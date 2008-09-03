@@ -148,7 +148,7 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                 {
                     State = hsPerl_Data;
                     Color = CLR_Comment;
-                //hilit6:
+                hilit6:
                     ColorNext();
                 hilit5:
                     ColorNext();
@@ -174,6 +174,16 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                     State = hsPerl_Data;
                     Color = CLR_Comment;
 
+                } else if (
+                           i == 0 && X_NOT(State) && (*p == '=') && len > 5 &&
+                           (
+                            strncmp(p+1, "begin", 5) == 0
+                           )
+                          )
+                {
+                    State = hsPerl_Docs;
+                    Color = CLR_Comment;
+                    goto hilit6;
                 } else if (
                            i == 0 && X_NOT(State) && (*p == '=') && len > 4 &&
                            (

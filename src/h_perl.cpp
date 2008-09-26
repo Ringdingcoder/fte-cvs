@@ -333,7 +333,7 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                     State = hsPerl_Normal | X_BIT;
                     continue;
                 } else if ((*p == '$') && (len > 1) &&
-                           ((p[1] == '$') || p[1] == '"')) {
+                           (p[1] == '"')) {
                     State = hsPerl_Variable;
                     Color = CLR_Variable;
                     ColorNext();
@@ -348,7 +348,9 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                     ColorNext();
                     State = s;
                     continue;
-                } else if (*p == '$' || *p == '@' || *p == '\\' || (len > 2 && (*p == '%' || *p == '*') && X_NOT(State))) {
+                } else if (*p == '$' || *p == '@' || *p == '\\' ||
+                           (len > 2 && (*p == '%' || *p == '*') && X_NOT(State))
+                          ) {
                     char var_type = *p;
                     State = hsPerl_Variable;
                     Color = CLR_Variable;
@@ -368,7 +370,7 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                         ColorNext();
                     // the following are one-character-ONLY
                     if (
-                        (var_type == '$' && strchr("_&`'+*.!/|,\\\";#%=-~:?$<>()[]", first) != NULL) ||
+                        (var_type == '$' && strchr("_&`'+*.!/|,\\\";#%=-~:?<>()[]", first) != NULL) ||
                         (var_type == '@' && strchr("_", first) != NULL)
                        )
                     {

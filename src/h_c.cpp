@@ -954,6 +954,7 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
                            FIND_COMMA |
                            FIND_ENDBLOCK) != 1)
         {
+            LOG << "Found: " << ENDLINE;
             if (RowP != PrevRowP)
                 ContinuationIndent = C_CONTINUATION;
             I = 0;

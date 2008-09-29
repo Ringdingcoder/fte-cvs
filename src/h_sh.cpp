@@ -140,22 +140,32 @@ int Hilit_SH(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, 
                     //continue;
                 } else if (len > 3 && *p == '<' && p[1] == '<') {
 
-                    // !!! this is a hack, doesn't work properly -- Mark
+                    if (p[2] == '<')
+                    {
+                        Color = CLR_Control;
+                        ColorNext();
+                        ColorNext();
+                        ColorNext();
+                    }
+                    else
+                    {
+                        // !!! this is a hack, doesn't work properly -- Mark
 
-                    char *s = seof;
+                        char *s = seof;
 
-                    j++;
-                    if (p[2] == '-') j++;
-                    Color = CLR_Control;
-                    while (len > j && (isspace(p[j]) || p[j] == '\'' || p[j] == '"'))
                         j++;
-                    if( p[j] == '\\' ) j++;
-                    while (len > j && !(isspace(p[j]) || p[j] == '\'' || p[j] == '"'))
-                        *s++ = p[j++];
-                    if (len > j && (p[j] == '\'' || p[j] == '"')) j++;
-                    *s = 0;
-                    State = hsSH_EOF;
-                    break;
+                        if (p[2] == '-') j++;
+                        Color = CLR_Control;
+                        while (len > j && (isspace(p[j]) || p[j] == '\'' || p[j] == '"'))
+                            j++;
+                        if( p[j] == '\\' ) j++;
+                        while (len > j && !(isspace(p[j]) || p[j] == '\'' || p[j] == '"'))
+                            *s++ = p[j++];
+                        if (len > j && (p[j] == '\'' || p[j] == '"')) j++;
+                        *s = 0;
+                        State = hsSH_EOF;
+                        break;
+                    }
                 } else if (*p == '=' || *p == '\\' || *p == '>' ||
                            *p == '<' || *p == '!' /*|| *p == ':'*/) {
                     Color = CLR_Control;

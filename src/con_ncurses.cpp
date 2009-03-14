@@ -20,7 +20,7 @@
 #define escDelay 10
 
 /* translate fte colors to curses*/
-static int fte_curses_colors[] = 
+static const short fte_curses_colors[] =
 {
 	COLOR_BLACK,
 	COLOR_BLUE,
@@ -129,9 +129,9 @@ static int ConInitColors()
 				{
 					if(colors)
 					{
-						int pair = bg*8+fg;
+						short pair = short(bg*8+fg);
 						if(c!=0) init_pair(pair, fte_curses_colors[fg], fte_curses_colors[bg]);
-						fte_curses_attr[c] = (fgb ? A_BOLD : 0) | COLOR_PAIR(pair);
+						fte_curses_attr[c] = short((fgb ? A_BOLD : 0) | COLOR_PAIR(pair));
 					}
 					else
 					{
@@ -220,7 +220,7 @@ int ConClear() /* not used? */
 	return 0;
 }
 
-static unsigned int  GetDch(int idx)
+static chtype GetDch(int idx)
 {
 	switch(idx)
 	{
@@ -253,11 +253,10 @@ static int last_attr = A_NORMAL;
 
 // "Cell" is currently an integer type, but its contents is treated as
 // a char data struct. So, create a struct to cast it that way.
-typedef struct CellData
-{
+struct CellData {
 	unsigned char ch;
 	unsigned char attr;
-} CellData;
+};
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 {
@@ -358,7 +357,7 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 
 	box = new TCell [W * H];
 
-	TCell fill = (((unsigned) Fill) << 8) | ' ';
+	TCell fill = TCell((((unsigned) Fill) << 8) | ' ');
 
 	ConGetBox(X, Y, W, H, box);
 
@@ -524,7 +523,7 @@ static TEvent Prev =
 
 static int ConGetEscEvent(TEvent *Event)
 {
-	char ch;
+	int ch;
 	
 	TKeyEvent *KEvent = &(Event->Key);
 
@@ -546,8 +545,8 @@ static int ConGetEscEvent(TEvent *Event)
 	}
 	else if(ch == '[' || ch == 'O')
 	{
-		char ch1 = getch();
-		char ch2 = '\0';
+		int ch1 = getch();
+		int ch2 = '\0';
 		if(ch1 >= '1' &&  ch1 <= '8')
 		{
 			ch2 = getch();
@@ -842,7 +841,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 char ConGetDrawChar(int idx)
 {
 	//    return 128+idx;
-	return idx;
+	return (char)idx;
 }
 
 int ConPutEvent(TEvent Event)

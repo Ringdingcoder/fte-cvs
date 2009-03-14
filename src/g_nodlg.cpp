@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include "console.h"
+#include <sys/types.h>
 #include "gui.h"
 
 int DLGGetFile(GView * /*v*/, const char * /*Prompt*/, unsigned int /*BufLen*/, char * /*FileName*/, int /*Flags*/) {

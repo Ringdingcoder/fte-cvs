@@ -114,8 +114,8 @@ typedef struct {
 typedef struct {
     TEventMask What;
     GView* View;
-    long X;
-    long Y;
+    int X;
+    int Y;
     unsigned short Buttons;
     unsigned short Count;
     TKeyCode KeyMask;

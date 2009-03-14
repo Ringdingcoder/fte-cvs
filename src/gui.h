@@ -139,7 +139,7 @@ public:
     
     int OpenPipe(char *Command, EModel *notify);
     int SetPipeView(int id, EModel *notify);
-    int ReadPipe(int id, void *buffer, int len);
+    ssize_t ReadPipe(int id, void *buffer, int len);
     int ClosePipe(int id);
 
     int multiFrame();

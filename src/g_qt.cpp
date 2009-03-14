@@ -2048,7 +2048,7 @@ int GUI::SetPipeView(int id, EModel *notify) {
     return 0;
 }
 
-int GUI::ReadPipe(int id, void *buffer, int len) {
+ssize_t GUI::ReadPipe(int id, void *buffer, int len) {
     int rc;
     
     if (id < 0 || id > MAX_PIPES)

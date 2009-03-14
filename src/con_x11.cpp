@@ -687,8 +687,8 @@ int ConSetTitle(char *Title, char *STitle) {
 }
 
 int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen) {
-    strlcpy(Title, winTitle, MaxLen);
-    strlcpy(STitle, winSTitle, SMaxLen);
+    strncpy(Title, winTitle, MaxLen);
+    strncpy(STitle, winSTitle, SMaxLen);
     return 0;
 }
 
@@ -1287,14 +1287,14 @@ void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent
 
 static void ProcessXEvents(TEvent *Event) {
     XEvent event;
-    XAnyEvent *anyEvent = (XAnyEvent *) &event;
-    XExposeEvent *exposeEvent = (XExposeEvent *) &event;
-    XButtonEvent *buttonEvent = (XButtonEvent *) &event;
-    XKeyEvent *keyEvent = (XKeyEvent *) &event;
+    XAnyEvent& anyEvent = (XAnyEvent&) event;
+    XExposeEvent& exposeEvent = (XExposeEvent&) event;
+    XButtonEvent& buttonEvent = (XButtonEvent&) event;
+    XKeyEvent& keyEvent = (XKeyEvent&) event;
     XKeyEvent keyEvent1;
-    XConfigureEvent *configureEvent = (XConfigureEvent *) &event;
-    XGraphicsExposeEvent *gexposeEvent = (XGraphicsExposeEvent *) &event;
-    XMotionEvent *motionEvent = (XMotionEvent *) &event;
+    XConfigureEvent& configureEvent = (XConfigureEvent&) event;
+    XGraphicsExposeEvent& gexposeEvent = (XGraphicsExposeEvent&) event;
+    XMotionEvent& motionEvent = (XMotionEvent&) event;
     KeySym key, key1;
     int state;
     char keyName[32];
@@ -1302,13 +1302,8 @@ static void ProcessXEvents(TEvent *Event) {
 
     memset((void *)&event, 0, sizeof(event));
     Event->What = evNone;
-#ifdef WINNT
-    //int rc = -1;
-#else
-    //int rc =
-#endif
-        XNextEvent(display, &event);
 
+    XNextEvent(display, &event);
     if (XFilterEvent(&event, None))
         return;
 
@@ -1317,7 +1312,7 @@ static void ProcessXEvents(TEvent *Event) {
         return;
     }
 
-    if (anyEvent->window != win) {
+    if (anyEvent.window != win) {
         if (event.type == PropertyNotify && event.xproperty.state == PropertyDelete) {
             // Property change on different window - try to find matching incremental selection request
             IncrementalSelectionInfo *isi, *prev_isi = NULL;
@@ -1361,24 +1356,24 @@ static void ProcessXEvents(TEvent *Event) {
         // printf("Event %d\n", state);
             while (state-- > 0)
                 if (XCheckTypedWindowEvent(display, win, event.type, &ev)) {
-                    int w = exposeEvent->x + exposeEvent->width;
+                    int w = exposeEvent.x + exposeEvent.width;
                     if ((e.x + e.width) > w)
                         w = (e.x + e.width);
-                    if (e.x < exposeEvent->x)
-                        exposeEvent->x = e.x;
-                    exposeEvent->width = w - exposeEvent->x;
+                    if (e.x < exposeEvent.x)
+                        exposeEvent.x = e.x;
+                    exposeEvent.width = w - exposeEvent.x;
 
-                    int h = exposeEvent->y + exposeEvent->height;
+                    int h = exposeEvent.y + exposeEvent.height;
                     if ((e.y + e.height) > h)
                         h = e.y + e.height;
-                    if (e.y < exposeEvent->y)
-                        exposeEvent->y = e.y;
-                    exposeEvent->height = h - exposeEvent->y;
+                    if (e.y < exposeEvent.y)
+                        exposeEvent.y = e.y;
+                    exposeEvent.height = h - exposeEvent.y;
                     //printf("Merged %d\n", ++a);
                 }
         }
-        UpdateWindow(exposeEvent->x, exposeEvent->y,
-                     exposeEvent->width, exposeEvent->height);
+        UpdateWindow(exposeEvent.x, exposeEvent.y,
+                     exposeEvent.width, exposeEvent.height);
         break;
     case GraphicsExpose:
         /* catch up same events to speed up this a bit */
@@ -1386,13 +1381,13 @@ static void ProcessXEvents(TEvent *Event) {
         //printf("Event GExpose %d\n", state);
         while (state-- > 0) {
             XEvent e;
-            XGraphicsExposeEvent *ge = (XGraphicsExposeEvent *) &e;
+            XGraphicsExposeEvent& ge = (XGraphicsExposeEvent&) e;
 
             if (XCheckTypedWindowEvent(display, win, event.type, &e)) {
-                if (gexposeEvent->x == ge->x
-                    && gexposeEvent->y == ge->y
-                    && gexposeEvent->width == ge->width
-                    && gexposeEvent->height == ge->height) {
+                if (gexposeEvent.x == ge.x
+                    && gexposeEvent.y == ge.y
+                    && gexposeEvent.width == ge.width
+                    && gexposeEvent.height == ge.height) {
                     // fprintf(stderr, "found the same gexpose event\n");
                     continue;
                 } else {
@@ -1402,24 +1397,24 @@ static void ProcessXEvents(TEvent *Event) {
             }
             break;
         }
-        UpdateWindow(gexposeEvent->x,
-                     gexposeEvent->y,
-                     gexposeEvent->width,
-                     gexposeEvent->height);
+        UpdateWindow(gexposeEvent.x,
+                     gexposeEvent.y,
+                     gexposeEvent.width,
+                     gexposeEvent.height);
         break;
     case ConfigureNotify:
         while ((XPending(display) > 0) &&
                XCheckTypedWindowEvent(display, win,
                                       ConfigureNotify, &event))
             XSync(display, 0);
-        ResizeWindow(configureEvent->width, configureEvent->height);
+        ResizeWindow(configureEvent.width, configureEvent.height);
         Event->What = evCommand;
         Event->Msg.Command = cmResize;
         break;
     case ButtonPress:
     case ButtonRelease:
         now = event.xbutton.time;
-        ConvertClickToEvent(event.type, buttonEvent->x, buttonEvent->y, buttonEvent->button, buttonEvent->state, Event, motionEvent->time);
+        ConvertClickToEvent(event.type, buttonEvent.x, buttonEvent.y, buttonEvent.button, buttonEvent.state, Event, motionEvent.time);
         break;
     case FocusIn:
         if (i18n_ctx) i18n_focus_in(i18n_ctx);
@@ -1430,14 +1425,14 @@ static void ProcessXEvents(TEvent *Event) {
     case KeyPress:
         // case KeyRelease:
         now = event.xkey.time;
-        state = keyEvent->state;
-        keyEvent1 = *keyEvent;
+        state = keyEvent.state;
+        keyEvent1 = keyEvent;
         keyEvent1.state &= ~(ShiftMask | ControlMask | Mod1Mask /* | Mod2Mask*/ | Mod3Mask | Mod4Mask | Mod5Mask);
 
         if (!i18n_ctx || event.type == KeyRelease)
-            XLookupString(keyEvent, keyName, sizeof(keyName), &key, 0);
+            XLookupString(&keyEvent, keyName, sizeof(keyName), &key, 0);
         else {
-            i18n_lookup_sym(keyEvent, keyName, sizeof(keyName), &key, i18n_ctx->xic);
+            i18n_lookup_sym(&keyEvent, keyName, sizeof(keyName), &key, i18n_ctx->xic);
             if (!key)
                 break;
         }
@@ -1449,7 +1444,7 @@ static void ProcessXEvents(TEvent *Event) {
         break;
     case MotionNotify:
         now = event.xmotion.time;
-        ConvertClickToEvent(event.type, motionEvent->x, motionEvent->y, 0, motionEvent->state, Event, motionEvent->time);
+        ConvertClickToEvent(event.type, motionEvent.x, motionEvent.y, 0, motionEvent.state, Event, motionEvent.time);
         break;
     case ClientMessage:
         if (event.xclient.message_type == wm_protocols
@@ -1550,7 +1545,7 @@ static void ProcessXEvents(TEvent *Event) {
 #ifdef X_HAVE_UTF8_STRING
                         event.xselectionrequest.target == proptype_utf8_string ? XUTF8StringStyle :
 #endif
-                        XStringStyle;
+                        (XICCEncodingStyle)-1;
 
                     if (style != -1) {
                         // Can convert
@@ -1946,7 +1941,7 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
             // Get total length first
             *len = 0;
             for (i = 0; i < list_count; i++) {
-                *len += strlen(list[i]);
+                *len += (int)strlen(list[i]);
             }
             // Allocate
             *data = (char *)malloc(*len + 1);
@@ -2212,15 +2207,15 @@ int GUI::RunProgram(int mode, char *Command) {
     char Cmd[1024];
 
     /* FIXME: this could easily overwrite buffers */
-    strlcpy(Cmd, XShellCommand, sizeof(Cmd));
+    strncpy(Cmd, XShellCommand, sizeof(Cmd));
 
     if (*Command == 0)  // empty string = shell
-        strlcat(Cmd, " -ls &", sizeof(Cmd));
+        strncat(Cmd, " -ls &", sizeof(Cmd));
     else {
-        strlcat(Cmd, " -e ", sizeof(Cmd));
-        strlcat(Cmd, Command, sizeof(Cmd));
+        strncat(Cmd, " -e ", sizeof(Cmd));
+        strncat(Cmd, Command, sizeof(Cmd));
         if (mode == RUN_ASYNC)
-            strlcat(Cmd, " &", sizeof(Cmd));
+            strncat(Cmd, " &", sizeof(Cmd));
     }
     return system(Cmd);
 }

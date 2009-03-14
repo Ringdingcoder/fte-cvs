@@ -687,8 +687,8 @@ int ConSetTitle(char *Title, char *STitle) {
 }
 
 int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen) {
-    strncpy(Title, winTitle, MaxLen);
-    strncpy(STitle, winSTitle, SMaxLen);
+    strlcpy(Title, winTitle, MaxLen);
+    strlcpy(STitle, winSTitle, SMaxLen);
     return 0;
 }
 
@@ -2206,16 +2206,15 @@ int GUI::ClosePipe(int id) {
 int GUI::RunProgram(int mode, char *Command) {
     char Cmd[1024];
 
-    /* FIXME: this could easily overwrite buffers */
-    strncpy(Cmd, XShellCommand, sizeof(Cmd));
+    strlcpy(Cmd, XShellCommand, sizeof(Cmd));
 
     if (*Command == 0)  // empty string = shell
-        strncat(Cmd, " -ls &", sizeof(Cmd));
+        strlcat(Cmd, " -ls &", sizeof(Cmd));
     else {
-        strncat(Cmd, " -e ", sizeof(Cmd));
-        strncat(Cmd, Command, sizeof(Cmd));
+        strlcat(Cmd, " -e ", sizeof(Cmd));
+        strlcat(Cmd, Command, sizeof(Cmd));
         if (mode == RUN_ASYNC)
-            strncat(Cmd, " &", sizeof(Cmd));
+            strlcat(Cmd, " &", sizeof(Cmd));
     }
     return system(Cmd);
 }

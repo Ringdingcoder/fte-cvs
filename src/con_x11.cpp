@@ -41,7 +41,7 @@
 #include <X11/Intrinsic.h>
 #endif
 #ifdef HPUX
-#include </usr/include/X11R5/X11/HPkeysym.h>
+#include <X11R5/X11/HPkeysym.h>
 #endif
 #include "sysdep.h"
 #include "c_config.h"
@@ -52,8 +52,6 @@
 #include "s_files.h"
 #include "s_util.h"
 #include "s_string.h"
-
-i18n_context_t* i18n_ctx = NULL;
 
 #ifdef WINHCLX
 #include <X11/XlibXtra.h>    /* HCL - HCLXlibInit */
@@ -75,6 +73,8 @@ i18n_context_t* i18n_ctx = NULL;
 #define FD_SET_CAST()
 #endif
 
+#define MAX_SCRWIDTH 255
+#define MAX_SCRHEIGHT 255
 #define MIN_SCRWIDTH 20
 #define MIN_SCRHEIGHT 6
 
@@ -85,22 +85,22 @@ i18n_context_t* i18n_ctx = NULL;
 #define SELECTION_XFER_LIMIT 0x1000
 #define SELECTION_MAX_AGE 10
 
-typedef struct {
+struct GPipe {
     int used;
     int id;
     int fd;
     int pid;
     int stopped;
-    EModel *notify;
-} GPipe;
+    EModel* notify;
+};
 
 static GPipe Pipes[MAX_PIPES] = {
     { 0 },
 };
 
-static const long MouseAutoDelay = 40;
-static const long MouseAutoRepeat = 200;
-static const long MouseMultiClick = 300;
+static const int MouseAutoDelay = 40;
+static const int MouseAutoRepeat = 200;
+static const int MouseMultiClick = 300;
 
 static int setUserPosition = 0;
 static int initX = 0, initY = 0;
@@ -113,7 +113,7 @@ static int CursorStart, CursorEnd;
 static unsigned long CursorLastTime;
 // Cursor flashing interval, in msecs
 static unsigned CursorFlashInterval = 300;
-static unsigned char *ScreenBuffer = NULL;
+static unsigned char *ScreenBuffer = 0;
 static int Refresh = 0;
 
 // res_name can be set with -name switch
@@ -135,19 +135,18 @@ static Atom prop_selection;
 static XSizeHints sizeHints;
 // program now contains both modes if available
 // some older Xservers don't like XmbDraw...
-static XFontStruct *fontStruct;
+static XFontStruct* fontStruct = 0;
 #ifdef USE_XMB
-static int useXMB = 1; // default is yes
+static int useXMB = true;
 static XFontSet fontSet;
 static int FontCYD;
 #else
 static int useXMB = 0;
 #endif
-static int useI18n = 1;
+static i18n_context_t* i18n_ctx = 0;
+static int useI18n = true;
 static int FontCX, FontCY;
 static XColor Colors[16];
-static GC GCs[256];
-//static int rc;
 static char winTitle[256] = "FTE";
 static char winSTitle[256] = "FTE";
 
@@ -156,8 +155,8 @@ static int CurSelectionLen[3] = {0,0,0};
 static int CurSelectionOwn[3] = {0,0,0};
 static Time now;
 
-typedef struct _IncrementalSelectionInfo {
-    struct _IncrementalSelectionInfo *next;
+struct IncrementalSelectionInfo {
+    IncrementalSelectionInfo *next;
     unsigned char *data;
     int len;
     int pos;
@@ -165,8 +164,9 @@ typedef struct _IncrementalSelectionInfo {
     Atom property;
     Atom type;
     time_t lastUse;
-} IncrementalSelectionInfo;
-IncrementalSelectionInfo *incrementalSelections = NULL;
+};
+
+static IncrementalSelectionInfo *incrementalSelections = NULL;
 
 static Bool gotXError;
 
@@ -187,7 +187,6 @@ static Atom GetXClip (int clipboard) {
     return XA_CLIPBOARD;
 }
 
-
 static int GetFTEClip (Atom clip) {
     if (clip==XA_CLIPBOARD) {
         return 0;
@@ -200,7 +199,6 @@ static int GetFTEClip (Atom clip) {
     }
     return -1;
 }
-
 
 static int AllocBuffer() {
     unsigned char *p;
@@ -215,10 +213,9 @@ static int AllocBuffer() {
     return 0;
 }
 
-static struct {
-    int r, g, b;
-} dcolors[] =
-{
+static const struct {
+    unsigned short r, g, b;
+} dcolors[] = {
     {   0,   0,   0 },  //     black
     {   0,   0, 160 },  // darkBlue
     {   0, 160,   0 },  // darkGreen
@@ -241,14 +238,14 @@ static void SetColor(int i) {
     assert (0 <= i && i <= 15);
 
     if (RGBColorValid [i]) {
-        Colors[i].blue  = (RGBColor[i].b << 8) | RGBColor[i].b;
-        Colors[i].green = (RGBColor[i].g << 8) | RGBColor[i].g;
-        Colors[i].red   = (RGBColor[i].r << 8) | RGBColor[i].r;
+        Colors[i].blue  = (unsigned short)((RGBColor[i].b << 8) | RGBColor[i].b);
+        Colors[i].green = (unsigned short)((RGBColor[i].g << 8) | RGBColor[i].g);
+        Colors[i].red   = (unsigned short)((RGBColor[i].r << 8) | RGBColor[i].r);
     }
     else {
-    Colors[i].blue  = (dcolors[i].b << 8) | dcolors[i].b;
-    Colors[i].green = (dcolors[i].g << 8) | dcolors[i].g;
-    Colors[i].red   = (dcolors[i].r << 8) | dcolors[i].r;
+        Colors[i].blue  = (unsigned short)((dcolors[i].b << 8) | dcolors[i].b);
+        Colors[i].green = (unsigned short)((dcolors[i].g << 8) | dcolors[i].g);
+        Colors[i].red   = (unsigned short)((dcolors[i].r << 8) | dcolors[i].r);
     }
     Colors[i].flags = DoRed | DoGreen | DoBlue;
 }
@@ -320,6 +317,39 @@ static int InitXColors() {
     return 0;
 }
 
+class ColorXGC {
+    unsigned long mask;
+    XGCValues gcv;
+    GC GCs[256];
+public:
+    ColorXGC() : mask(GCForeground | GCBackground) {
+        if (!useXMB) {
+            gcv.font = fontStruct->fid;
+            mask |= GCFont;
+        }
+        memset(&GCs, 0, sizeof(GCs));
+    }
+
+    ~ColorXGC() {
+        for (unsigned i = 0; i < 256; ++i)
+            if (GCs[i])
+                XFreeGC(display, GCs[i]);
+    }
+
+    GC& GetGC(unsigned i) {
+        i &= 0xff;
+        if (!GCs[i]) {
+            gcv.foreground = Colors[i % 16].pixel;
+            gcv.background = Colors[i / 16].pixel;
+            GCs[i] = XCreateGC(display, win, mask, &gcv);
+        }
+        return GCs[i];
+    }
+};
+
+static ColorXGC* colorXGC = 0;
+
+#if 0
 static int InitXGCs()
 {
     unsigned int i;
@@ -339,29 +369,30 @@ static int InitXGCs()
 
     return 0;
 }
+#endif
 
 #ifdef USE_XMB
-static void try_fontset_load(const char *fs)
+static void TryLoadFontset(const char *fs)
 {
     char *def = NULL;
     char **miss = NULL;
     int nMiss = 0;
 
     if (fontSet)
-	return;
+        return;
 
     if (!fs || !*fs)
-	return;
+        return;
 
     fontSet = XCreateFontSet(display, fs, &miss, &nMiss, &def);
 
     if (fontSet == NULL) {
-	fprintf(stderr, "XFTE Warning: unable to open font \"%s\":\n"
-		" Missing count: %d\n", fs, nMiss);
-	for(int i = 0; i < nMiss; i++)
-	    fprintf(stderr, "  %s\n", miss[i]);
-	if (def != NULL)
-	    fprintf(stderr, " def_ret: %s\n", def);
+        fprintf(stderr, "XFTE Warning: unable to open font \"%s\":\n"
+                " Missing count: %d\n", fs, nMiss);
+        for(int i = 0; i < nMiss; i++)
+            fprintf(stderr, "  %s\n", miss[i]);
+        if (def != NULL)
+            fprintf(stderr, " def_ret: %s\n", def);
     }
 }
 #endif
@@ -375,14 +406,14 @@ static int InitXFonts(void)
     if (!useXMB) {
         fontStruct = NULL;
 
-	if (fs != NULL) {
-	    char *s = 0;
+        if (fs != NULL) {
+            char *s = 0;
 
-	    s = strchr(fs, ',');
-	    if (s != NULL)
-		*s = 0;
-	    fontStruct = XLoadQueryFont(display, fs);
-	}
+            s = strchr(fs, ',');
+            if (s != NULL)
+                *s = 0;
+            fontStruct = XLoadQueryFont(display, fs);
+        }
         if (fontStruct == NULL)
             fontStruct = XLoadQueryFont(display, "8x13");
         if (fontStruct == NULL)
@@ -394,13 +425,13 @@ static int InitXFonts(void)
     }
 #ifdef USE_XMB
     else {
-	try_fontset_load(getenv("VIOFONT"));
-	try_fontset_load(WindowFont);
-	try_fontset_load("-misc-*-r-normal-*");
-	try_fontset_load("*fixed*");
+        TryLoadFontset(getenv("VIOFONT"));
+        TryLoadFontset(WindowFont);
+        TryLoadFontset("-misc-*-r-normal-*");
+        TryLoadFontset("*fixed*");
 
-	if (fontSet == NULL)
-	    return -1;
+        if (fontSet == NULL)
+            return -1;
 
         XFontSetExtents *xE = XExtentsOfFontSet(fontSet);
 
@@ -416,30 +447,29 @@ static int InitXFonts(void)
 
 static int SetupXWindow(int argc, char **argv)
 {
-    unsigned long mask;
-    XSetWindowAttributes setWindowAttributes;
 
 #ifdef WINHCLX
     HCLXlibInit(); /* HCL - Initialize the X DLL */
 #endif
 
 #ifdef USE_XTINIT
-    XtAppContext  	app_context;
+    XtAppContext app_context;
     XtToolkitInitialize();
     app_context = XtCreateApplicationContext();
     if (( display = XtOpenDisplay(app_context, NULL, argv[0], "xfte",
                             NULL, 0, &argc, argv)) == NULL)
        DieError(1, "%s:  Can't open display\n", argv[0]);
 #else
-    char *ds = getenv("DISPLAY");
+    const char *ds = getenv("DISPLAY");
     if (!ds)
-	DieError(1, "$DISPLAY not set? This version of fte must be run under X11.");
+        DieError(1, "$DISPLAY not set? This version of fte must be run under X11.");
     if ((display = XOpenDisplay(ds)) == NULL)
-	DieError(1, "XFTE Fatal: could not open display: %s!", ds);
+        DieError(1, "XFTE Fatal: could not open display: %s!", ds);
 #endif
 
     colormap = DefaultColormap(display, DefaultScreen(display));
 
+    XSetWindowAttributes setWindowAttributes;
     setWindowAttributes.bit_gravity =
         sizeHints.win_gravity = NorthWestGravity;
 
@@ -458,10 +488,11 @@ static int SetupXWindow(int argc, char **argv)
                         CopyFromParent, InputOutput, CopyFromParent,
                         CWBitGravity, &setWindowAttributes);
 
-    i18n_ctx = useI18n ? i18n_open(display, win, &mask) : 0;
+    unsigned long mask;
+    i18n_ctx = (useI18n) ? i18n_open(display, win, &mask) : 0;
 
     if (InitXFonts() != 0)
-	DieError(1, "XFTE Fatal: could not open any font!");
+        DieError(1, "XFTE Fatal: could not open any font!");
 
     /* >KeyReleaseMask shouldn't be set for correct key mapping */
     /* we set it anyway, but not pass to XmbLookupString -- mark */
@@ -509,7 +540,8 @@ static int SetupXWindow(int argc, char **argv)
     XSetWMProtocols(display, win, &wm_delete_window, 1);
 
     if (InitXColors() != 0) return -1;
-    if (InitXGCs() != 0) return -1;
+    colorXGC = new ColorXGC();
+    //if (InitXGCs() != 0) return -1;
 
 #ifdef USE_XICON
     // Set icon using WMHints
@@ -557,10 +589,10 @@ static int SetupXWindow(int argc, char **argv)
                 colors[j] = 0;
             } else if (XParseColor(display, colormap, c, &xc)) {
                 // Color parsed successfully
-                ((char *)(colors + j))[0] = xc.blue >> 8;
-                ((char *)(colors + j))[1] = xc.green >> 8;
-                ((char *)(colors + j))[2] = xc.red >> 8;
-                ((char *)(colors + j))[3] = 0xff;
+                ((char *)(colors + j))[0] = (char)(xc.blue >> 8);
+                ((char *)(colors + j))[1] = (char)(xc.green >> 8);
+                ((char *)(colors + j))[2] = (char)(xc.red >> 8);
+                ((char *)(colors + j))[3] = (char)0xff;
             } else {
                 // Color parsing failed
                 colors[j] = 0;
@@ -576,15 +608,14 @@ static int SetupXWindow(int argc, char **argv)
                 XpmImage &xpm = xpmImage[i];
                 CARD32 *&colors = xpmColors[i];
                 *b++ = xpm.width; *b++ = xpm.height;
-                for (j = 0; j < xpm.width * xpm.height; j++) {
+                for (j = 0; j < xpm.width * xpm.height; j++)
                     *b++ = colors[xpm.data[j]];
-                }
-	    }
-	    Atom at = XInternAtom(display, "_NET_WM_ICON", False);
-	    if (at != None)
-		XChangeProperty(display, win, at,
-				XA_CARDINAL, 32, PropModeReplace,
-				(unsigned char *)iconBuffer, iconBufferSize);
+            }
+            Atom at = XInternAtom(display, "_NET_WM_ICON", False);
+            if (at != None)
+                XChangeProperty(display, win, at,
+                                XA_CARDINAL, 32, PropModeReplace,
+                                (unsigned char *)iconBuffer, iconBufferSize);
             free(iconBuffer);
         }
     }
@@ -673,23 +704,23 @@ void DrawCursor(int Show) {
             Show &= (CursorLastTime % (CursorFlashInterval * 2)) > CursorFlashInterval;
         int attr = p[1] ^ (Show ? 0xff : 0);
         if (!useXMB)
-	    XDrawImageString(display, win, GCs[attr],
-			     CursorX * FontCX,
-			     fontStruct->max_bounds.ascent + CursorY * FontCY,
+            XDrawImageString(display, win, colorXGC->GetGC(attr),
+                             CursorX * FontCX,
+                             fontStruct->max_bounds.ascent + CursorY * FontCY,
                              (char *)p, 1);
 #ifdef USE_XMB
         else
-	    XmbDrawImageString(display, win, fontSet, GCs[attr],
-			       CursorX * FontCX, FontCYD + CursorY * FontCY,
-			       (char *)p, 1);
+            XmbDrawImageString(display, win, fontSet, colorXGC->GetGC(attr),
+                               CursorX * FontCX, FontCYD + CursorY * FontCY,
+                               (char *)p, 1);
 #endif
 #if 0
         if (Show) {
-	    int cs = (CursorStart * FontCY + FontCY / 2) / 100;
-	    int ce = (CursorEnd   * FontCY + FontCY / 2) / 100;
-	    XFillRectangle (display, win, GCs[p[1]],
-	                    CursorX * FontCX, CursorY * FontCY + cs,
-			    FontCX, ce - cs);
+            int cs = (CursorStart * FontCY + FontCY / 2) / 100;
+            int ce = (CursorEnd   * FontCY + FontCY / 2) / 100;
+            XFillRectangle (display, win, GCs[p[1]],
+                            CursorX * FontCX, CursorY * FontCY + cs,
+                            FontCX, ce - cs);
         }
 #endif
     }
@@ -714,7 +745,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         len = W;
         p = CursorXYPos(X, Y + i);
         ps = (unsigned char *) Cell;
-	x = X;
+        x = X;
         while (len > 0) {
             if (!Refresh) {
                 c = CursorXYPos(x, Y + i);
@@ -743,31 +774,31 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
             while ((l < len) && ((unsigned char) (ps[1]) == attr)) {
                 temp[l++] = *ps++;
                 ps++;
-	    }
-	    if (!useXMB)
-                XDrawImageString(display, win, GCs[((unsigned)attr) & 0xFF],
+            }
+            if (!useXMB)
+                XDrawImageString(display, win, colorXGC->GetGC(attr),
                                  x * FontCX, fontStruct->max_bounds.ascent +
                                  (Y + i) * FontCY,
                                  (char *)temp, l);
 #ifdef USE_XMB
             else
                 XmbDrawImageString(display, win, fontSet,
-                                   GCs[((unsigned)attr) & 0xFF],
+                                   colorXGC->GetGC(attr),
                                    x * FontCX, FontCYD + (Y + i) * FontCY,
                                    (char *)temp, l);
 #endif
-	    //temp[l] = 0; printf("%s\n", temp);
+            //temp[l] = 0; printf("%s\n", temp);
             len -= l;
             x += l;
-	}
-/*	if (x < ScreenCols - 1) {
-	    printf("XX %d   %d   %d\n", X, x, W);
-	    XFillRectangle(display, win, GCs[15 * 16 + 7],
-			   x * FontCX, (Y + i) * FontCY,
-			   (ScreenCols - x - 1) * FontCX, FontCY);
-	}
+        }
+/*      if (x < ScreenCols - 1) {
+            printf("XX %d   %d   %d\n", X, x, W);
+            XFillRectangle(display, win, GCs[15 * 16 + 7],
+                           x * FontCX, (Y + i) * FontCY,
+                           (ScreenCols - x - 1) * FontCX, FontCY);
+        }
 */        p = CursorXYPos(X, Y + i);
-        memcpy(p, Cell, W * 2);
+        memmove(p, Cell, W * 2);
         if (i + Y == CursorY)
             DrawCursor(1);
         Cell += W;
@@ -798,7 +829,7 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
     int i;
 
     for (i = 0; i < W; i++)
-	B[i] = Cell;
+        B[i] = Cell;
     ConPutLine(X, Y, W, H, B);
     return 0;
 }
@@ -810,31 +841,31 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
     MoveCh(&Cell, ' ', Fill, 1);
     DrawCursor(0);
     if (Way == csUp) {
-	XCopyArea(display, win, win, GCs[0],
-		  X * FontCX,
+        XCopyArea(display, win, win, colorXGC->GetGC(0),
+                  X * FontCX,
                   (Y + Count) * FontCY,
                   W * FontCX,
                   (H - Count) * FontCY,
-		  X * FontCX,
+                  X * FontCX,
                   Y * FontCY);
-	for (l = 0; l < H - Count; l++)
-	    memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), 2 * W);
+        for (l = 0; l < H - Count; l++)
+            memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), 2 * W);
 
-	if (ConSetBox(X, Y + l, W, Count, Cell) == -1)
-	    return -1;
+        if (ConSetBox(X, Y + l, W, Count, Cell) == -1)
+            return -1;
     } else if (Way == csDown) {
-        XCopyArea(display, win, win, GCs[0],
+        XCopyArea(display, win, win, colorXGC->GetGC(0),
                   X * FontCX,
                   Y * FontCY,
                   W * FontCX,
                   (H - Count) * FontCY,
                   X * FontCX,
                   (Y + Count) * FontCY);
-	for (l = H - 1; l >= Count; l--)
+        for (l = H - 1; l >= Count; l--)
             memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l - Count), 2 * W);
 
-	if (ConSetBox(X, Y, W, Count, Cell) == -1)
-	    return -1;
+        if (ConSetBox(X, Y, W, Count, Cell) == -1)
+            return -1;
     }
     DrawCursor(1);
     return 0;
@@ -854,10 +885,10 @@ int ConSetSize(int X, int Y) {
     }
     MX = ScreenCols;
     if (X < MX)
-	MX = X;
+        MX = X;
     MY = ScreenRows;
     if (Y < MY)
-	MY = Y;
+        MY = Y;
     p = NewBuffer;
     for (i = 0; i < MY; i++) {
         memcpy(p, CursorXYPos(0, i), MX * 2);
@@ -946,25 +977,37 @@ int ConQueryMouseButtons(int *ButtonCount) {
     return 0;
 }
 
-void UpdateWindow(int xx, int yy, int ww, int hh) {
+static void UpdateWindow(int xx, int yy, int ww, int hh) {
     PCell p;
     int i;
 
+#if 0
     /* show redrawn area */
-    /*
-    XFillRectangle(display, win, GCs[14], xx, yy, ww, hh);
+    XFillRectangle(display, win, colorXGC->GetGC(14), xx, yy, ww, hh);
     XFlush(display);
     i = XEventsQueued(display, QueuedAfterReading);
     while (i-- > 0) {
-	XEvent e;
-	XNextEvent(display, &e);
+        XEvent e;
+        if (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e)) {
+            XNextEvent(display, &e);
+        } else {
+            // fprintf(stderr, "caught different gexpose event\n");
+            //XPutBackEvent(display, &e);
+        }
     }
-    // sleep(1);*/
+    sleep(1);
+#endif
 
-    ww /= FontCX; ww += 2;
-    hh /= FontCY;
+    //fprintf(stderr, "Update\tx:%3d  y:%3d  w:%3d  h:%3d    %dx%d\n", xx, yy, ww, hh, FontCX, FontCY);
+
     xx /= FontCX;
     yy /= FontCY;
+    ww /= FontCX;
+    hh /= FontCY;
+
+    ww += 2;
+    hh += 2;
+    //fprintf(stderr, "\t\tx:%3d  y:%3d  w:%3d  h:%3d\n", xx, yy, ww, hh);
 
     /*
      * OK for this moment I suggest this method - it works somehow
@@ -972,9 +1015,6 @@ void UpdateWindow(int xx, int yy, int ww, int hh) {
      * of some basic behavior of FTE editor
      * THIS IS TEMPORAL FIX AND SHOULD BE SOLVED IN GENERAL WAY !
      */
-    hh *= 3; yy -= hh; hh += hh + 2;
-    if (yy < 0)
-	yy = 0;
     if (xx + ww > (int)ScreenCols) ww = ScreenCols - xx;
     if (yy + hh > (int)ScreenRows) hh = ScreenRows - yy;
     Refresh = 1;
@@ -990,11 +1030,11 @@ void UpdateWindow(int xx, int yy, int ww, int hh) {
     Refresh = 0;
 }
 
-void ResizeWindow(int ww, int hh) {
+static void ResizeWindow(int ww, int hh) {
     int ox = ScreenCols;
     int oy = ScreenRows;
-    ww /= FontCX; if (ww <= 4) ww = 4;
-    hh /= FontCY; if (hh <= 2) hh = 2;
+    ww /= FontCX; if (ww < 4) ww = 4;
+    hh /= FontCY; if (hh < 2) hh = 2;
     if ((int)ScreenCols != ww || (int)ScreenRows != hh) {
         Refresh = 0;
         ConSetSize(ww, hh);
@@ -1009,9 +1049,9 @@ void ResizeWindow(int ww, int hh) {
     }
 }
 
-static struct {
-    long keysym;
-    long keycode;
+static const struct {
+    int keysym;
+    int keycode;
 } key_table[] = {
     { XK_Escape,         kbEsc },
     { XK_Tab,            kbTab },
@@ -1089,7 +1129,7 @@ static struct {
     { 0,                 0 }
 };
 
-void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char */*keyname1*/, int etype, int state, TEvent *Event) {
+static void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char */*keyname1*/, int etype, int state, TEvent *Event) {
     unsigned int myState = 0;
 
     Event->What = evNone;
@@ -1165,8 +1205,8 @@ void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent
     Event->Mouse.X = xx / FontCX;
     Event->Mouse.Y = yy / FontCY;
     if (Event->What == evMouseMove)
-	if (LastMouseX == Event->Mouse.X
-	    && LastMouseY == Event->Mouse.Y) {
+        if (LastMouseX == Event->Mouse.X
+            && LastMouseY == Event->Mouse.Y) {
             Event->What = evNone;
             return;
         }
@@ -1245,7 +1285,7 @@ void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent
     LastMouseEvent = *Event;
 }
 
-void ProcessXEvents(TEvent *Event) {
+static void ProcessXEvents(TEvent *Event) {
     XEvent event;
     XAnyEvent *anyEvent = (XAnyEvent *) &event;
     XExposeEvent *exposeEvent = (XExposeEvent *) &event;
@@ -1294,10 +1334,10 @@ void ProcessXEvents(TEvent *Event) {
 
                     if (send == 0) {
                         // Was sent - remove from memory
-			if (prev_isi)
-			    prev_isi->next = isi->next;
-			else
-			    incrementalSelections = isi->next;
+                        if (prev_isi)
+                            prev_isi->next = isi->next;
+                        else
+                            incrementalSelections = isi->next;
                         XFree(isi->data);
                         delete isi;
                     }
@@ -1310,39 +1350,58 @@ void ProcessXEvents(TEvent *Event) {
 
     switch (event.type) {
     case Expose:
-	//fprintf(stderr, "EXPOSE\tx:%3d  y:%3d  w:%3d  h:%3d\n",
-	//	exposeEvent->x, exposeEvent->y,
-	//	exposeEvent->width, exposeEvent->height);
-        UpdateWindow(exposeEvent->x,
-                     exposeEvent->y,
-                     exposeEvent->width,
-                     exposeEvent->height);
+        if ((state = XEventsQueued(display, QueuedAfterReading)) > 0) {
+            XEvent ev;
+            XExposeEvent& e = *(XExposeEvent*)&ev;
+#if 0
+            fprintf(stderr, "EXPOSE\tx:%3d  y:%3d  w:%3d  h:%3d   states:%d\n",
+                    exposeEvent->x, exposeEvent->y,
+                    exposeEvent->width, exposeEvent->height, state);
+#endif
+        // printf("Event %d\n", state);
+            while (state-- > 0)
+                if (XCheckTypedWindowEvent(display, win, event.type, &ev)) {
+                    int w = exposeEvent->x + exposeEvent->width;
+                    if ((e.x + e.width) > w)
+                        w = (e.x + e.width);
+                    if (e.x < exposeEvent->x)
+                        exposeEvent->x = e.x;
+                    exposeEvent->width = w - exposeEvent->x;
+
+                    int h = exposeEvent->y + exposeEvent->height;
+                    if ((e.y + e.height) > h)
+                        h = e.y + e.height;
+                    if (e.y < exposeEvent->y)
+                        exposeEvent->y = e.y;
+                    exposeEvent->height = h - exposeEvent->y;
+                    //printf("Merged %d\n", ++a);
+                }
+        }
+        UpdateWindow(exposeEvent->x, exposeEvent->y,
+                     exposeEvent->width, exposeEvent->height);
         break;
     case GraphicsExpose:
         /* catch up same events to speed up this a bit */
-	state = XEventsQueued(display, QueuedAfterReading);
-        // printf("Event %d\n", state);
-	while (state-- > 0) {
-	    XEvent e;
-	    XGraphicsExposeEvent *ge = (XGraphicsExposeEvent *) &e;
+        state = XEventsQueued(display, QueuedAfterReading);
+        //printf("Event GExpose %d\n", state);
+        while (state-- > 0) {
+            XEvent e;
+            XGraphicsExposeEvent *ge = (XGraphicsExposeEvent *) &e;
 
-	    if (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e)) {
-		if (gexposeEvent->x == ge->x
-		    && gexposeEvent->y == ge->y
-		    && gexposeEvent->width == ge->width
-		    && gexposeEvent->height == ge->height) {
-		    // fprintf(stderr, "found the same gexpose event\n");
-		    continue;
-		} else {
-		    // fprintf(stderr, "caught different gexpose event\n");
-		    XPutBackEvent(display, &e);
-		}
-	    }
-	    break;
-	}
-	//fprintf(stderr, "GEXPOSE\tx:%3d  y:%3d  w:%3d  h:%3d\n",
-	//	gexposeEvent->x, gexposeEvent->y,
-	//	gexposeEvent->width, gexposeEvent->height);
+            if (XCheckTypedWindowEvent(display, win, event.type, &e)) {
+                if (gexposeEvent->x == ge->x
+                    && gexposeEvent->y == ge->y
+                    && gexposeEvent->width == ge->width
+                    && gexposeEvent->height == ge->height) {
+                    // fprintf(stderr, "found the same gexpose event\n");
+                    continue;
+                } else {
+                    // fprintf(stderr, "caught different gexpose event\n");
+                    XPutBackEvent(display, &e);
+                }
+            }
+            break;
+        }
         UpdateWindow(gexposeEvent->x,
                      gexposeEvent->y,
                      gexposeEvent->width,
@@ -1378,7 +1437,7 @@ void ProcessXEvents(TEvent *Event) {
         if (!i18n_ctx || event.type == KeyRelease)
             XLookupString(keyEvent, keyName, sizeof(keyName), &key, 0);
         else {
-	    i18n_lookup_sym(keyEvent, keyName, sizeof(keyName), &key, i18n_ctx->xic);
+            i18n_lookup_sym(keyEvent, keyName, sizeof(keyName), &key, i18n_ctx->xic);
             if (!key)
                 break;
         }
@@ -1460,7 +1519,7 @@ void ProcessXEvents(TEvent *Event) {
                         , proptype_utf8_string
 #endif
 #endif
-		    };
+                    };
 
                     XChangeProperty(display,
                                     event.xselectionrequest.requestor,
@@ -1491,7 +1550,7 @@ void ProcessXEvents(TEvent *Event) {
 #ifdef X_HAVE_UTF8_STRING
                         event.xselectionrequest.target == proptype_utf8_string ? XUTF8StringStyle :
 #endif
-                        (XICCEncodingStyle)-1;
+                        XStringStyle;
 
                     if (style != -1) {
                         // Can convert
@@ -1543,7 +1602,7 @@ static void FlashCursor ()
     unsigned long OldTime = CursorLastTime;
     CursorLastTime = tv.tv_sec * 1000 + tv.tv_usec / 1000;
     if (OldTime / CursorFlashInterval != CursorLastTime / CursorFlashInterval)
-	DrawCursor(CursorVisible);
+        DrawCursor(CursorVisible);
 }
 
 static TEvent Pending = { evNone };
@@ -1575,7 +1634,7 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
 
     // We can't sleep for too much since we have to flash the cursor
     if (CursorBlink && ((WaitTime == -1)
-			|| (WaitTime > (int)CursorFlashInterval))
+                        || (WaitTime > (int)CursorFlashInterval))
        )
         WaitTime = CursorFlashInterval;
 
@@ -1583,7 +1642,7 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
     while (Event->What == evNone) {
         Event->What = evNone;
         while (XPending(display) > 0) {
-	    FlashCursor();
+            FlashCursor();
             ProcessXEvents(Event);
             if (Event->What != evNone) {
                 while ((Event->What == evMouseMove) && (Queued.What == evNone)) {
@@ -1687,6 +1746,7 @@ int ConGrabEvents(TEventMask /*EventMask*/) {
     return 0;
 }
 
+// FIXME - this is absurd busy loop
 static int WaitForXEvent(int eventType, XEvent *event) {
     time_t time_started = time(NULL);
     for (;;) {
@@ -1757,7 +1817,8 @@ static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned cha
     XSetErrorHandler(oldHandler);
 
     // Cleanup
-    if (privateData) XFree(data);
+    if (privateData)
+        XFree(data);
 }
 
 static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
@@ -1973,12 +2034,12 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
 
                 XParseGeometry(argv[++c], &initX, &initY,
                                &ScreenCols, &ScreenRows);
-                if (ScreenCols > 255)
-                    ScreenCols = 255;
+                if (ScreenCols > MAX_SCRWIDTH)
+                    ScreenCols = MAX_SCRWIDTH;
                 else if (ScreenCols < MIN_SCRWIDTH)
                     ScreenCols = MIN_SCRWIDTH;
-                if (ScreenRows > 255)
-                    ScreenRows = 255;
+                if (ScreenRows > MAX_SCRHEIGHT)
+                    ScreenRows = MAX_SCRHEIGHT;
                 else if (ScreenRows < MIN_SCRHEIGHT)
                     ScreenRows = MIN_SCRHEIGHT;
                 setUserPosition = 1;
@@ -1993,7 +2054,7 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
             if (c + 1 < argc) {
                 strncpy (res_name, argv [++c], sizeof (res_name));
                 res_name[sizeof(res_name)-1] = '\0'; // ensure termination
-	    }
+            }
         } else
             argv[o++] = argv[c];
     }
@@ -2011,11 +2072,11 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
 
 GUI::~GUI() {
     i18n_destroy(&i18n_ctx);
-    for (int i = 0; i < 256; i++)
-	XFreeGC(display, GCs[i]);
+    delete colorXGC;
+    colorXGC = 0;
 #ifdef USE_XMB
     if (fontSet)
-	XFreeFontSet(display, fontSet);
+        XFreeFontSet(display, fontSet);
 #endif
     if (fontStruct)
         XFreeFont(display, fontStruct);
@@ -2098,9 +2159,9 @@ int GUI::SetPipeView(int id, EModel *notify) {
     return 0;
 }
 
-int GUI::ReadPipe(int id, void *buffer, int len) {
+ssize_t GUI::ReadPipe(int id, void *buffer, int len) {
 #ifndef NO_PIPES
-    int r;
+    ssize_t r;
 
     if (id < 0 || id > MAX_PIPES)
         return -1;
@@ -2150,13 +2211,14 @@ int GUI::ClosePipe(int id) {
 int GUI::RunProgram(int mode, char *Command) {
     char Cmd[1024];
 
+    /* FIXME: this could easily overwrite buffers */
     strlcpy(Cmd, XShellCommand, sizeof(Cmd));
 
     if (*Command == 0)  // empty string = shell
         strlcat(Cmd, " -ls &", sizeof(Cmd));
     else {
         strlcat(Cmd, " -e ", sizeof(Cmd));
-	strlcat(Cmd, Command, sizeof(Cmd));
+        strlcat(Cmd, Command, sizeof(Cmd));
         if (mode == RUN_ASYNC)
             strlcat(Cmd, " &", sizeof(Cmd));
     }
@@ -2164,11 +2226,10 @@ int GUI::RunProgram(int mode, char *Command) {
 }
 
 char ConGetDrawChar(int idx) {
-    static const char *tab=NULL;
+    static const char *tab = NULL;
 
-    if (!tab) {
-        tab=GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
-    }
+    if (!tab)
+        tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
     assert(idx >= 0 && idx < (int) strlen(tab));
 
     return tab[idx];

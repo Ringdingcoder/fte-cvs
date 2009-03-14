@@ -16,11 +16,11 @@
 #include "console.h"
 #include "conkbd.h"
 
-#define FTESL_KBDCTRL(x)    ( x-'a'+ 1)
+#define FTESL_KBDCTRL(x)    (x - 'a' +  1)
 
 static unsigned get_linux_keycode(TKeyCode kcode)
 {
-        static unsigned lnxkeycodes[] = {
+        static const unsigned lnxkeycodes[] = {
                 /* 32 */
                 57,  2, 40,  4,  5,  6,  8, 40,
 
@@ -58,7 +58,7 @@ static unsigned get_linux_keycode(TKeyCode kcode)
                 45, 21, 44, 26, 86, 27, 43,  0,
         };
 
-        TKeyCode        key = keyCode(kcode)|(kcode&kfGray);
+        TKeyCode key = keyCode(kcode)|(kcode&kfGray);
 
         switch(key) {
             case kbF1:
@@ -186,13 +186,12 @@ static unsigned get_linux_keycode(TKeyCode kcode)
         }
 }
 
-typedef struct keymapper
-{
+struct keymapper {
         TKeyCode        kcode;
         const char*     kname;
-} keymapper;
+};
 
-static keymapper speckeymap[]={
+static const keymapper speckeymap[]={
         { kbHome,   "Home"   },
         { kbEnd,    "End"    },
         { kbPgUp,   "PgUp"   },

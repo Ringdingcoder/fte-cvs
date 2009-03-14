@@ -10,25 +10,14 @@
  */
 #define XIM_INPUT_STYLE "Root"
 
-struct remapKey {
-    KeySym key_english;
-    KeySym key_remap;
-};
-
-struct keyboardRec {
-    struct remapKey *tab;
-    KeySym deadkey;
-    short next;
-};
-
-typedef struct {
+struct i18n_context_t {
     XIC xic;
 #if XlibSpecificationRelease >= 6
     XIM xim;
     XIMStyles* xim_styles;
     XIMStyle input_style;
 #endif
-} i18n_context_t;
+};
 
 /*
  * prototypes for I18N functions

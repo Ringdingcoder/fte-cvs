@@ -3,7 +3,7 @@
  *
  *    Copyright (c) 1998, Zdenek Kabelac
  *
- *    I18N support by kabi@fi.muni.cz
+ *    I18N support by zdenek.kabelac@gmail.com
  *
  *    written as plain 'C' module and might be used
  *    in other programs to implement I18N support
@@ -206,7 +206,7 @@ static int i18n_key_analyze(XKeyEvent * /*keyEvent*/, KeySym * key, /*FOLD00*/
  * is using Xt Toolkit some things have to be made
  * different
  */
-i18n_context_t* i18n_open(Display * display, Window win, unsigned long *mask) /*FOLD00*/
+i18n_context_t* i18n_open(Display* display, Window win, unsigned long* mask) /*FOLD00*/
 {
     *mask = 0;
 #if XlibSpecificationRelease >= 6

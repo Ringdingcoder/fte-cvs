@@ -4,12 +4,23 @@
 #include "con_i18n.h"
 #include <X11/keysym.h>
 
-static struct remapKey keyboardStd[] =
+struct remapKey {
+    KeySym key_english;
+    KeySym key_remap;
+};
+
+struct keyboardRec {
+    struct remapKey *tab;
+    KeySym deadkey;
+    short next;
+};
+
+static const struct remapKey keyboardStd[] =
 {
     {0,}
 };
 
-static struct remapKey keyboardHalfCz[] =
+static const struct remapKey keyboardHalfCz[] =
 {
     {XK_2, 0xff & 'ì'},
     {XK_3, 0xff & '¹'},
@@ -23,7 +34,7 @@ static struct remapKey keyboardHalfCz[] =
     {0,}
 };
 
-static struct remapKey keyboardFullCz[] =
+static const struct remapKey keyboardFullCz[] =
 {
     {XK_1, 0xff & '+'},
     {XK_exclam, XK_1},
@@ -69,7 +80,7 @@ static struct remapKey keyboardFullCz[] =
     {0,}
 };
 
-static struct remapKey keyboardAcute[] =
+static const struct remapKey keyboardAcute[] =
 {
     {XK_w, 0xff & 'ì'},
     {XK_W, 0xff & 'Ì'},
@@ -344,50 +355,50 @@ static struct remapKey keyboardFifth[] =
 
 static struct keyboardRec kbdStdRec[] =
 {
-    {keyboardStd, 0, 0},        /*  0 */
+    { keyboardStd, 0, 0 },        /*  0 */
 
     KEYMAPS_MACRO
 
     KBD_MACRO
 
-    {NULL,}
+    { NULL }
 };
 
 static struct keyboardRec kbdHalfCzRec[] =
 {
-    {keyboardHalfCz, 0, 0},     /*  0 */
+    { keyboardHalfCz, 0, 0 },     /*  0 */
 
     KEYMAPS_MACRO
 
     KBD_MACRO
 
-    {NULL,}
+    { NULL }
 };
 
 static struct keyboardRec kbdFullCzRec[] =
 {
-    {keyboardFullCz, 0, 0},     /*  0 */
+    { keyboardFullCz, 0, 0 },     /*  0 */
 
     KEYMAPS_MACRO
 
-    {keyboardStd, XK_equal, 1},
-    {keyboardStd, XK_plus, 2},
+    { keyboardStd, XK_equal, 1 },
+    { keyboardStd, XK_plus, 2 },
 
     KBD_MACRO
 
-    {NULL,}
+    { NULL }
 };
 
 /*
  * one standart keyboard and two national keyboards
  * (for programmers and for writers)
  */
-static struct keyboardRec *nationalKey[] =
+static const struct keyboardRec* nationalKey[] =
 {
     kbdStdRec,
     kbdHalfCzRec,
     kbdFullCzRec,
-    0
+    NULL
 };
 
 #endif

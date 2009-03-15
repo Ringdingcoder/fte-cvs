@@ -1296,7 +1296,6 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
     ENDFUNCRC(rc);
 }
 
-static //const
 #include "defcfg.h"
 
 int UseDefaultConfig() {

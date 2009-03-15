@@ -106,7 +106,7 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
     if (BPos >= 0 && BPos < Width) { \
     BPtr = (PCLI *) (B + BPos); \
     BPtr[0] = *p; \
-    BPtr[1] = HILIT_CLRD(); \
+    BPtr[1] = (unsigned char) HILIT_CLRD(); \
     } \
     if (StateMap) StateMap[i] = (hsState)(State & 0xFF); \
     } while (0)

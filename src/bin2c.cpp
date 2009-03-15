@@ -2,9 +2,10 @@
 
 #define BUFLEN (64 * 1024)
 
-unsigned char buf[BUFLEN];
+static unsigned char buf[BUFLEN];
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     int fd;
     int i, n = 1, len;
 
@@ -16,7 +17,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Open: %s, error=%d\n", argv[1], errno);
         exit(1);
     }
-    printf("/* do not edit */\nunsigned char DefaultConfig[] = {\n");
+    printf("/* do not edit */\nstatic const unsigned char DefaultConfig[] = {\n");
     while ((len = read(fd, buf, BUFLEN)) > 0) {
         for (i = 0; i < len; i++) {
             printf("0x%02.02X", buf[i]);

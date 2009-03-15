@@ -629,8 +629,7 @@ static int SetupXWindow(int argc, char **argv)
 #endif
 
     XResizeWindow(display, win, ScreenCols * FontCX, ScreenRows * FontCY);
-    XMapRaised(display, win);
-    //    XClearWindow(display, win); /// !!! why?
+    XMapRaised(display, win); // -> Expose
     return 0;
 }
 
@@ -984,49 +983,33 @@ static void UpdateWindow(int xx, int yy, int ww, int hh) {
 #if 0
     /* show redrawn area */
     XFillRectangle(display, win, colorXGC->GetGC(14), xx, yy, ww, hh);
-    XFlush(display);
-    i = XEventsQueued(display, QueuedAfterReading);
-    while (i-- > 0) {
-        XEvent e;
-        if (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e)) {
-            XNextEvent(display, &e);
-        } else {
-            // fprintf(stderr, "caught different gexpose event\n");
-            //XPutBackEvent(display, &e);
-        }
-    }
+    //i = XEventsQueued(display, QueuedAfterReading);
+    XEvent e;
+    while (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e))
+        XNextEvent(display, &e);
     sleep(1);
 #endif
 
     //fprintf(stderr, "Update\tx:%3d  y:%3d  w:%3d  h:%3d    %dx%d\n", xx, yy, ww, hh, FontCX, FontCY);
-
     xx /= FontCX;
     yy /= FontCY;
     ww /= FontCX;
     hh /= FontCY;
 
     ww += 2;
-    hh += 2;
-    //fprintf(stderr, "\t\tx:%3d  y:%3d  w:%3d  h:%3d\n", xx, yy, ww, hh);
+    if (xx + ww > (int)ScreenCols)
+        ww = ScreenCols - xx;
 
-    /*
-     * OK for this moment I suggest this method - it works somehow
-     * But I suppose the correct solution would meant general rewrite
-     * of some basic behavior of FTE editor
-     * THIS IS TEMPORAL FIX AND SHOULD BE SOLVED IN GENERAL WAY !
-     */
-    if (xx + ww > (int)ScreenCols) ww = ScreenCols - xx;
-    if (yy + hh > (int)ScreenRows) hh = ScreenRows - yy;
+    hh += 2;
+    if (yy + hh > (int)ScreenRows)
+        hh = ScreenRows - yy;
+    //fprintf(stderr, "Refresh\tx:%3d  y:%3d  chars:%3d  lines:%3d\n", xx, yy, ww, hh);
     Refresh = 1;
-    //frames->Repaint();
-    //frames->Update();
     p = (PCell) CursorXYPos(xx, yy);
     for (i = 0; i < hh; i++) {
         ConPutBox(xx, yy + i, ww, 1, p);
         p += ScreenCols;
     }
-    //fprintf(stderr, "UPDATE\tx:%3d  y:%3d  w:%3d  h:%3d\n", xx, yy, ww, hh);
-    //XFlush(display);
     Refresh = 0;
 }
 
@@ -1149,7 +1132,7 @@ static void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char *
     if (state & Mod4Mask) myState |= kfAlt;
     if (state & Mod5Mask) myState |= kfAlt;
 
-    /* modified kabi@fi.muni.cz
+    /* modified kabi@users.sf.net
      * for old method
      * if (!KeyAnalyze((etype == KeyPress), state, &key, &key1))
      *     return;
@@ -1172,7 +1155,7 @@ static void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char *
         for (unsigned i = 0; i < (sizeof(key_table) / sizeof(key_table[0])); i++) {
             long k;
 
-            if ((long) key1 == key_table[i].keysym) {
+            if ((int) key1 == key_table[i].keysym) {
                 k = key_table[i].keycode;
                 if (k < 256)
                     if (myState == kfShift)
@@ -1287,32 +1270,14 @@ void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent
 
 static void ProcessXEvents(TEvent *Event) {
     XEvent event;
-    XAnyEvent& anyEvent = (XAnyEvent&) event;
-    XExposeEvent& exposeEvent = (XExposeEvent&) event;
-    XButtonEvent& buttonEvent = (XButtonEvent&) event;
-    XKeyEvent& keyEvent = (XKeyEvent&) event;
-    XKeyEvent keyEvent1;
-    XConfigureEvent& configureEvent = (XConfigureEvent&) event;
-    XGraphicsExposeEvent& gexposeEvent = (XGraphicsExposeEvent&) event;
-    XMotionEvent& motionEvent = (XMotionEvent&) event;
-    KeySym key, key1;
-    int state;
-    char keyName[32];
-    char keyName1[32];
 
-    memset((void *)&event, 0, sizeof(event));
     Event->What = evNone;
 
     XNextEvent(display, &event);
     if (XFilterEvent(&event, None))
         return;
 
-    if (event.type == MappingNotify) {
-        XRefreshKeyboardMapping(&event.xmapping);
-        return;
-    }
-
-    if (anyEvent.window != win) {
+    if (event.xany.window != win) {
         if (event.type == PropertyNotify && event.xproperty.state == PropertyDelete) {
             // Property change on different window - try to find matching incremental selection request
             IncrementalSelectionInfo *isi, *prev_isi = NULL;
@@ -1344,77 +1309,40 @@ static void ProcessXEvents(TEvent *Event) {
     }
 
     switch (event.type) {
-    case Expose:
-        if ((state = XEventsQueued(display, QueuedAfterReading)) > 0) {
-            XEvent ev;
-            XExposeEvent& e = *(XExposeEvent*)&ev;
-#if 0
-            fprintf(stderr, "EXPOSE\tx:%3d  y:%3d  w:%3d  h:%3d   states:%d\n",
-                    exposeEvent->x, exposeEvent->y,
-                    exposeEvent->width, exposeEvent->height, state);
-#endif
-        // printf("Event %d\n", state);
-            while (state-- > 0)
-                if (XCheckTypedWindowEvent(display, win, event.type, &ev)) {
-                    int w = exposeEvent.x + exposeEvent.width;
-                    if ((e.x + e.width) > w)
-                        w = (e.x + e.width);
-                    if (e.x < exposeEvent.x)
-                        exposeEvent.x = e.x;
-                    exposeEvent.width = w - exposeEvent.x;
-
-                    int h = exposeEvent.y + exposeEvent.height;
-                    if ((e.y + e.height) > h)
-                        h = e.y + e.height;
-                    if (e.y < exposeEvent.y)
-                        exposeEvent.y = e.y;
-                    exposeEvent.height = h - exposeEvent.y;
-                    //printf("Merged %d\n", ++a);
-                }
-        }
-        UpdateWindow(exposeEvent.x, exposeEvent.y,
-                     exposeEvent.width, exposeEvent.height);
+    case MappingNotify:
+        XRefreshKeyboardMapping(&event.xmapping);
         break;
+    case Expose:
     case GraphicsExpose:
-        /* catch up same events to speed up this a bit */
-        state = XEventsQueued(display, QueuedAfterReading);
-        //printf("Event GExpose %d\n", state);
-        while (state-- > 0) {
-            XEvent e;
-            XGraphicsExposeEvent& ge = (XGraphicsExposeEvent&) e;
-
-            if (XCheckTypedWindowEvent(display, win, event.type, &e)) {
-                if (gexposeEvent.x == ge.x
-                    && gexposeEvent.y == ge.y
-                    && gexposeEvent.width == ge.width
-                    && gexposeEvent.height == ge.height) {
-                    // fprintf(stderr, "found the same gexpose event\n");
-                    continue;
-                } else {
-                    // fprintf(stderr, "caught different gexpose event\n");
-                    XPutBackEvent(display, &e);
-                }
-            }
-            break;
+        {
+            XRectangle rect;
+            Region region = XCreateRegion();
+            //state = XEventsQueued(display, QueuedAfterReading); fprintf(stderr, "Events Expose %d\n", state);
+            do {
+                rect.x = (short) event.xexpose.x;
+                rect.y = (short) event.xexpose.y;
+                rect.width = (short) event.xexpose.width;
+                rect.height= (short) event.xexpose.height;
+                XUnionRectWithRegion(&rect, region, region);
+            } while (XCheckTypedWindowEvent(display, win, event.type, &event));
+            XClipBox(region, &rect);
+            XDestroyRegion(region);
+            UpdateWindow(rect.x, rect.y, rect.width, rect.height);
         }
-        UpdateWindow(gexposeEvent.x,
-                     gexposeEvent.y,
-                     gexposeEvent.width,
-                     gexposeEvent.height);
         break;
     case ConfigureNotify:
-        while ((XPending(display) > 0) &&
-               XCheckTypedWindowEvent(display, win,
-                                      ConfigureNotify, &event))
+        while (XCheckTypedWindowEvent(display, win, event.type, &event))
             XSync(display, 0);
-        ResizeWindow(configureEvent.width, configureEvent.height);
+        ResizeWindow(event.xconfigure.width, event.xconfigure.height);
         Event->What = evCommand;
         Event->Msg.Command = cmResize;
         break;
     case ButtonPress:
     case ButtonRelease:
         now = event.xbutton.time;
-        ConvertClickToEvent(event.type, buttonEvent.x, buttonEvent.y, buttonEvent.button, buttonEvent.state, Event, motionEvent.time);
+        ConvertClickToEvent(event.type, event.xbutton.x, event.xbutton.y,
+                            event.xbutton.button, event.xbutton.state,
+                            Event, event.xmotion.time);
         break;
     case FocusIn:
         if (i18n_ctx) i18n_focus_in(i18n_ctx);
@@ -1424,27 +1352,33 @@ static void ProcessXEvents(TEvent *Event) {
         break;
     case KeyPress:
         // case KeyRelease:
-        now = event.xkey.time;
-        state = keyEvent.state;
-        keyEvent1 = keyEvent;
-        keyEvent1.state &= ~(ShiftMask | ControlMask | Mod1Mask /* | Mod2Mask*/ | Mod3Mask | Mod4Mask | Mod5Mask);
+        {
+            char keyName[32];
+            char keyName1[32];
+            KeySym key, key1;
+            XEvent event1 = event;
+            event1.xkey.state &= ~(ShiftMask | ControlMask | Mod1Mask /* | Mod2Mask*/ | Mod3Mask | Mod4Mask | Mod5Mask);
+            now = event.xkey.time;
 
-        if (!i18n_ctx || event.type == KeyRelease)
-            XLookupString(&keyEvent, keyName, sizeof(keyName), &key, 0);
-        else {
-            i18n_lookup_sym(&keyEvent, keyName, sizeof(keyName), &key, i18n_ctx->xic);
-            if (!key)
-                break;
+            if (!i18n_ctx || event.type == KeyRelease) {
+                XLookupString(&event.xkey, keyName, sizeof(keyName), &key, 0);
+            } else {
+                i18n_lookup_sym(&event.xkey, keyName, sizeof(keyName), &key, i18n_ctx->xic);
+                if (!key)
+                    break;
+            }
+            XLookupString(&event1.xkey, keyName1, sizeof(keyName1), &key1, 0);
+            //fprintf(stderr, "event.state = %d %s %08X\n", event.xkey.state, keyName, (int)key);
+            //fprintf(stderr, "keyev.state = %d %s %08X\n", event1.xkey.state, keyName1, (int)key1);
+            //key1 = XLookupKeysym(&event1.xkey, 0);
+            ConvertKeyToEvent(key, key1, keyName, keyName1,
+                              event.type, event.xkey.state, Event);
         }
-        XLookupString(&keyEvent1, keyName1, sizeof(keyName1), &key1, 0);
-        //printf("keyEvent->state = %d %s %08X\n", keyEvent->state, keyName, key);
-        //printf("keyEvent1.state = %d %s %08X\n", keyEvent1.state, keyName1, key1);
-        //key1 = XLookupKeysym(keyEvent, 0);
-        ConvertKeyToEvent(key, key1, keyName, keyName1, event.type, state, Event);
         break;
     case MotionNotify:
         now = event.xmotion.time;
-        ConvertClickToEvent(event.type, motionEvent.x, motionEvent.y, 0, motionEvent.state, Event, motionEvent.time);
+        ConvertClickToEvent(event.type, event.xmotion.x, event.xmotion.y,
+                            0, event.xmotion.state, Event, event.xmotion.time);
         break;
     case ClientMessage:
         if (event.xclient.message_type == wm_protocols

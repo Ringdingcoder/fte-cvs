@@ -99,12 +99,14 @@ static char slang_dchs[] =
     '+'
 };
 
-static char raw_dchs[sizeof(slang_dchs)];
+static SLsmg_Char_Type raw_dchs[sizeof(slang_dchs)];
 
-static unsigned char ftesl_get_dch(char raw)
+static unsigned char ftesl_get_dch(SLsmg_Char_Type raw)
 {
     for (int i = 0; i < (int) sizeof(slang_dchs); i++)
-	if (raw_dchs[i] == raw)
+	if (raw_dchs[i].nchars == raw.nchars
+	    && !memcmp(raw_dchs[i].wchars, raw.wchars,
+		       raw.nchars * sizeof(*raw.wchars)))
 	    return DCH_SLANG_C1 + i;
     return DCH_SLANG_EOL;
 }
@@ -215,7 +217,6 @@ static int ftesl_getkeysym(TKeyCode keycode)
 int ConInit(int /*XSize */ , int /*YSize */ )
 {
     unsigned i;
-    unsigned short linebuf[sizeof(slang_dchs)];
 
     SLtt_get_terminfo();
 
@@ -246,9 +247,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
     SLsmg_write_nchars(slang_dchs, sizeof(slang_dchs));
 
     SLsmg_gotorc(0, 0);
-    SLsmg_read_raw(linebuf, sizeof(slang_dchs));
-    for (i = 0; i < sizeof(slang_dchs); i++)
-	raw_dchs[i] = (linebuf[i]) & 0xff;
+    SLsmg_read_raw(raw_dchs, sizeof(slang_dchs));
 
     SLsmg_set_char_set(0);
 
@@ -361,7 +360,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
     return 0;
 }
 
-static int ConPutBoxRaw(int X, int Y, int W, int H, unsigned short *box)
+static int ConPutBoxRaw(int X, int Y, int W, int H, SLsmg_Char_Type *box)
 {
     int CurX, CurY;
 
@@ -381,28 +380,44 @@ static int ConPutBoxRaw(int X, int Y, int W, int H, unsigned short *box)
 int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 {
     int CurX, CurY, i;
-    char ch;
+    SLsmg_Char_Type *linebuf;
+
+    linebuf = new SLsmg_Char_Type [W];
 
     ConQueryCursorPos(&CurX, &CurY);
     while (H > 0) {
 	SLsmg_gotorc(Y++, X);
-	SLsmg_read_raw(Cell, W);
-	for (i = 0; i < W; i++)
-	    if (Cell[i] & 0x8000) {
-		ch = Cell[i] & 0xff;
-		Cell[i] &= 0x7f00;
-		Cell[i] |= ftesl_get_dch(ch);
-	    }
+	SLsmg_read_raw(linebuf, W);
+	for (i = 0; i < W; i++) {
+	    if (linebuf[i].color & SLSMG_ACS_MASK)
+		Cell[i] = ftesl_get_dch(linebuf[i]);
+	    else
+		/*
+		 * FIXME: Handle UTF-8 -- way beyond a quick-and-dirty
+		 * fix.  --MV
+		 */
+		Cell[i] = SLSMG_EXTRACT_CHAR(linebuf[i]);
+	    /*
+	     * FIXME: This preserves only 7 out of 15 bits of color.
+	     * Fortunately, we're dealing with color handles rather than
+	     * colors themselves -- S-Lang jumps through an extra hoop to
+	     * map these to color data.  As long as we use less than 127
+	     * different colors, things should be OK.  I think.  --MV
+	     */
+	    Cell[i] |= (linebuf[i].color & 0x7f) << 8;
+	}
 	Cell += W;
 	H--;
     }
     ConSetCursorPos(CurX, CurY);
 
+    delete[] linebuf;
+
     return 0;
 
 }
 
-static int ConGetBoxRaw(int X, int Y, int W, int H, unsigned short *box)
+static int ConGetBoxRaw(int X, int Y, int W, int H, SLsmg_Char_Type *box)
 {
     int CurX, CurY;
 
@@ -451,9 +466,9 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 {
-    unsigned short *box;
+    SLsmg_Char_Type *box;
 
-    box = new unsigned short [W * H];
+    box = new SLsmg_Char_Type [W * H];
 
     TCell fill = (((unsigned) Fill) << 8) | ' ';
 

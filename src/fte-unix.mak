@@ -7,7 +7,7 @@
 
 TGT_NFTE = nfte
 #TGT_QFTE = qfte
-#TGT_SFTE = sfte
+TGT_SFTE = sfte
 TGT_VFTE = vfte
 TGT_XFTE = xfte
 

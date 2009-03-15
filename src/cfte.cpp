@@ -87,8 +87,8 @@ static void PutObject(CurPos &cp, int xtag, int xlen, void *obj) {
     if (preprocess_only == false)
     {
 
-	l[0] = len & 0xFF;
-	l[1] = (len >> 8) & 0xFF;
+	l[0] = (char)len;
+	l[1] = (char)(len >> 8);
 
 	if (fwrite(&tag, 1, 1, output) != 1 ||
 	    fwrite(l, 2, 1, output) != 1 ||
@@ -805,7 +805,7 @@ static char *GetString(CurPos &cp) {
                     else if (*cp.c >= 'a' && *cp.c <= 'f') n = n * 16 + *cp.c - 'a' + 10;
                     else if (*cp.c >= 'A' && *cp.c <= 'F') n = n * 16 + *cp.c - 'A' + 10;
                     else cp.c--;
-                    *cp.c = n;
+                    *cp.c = (char)n;
                     break;
                 }
             }
@@ -829,7 +829,7 @@ static int GetNumber(CurPos &cp) {
     int value = 0;
     int neg = 0;
 
-    if (cp.c < cp.z && *cp.c == '-' || *cp.c == '+') {
+    if (cp.c < cp.z && (*cp.c == '-' || *cp.c == '+')) {
         if (*cp.c == '-') neg = 1;
         cp.c++;
     }

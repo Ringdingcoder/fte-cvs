@@ -93,7 +93,7 @@ static void my_fixpath(const char *in, char *out) {
 
 
 char *Slash(char *Path, int Add) {
-    int len = strlen(Path);
+    size_t len = strlen(Path);
 
     if (Add) {
         if ((len == 0) || !ISSLASH(Path[len - 1])) {
@@ -115,7 +115,7 @@ char *Slash(char *Path, int Add) {
 }
 
 char *SlashDir(char *Path) {
-    int len = strlen(Path);
+    size_t len = strlen(Path);
     if (len > 1) {
 #if PATHTYPE == PT_DOSISH
         if ((len == 2) && Path[1] == ':') {
@@ -145,7 +145,7 @@ char *SlashDir(char *Path) {
 }
 
 int IsDirectory(const char *Path) {
-    int len = strlen(Path);
+    size_t len = strlen(Path);
     if (len > 0) {
 #if PATHTYPE == PT_DOSISH
         if ((len == 2) && Path[1] == ':')
@@ -389,10 +389,10 @@ int JustDirectory(const char *Path, char *Dir, int DirSize) {
 }
 
 int JustLastDirectory(const char *Path, char *Dir, int DirSize) {
-    int lastSlash = strlen(Path);
+    size_t lastSlash = strlen(Path);
     while (lastSlash > 0 && !ISSEP(Path[lastSlash])) lastSlash--;
 
-    int secondLastSlash = lastSlash;
+    size_t secondLastSlash = lastSlash;
     while (secondLastSlash > 0 && !ISSEP(Path[secondLastSlash - 1])) secondLastSlash--;
 
     if ((lastSlash - secondLastSlash) >= (DirSize-1))
@@ -409,7 +409,7 @@ int JustLastDirectory(const char *Path, char *Dir, int DirSize) {
 }
 
 int JustFileName(const char *Path, char *Name, int NameSize) {
-    int len = strlen(Path);
+    size_t len = strlen(Path);
 
     while (len > 0 && !ISSEP(Path[len - 1])) len--;
     strlcpy(Name, Path + len, NameSize);
@@ -447,7 +447,7 @@ int IsFullPath(const char *Path) {
 const char *ShortFName(const char *Path, int len) {
     static char P[MAXPATH];
     char p1[MAXPATH];
-    int l1;
+    size_t l1;
 
     if (len < 10) len = 10;
     if (len > (int)(sizeof(P) - 1)) len = sizeof(P) - 1;
@@ -499,7 +499,7 @@ char *SepRChr(char *Dir)
 // Ex: Dir = /home/martin/src/ Path = /home/martin/src/Fte/s_files.cpp -> Fte/s_files.cpp
 int RelativePathName(const char *Dir, const char *Path, char *RelPath, int RelPathSize) {
     char d[MAXPATH], p[MAXPATH], c;
-    int dl, pl;
+    size_t dl, pl;
 
     if (ExpandPath(Dir, d, sizeof(d)) == -1) return -1;
     if (ExpandPath(Path, p, sizeof(p)) == -1) return -1;

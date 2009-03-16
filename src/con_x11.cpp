@@ -8,6 +8,19 @@
  *    I18N & XMB support added by zdenek.kabelac@gmail.com
  */
 
+#include "fte.h"
+#include "sysdep.h"
+#include "c_config.h"
+#include "console.h"
+#include "gui.h"
+
+#include "con_i18n.h"
+#include "s_files.h"
+#include "s_util.h"
+#include "s_string.h"
+
+
+
 #include <string.h>
 #include <assert.h>
 #include <stdarg.h>
@@ -43,16 +56,6 @@
 #ifdef HPUX
 #include <X11R5/X11/HPkeysym.h>
 #endif
-#include "sysdep.h"
-#include "c_config.h"
-#include "console.h"
-#include "gui.h"
-
-#include "con_i18n.h"
-#include "s_files.h"
-#include "s_util.h"
-#include "s_string.h"
-
 #ifdef WINHCLX
 #include <X11/XlibXtra.h>    /* HCL - HCLXlibInit */
 #endif
@@ -691,7 +694,6 @@ int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen) {
     return 0;
 }
 
-#define InRange(x,a,y) (((x) <= (a)) && ((a) < (y)))
 #define CursorXYPos(x,y) (ScreenBuffer + ((x) + ((y) * ScreenCols)) * 2)
 
 void DrawCursor(int Show) {
@@ -752,8 +754,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
                 ops = ps;
                 ox = x;
                 olen = len;
-                while ((len > 0) && c[0] == ps[0] && c[1] == ps[1] )
-                {
+                while ((len > 0) && c[0] == ps[0] && c[1] == ps[1]) {
                     ps+=2;
                     c+=2;
                     x++;
@@ -771,8 +772,8 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
             l = 1;
             temp[0] = *ps++; attr = *ps++;
             while ((l < len) && ((unsigned char) (ps[1]) == attr)) {
-                temp[l++] = *ps++;
-                ps++;
+                temp[l++] = *ps;
+                ps += 2;
             }
             if (!useXMB)
                 XDrawImageString(display, win, colorXGC->GetGC(attr),
@@ -796,7 +797,8 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
                            x * FontCX, (Y + i) * FontCY,
                            (ScreenCols - x - 1) * FontCX, FontCY);
         }
-*/        p = CursorXYPos(X, Y + i);
+        */
+        p = CursorXYPos(X, Y + i);
         memmove(p, Cell, W * 2);
         if (i + Y == CursorY)
             DrawCursor(1);
@@ -936,7 +938,7 @@ int ConHideCursor(void) {
 }
 
 int ConCursorVisible(void) {
-    return 1;
+    return CursorVisible;
 }
 int ConSetCursorSize(int Start, int End) {
     CursorStart = Start;
@@ -977,9 +979,6 @@ int ConQueryMouseButtons(int *ButtonCount) {
 }
 
 static void UpdateWindow(int xx, int yy, int ww, int hh) {
-    PCell p;
-    int i;
-
 #if 0
     /* show redrawn area */
     XFillRectangle(display, win, colorXGC->GetGC(14), xx, yy, ww, hh);
@@ -1005,8 +1004,8 @@ static void UpdateWindow(int xx, int yy, int ww, int hh) {
         hh = ScreenRows - yy;
     //fprintf(stderr, "Refresh\tx:%3d  y:%3d  chars:%3d  lines:%3d\n", xx, yy, ww, hh);
     Refresh = 1;
-    p = (PCell) CursorXYPos(xx, yy);
-    for (i = 0; i < hh; i++) {
+    PCell p = (PCell) CursorXYPos(xx, yy);
+    for (int i = 0; i < hh; i++) {
         ConPutBox(xx, yy + i, ww, 1, p);
         p += ScreenCols;
     }
@@ -1209,22 +1208,10 @@ void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent
         case Button5:
             if (type == ButtonPress) {
                 Event->What = evCommand;
-                if (state & ShiftMask) {
-                    Event->Msg.Param1 = 1;
-
-                    if (button == Button4)
-                        Event->Msg.Command = cmVScrollUp; // fix core to use count
-                    else
-                        Event->Msg.Command = cmVScrollDown;
-                }
-                else
-                {
-                    Event->Msg.Param1 = 3;
-                    if (button == Button4)
-                        Event->Msg.Command = cmVScrollUp;
-                    else
-                        Event->Msg.Command = cmVScrollDown;
-                }
+                Event->Msg.Param1 = (state & ShiftMask) ? 1 : 3;
+                // fix core to use count
+                Event->Msg.Command =
+                    (button == Button4) ? cmVScrollUp : cmVScrollDown;
             }
             return;
         }
@@ -1259,12 +1246,6 @@ void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent
             LastClickCount = 1;
         LastClickTime = CurTime;
     }
-    /*    if (Event->What == evMouseMove) {
-     LastClick = 0;
-     LastClickCount = 0;
-     LastClickTime = 0;
-     }
-     */
     LastMouseEvent = *Event;
 }
 
@@ -1332,7 +1313,7 @@ static void ProcessXEvents(TEvent *Event) {
         break;
     case ConfigureNotify:
         while (XCheckTypedWindowEvent(display, win, event.type, &event))
-            XSync(display, 0);
+            ;//XSync(display, 0);
         ResizeWindow(event.xconfigure.width, event.xconfigure.height);
         Event->What = evCommand;
         Event->Msg.Command = cmResize;
@@ -1562,9 +1543,8 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
     }
 
     // We can't sleep for too much since we have to flash the cursor
-    if (CursorBlink && ((WaitTime == -1)
-                        || (WaitTime > (int)CursorFlashInterval))
-       )
+    if (CursorBlink
+        && ((WaitTime == -1) || (WaitTime > (int)CursorFlashInterval)))
         WaitTime = CursorFlashInterval;
 
     Event->What = evNone;
@@ -1587,7 +1567,8 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
             }
             if (Delete == 0)
                 Pending = *Event;
-            if (Event->What & EventMask) return 0;
+            if (Event->What & EventMask)
+                return 0;
             else
                 Pending.What = evNone;
             Event->What = evNone;
@@ -1595,44 +1576,43 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
 
         Event->What = evNone;
         FD_ZERO(&read_fds);
+        int maxfd = ConnectionNumber(display);
         FD_SET(ConnectionNumber(display), &read_fds);
-        for (int p = 0; p < MAX_PIPES; p++)
-            if (Pipes[p].used)
-                if (Pipes[p].fd != -1)
-                    FD_SET(Pipes[p].fd, &read_fds);
 
-        if ((WaitTime == -1 || WaitTime > MouseAutoDelay) && (LastMouseEvent.What == evMouseAuto) && (EventMask & evMouse)) {
+        for (int p = 0; p < MAX_PIPES; p++)
+            if (Pipes[p].used && Pipes[p].fd != -1) {
+                FD_SET(Pipes[p].fd, &read_fds);
+                if (maxfd < Pipes[p].fd)
+                    maxfd = Pipes[p].fd; // pick max
+            }
+        maxfd++;
+
+        if ((WaitTime == -1 || WaitTime > MouseAutoDelay)
+            && (LastMouseEvent.What == evMouseAuto) && (EventMask & evMouse)) {
             timeout.tv_sec = 0;
             timeout.tv_usec = MouseAutoDelay * 1000;
-            rc = select(sizeof(fd_set) * 8, &read_fds, NULL, NULL, &timeout);
+            rc = select(maxfd, &read_fds, NULL, NULL, &timeout);
             if (rc == 0) {
                 *Event = LastMouseEvent;
                 return 0;
             }
-        } else if ((WaitTime == -1 || WaitTime > MouseAutoRepeat) && (LastMouseEvent.What == evMouseDown || LastMouseEvent.What == evMouseMove)
-                   &&
-                   (LastMouseEvent.Mouse.Buttons) && (EventMask & evMouse))
-        {
+        } else if ((WaitTime == -1 || WaitTime > MouseAutoRepeat)
+                   && (LastMouseEvent.What == evMouseDown || LastMouseEvent.What == evMouseMove)
+                   && (LastMouseEvent.Mouse.Buttons) && (EventMask & evMouse)) {
             timeout.tv_sec = 0;
             timeout.tv_usec = MouseAutoRepeat * 1000;
-            rc = select(sizeof(fd_set) * 8,
-                        FD_SET_CAST() &read_fds, NULL, NULL,
-                        &timeout);
+            rc = select(maxfd, &read_fds, NULL, NULL, &timeout);
             if (rc == 0) {
                 LastMouseEvent.What = evMouseAuto;
                 *Event = LastMouseEvent;
                 return 0;
             }
         } else if (WaitTime == -1) {
-            rc = select(sizeof(fd_set) * sizeof(char),
-                        FD_SET_CAST() &read_fds, NULL, NULL,
-                        NULL);
+            rc = select(maxfd, &read_fds, NULL, NULL, NULL);
         } else {
             timeout.tv_sec = 0;
             timeout.tv_usec = WaitTime * 1000 + 1;
-            rc = select(sizeof(fd_set) * sizeof(char),
-                        FD_SET_CAST() &read_fds, NULL, NULL,
-                        &timeout);
+            rc = select(maxfd, &read_fds, NULL, NULL, &timeout);
         }
 
         if (rc == 0 || rc == -1) {
@@ -1642,20 +1622,19 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
         if (FD_ISSET(ConnectionNumber(display), &read_fds)) // X has priority
             continue;
         for (int pp = 0; pp < MAX_PIPES; pp++) {
-            if (Pipes[pp].used)
-                if (Pipes[pp].fd != -1)
-                    if (FD_ISSET(Pipes[pp].fd, &read_fds)) {
-                        if (Pipes[pp].notify) {
-                            Event->What = evNotify;
-                            Event->Msg.View = 0;
-                            Event->Msg.Model = Pipes[pp].notify;
-                            Event->Msg.Command = cmPipeRead;
-                            Event->Msg.Param1 = pp;
-                            Pipes[pp].stopped = 0;
-                        }
-                        //fprintf(stderr, "Pipe %d\n", Pipes[pp].fd);
-                        return 0;
-                    }
+            if (Pipes[pp].used && (Pipes[pp].fd != -1)
+                && (FD_ISSET(Pipes[pp].fd, &read_fds))) {
+                if (Pipes[pp].notify) {
+                    Event->What = evNotify;
+                    Event->Msg.View = 0;
+                    Event->Msg.Model = Pipes[pp].notify;
+                    Event->Msg.Command = cmPipeRead;
+                    Event->Msg.Param1 = pp;
+                    Pipes[pp].stopped = 0;
+                }
+                //fprintf(stderr, "Pipe %d\n", Pipes[pp].fd);
+                return 0;
+            }
         }
     }
     return 0;
@@ -1675,15 +1654,15 @@ int ConGrabEvents(TEventMask /*EventMask*/) {
     return 0;
 }
 
-// FIXME - this is absurd busy loop
 static int WaitForXEvent(int eventType, XEvent *event) {
     time_t time_started = time(NULL);
-    for (;;) {
-        if (XCheckTypedWindowEvent(display, win, eventType, event)) return 1;
+    while (!XCheckTypedWindowEvent(display, win, eventType, event)) {
+        usleep(1000);
         time_t tnow = time(NULL);
         if (time_started > tnow) time_started = tnow;
         if (tnow - time_started > 5) return 0;
     }
+    return 1;
 }
 
 static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned char *data, int len, Bool privateData) {
@@ -1777,7 +1756,7 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
 
     if (actual_type == proptype_incr) {
         // Incremental data
-        int pos, buffer_len;
+        size_t pos, buffer_len;
         unsigned char *buffer;
 
         // Get selection length and allocate buffer

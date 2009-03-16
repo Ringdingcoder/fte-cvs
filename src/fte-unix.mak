@@ -56,8 +56,8 @@ NOEXCEPTION = -fno-rtti -fno-exceptions
 #######################################################################
 # Linux
 UOS      = -DLINUX
-XINCDIR  = -I/usr/X11R6/include
-XLIBDIR  = -L/usr/X11R6/lib
+XINCDIR  = -I/usr/include/X11
+XLIBDIR  = 
 
 #######################################################################
 # HP/UX

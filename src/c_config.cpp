@@ -12,20 +12,20 @@
 #include "o_svnbase.h"
 #include "log.h"
 
-typedef struct _GUICharactersEntry {
-    struct _GUICharactersEntry *next;
+struct GUICharactersEntry {
+    struct GUICharactersEntry *next;
     char *name;
     char *chars;
-} GUICharactersEntry;
+};
 
-typedef struct _CurPos {
-    int sz;
+struct CurPos {
+    off_t sz;
     const char *a;
     const char *c;
     const char *z;
     int line;
     const char *name; // filename
-} CurPos;
+};
 
 #ifdef CONFIG_INDENT_C
 extern int C_Indent;
@@ -109,7 +109,7 @@ char XShellCommand[256] = "xterm";
 const char *GetGUICharacters(const char *which, const char *defChars) {
     GUICharactersEntry *g, *gg, *found = NULL;
     char *s;
-    unsigned int i;
+    size_t i;
 
     for (g = GUICharacters; g; g=gg) {
         gg = g->next;
@@ -164,13 +164,11 @@ static void AppendGUICharacters(const char *string) {
 
 #ifdef CONFIG_SYNTAX_HILIT
 static int AddKeyword(ColorKeywords *tab, char color, const char *keyword) {
-    int len;
-
-    len = strlen(keyword);
+    size_t len = strlen(keyword);
     if (len < 1 || len >= CK_MAXLEN) return 0;
 
     if (tab->key[len]) {
-        int lx = strlen(tab->key[len]);
+        size_t lx = strlen(tab->key[len]);
         char *key;
 
         key = (char *)realloc(tab->key[len], lx + len + 1 + 1);

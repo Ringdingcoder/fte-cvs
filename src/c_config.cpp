@@ -8,6 +8,7 @@
  */
 
 #include "fte.h"
+#include "ftever.h"
 #include "o_cvsbase.h"
 #include "o_svnbase.h"
 #include "log.h"

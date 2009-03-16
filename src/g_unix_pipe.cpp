@@ -10,21 +10,17 @@
 #include "gui.h"
 
 
-typedef struct {
+struct GPipe {
     int used;
     int id;
     int fd;
     int pid;
     int stopped;
     EModel *notify;
-} GPipe;
+};
 
-static GPipe Pipes[MAX_PIPES] =
-{
+static GPipe Pipes[MAX_PIPES] = {
     {0},
-    {0},
-    {0},
-    {0}
 };
 
 /* If command pipes are open, wait for input on them or
@@ -36,16 +32,15 @@ int WaitPipeEvent(TEvent *Event,int WaitTime, int *fds, int nfds)
     int have_pipes;
     int i;
 
-
     FD_ZERO(&readfds);
 
     have_pipes = 0;
     for (int p = 0; p < MAX_PIPES; p++)
-	    if (Pipes[p].used && Pipes[p].fd != -1)
-	    {
-		    FD_SET(Pipes[p].fd, &readfds);
-                    have_pipes = 1;
-	    }
+	if (Pipes[p].used && Pipes[p].fd != -1)
+	{
+	    FD_SET(Pipes[p].fd, &readfds);
+	    have_pipes = 1;
+	}
     if(!have_pipes) return 0;
 
     for(i=0; i<nfds; i++) { FD_SET(fds[i], &readfds);}
@@ -61,31 +56,25 @@ int WaitPipeEvent(TEvent *Event,int WaitTime, int *fds, int nfds)
     }
 
     for(i=0; i<nfds; i++)
-    {
-	    if(FD_ISSET(fds[i], &readfds))
-	    {
-                    return 0;
-	    }
-    }
+	if(FD_ISSET(fds[i], &readfds))
+	    return 0;
 
-	for (int pp = 0; pp < MAX_PIPES; pp++) {
-	    if (Pipes[pp].used && Pipes[pp].fd != -1 &&
-		FD_ISSET(Pipes[pp].fd, &readfds) &&
-		Pipes[pp].notify) {
-		Event->What = evNotify;
-		Event->Msg.View = 0;
-		Event->Msg.Model = Pipes[pp].notify;
-		Event->Msg.Command = cmPipeRead;
-		Event->Msg.Param1 = pp;
-		Pipes[pp].stopped = 0;
-		return 1;
-	    }
-	    //fprintf(stderr, "Pipe %d\n", Pipes[pp].fd);
+    for (int pp = 0; pp < MAX_PIPES; pp++) {
+	if (Pipes[pp].used && Pipes[pp].fd != -1 &&
+	    FD_ISSET(Pipes[pp].fd, &readfds) &&
+	    Pipes[pp].notify) {
+	    Event->What = evNotify;
+	    Event->Msg.View = 0;
+	    Event->Msg.Model = Pipes[pp].notify;
+	    Event->Msg.Command = cmPipeRead;
+	    Event->Msg.Param1 = pp;
+	    Pipes[pp].stopped = 0;
+	    return 1;
 	}
-	return 0;
+	//fprintf(stderr, "Pipe %d\n", Pipes[pp].fd);
     }
-
-
+    return 0;
+}
 
 int GUI::OpenPipe(char *Command, EModel * notify)
 {

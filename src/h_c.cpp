@@ -87,7 +87,7 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                     C += j;
                     State = hsC_Normal;
                     continue;
-                } else if ((len >= 2) && (*p == '/') && (*(p+1) == '*')) {
+                } else if ((len >= 2) && (*p == '/') && (p[1] == '*')) {
                     State = hsC_Comment;
                     Color = CLR_Comment;
                     goto hilit2;
@@ -98,7 +98,7 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
 		} else if (isdigit(*p)) {
                     // check if it is not floating point number 0.08!
                     if ((len >= 2) && (*p == '0') && p[1] != '.') {
-                        if (toupper(*(p+1)) == 'X') {
+                        if (toupper(p[1]) == 'X') {
                             Color = CLR_HexNumber;
                             ColorNext();
                             ColorNext();
@@ -157,7 +157,7 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                 goto hilit;
             case hsC_Comment:
                 Color = CLR_Comment;
-                if ((len >= 2) && (*p == '*') && (*(p+1) == '/')) {
+                if ((len >= 2) && (*p == '*') && (p[1] == '/')) {
                     ColorNext();
                     ColorNext();
                     State = hsC_Normal;
@@ -166,7 +166,7 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                 goto hilit;
             case hsC_CPP_Comm:
                 Color = CLR_Comment;
-                if ((len >= 2) && (*p == '*') && (*(p+1) == '/')) {
+                if ((len >= 2) && (*p == '*') && (p[1] == '/')) {
                     ColorNext();
                     ColorNext();
                     State = hsC_CPP;

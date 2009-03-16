@@ -7,10 +7,13 @@ any of its derivitives.
 
 ********************************************************************/
 
+#include "log.h"
+
+#ifndef FTE_NO_LOGGING
+
 #include <time.h>
 #include <ctype.h>
 #include "sysdep.h"
-#include "log.h"
 
 #if defined(NO_NEW_CPP_FEATURES)
 #include <iomanip.h>
@@ -22,7 +25,6 @@ any of its derivitives.
 using namespace std;
 #endif
 
-#ifndef FTE_NO_LOGGING
 
 /*********************************************************************
  *

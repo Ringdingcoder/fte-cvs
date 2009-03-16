@@ -8,6 +8,7 @@
  */
 
 #include "fte.h"
+#include "ftever.h"
 
 SearchReplaceOptions LSearch = { 0 };
 int suspendLoads = 0;

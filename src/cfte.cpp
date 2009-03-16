@@ -47,14 +47,14 @@ static bool preprocess_only = false;
 #include "c_commands.h"
 #include "c_cmdtab.h"
 
-typedef struct _CurPos {
-    int sz;
+struct CurPos {
+    off_t sz;
     char *a;
     char *c;
     char *z;
     int line;
     const char *name; // filename
-} CurPos;
+};
 
 static void cleanup(int xerrno) {
     if (output)

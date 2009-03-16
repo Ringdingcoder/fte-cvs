@@ -7,6 +7,7 @@
  *
  */
 #include "fte.h"
+#include "ftever.h"
 #include "log.h"
 #include "c_history.h"
 #ifdef USE_LOCALE

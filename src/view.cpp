@@ -8,6 +8,7 @@
  */
 
 #include "fte.h"
+#include "ftever.h"
 
 EView *ActiveView = 0;
 

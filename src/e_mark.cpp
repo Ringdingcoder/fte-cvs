@@ -1,4 +1,5 @@
 #include "fte.h"
+#include "e_mark.h"
 
 EMarkIndex markIndex;
 

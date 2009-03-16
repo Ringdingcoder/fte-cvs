@@ -10,13 +10,11 @@
 #ifndef __FTE_H
 #define __FTE_H
 
-#include "ftever.h"
 #include "feature.h"
 #include "sysdep.h"
 
-#ifdef NEED_LOG_H
-#include "log.h"
-#endif // NEED_LOG_H
+#if 1
+/* slowly remove this global header file */
 #include "console.h"
 #include "gui.h"
 #include "c_desktop.h"
@@ -62,6 +60,8 @@
 #include "o_svndiff.h"
 #include "c_commands.h"
 #include "c_history.h"
+
+#endif
 
 #if defined(_DEBUG) && defined(MSVC) && defined(MSVCDEBUG)
 #include <crtdbg.h>

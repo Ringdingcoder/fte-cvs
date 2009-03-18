@@ -5,7 +5,7 @@
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- *    I18N & XMB support added by zdenek.kabelac@gmail.com
+ *    I18N & XMB support added by kabi@users.sf.net
  */
 
 #include "fte.h"
@@ -18,8 +18,6 @@
 #include "s_files.h"
 #include "s_util.h"
 #include "s_string.h"
-
-
 
 #include <string.h>
 #include <assert.h>
@@ -70,12 +68,6 @@
 #include "icons/fte64x64.xpm"
 #endif
 
-#ifdef CAST_FD_SET_INT
-#define FD_SET_CAST() (int *)
-#else
-#define FD_SET_CAST()
-#endif
-
 #define MAX_SCRWIDTH 255
 #define MAX_SCRHEIGHT 255
 #define MIN_SCRWIDTH 20
@@ -87,6 +79,8 @@
 #define SELECTION_INCR_LIMIT 0x1000
 #define SELECTION_XFER_LIMIT 0x1000
 #define SELECTION_MAX_AGE 10
+
+class ColorXGC;
 
 struct GPipe {
     int used;
@@ -123,7 +117,7 @@ static int Refresh = 0;
 static char res_name[20] = "fte";
 static char res_class[] = "Fte";
 
-static Display *display;
+static Display *display = 0;
 static Colormap colormap;
 static Atom wm_protocols;
 static Atom wm_delete_window;
@@ -139,6 +133,7 @@ static XSizeHints sizeHints;
 // program now contains both modes if available
 // some older Xservers don't like XmbDraw...
 static XFontStruct* fontStruct = 0;
+static ColorXGC* colorXGC = 0;
 #ifdef USE_XMB
 static int useXMB = true;
 static XFontSet fontSet;
@@ -317,6 +312,12 @@ static int InitXColors() {
              return 0;*/
         }
     }
+    /* clear backgroud to background color when the windows is obscured
+     * its looks more pleasant before the redraw event does its job */
+    XSetWindowBackground(display, win,
+                         ((Colors[0].blue & 0xff00) << 8)
+                         | ((Colors[0].green & 0xff00))
+                         | ((Colors[0].red & 0xff00) >> 8));
     return 0;
 }
 
@@ -324,8 +325,9 @@ class ColorXGC {
     unsigned long mask;
     XGCValues gcv;
     GC GCs[256];
+    Region reg;
 public:
-    ColorXGC() : mask(GCForeground | GCBackground) {
+    ColorXGC() : mask(GCForeground | GCBackground), reg(0) {
         if (!useXMB) {
             gcv.font = fontStruct->fid;
             mask |= GCFont;
@@ -334,9 +336,7 @@ public:
     }
 
     ~ColorXGC() {
-        for (unsigned i = 0; i < 256; ++i)
-            if (GCs[i])
-                XFreeGC(display, GCs[i]);
+        clear();
     }
 
     GC& GetGC(unsigned i) {
@@ -345,34 +345,26 @@ public:
             gcv.foreground = Colors[i % 16].pixel;
             gcv.background = Colors[i / 16].pixel;
             GCs[i] = XCreateGC(display, win, mask, &gcv);
+            if (reg)
+                XSetRegion(display, GCs[i], reg);
         }
         return GCs[i];
     }
+
+    void SetRegion(Region r) {
+        clear();
+        memset(&GCs, 0, sizeof(GCs));
+        reg = r;
+    }
+
+    void clear() {
+        if (reg)
+            XDestroyRegion(reg);
+        for (unsigned i = 0; i < 256; ++i)
+            if (GCs[i])
+                XFreeGC(display, GCs[i]);
+    }
 };
-
-static ColorXGC* colorXGC = 0;
-
-#if 0
-static int InitXGCs()
-{
-    unsigned int i;
-    unsigned long mask = GCForeground | GCBackground;
-    XGCValues gcv;
-
-    if (!useXMB) {
-        gcv.font = fontStruct->fid;
-        mask |= GCFont;
-    }
-
-    for (i = 0; i < 256; i++) {
-        gcv.foreground = Colors[i % 16].pixel;
-        gcv.background = Colors[(i / 16)].pixel;
-        GCs[i] = XCreateGC(display, win, mask, &gcv);
-    }
-
-    return 0;
-}
-#endif
 
 #ifdef USE_XMB
 static void TryLoadFontset(const char *fs)
@@ -544,7 +536,6 @@ static int SetupXWindow(int argc, char **argv)
 
     if (InitXColors() != 0) return -1;
     colorXGC = new ColorXGC();
-    //if (InitXGCs() != 0) return -1;
 
 #ifdef USE_XICON
     // Set icon using WMHints
@@ -604,7 +595,7 @@ static int SetupXWindow(int argc, char **argv)
     }
     if (i == ICON_COUNT) {
         // Everything OK, can create property
-        CARD32 *iconBuffer = (CARD32 *)malloc(iconBufferSize * sizeof(CARD32));
+        CARD32 *iconBuffer = (CARD32 *)malloc(iconBufferSize * sizeof(CARD32) + 16);
         if (iconBuffer) {
             CARD32 *b = iconBuffer;
             for (i = 0; i < ICON_COUNT; i++) {
@@ -630,7 +621,6 @@ static int SetupXWindow(int argc, char **argv)
         }
     }
 #endif
-
     XResizeWindow(display, win, ScreenCols * FontCX, ScreenRows * FontCY);
     XMapRaised(display, win); // -> Expose
     return 0;
@@ -733,7 +723,6 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
     unsigned char *p, *ps, *c, *ops;
     unsigned int len, x, l, ox, olen, skip;
 
-
     if (X >= (int) ScreenCols || Y >= (int) ScreenRows ||
         X + W > (int) ScreenCols || Y + H > (int) ScreenRows) {
         //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
@@ -775,6 +764,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
                 temp[l++] = *ps;
                 ps += 2;
             }
+
             if (!useXMB)
                 XDrawImageString(display, win, colorXGC->GetGC(attr),
                                  x * FontCX, fontStruct->max_bounds.ascent +
@@ -804,6 +794,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
             DrawCursor(1);
         Cell += W;
     }
+
     return 0;
 }
 
@@ -978,30 +969,39 @@ int ConQueryMouseButtons(int *ButtonCount) {
     return 0;
 }
 
-static void UpdateWindow(int xx, int yy, int ww, int hh) {
 #if 0
-    /* show redrawn area */
-    XFillRectangle(display, win, colorXGC->GetGC(14), xx, yy, ww, hh);
-    //i = XEventsQueued(display, QueuedAfterReading);
-    XEvent e;
-    while (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e))
-        XNextEvent(display, &e);
-    sleep(1);
+static void UpdateWindow1(Region reg) {
+    Refresh = 1;
+    colorXGC->SetRegion(reg);
+
+    //XRectangle rect;
+    //XClipBox(reg, &rect);
+
+    //ConPutBox(rect.x, rect.y, rect.width/FontCX + 1, rect.height/FontCY + 1,
+    //          (PCell) CursorXYPos(rect.x, rect.y));
+    ConPutBox(0, 0, ScreenCols, ScreenRows, (PCell) CursorXYPos(0, 0));
+    colorXGC->SetRegion(0);
+    Refresh = 0;
+}
 #endif
 
-    //fprintf(stderr, "Update\tx:%3d  y:%3d  w:%3d  h:%3d    %dx%d\n", xx, yy, ww, hh, FontCX, FontCY);
-    xx /= FontCX;
-    yy /= FontCY;
-    ww /= FontCX;
-    hh /= FontCY;
-
-    ww += 2;
+static void UpdateWindow(int xx, int yy, int ww, int hh) {
     if (xx + ww > (int)ScreenCols)
         ww = ScreenCols - xx;
 
-    hh += 2;
     if (yy + hh > (int)ScreenRows)
         hh = ScreenRows - yy;
+
+#if 0
+    /* show redrawn area */
+    XFillRectangle(display, win, colorXGC->GetGC(14),
+                   xx * FontCX, yy * FontCY, ww * FontCX, hh * FontCY);
+    XEvent e;
+    while (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e))
+        XNextEvent(display, &e);
+    //sleep(1);
+#endif
+
     //fprintf(stderr, "Refresh\tx:%3d  y:%3d  chars:%3d  lines:%3d\n", xx, yy, ww, hh);
     Refresh = 1;
     PCell p = (PCell) CursorXYPos(xx, yy);
@@ -1021,12 +1021,13 @@ static void ResizeWindow(int ww, int hh) {
         Refresh = 0;
         ConSetSize(ww, hh);
         Refresh = 1;
+#if 1
         if (ox < (int)ScreenCols)
-            UpdateWindow(ox * FontCX, 0,
-                         (ScreenCols - ox) * FontCX, ScreenRows * FontCY);
+            UpdateWindow(ox, 0, (ScreenCols - ox), ScreenRows);
         if (oy < (int)ScreenRows)
-            UpdateWindow(0, oy * FontCY,
-                         ScreenCols * FontCX, (ScreenRows - oy) * FontCY);
+            UpdateWindow(0, oy, ScreenCols, (ScreenRows - oy));
+#endif
+        //UpdateWindow(0, 0, ScreenCols, ScreenRows);
         Refresh = 0;
     }
 }
@@ -1297,23 +1298,69 @@ static void ProcessXEvents(TEvent *Event) {
     case GraphicsExpose:
         {
             XRectangle rect;
-            Region region = XCreateRegion();
+#if 0
+#define MAXREGS 5
+            Region region[MAXREGS];
+            memset(region, 0, sizeof(region));
             //state = XEventsQueued(display, QueuedAfterReading); fprintf(stderr, "Events Expose %d\n", state);
             do {
+                rect.x = (short) event.xexpose.x / FontCX;
+                rect.y = (short) event.xexpose.y / FontCY;
+                rect.width = (short) event.xexpose.width / FontCX + 1;
+                rect.height= (short) event.xexpose.height / FontCY + 1;
+
+                fprintf(stderr, "Region   %hd %hd %hd %hd\n",
+                        rect.x, rect.y, rect.width, rect.height);
+
+                for (int i = 0; i < MAXREGS; ++i)
+                    if (!region[i] || (i == (MAXREGS - 1))
+                        || XRectInRegion(region[i], rect.x, rect.y,
+                                         rect.width, rect.height)) {
+                        if (!region[i])
+                            region[i] = XCreateRegion();
+                        XUnionRectWithRegion(&rect, region[i], region[i]);
+                        fprintf(stderr, "-> region %d\n", i);
+                        break;
+                    }
+
+            } while (XCheckTypedWindowEvent(display, win, event.type, &event));
+
+            for (int j = 0; region[j] && j < MAXREGS; ++j) {
+                XClipBox(region[j], &rect);
+                XDestroyRegion(region[j]);
+                UpdateWindow(rect.x, rect.y, rect.width + 1, rect.height + 1);
+            }
+#else
+            Region region = XCreateRegion();
+            //state = XEventsQueued(display, QueuedAfterReading); fprintf(stderr, "Events Expose %d\n", state);
+            //XFlush(display);
+            //XSync(display, 0);
+            int maxx = ScreenCols * FontCX;
+            int maxy = ScreenRows * FontCY;
+            do {
+                if (event.xexpose.x >= maxx || event.xexpose.y > maxy)
+                    continue;
                 rect.x = (short) event.xexpose.x;
                 rect.y = (short) event.xexpose.y;
                 rect.width = (short) event.xexpose.width;
                 rect.height= (short) event.xexpose.height;
                 XUnionRectWithRegion(&rect, region, region);
             } while (XCheckTypedWindowEvent(display, win, event.type, &event));
+
             XClipBox(region, &rect);
             XDestroyRegion(region);
-            UpdateWindow(rect.x, rect.y, rect.width, rect.height);
+            UpdateWindow(rect.x / FontCX, rect.y / FontCY,
+                         rect.width / FontCX + 2, rect.height / FontCY + 2);
+            //UpdateWindow1(region);
+
+            //fprintf(stderr, "RegionResult %d  %hd %hd %hd %hd\n",  event.type,
+            //        rect.x, rect.y, rect.width, rect.height);
+#endif
         }
         break;
     case ConfigureNotify:
         while (XCheckTypedWindowEvent(display, win, event.type, &event))
-            ;//XSync(display, 0);
+            XSync(display, 0); // wait for final resize
         ResizeWindow(event.xconfigure.width, event.xconfigure.height);
         Event->What = evCommand;
         Event->Msg.Command = cmResize;

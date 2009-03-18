@@ -7,13 +7,14 @@
  *
  */
 
+// UNIX specific routines
+
+#include "fte.h"
+
 #ifdef WINNT
 #include "e_win32.cpp"
 #else
 
-// UNIX specific routines
-
-#include "fte.h"
 
 #include <sys/wait.h>
 #include <signal.h>
@@ -75,6 +76,8 @@ int EView::SysShowHelp(ExState &State, const char *word) {
     // int rc = system(command);
 
     err = FileLoad(0, file, "CATBS", this);
+    BFI((EBuffer*)(this->Model), BFI_ReadOnly) = 1;
+
     unlink(file);
 
     if (err == 0){

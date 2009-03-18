@@ -18,9 +18,13 @@ any of its derivitives.
 #if defined(NO_NEW_CPP_FEATURES)
 #include <iomanip.h>
 #include <iostream.h>
+#include <string.h>
+#include <stdlib.h>
 #else
 #include <iomanip>
 #include <iostream>
+#include <cstring>
+#include <cstdlib>
 
 using namespace std;
 #endif
@@ -33,6 +37,10 @@ using namespace std;
  *********************************************************************/
 
 GlobalLog globalLog;
+
+GlobalLog::GlobalLog(char const* strLogFile) : m_strLogFile(strdup(strLogFile)), m_bOpened(false)
+{
+}
 
 bool GlobalLog::OpenLogFile()
 {
@@ -61,6 +69,11 @@ bool GlobalLog::OpenLogFile()
 // output to the logfile with wrong loglevel.
 static ofstream ofsInvalid;
 
+GlobalLog::~GlobalLog()
+{
+    free(m_strLogFile);
+}
+
 ostream& GlobalLog::operator()()
 {
     // Ensure the current file is open:
@@ -80,6 +93,18 @@ ostream& GlobalLog::operator()()
         << "FTE" << ' ';
     m_ofsLog.fill(cOldFill);
     return m_ofsLog;
+}
+
+void GlobalLog::SetLogFile(char const* strNewLogFile)
+{
+    if (m_strLogFile == NULL ||
+	strNewLogFile == NULL ||
+	strcmp(m_strLogFile,strNewLogFile) != 0)
+    {
+	free((void*)m_strLogFile);
+	m_strLogFile = strNewLogFile == NULL ? (char *)NULL : strdup(strNewLogFile);
+	m_bOpened    = false;
+    }
 }
 
 FunctionLog::FunctionLog(GlobalLog& gl, const char* funcName, unsigned long line)

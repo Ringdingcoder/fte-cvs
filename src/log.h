@@ -84,20 +84,17 @@ ENDFUNCAS_SAFE(HANDLE, unsigned long, GetNextHandle());
 #if defined(NO_NEW_CPP_FEATURES)
 #include <fstream.h>
 #include <assert.h>
-#include <string.h>
-#include <stdlib.h>
 #else
 #include <fstream>
 #include <cassert>
-#include <cstring>
-#include <cstdlib>
 #endif
+
+#ifndef FTE_NO_LOGGING
 
 #if !defined(NO_NEW_CPP_FEATURES)
 using namespace std;
 #endif
 
-#ifndef FTE_NO_LOGGING
 
 /**
  * GlobalLog handles the actual logging.
@@ -117,22 +114,10 @@ private:
 
 public:
     GlobalLog() : m_strLogFile(NULL), m_bOpened(false) {}
-    GlobalLog(char const* strLogFile) : m_strLogFile(strdup(strLogFile)), m_bOpened(false) {}
+    GlobalLog(char const* strLogFile);
 
-    virtual ~GlobalLog() {free(m_strLogFile);}
-
-    void SetLogFile(char const* strNewLogFile)
-    {
-        if (m_strLogFile == NULL ||
-            strNewLogFile == NULL ||
-            strcmp(m_strLogFile,strNewLogFile) != 0)
-        {
-            free((void*)m_strLogFile);
-            m_strLogFile = strNewLogFile == NULL ? (char *)NULL : strdup(strNewLogFile);
-            m_bOpened    = false;
-        }
-    }
-
+    virtual ~GlobalLog();
+    void SetLogFile(char const* strNewLogFile);
     operator bool() { return !m_ofsLog.fail(); }
 
 protected:
@@ -283,8 +268,8 @@ void Log__BinaryData(FunctionLog&, void* bin_data, size_t len, unsigned long lin
 
 #else // defined NO_LOGGING
 
-#define LOG while (0) { cout
-#define ENDLINE endl; }
+#define LOG while (0) { std::cout
+#define ENDLINE std::endl; }
 
 #define STARTFUNC(func) 
 #define ENDFUNCRC(rc) return rc

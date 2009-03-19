@@ -49,8 +49,8 @@ int EView::SysShowHelp(ExState &State, const char *word) {
     if ((pid = fork()) == 0) {
         close(1);
         SYSCALL(err = open(file, O_CREAT | O_WRONLY | O_APPEND, S_IRWXU));
-	if (err != -1) {
-	    close(2);
+        if (err != -1) {
+            close(2);
             //dup(1); // ignore error output
             close(0);
             assert(open("/dev/null", O_RDONLY) == 0);
@@ -60,8 +60,9 @@ int EView::SysShowHelp(ExState &State, const char *word) {
 #endif
                    word, NULL);
             // execlp("/bin/sh", "sh", "-c", command, NULL);
-        }
-        perror("Can't Exec Command\n");
+            perror("Can't exec command");
+        } else
+            perror("Can't open file");
         exit(-1);
     } else if (pid < 0) {
         perror("Can't fork");
@@ -69,7 +70,7 @@ int EView::SysShowHelp(ExState &State, const char *word) {
     }
     SYSCALL(err = waitpid(pid, &status, 0));
     if (err == -1) {
-        perror("Waitpid failed\n");
+        perror("waitpid failed");
         return 0;
     }
 

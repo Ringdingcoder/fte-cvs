@@ -56,8 +56,7 @@ NOEXCEPTION = -fno-rtti -fno-exceptions
 #######################################################################
 # Linux
 UOS      = -DLINUX
-XINCDIR  = -I/usr/include/X11
-XLIBDIR  = 
+#XLIBDIR  = 
 
 #######################################################################
 # HP/UX
@@ -77,7 +76,7 @@ XLIBDIR  =
 #MINCDIR  = -I/usr/include/Motif1.2
 #MLIBDIR  = -L/usr/lib/Motif1.2
 
-SINCDIR   = -I/usr/include/slang
+#SINCDIR   = -I/usr/include/slang
 
 #######################################################################
 # AIX

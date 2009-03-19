@@ -1,14 +1,14 @@
 
-#define MAX_PIPES 4
-
-#include <signal.h>
-#include <sys/wait.h>
 
 #include "sysdep.h"
 #include "c_config.h"
 #include "console.h"
 #include "gui.h"
 
+#include <signal.h>
+#include <sys/wait.h>
+
+#define MAX_PIPES 4
 
 struct GPipe {
     int used;
@@ -25,7 +25,7 @@ static GPipe Pipes[MAX_PIPES] = {
 
 /* If command pipes are open, wait for input on them or
  * external file descriptors if  passed */
-int WaitPipeEvent(TEvent *Event,int WaitTime, int *fds, int nfds)
+int WaitPipeEvent(TEvent *Event, int WaitTime, int *fds, int nfds)
 {
     fd_set readfds;
     struct timeval timeout;

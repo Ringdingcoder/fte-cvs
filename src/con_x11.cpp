@@ -572,9 +572,9 @@ static int SetupXWindow(int argc, char **argv)
             XColor xc;
             char *c = xpm.colorTable[j].c_color;
             if (c == NULL) c = xpm.colorTable[j].g_color;
-            else if (c == NULL) c = xpm.colorTable[j].g4_color;
-            else if (c == NULL) c = xpm.colorTable[j].m_color;
-            else if (c == NULL) c = xpm.colorTable[j].symbolic;
+            if (c == NULL) c = xpm.colorTable[j].g4_color;
+            if (c == NULL) c = xpm.colorTable[j].m_color;
+            if (c == NULL) c = xpm.colorTable[j].symbolic;
             if (c == NULL) {
                 // Unknown color
                 colors[j] = 0;

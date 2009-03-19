@@ -9,6 +9,14 @@
 
 static int use_esc_hack = 0;
 
+#include "sysdep.h"
+#include "c_config.h"
+#include "console.h"
+// #include "slangkbd.h"
+#include "gui.h"
+
+#include <slang/slang.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -20,14 +28,6 @@ static int use_esc_hack = 0;
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/time.h>
-
-#include <slang.h>
-
-#include "sysdep.h"
-#include "c_config.h"
-#include "console.h"
-// #include "slangkbd.h"
-#include "gui.h"
 
 #define MAX_PIPES 4
 //#define PIPE_BUFLEN 4096
@@ -74,7 +74,7 @@ static GPipe Pipes[MAX_PIPES] =
 #define DCH_SLANG_ALEFT      147
 #define DCH_SLANG_ARIGHT     148
 
-static char slang_dchs[] =
+static const char slang_dchs[] =
 {
     'l',
     'k',
@@ -244,7 +244,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
     SLsmg_gotorc(0, 0);
     SLsmg_set_char_set(1);
 
-    SLsmg_write_nchars(slang_dchs, sizeof(slang_dchs));
+    SLsmg_write_nchars(const_cast<char*>(slang_dchs), sizeof(slang_dchs));
 
     SLsmg_gotorc(0, 0);
     SLsmg_read_raw(raw_dchs, sizeof(slang_dchs));
@@ -452,17 +452,15 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell)
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 {
-    PCell line = (PCell) malloc(sizeof(TCell) * W);
-    int i;
+    PCell line = (PCell) alloca(sizeof(TCell) * W);
 
-    for (i = 0; i < W; i++)
+    for (int i = 0; i < W; i++)
 	line[i] = Cell;
-    ConPutLine(X, Y++, W, H, line);
-    free(line);
+
+    ConPutLine(X, Y, W, H, line);
+
     return 0;
 }
-
-
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 {
@@ -569,8 +567,7 @@ int ConQueryMouseButtons(int *ButtonCount)
     return 0;
 }
 
-static TEvent Prev =
-{evNone};
+static TEvent Prev = { evNone };
 
 static const TKeyCode keys_ctrlhack[] =
 {

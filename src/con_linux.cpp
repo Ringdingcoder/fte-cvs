@@ -620,8 +620,8 @@ static int slock_state = 0;
 static char dead_key = 0;
 
 static const struct {
-    unsigned long KeySym;
-    unsigned long KeyCode;
+    unsigned int KeySym;
+    unsigned int KeyCode;
 } KeyTrans[] = {
 { K(KT_FN, K_F1),               kbF1 },
 { K(KT_FN, K_F2),               kbF2 },
@@ -680,7 +680,7 @@ static const struct {
 };
 
 static const struct {
-    unsigned long KeySym;
+    unsigned int KeySym;
     char Diacr;
 } DeadTrans[] = {
 { K_DGRAVE, '`' },

@@ -51,9 +51,23 @@
 #ifdef USE_XTINIT
 #include <X11/Intrinsic.h>
 #endif
+
 #ifdef HPUX
 #include <X11R5/X11/HPkeysym.h>
-#endif
+#else
+#ifdef HAVE_HPKEYSYM
+#include <HPkeysym.h>
+#else
+#define XK_ClearLine            0x1000FF6F
+#define XK_InsertLine           0x1000FF70
+#define XK_DeleteLine           0x1000FF71
+#define XK_InsertChar           0x1000FF72
+#define XK_DeleteChar           0x1000FF73
+#define XK_BackTab              0x1000FF74
+#define XK_KP_BackTab           0x1000FF75
+#endif // HPKEYSYM
+#endif // HPUX
+
 #ifdef WINHCLX
 #include <X11/XlibXtra.h>    /* HCL - HCLXlibInit */
 #endif
@@ -95,9 +109,10 @@ static GPipe Pipes[MAX_PIPES] = {
     { 0 },
 };
 
-static const int MouseAutoDelay = 40;
-static const int MouseAutoRepeat = 200;
-static const int MouseMultiClick = 300;
+// times in miliseconds
+static const unsigned int MouseAutoDelay = 40;
+static const unsigned int MouseAutoRepeat = 200;
+static const unsigned int MouseMultiClick = 300;
 
 static int setUserPosition = 0;
 static int initX = 0, initY = 0;
@@ -109,7 +124,7 @@ static int CursorVisible = 1;
 static int CursorStart, CursorEnd;
 static unsigned long CursorLastTime;
 // Cursor flashing interval, in msecs
-static unsigned CursorFlashInterval = 300;
+static const unsigned int CursorFlashInterval = 300;
 static unsigned char *ScreenBuffer = 0;
 static int Refresh = 0;
 
@@ -129,14 +144,14 @@ static Atom proptype_utf8_string;
 static Atom proptype_incr;
 static Window win;
 static Atom prop_selection;
-static XSizeHints sizeHints;
+static XSizeHints size_hints;
 // program now contains both modes if available
 // some older Xservers don't like XmbDraw...
-static XFontStruct* fontStruct = 0;
+static XFontStruct* font_struct = 0;
 static ColorXGC* colorXGC = 0;
 #ifdef USE_XMB
 static int useXMB = true;
-static XFontSet fontSet;
+static XFontSet font_set;
 static int FontCYD;
 #else
 static int useXMB = 0;
@@ -168,14 +183,14 @@ static IncrementalSelectionInfo *incrementalSelections = NULL;
 
 static Bool gotXError;
 
-static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned char *data, int len, Bool privateData);
+static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned char *data, size_t len, Bool privateData);
 
 static int ErrorHandler(Display *, XErrorEvent *ee) {
     gotXError = True;
     return 1;
 }
 
-static Atom GetXClip (int clipboard) {
+static Atom GetXClip(int clipboard) {
     if (clipboard==1) {
         return XA_PRIMARY;
     }
@@ -185,7 +200,7 @@ static Atom GetXClip (int clipboard) {
     return XA_CLIPBOARD;
 }
 
-static int GetFTEClip (Atom clip) {
+static int GetFTEClip(Atom clip) {
     if (clip==XA_CLIPBOARD) {
         return 0;
     }
@@ -329,7 +344,7 @@ class ColorXGC {
 public:
     ColorXGC() : mask(GCForeground | GCBackground), reg(0) {
         if (!useXMB) {
-            gcv.font = fontStruct->fid;
+            gcv.font = font_struct->fid;
             mask |= GCFont;
         }
         memset(&GCs, 0, sizeof(GCs));
@@ -373,15 +388,15 @@ static void TryLoadFontset(const char *fs)
     char **miss = NULL;
     int nMiss = 0;
 
-    if (fontSet)
+    if (font_set)
         return;
 
     if (!fs || !*fs)
         return;
 
-    fontSet = XCreateFontSet(display, fs, &miss, &nMiss, &def);
+    font_set = XCreateFontSet(display, fs, &miss, &nMiss, &def);
 
-    if (fontSet == NULL) {
+    if (font_set == NULL) {
         fprintf(stderr, "XFTE Warning: unable to open font \"%s\":\n"
                 " Missing count: %d\n", fs, nMiss);
         for(int i = 0; i < nMiss; i++)
@@ -399,7 +414,7 @@ static int InitXFonts(void)
         fs = WindowFont;
 
     if (!useXMB) {
-        fontStruct = NULL;
+        font_struct = NULL;
 
         if (fs != NULL) {
             char *s = 0;
@@ -407,16 +422,16 @@ static int InitXFonts(void)
             s = strchr(fs, ',');
             if (s != NULL)
                 *s = 0;
-            fontStruct = XLoadQueryFont(display, fs);
+            font_struct = XLoadQueryFont(display, fs);
         }
-        if (fontStruct == NULL)
-            fontStruct = XLoadQueryFont(display, "8x13");
-        if (fontStruct == NULL)
-            fontStruct = XLoadQueryFont(display, "fixed");
-        if (fontStruct == NULL)
+        if (font_struct == NULL)
+            font_struct = XLoadQueryFont(display, "8x13");
+        if (font_struct == NULL)
+            font_struct = XLoadQueryFont(display, "fixed");
+        if (font_struct == NULL)
             return -1;
-        FontCX = fontStruct->max_bounds.width;
-        FontCY = fontStruct->max_bounds.ascent + fontStruct->max_bounds.descent;
+        FontCX = font_struct->max_bounds.width;
+        FontCY = font_struct->max_bounds.ascent + font_struct->max_bounds.descent;
     }
 #ifdef USE_XMB
     else {
@@ -425,10 +440,10 @@ static int InitXFonts(void)
         TryLoadFontset("-misc-*-r-normal-*");
         TryLoadFontset("*fixed*");
 
-        if (fontSet == NULL)
+        if (font_set == NULL)
             return -1;
 
-        XFontSetExtents *xE = XExtentsOfFontSet(fontSet);
+        XFontSetExtents *xE = XExtentsOfFontSet(font_set);
 
         FontCX = xE->max_logical_extent.width;
         FontCY = xE->max_logical_extent.height;
@@ -466,7 +481,7 @@ static int SetupXWindow(int argc, char **argv)
 
     XSetWindowAttributes setWindowAttributes;
     setWindowAttributes.bit_gravity =
-        sizeHints.win_gravity = NorthWestGravity;
+        size_hints.win_gravity = NorthWestGravity;
 
     // this is correct behavior
     if (initX < 0)
@@ -515,23 +530,23 @@ static int SetupXWindow(int argc, char **argv)
     proptype_incr = XInternAtom(display, "INCR", False);
     assert(proptype_incr != None);
 
-    sizeHints.flags = PResizeInc | PMinSize | PBaseSize | PWinGravity;
-    sizeHints.width_inc = FontCX;
-    sizeHints.height_inc = FontCY;
-    sizeHints.min_width = MIN_SCRWIDTH * FontCX;
-    sizeHints.min_height = MIN_SCRHEIGHT * FontCY;
-    sizeHints.base_width = 0;
-    sizeHints.base_height = 0;
+    size_hints.flags = PResizeInc | PMinSize | PBaseSize | PWinGravity;
+    size_hints.width_inc = FontCX;
+    size_hints.height_inc = FontCY;
+    size_hints.min_width = MIN_SCRWIDTH * FontCX;
+    size_hints.min_height = MIN_SCRHEIGHT * FontCY;
+    size_hints.base_width = 0;
+    size_hints.base_height = 0;
     if (setUserPosition)
-        sizeHints.flags |= USPosition;
+        size_hints.flags |= USPosition;
 
-    XClassHint classHints;
-    classHints.res_name = res_name;
-    classHints.res_class = res_class;
-    XSetClassHint(display, win, &classHints);
+    XClassHint class_hints;
+    class_hints.res_name = res_name;
+    class_hints.res_class = res_class;
+    XSetClassHint(display, win, &class_hints);
 
     XSetStandardProperties(display, win, winTitle, winTitle, 0, NULL, 0, 0);
-    XSetWMNormalHints(display, win, &sizeHints);
+    XSetWMNormalHints(display, win, &size_hints);
     XSetWMProtocols(display, win, &wm_delete_window, 1);
 
     if (InitXColors() != 0) return -1;
@@ -697,11 +712,11 @@ void DrawCursor(int Show) {
         if (!useXMB)
             XDrawImageString(display, win, colorXGC->GetGC(attr),
                              CursorX * FontCX,
-                             fontStruct->max_bounds.ascent + CursorY * FontCY,
+                             font_struct->max_bounds.ascent + CursorY * FontCY,
                              (char *)p, 1);
 #ifdef USE_XMB
         else
-            XmbDrawImageString(display, win, fontSet, colorXGC->GetGC(attr),
+            XmbDrawImageString(display, win, font_set, colorXGC->GetGC(attr),
                                CursorX * FontCX, FontCYD + CursorY * FontCY,
                                (char *)p, 1);
 #endif
@@ -767,12 +782,12 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
 
             if (!useXMB)
                 XDrawImageString(display, win, colorXGC->GetGC(attr),
-                                 x * FontCX, fontStruct->max_bounds.ascent +
+                                 x * FontCX, font_struct->max_bounds.ascent +
                                  (Y + i) * FontCY,
                                  (char *)temp, l);
 #ifdef USE_XMB
             else
-                XmbDrawImageString(display, win, fontSet,
+                XmbDrawImageString(display, win, font_set,
                                    colorXGC->GetGC(attr),
                                    x * FontCX, FontCYD + (Y + i) * FontCY,
                                    (char *)temp, l);
@@ -1102,26 +1117,24 @@ static const struct {
     { XK_KP_8,           '8' | kfGray },
     { XK_KP_9,           '9' | kfGray },
     { XK_KP_Decimal,     '.' | kfGray },
-    { 0x1000FF6F,        kbDel | kfShift | kfGray },
-    { 0x1000FF70,        kbIns | kfCtrl | kfGray },
-    { 0x1000FF71,        kbIns | kfShift | kfGray },
-    { 0x1000FF72,        kbIns | kfGray },
-    { 0x1000FF73,        kbDel | kfGray },
-    { 0x1000FF74,        kbTab | kfShift },
-    { 0x1000FF75,        kbTab | kfShift },
+    // HP keysyms
+    { XK_ClearLine,      kbDel | kfShift | kfGray },
+    { XK_InsertLine,     kbIns | kfCtrl | kfGray },
+    { XK_DeleteLine,     kbIns | kfShift | kfGray },
+    { XK_InsertChar,     kbIns | kfGray },
+    { XK_DeleteChar,     kbDel | kfGray },
+    { XK_BackTab,        kbTab | kfShift },
+    { XK_KP_BackTab,     kbTab | kfShift },
     { 0,                 0 }
 };
 
 static void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char */*keyname1*/, int etype, int state, TEvent *Event) {
     unsigned int myState = 0;
 
-    Event->What = evNone;
-
     switch (etype) {
     case KeyPress:   Event->What = evKeyDown; break;
     case KeyRelease: Event->What = evKeyUp; break;
-    default:
-        return ;
+    default:         Event->What = evNone; return;
     }
 
     if (state & ShiftMask) myState |= kfShift;
@@ -1168,7 +1181,6 @@ static void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char *
     //printf("Unknown key: %ld %s %d %d\n", key, keyname, etype, state);
     Event->What = evNone;
 }
-
 
 static TEvent LastMouseEvent = { evNone };
 
@@ -1300,6 +1312,8 @@ static void ProcessXEvents(TEvent *Event) {
             XRectangle rect;
 #if 0
 #define MAXREGS 5
+            // idea here is to create limited set of intersection free bounding boxes
+            // though it would need some more thing about combining them together smartly
             Region region[MAXREGS];
             memset(region, 0, sizeof(region));
             //state = XEventsQueued(display, QueuedAfterReading); fprintf(stderr, "Events Expose %d\n", state);
@@ -1335,26 +1349,25 @@ static void ProcessXEvents(TEvent *Event) {
             //state = XEventsQueued(display, QueuedAfterReading); fprintf(stderr, "Events Expose %d\n", state);
             //XFlush(display);
             //XSync(display, 0);
-            int maxx = ScreenCols * FontCX;
-            int maxy = ScreenRows * FontCY;
+            const int maxx = ScreenCols * FontCX;
+            const int maxy = ScreenRows * FontCY;
             do {
-                if (event.xexpose.x >= maxx || event.xexpose.y > maxy)
-                    continue;
-                rect.x = (short) event.xexpose.x;
-                rect.y = (short) event.xexpose.y;
-                rect.width = (short) event.xexpose.width;
-                rect.height= (short) event.xexpose.height;
-                XUnionRectWithRegion(&rect, region, region);
+                if (event.xexpose.x < maxx && event.xexpose.y < maxy) {
+                    rect.x = (short) event.xexpose.x;
+                    rect.y = (short) event.xexpose.y;
+                    rect.width = (short) event.xexpose.width;
+                    rect.height= (short) event.xexpose.height;
+                    XUnionRectWithRegion(&rect, region, region);
+                }
             } while (XCheckTypedWindowEvent(display, win, event.type, &event));
 
+            // get clipping bounding box for all Exposed areas
+            // this seems to be much faster the using clipped regions for drawing
             XClipBox(region, &rect);
             XDestroyRegion(region);
             UpdateWindow(rect.x / FontCX, rect.y / FontCY,
                          rect.width / FontCX + 2, rect.height / FontCY + 2);
             //UpdateWindow1(region);
-
-            //fprintf(stderr, "RegionResult %d  %hd %hd %hd %hd\n",  event.type,
-            //        rect.x, rect.y, rect.width, rect.height);
 #endif
         }
         break;
@@ -1565,10 +1578,10 @@ static void FlashCursor ()
 static TEvent Pending = { evNone };
 
 int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
+    static TEvent Queued = { evNone };
     fd_set read_fds;
     struct timeval timeout;
     int rc;
-    static TEvent Queued = { evNone };
 
     FlashCursor();
 
@@ -1634,7 +1647,7 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
             }
         maxfd++;
 
-        if ((WaitTime == -1 || WaitTime > MouseAutoDelay)
+        if ((WaitTime == -1 || WaitTime > (int)MouseAutoDelay)
             && (LastMouseEvent.What == evMouseAuto) && (EventMask & evMouse)) {
             timeout.tv_sec = 0;
             timeout.tv_usec = MouseAutoDelay * 1000;
@@ -1643,7 +1656,7 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
                 *Event = LastMouseEvent;
                 return 0;
             }
-        } else if ((WaitTime == -1 || WaitTime > MouseAutoRepeat)
+        } else if ((WaitTime == -1 || WaitTime > (int)MouseAutoRepeat)
                    && (LastMouseEvent.What == evMouseDown || LastMouseEvent.What == evMouseMove)
                    && (LastMouseEvent.Mouse.Buttons) && (EventMask & evMouse)) {
             timeout.tv_sec = 0;
@@ -1712,9 +1725,9 @@ static int WaitForXEvent(int eventType, XEvent *event) {
     return 1;
 }
 
-static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned char *data, int len, Bool privateData) {
+static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned char *data, size_t len, Bool privateData) {
     int (*oldHandler)(Display *, XErrorEvent *);
-    int i, send;
+    size_t i, send;
 
     // Install error handler
     oldHandler = XSetErrorHandler(ErrorHandler);
@@ -1726,7 +1739,7 @@ static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned cha
             send = len - i;
             send = send < SELECTION_XFER_LIMIT ? send : SELECTION_XFER_LIMIT;
             XChangeProperty(display, notify->xselection.requestor, property,
-                            type, 8, PropModeReplace, data + i, send);
+                            type, 8, PropModeReplace, data + i, (int)send);
         }
         if (!gotXError) notify->xselection.property = property;
         XSendEvent(display, notify->xselection.requestor, False, 0L, notify);
@@ -1735,7 +1748,7 @@ static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned cha
         IncrementalSelectionInfo *isi = new IncrementalSelectionInfo;
 
         isi->next = incrementalSelections;
-        isi->len = len;
+        isi->len = (int)len;
         isi->pos = 0;
         isi->requestor = notify->xselection.requestor;
         isi->property = property;
@@ -1780,7 +1793,7 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
     XEvent event;
     Atom actual_type;
     int actual_format, retval;
-    unsigned long nitems, bytes_after;
+    size_t nitems, bytes_after;
     unsigned char *d;
 
     // Make sure property does not exist
@@ -1837,7 +1850,7 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
                 // Data received and have buffer
                 if (nitems > (unsigned int)(buffer_len - pos)) {
                     // More data than expected - realloc buffer
-                    int new_len = pos + nitems;
+                    size_t new_len = pos + nitems;
                     unsigned char *new_buffer = (unsigned char *)malloc(new_len);
                     if (new_buffer) memcpy(new_buffer, buffer, buffer_len);
                     free(buffer);
@@ -1878,7 +1891,7 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
         // propagated from INCR branch above - they are allocated by malloc() but get freed
         // by XFree() after Xmb conversion below.
         *data = (char *)d;
-        *len = nitems;
+        *len = (int)nitems;
     } else {
 #if USE_XMB
         // Convert data to char * string
@@ -1982,7 +1995,8 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
     for (int c = 1; c < argc; c++) {
         if (strcmp(argv[c], "-font") == 0) {
             if (c + 1 < argc) {
-                strcpy(WindowFont, argv[++c]);
+                strncpy(WindowFont, argv[++c], 63);// ugly
+                WindowFont[63] = '\0'; // ensure termination
             }
         } else if (strcmp(argv[c], "-geometry") == 0) {
             if (c + 1 < argc) {
@@ -2007,8 +2021,8 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
             useI18n = 0;
         else if (strcmp(argv[c], "-name") == 0) {
             if (c + 1 < argc) {
-                strncpy (res_name, argv [++c], sizeof (res_name));
-                res_name[sizeof(res_name)-1] = '\0'; // ensure termination
+                strncpy(res_name, argv [++c], sizeof(res_name));
+                res_name[sizeof(res_name) - 1] = '\0'; // ensure termination
             }
         } else
             argv[o++] = argv[c];
@@ -2030,11 +2044,11 @@ GUI::~GUI() {
     delete colorXGC;
     colorXGC = 0;
 #ifdef USE_XMB
-    if (fontSet)
-        XFreeFontSet(display, fontSet);
+    if (font_set)
+        XFreeFontSet(display, font_set);
 #endif
-    if (fontStruct)
-        XFreeFont(display, fontStruct);
+    if (font_struct)
+        XFreeFont(display, font_struct);
     XDestroyWindow(display, win);
     XCloseDisplay(display);
 

@@ -1,17 +1,24 @@
-.TH FTE 1 
+.TH FTE 1
 .SH NAME
 fte \- Text editor
 .SH SYNOPSIS
 .B fte
 .I " [[options] files ...]"
 .BR
+
 .B xfte
 .I "[[options] files ...]"
 .BR
-.B vfte 
+
+.B vfte
 .I "[[options] files ...]"
 .BR
-.B nfte 
+
+.B nfte
+.I "[[options] files ...]"
+.BR
+
+.B sfte
 .I "[[options] files ...]"
 .BR
 .\" .I "[[options] files ...]"
@@ -19,10 +26,7 @@ fte \- Text editor
 This manual page documents briefly the
 .BR "fte" .
 
-This manual page was written for the Debian GNU/Linux distribution
-(but may be used by others), because the original program does not
-have a manual page.
-Instead, it has documentation in html format; see below.
+Some detailed documentation is available html format, see below.
 .PP
 .B fte
 is a powerful text editor which closely resembles Borlands programming
@@ -35,7 +39,7 @@ most of Debian GNU/Linux apps.
 .B \-h \-? \--help
 Help on command line options.
 .TP
-.B \-! 
+.B \-!
 Ignore any external configuration file and use internal configuration.
 .TP
 .BI \-l <line>[,<column>]
@@ -84,7 +88,7 @@ Select XWindow font to use with \fBxfte\fP. See \fBVIOFONT\fP also.
 This is list of variable which might change behavior of some \
 internals of \fBfte\fP.
 .TP
-\fBVIOFONT\fP \- select font used by xfte 
+\fBVIOFONT\fP \- select font used by xfte
 .TP
 \fBISOCONSOLE\fP \- when set, vfte is usign ascii symbols to draw tables. \
 This is useful when iso latin charset is used on console.

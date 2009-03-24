@@ -29,9 +29,9 @@
 
 #define slen(s) ((s) ? (strlen(s) + 1) : 0)
 
-typedef struct {
+struct ExMacro {
     char *Name;
-} ExMacro;
+};
 
 static unsigned int CMacros = 0;
 static ExMacro *Macros = 0;
@@ -317,10 +317,10 @@ int main(int argc, char **argv) {
 #define COLORIZE_FLG(x) { #x, COL_##x }
 #define HILIT_CLR(x) { #x, CLR_##x }
 
-typedef struct _OrdLookup {
+struct OrdLookup {
     const char *Name;
     int num;
-} OrdLookup;
+};
 
 static const OrdLookup mode_num[] = {
 MODE_BFI(AutoIndent),
@@ -854,7 +854,7 @@ static int CmdNum(const char *Cmd) {
     return 0; // Nop
 }
 
-int NewCommand(const char *Name) {
+static int NewCommand(const char *Name) {
     if (Name == 0)
         Name = "";
     Macros = (ExMacro *) realloc(Macros, sizeof(ExMacro) * (1 + CMacros));

@@ -64,7 +64,7 @@ static GPipe Pipes[MAX_PIPES] = {
 class QEText: public QWidget {
     Q_OBJECT
 public:
-    GViewPeer   *view;
+    GViewPeer *view;
     
     QEText(GViewPeer *peer, QWidget *parent = 0, const char *name = 0);
     virtual ~QEText();
@@ -215,12 +215,12 @@ static int cyChar = 1;
 //static int fmAscent;
 static int FinalExit = 0;
 
-TEvent EventBuf = { evNone };
+static TEvent EventBuf = { evNone };
 
-typedef struct _qEvent {
+struct qEvent {
     TEvent event;
-    struct _qEvent *next;
-} qEvent;
+    struct qEvent *next;
+};
 
 TEvent NextEvent = { evNone };
 static QColor colors[16] = {
@@ -415,6 +415,7 @@ QEText::QEText(GViewPeer *peer, QWidget *parent, const char *name): QWidget(pare
 
 //    setAcceptFocus(TRUE);
     setMinimumSize(100, 80);
+    DEBUGX(("QEText %p\n", this));
 }
 
 QEText::~QEText() {
@@ -423,7 +424,7 @@ QEText::~QEText() {
 void QEText::resizeEvent(QResizeEvent *qe) {
     int X, Y;
 
-    DEBUGX(("A: %X\n", qe));
+    DEBUGX(("A: %p\n", qe));
     QWidget::resizeEvent(qe);
     DEBUGX(("B\n"));
     
@@ -443,6 +444,7 @@ void QEText::resizeEvent(QResizeEvent *qe) {
 }
 
 void QEText::paintEvent(QPaintEvent *qe) {
+    DEBUGX(("Paint %p\n", qe));
     view->UpdateWindow(qe->rect().x(),
                        qe->rect().y(),
                        qe->rect().width(),
@@ -521,7 +523,7 @@ void QEText::mouseReleaseEvent(QMouseEvent *qe) {
     handleMouse(qe);
 }
 
-static struct {
+static const struct {
     unsigned int q_code;
     TKeyCode keyCode;
 } key_table[] = {
@@ -611,7 +613,7 @@ void QEText::handleKeyPressEvent(QKeyEvent *qe) {
         return;
     }
 
-    DEBUGX(("key: %d, flags:%d\n", keyCode, keyFlags));
+    DEBUGX(("key: %d, flags:%d\n", (int)keyCode, (int)keyFlags));
 
     NextEvent.What = evKeyDown;
     NextEvent.Key.View = view->View;
@@ -685,7 +687,7 @@ void QEFrame::resizeEvent(QResizeEvent *qe) {
 }
 
 void QEFrame::closeEvent(QCloseEvent *qe) {
-    DEBUGX(("Close Selected: %d\n", id));
+    DEBUGX(("Close Selected: %p\n", qe));
     NextEvent.What = evCommand;
     NextEvent.Msg.View = frame->Frame->Active;
     NextEvent.Msg.Command = cmClose;
@@ -1930,7 +1932,7 @@ void GUI::ProcessEvent() {
     while (doLoop && qHasEvent()) {
         NextEvent.What = evNone;
         qGetEvent(NextEvent);
-        DEBUGX(("Got event: %d\n", NextEvent.What));
+        DEBUGX(("Got event: %d\n", (int)NextEvent.What));
         if (NextEvent.What == evMouseDown) {
             DEBUGX(("x:%d, y:%d, buttons:%d\n",
                     NextEvent.Mouse.X,
@@ -2033,9 +2035,9 @@ int GUI::SetPipeView(int id, EModel *notify) {
         return -1;
     if (Pipes[id].used == 0)
         return -1;
-    DEBUGX(("Pipe View: %d %08X\n", id, notify));
+    DEBUGX(("Pipe View: %d %p\n", id, notify));
     Pipes[id].notify = notify;
-    if (notify != Pipes[id].notify) 
+    if (notify != Pipes[id].notify) {
         if (notify) {
             //Pipes[id].input =
             //    XtAppAddInput(AppContext, Pipes[id].fd, XtInputReadMask, PipeCallback, &Pipes[id]);
@@ -2044,12 +2046,14 @@ int GUI::SetPipeView(int id, EModel *notify) {
             //    XtRemoveInput(Pipes[id].input);
           //      Pipes[id].input = 0;
             //}
-        }
+	}
+    }
+
     return 0;
 }
 
 ssize_t GUI::ReadPipe(int id, void *buffer, int len) {
-    int rc;
+    ssize_t rc;
     
     if (id < 0 || id > MAX_PIPES)
         return -1;
@@ -2109,7 +2113,7 @@ int GetXSelection(int *len, char **data, int clipboard) {
     if (text == 0)
         return -1;
 
-    *len = strlen(text);
+    *len = (int)strlen(text);
     *data = (char *)malloc(*len);
     if (*data == 0)
         return -1;

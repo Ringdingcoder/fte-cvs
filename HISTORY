@@ -2,13 +2,21 @@ Revision history
 -----------------------------------------------------------------------
 0.50.X -- <fill month here> 2006
 
+0.50.2 -- March 2009
+  - Cleanup for new Debian package
+  - Various 64bit compilation and gcc cleanup
+  - Fixing bugs in pipe handling
+  - Speeding XWindow Expose refresh and cleaning a bit this code
+  - Adding more const
+  - Reusing Pipe routines across unix targets
+
 0.50.1 -- September 2006
   - Cleanup and Debian package update
 
 0.50.0 -- <fill month here> 2003
   - Many internal and some external changes
   - Some bugs fixed in this release
-  + cfte: added -p[reprocess] command line paramter, it can be used to debug configuration files.
+  + cfte: added -p[reprocess] command line parameter, it can be used to debug configuration files.
   ! X11: XShellCommand is used to specify used shell under X11. $TERM is no longer used as shell.
 
 0.46
@@ -43,10 +51,10 @@ Revision history
   + first win32 console version.
 
 0.44 -- November 28
-  
+
 0.44b6 -- November 1996
   ! Bug fixes in Linux pipe handling.
-  ! Bug fixes in OS/2 PM version. 
+  ! Bug fixes in OS/2 PM version.
   ! Fixed repainting bugs in Messages view.
 
 0.44b5 -- November 1996
@@ -83,7 +91,7 @@ Revision history
   + ...
 
 0.43 -- 15 July 1996
-  ! Minor bug fixes. 
+  ! Minor bug fixes.
   ! Upper/Lower block in column mode could cause a crash.
   ! CompleteWord command occasionally inserted garbage when previous
     match was found in the same line.
@@ -178,7 +186,7 @@ Revision history
   - When CursorTroughTabs was set to 0, certain movement commands would
     behave incorrectly.
   + S-Ins will perform Paste operation in prompts.
-  + New Command: WinResize <delta> and WinClose. Windows can be also 
+  + New Command: WinResize <delta> and WinClose. Windows can be also
     resized by a mouse.
 
 0.36 -- Oct 95
@@ -193,9 +201,9 @@ Revision history
 
 0.34 -- 1995/10/15
    Minor fixes & docs updates...
-  
+
 0.33 -- 1995/10/01
-    
+
   ! SIGBREAK handler now works again.
   ! Fixes in C/C++ smart indentation (if in switch, ...)
   + Pascal highlighting mode.
@@ -208,10 +216,10 @@ Revision history
     FoldToggleOpenClose, MoveFoldPrev, MoveFoldNext.
   + New settings: SaveFolds, CommentStart, CommentEnd.
   + Word characters can be configured using WordChars setting.
-    
-  
+
+
 0.32 -- 1995/08/15
-    
+
   + New search routines. (Find, FindReplace, FindRepeat,
     FindRepeatReverse, FindRepeatOnce, ...)
   + Block-local searches.
@@ -221,26 +229,26 @@ Revision history
   + Bookmarks! New commands: PlaceBookmark, GotoBookmark, RemoveBookmark
   + Files can now be saved and closed from window list.
   + Optimized CMode indentation. Also more configurable.
-    
-  
+
+
 0.31 -- 1995/07/31
-    
+
   ! Bug fixed in undo/redo when UndoLimit reached.
-    
+
 0.30 -- 1995/07/30
-    
+
   + Folding support.
   + New commands: FoldLine, UnfoldLine, UnfoldNextLine, UnfoldAll, ClearFolds, FoldIndent, FoldRegexp, FoldBlock, UnfoldBlock, FoldBlockRegexp
   ! BackSpace at eof when TrimLine is enabled will not abort.
   + Incremental search (IncrementalSearch).
   + PgUp/PgDn on a file prompt will show a list of files.
   + New command: CompleteWord
-    
-  
+
+
  0.29
-  
+
    1995/07/20
-    
+
      Regexps can now be case insensitive (\C,\c).
      BlockRead/BlockReadColumn/BlockWrite commands.
      Block marking can now be undone.
@@ -248,42 +256,42 @@ Revision history
      Multiple compile-regex statements can be specified simultaneously
      Minor bug-fixes in regexps ([\x00-\xFF] now works).
      Filter for filename completion.
-     New commands: SwitchTo ChangeKeys ChangeFlags ShowMenu 
+     New commands: SwitchTo ChangeKeys ChangeFlags ShowMenu
      New options: CompletionFilter DefaultModeName
-    
-  
+
+
  0.28
-  
+
    1995/07/08
-    
+
      - Needs to have documentation updated.
      Mostly rewritten PERL highlighting. Works much better now.
      Completely new config file syntax.
      New commands: ASCIITable, LoadFileInMode
      CMode indentation should now work for Perl (close enough).
      Highlighting for ADA and Email messages.
-    
-  
+
+
  0.27
-  
+
    1995/06/19
-    
+
      Minor bug fixes.
-    
-  
+
+
  0.26
-  
+
    1995/06/18
-    
+
      New commands: {Char,Line,Block}Case{Up,Down,Toggle}
      New setting: LoadAfterQuit -- if set to 1, editor will prompt to load another file before exiting.
      New setting: ShowScrollBar {0,1}.
-    
-  
+
+
  0.25
-  
+
    1995/06/12
-    
+
      Minor bug fix in REXX highlighting ("\"", ...)
      Bug fixes in word wrap.
      BlockCut now doesn't move the cursor to the block beginning.
@@ -292,20 +300,20 @@ Revision history
      Found text is now highlighted.
      New CMode setting: C.BraceOfs and command: ChangeCBraceOfs
      New commands: MovePrevPos, SavePos, MoveSavedPos, MoveSavedPosCol, MoveSavedPosRow
-    
-  
+
+
  0.24
-  
+
    1995/06/06
-    
+
      When checking for file modification time of last change is now used instead of the time of last access.
      Wildcard support for file loading.
-    
-  
+
+
  0.23
-  
+
    1995/06/04
-    
+
      Ctrl+C and Ctrl+Break are now disabled.
      Ctrl+S and Ctrl+C keys are now again recognised in Windowed mode.
      Fixed problem when spawning a subprocess in Windowed mode.
@@ -318,22 +326,22 @@ Revision history
      More than 4 commands can be bound to a key (actually this worked since 0.18, but was not documented).
      New command: FileReload.
      Editor will now check if file has changed on disk before saving it.
-    
-  
+
+
  0.22
-  
+
    1995/05/28
-    
+
      But fix in regular expressions (nested +#*@).
      Changes in regular expression syntax.
      New function: ListRoutines. Shows functions in current buffer.
      New setting: RoutineRx
-    
-  
+
+
  0.21
-  
+
    1995/05/21
-    
+
      REXX mode smart indentation.
      KillWord & KillWordPrev commands now actually work.
      Pressing Ctrl+Enter to begin Search will toggle case sensitivity of search.
@@ -341,31 +349,31 @@ Revision history
      New option 'ShowMarkers' and command 'ToggleShowMarkers'. Shows end of line and end of file markers.
      Bug fix in PERL highlighting (caused lockups)
      Bug fixes and improvements in regular expressions.
-    
-  
+
+
  0.20
-  
+
    1995/05/18
-    
+
      Major bug fixes in word wrap.
      New commands: MovePrevTab, MoveNextTab.
      Bug fixes in BlockIndent and BlockUnindent (stream/line mode)
-    
-  
+
+
  0.19
-  
+
    1995/05/16
-    
+
      Function names in REXX are now highlighted.
      WordWrap can be set to 0 - disabled, 1 - wrap line at right margin and 2 - wrap paragraph continously. Function ToggleAutoWrap renamed to ToggleWordWrap.
      New way to set left/right margin (SetLeftMargin, SetLeftMargin)
      Minor fix in PERL highlighting.
-    
-  
+
+
  0.18
-  
+
    1995/05/13
-    
+
      PERL Syntax Higlighting.
      Memory allocation problem in tab expansion.
      Wordwrap now strips all spaces on beginning of line (except on the first line of the paragraph).
@@ -374,21 +382,21 @@ Revision history
      New commands: ToggleAutoIndent, ToggleExpandTabs, ToggleShowTabs, ToggleUndo, ToggleReadOnly, ToggleKeepBackups, ToggleMatchCase, ToggleBackSpKillTab,
          ToggleDeleteKillTab, ToggleSpaceTabs, ToggleIndentWithTabs, ToggleBackSpUnindents, ToggleAutoWrap.
      New commands: WinRefresh, ChangeTabSize, ChangeCIndent, ChangeLeftMargin, ChangeRightMargin.
-     
-  
+
+
  0.17
-  
+
    1995/05/10
-    
+
      Minor fix in word-wrap.
      Screen repaint problems when shelling out fixed.
      Blinking disabled for full-screen, high-intensity background colors can now be used.
-    
-  
+
+
  0.16
-  
+
    1995/05/06
-   
+
     Minor speedups in screen handling and highlighting.
     Regular expressions can now match start and end of words using .
     Regexp replace can paste entire matched string using &.
@@ -396,109 +404,107 @@ Revision history
     New commands: MoveLastNonWhite, MovePrevEqualIndent and MoveNextEqualIndent, LineDuplicate, InsPrevLineChar, InsPrevLineToEol.
     New color config. 'C.Function' for functions in C highlighting mode.
     Improved CMode hilit, preprocessor hiliting improved (strings, comments, numbers)
-   
-  
+
+
  0.15
-  
+
    1995/04/29
-    
+
      Speed improvement in CMode auto indent.
      Delete command can now delete full tabs instead of converting them to spaces.
      When closing a modified file, editor prompts you to save it.
      Automatic indentation can now use tabs.
      Manual and automatic wordwrap.
-    
+
    1995/04/24
-    
+
      Backspace can now delete full tabs instead of converting them to spaces (See BackSpace and KillBackTab).
      Backspace can unindent to previous indentation level.
-    
+
    1995/04/20
-    
+
      Basic mouse support.
-    
+
    1995/04/12
-    
+
      Configurable colors/keywords in C/REXX mode.
-    
-  
+
+
  0.14
-  
+
    1995/04/07
-    
+
      Characters could not be entered using AltGr on international keyboards.
      Immediatelly doing an undo on a newly loaded file deleted the first line.
      Ascii characters >= 128 can be now entered without quote command (C-Q).
      IPF Syntax highlighting.
-    
-  
+
+
  0.13
-  
+
    1995/04/03
-    
+
      Bug fix in regular expressions.
      Bug fixes in compiler support
      Editor clipboard can now be copied to/from PM clipboard.
-    
-  
+
+
  0.12
-  
+
    1995/03/30
-    
+
      Compiler support + error message parsing
-    
+
    1995/03/25
-    
+
      Paren matching (Command: MatchBracket).
      Bug fixes in CMode smart indentation.
-    
-  
+
+
  0.11
-  
+
    1995/03/11
-    
+
      Unlimited undo now works again.
-    
+
    1995/03/18
-    
+
      Entire blocks of C code can now be reindented (BlockReIndent)
      Search can now be case insensitive (SearchMatchCase - toggle). Option: MatchCase, Command: SearchMatchCase
      Regular expression find/replace works (case sensitive only)
-    
+
    1995/03/19
-    
+
      Fixed a bug in redo (last command could not be undone)
      New option: KeepBackups -- if set to 0, backup files will be deleted after a succesful save.
-    
-  
+
+
  0.10
-  
+
    1995/03/06
-    
+
      Fixed CMode indent when tabs are present in the file.
      Prompts now retain previous text only if you try to edit it.
-    
+
    1995/03/04
-    
+
      4DOS/4OS2 style filename completion (FileOpen, ...).
-    
+
    1995/02/25
-    
+
      New load routine, much faster in some cases.
      Undo/Redo can now be limited (if you hate to waste memory).
-    
+
    1995/02/19
-    
+
      C Mode indentation level can now be specified (C.Indent)
-     Bug fixes in screen redraw. 
+     Bug fixes in screen redraw.
      Editor will now scroll text instead of always redisplaying the screen.
      Regular expressions (Search only).
-    
-  
- 0.09 
-  
-   1995/02/08   
-    
+
+
+ 0.09
+
+   1995/02/08
+
      First public release (Version 0.09b)
-    
-  

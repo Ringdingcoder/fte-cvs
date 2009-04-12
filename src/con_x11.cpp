@@ -87,27 +87,11 @@
 #define MIN_SCRWIDTH 20
 #define MIN_SCRHEIGHT 6
 
-#define MAX_PIPES 40
-//#define PIPE_BUFLEN 4096
-
 #define SELECTION_INCR_LIMIT 0x1000
 #define SELECTION_XFER_LIMIT 0x1000
 #define SELECTION_MAX_AGE 10
 
 class ColorXGC;
-
-struct GPipe {
-    int used;
-    int id;
-    int fd;
-    int pid;
-    int stopped;
-    EModel* notify;
-};
-
-static GPipe Pipes[MAX_PIPES] = {
-    { 0 },
-};
 
 // times in miliseconds
 static const unsigned int MouseAutoDelay = 40;
@@ -1579,8 +1563,6 @@ static TEvent Pending = { evNone };
 
 int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
     static TEvent Queued = { evNone };
-    fd_set read_fds;
-    struct timeval timeout;
     int rc;
 
     FlashCursor();
@@ -1608,8 +1590,8 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
         WaitTime = CursorFlashInterval;
 
     Event->What = evNone;
+
     while (Event->What == evNone) {
-        Event->What = evNone;
         while (XPending(display) > 0) {
             FlashCursor();
             ProcessXEvents(Event);
@@ -1634,24 +1616,11 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
             Event->What = evNone;
         }
 
-        Event->What = evNone;
-        FD_ZERO(&read_fds);
-        int maxfd = ConnectionNumber(display);
-        FD_SET(ConnectionNumber(display), &read_fds);
+	if ((WaitTime == -1 || WaitTime > (int)MouseAutoDelay)
+	    && (LastMouseEvent.What == evMouseAuto) && (EventMask & evMouse)) {
 
-        for (int p = 0; p < MAX_PIPES; p++)
-            if (Pipes[p].used && Pipes[p].fd != -1) {
-                FD_SET(Pipes[p].fd, &read_fds);
-                if (maxfd < Pipes[p].fd)
-                    maxfd = Pipes[p].fd; // pick max
-            }
-        maxfd++;
-
-        if ((WaitTime == -1 || WaitTime > (int)MouseAutoDelay)
-            && (LastMouseEvent.What == evMouseAuto) && (EventMask & evMouse)) {
-            timeout.tv_sec = 0;
-            timeout.tv_usec = MouseAutoDelay * 1000;
-            rc = select(maxfd, &read_fds, NULL, NULL, &timeout);
+	    rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
+				 MouseAutoDelay);
             if (rc == 0) {
                 *Event = LastMouseEvent;
                 return 0;
@@ -1659,43 +1628,21 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
         } else if ((WaitTime == -1 || WaitTime > (int)MouseAutoRepeat)
                    && (LastMouseEvent.What == evMouseDown || LastMouseEvent.What == evMouseMove)
                    && (LastMouseEvent.Mouse.Buttons) && (EventMask & evMouse)) {
-            timeout.tv_sec = 0;
-            timeout.tv_usec = MouseAutoRepeat * 1000;
-            rc = select(maxfd, &read_fds, NULL, NULL, &timeout);
-            if (rc == 0) {
-                LastMouseEvent.What = evMouseAuto;
-                *Event = LastMouseEvent;
-                return 0;
-            }
-        } else if (WaitTime == -1) {
-            rc = select(maxfd, &read_fds, NULL, NULL, NULL);
-        } else {
-            timeout.tv_sec = 0;
-            timeout.tv_usec = WaitTime * 1000 + 1;
-            rc = select(maxfd, &read_fds, NULL, NULL, &timeout);
-        }
 
-        if (rc == 0 || rc == -1) {
-            Event->What = evNone;
-            return -1;
-        }
-        if (FD_ISSET(ConnectionNumber(display), &read_fds)) // X has priority
-            continue;
-        for (int pp = 0; pp < MAX_PIPES; pp++) {
-            if (Pipes[pp].used && (Pipes[pp].fd != -1)
-                && (FD_ISSET(Pipes[pp].fd, &read_fds))) {
-                if (Pipes[pp].notify) {
-                    Event->What = evNotify;
-                    Event->Msg.View = 0;
-                    Event->Msg.Model = Pipes[pp].notify;
-                    Event->Msg.Command = cmPipeRead;
-                    Event->Msg.Param1 = pp;
-                    Pipes[pp].stopped = 0;
-                }
-                //fprintf(stderr, "Pipe %d\n", Pipes[pp].fd);
+	    rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
+				 MouseAutoRepeat);
+            if (rc == 0) {
+		LastMouseEvent.What = evMouseAuto;
+		*Event = LastMouseEvent;
                 return 0;
             }
-        }
+	} else
+	    rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
+				 (WaitTime < 1000) ? WaitTime : 1001);
+
+        if (rc == 0 || rc == -1)
+            return -1;
+	// pipe event has evNotify
     }
     return 0;
 }
@@ -1793,7 +1740,7 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
     XEvent event;
     Atom actual_type;
     int actual_format, retval;
-    size_t nitems, bytes_after;
+    unsigned long nitems, bytes_after;
     unsigned char *d;
 
     // Make sure property does not exist
@@ -2071,110 +2018,6 @@ int GUI::ConContinue(void) {
 
 int GUI::ShowEntryScreen() {
     return 1;
-}
-
-int GUI::OpenPipe(char *Command, EModel *notify) {
-#ifndef NO_PIPES
-    int i;
-
-    for (i = 0; i < MAX_PIPES; i++) {
-        if (Pipes[i].used == 0) {
-            int pfd[2];
-
-            Pipes[i].id = i;
-            Pipes[i].notify = notify;
-            Pipes[i].stopped = 1;
-
-            if (pipe((int *)pfd) == -1)
-                return -1;
-
-            switch (Pipes[i].pid = fork()) {
-            case -1: /* fail */
-                return -1;
-            case 0: /* child */
-                signal(SIGPIPE, SIG_DFL);
-                close(pfd[0]);
-                close(0);
-                assert(open("/dev/null", O_RDONLY) == 0);
-                dup2(pfd[1], 1);
-                dup2(pfd[1], 2);
-                close(pfd[1]);
-                exit(system(Command));
-            default:
-                close(pfd[1]);
-                fcntl(pfd[0], F_SETFL, O_NONBLOCK);
-                Pipes[i].fd = pfd[0];
-            }
-            Pipes[i].used = 1;
-            //fprintf(stderr, "Pipe Open: %d\n", i);
-            return i;
-        }
-    }
-    return -1;
-#else
-    return 0;
-#endif
-}
-
-int GUI::SetPipeView(int id, EModel *notify) {
-#ifndef NO_PIPES
-    if (id < 0 || id > MAX_PIPES)
-        return -1;
-    if (Pipes[id].used == 0)
-        return -1;
-    //fprintf(stderr, "Pipe View: %d %08X\n", id, notify);
-    Pipes[id].notify = notify;
-#endif
-    return 0;
-}
-
-ssize_t GUI::ReadPipe(int id, void *buffer, int len) {
-#ifndef NO_PIPES
-    ssize_t r;
-
-    if (id < 0 || id > MAX_PIPES)
-        return -1;
-    if (Pipes[id].used == 0)
-        return -1;
-    //fprintf(stderr, "Pipe Read: Get %d %d\n", id, len);
-
-    r = read(Pipes[id].fd, buffer, len);
-    //fprintf(stderr, "Pipe Read: Got %d %d\n", id, len);
-    if (r == 0) {
-        close(Pipes[id].fd);
-        Pipes[id].fd = -1;
-        return -1;
-    }
-    if (r == -1) {
-        Pipes[id].stopped = 1;
-        return 0;
-    }
-    return r;
-#else
-    return 0;
-#endif
-}
-
-int GUI::ClosePipe(int id) {
-#ifndef NO_PIPES
-    int status;
-
-    if (id < 0 || id > MAX_PIPES)
-        return -1;
-    if (Pipes[id].used == 0)
-        return -1;
-    if (Pipes[id].fd != -1)
-        close(Pipes[id].fd);
-    kill(Pipes[id].pid, SIGHUP);
-    alarm(2);
-    waitpid(Pipes[id].pid, &status, 0);
-    alarm(0);
-    //fprintf(stderr, "Pipe Close: %d\n", id);
-    Pipes[id].used = 0;
-    return WEXITSTATUS(status);
-#else
-    return 0;
-#endif
 }
 
 int GUI::RunProgram(int mode, char *Command) {

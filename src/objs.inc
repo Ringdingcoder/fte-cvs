@@ -103,6 +103,7 @@ g_text.$(OEXT) \
 menu_text.$(OEXT) \
 con_x11.$(OEXT) \
 clip_x11.$(OEXT) \
+g_unix_pipe.$(OEXT) \
 con_i18n.$(OEXT) \
 g_nodlg.$(OEXT)
 
@@ -114,6 +115,7 @@ clip_x11.$(OEXT)
 SOBJS = $(UNIXOBJS) \
 g_text.$(OEXT) \
 menu_text.$(OEXT) \
+g_unix_pipe.$(OEXT) \
 con_slang.$(OEXT) \
 clip_no.$(OEXT) \
 g_nodlg.$(OEXT)

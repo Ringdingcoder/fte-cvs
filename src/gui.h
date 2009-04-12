@@ -215,4 +215,6 @@ typedef struct {
 int DLGGetFind(GView *View, SearchReplaceOptions &sr);
 int DLGGetFindReplace(GView *View, SearchReplaceOptions &sr);
 
+int WaitFdPipeEvent(TEvent *Event, int fd, int WaitTime);
+
 #endif

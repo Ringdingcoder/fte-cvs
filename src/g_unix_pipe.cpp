@@ -1,5 +1,3 @@
-
-
 #include "sysdep.h"
 #include "c_config.h"
 #include "console.h"
@@ -8,11 +6,10 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-#define MAX_PIPES 4
+#define MAX_PIPES 20
 
 struct GPipe {
     int used;
-    int id;
     int fd;
     int pid;
     int stopped;
@@ -24,45 +21,45 @@ static GPipe Pipes[MAX_PIPES] = {
 };
 
 /* If command pipes are open, wait for input on them or
- * external file descriptors if  passed */
-int WaitPipeEvent(TEvent *Event, int WaitTime, int *fds, int nfds)
+ * external file descriptor if  passed */
+int WaitFdPipeEvent(TEvent *Event, int fd, int WaitTime)
 {
-    fd_set readfds;
     struct timeval timeout;
-    int have_pipes;
-    int i;
+    fd_set readfds;
+    int rc, maxfd = fd;
+
+    Event->What = evNone;
 
     FD_ZERO(&readfds);
 
-    have_pipes = 0;
-    for (int p = 0; p < MAX_PIPES; p++)
-	if (Pipes[p].used && Pipes[p].fd != -1)
-	{
+    if (fd >= 0)
+	FD_SET(fd, &readfds);
+
+#ifndef NO_PIPES
+    for (int p = 0; p < MAX_PIPES; ++p)
+	if (Pipes[p].used && Pipes[p].fd != -1) {
 	    FD_SET(Pipes[p].fd, &readfds);
-	    have_pipes = 1;
+	    if (Pipes[p].fd > maxfd)
+                maxfd = Pipes[p].fd;
 	}
-    if(!have_pipes) return 0;
+#endif
 
-    for(i=0; i<nfds; i++) { FD_SET(fds[i], &readfds);}
+    timeout.tv_sec = WaitTime / 1000;
+    timeout.tv_usec = (WaitTime % 1000) * 1000;
 
-    if (WaitTime == -1) {
-	if (select(sizeof(fd_set) * 8, &readfds, NULL, NULL, NULL) < 0)
-	    return -1;
-    } else {
-	timeout.tv_sec = WaitTime / 1000;
-	timeout.tv_usec = (WaitTime % 1000) * 1000;
-	if (select(sizeof(fd_set) * 8, &readfds, NULL, NULL, &timeout) < 0)
-	    return -1;
-    }
+    if ((rc = select(maxfd + 1, &readfds, 0, 0,
+		    (WaitTime < 0) ? 0 : &timeout)) <= 0)
+	return rc;
 
-    for(i=0; i<nfds; i++)
-	if(FD_ISSET(fds[i], &readfds))
-	    return 0;
+    if ((fd >= 0) && FD_ISSET(fd, &readfds))
+	    return 1;
 
-    for (int pp = 0; pp < MAX_PIPES; pp++) {
-	if (Pipes[pp].used && Pipes[pp].fd != -1 &&
-	    FD_ISSET(Pipes[pp].fd, &readfds) &&
-	    Pipes[pp].notify) {
+#ifndef NO_PIPES
+    for (int pp = 0; pp < MAX_PIPES; ++pp) {
+	if (Pipes[pp].used
+	    && Pipes[pp].fd != -1
+	    && FD_ISSET(Pipes[pp].fd, &readfds)
+	    && Pipes[pp].notify) {
 	    Event->What = evNotify;
 	    Event->Msg.View = 0;
 	    Event->Msg.Model = Pipes[pp].notify;
@@ -73,31 +70,37 @@ int WaitPipeEvent(TEvent *Event, int WaitTime, int *fds, int nfds)
 	}
 	//fprintf(stderr, "Pipe %d\n", Pipes[pp].fd);
     }
+#endif
+
     return 0;
 }
 
 int GUI::OpenPipe(char *Command, EModel * notify)
 {
-    int i;
-
-    for (i = 0; i < MAX_PIPES; i++) {
+    //fprintf(stderr, "PIPE  %s   \n", Command);
+#ifndef NO_PIPES
+    for (int i = 0; i < MAX_PIPES; ++i) {
 	if (Pipes[i].used == 0) {
 	    int pfd[2];
 
-	    Pipes[i].id = i;
 	    Pipes[i].notify = notify;
 	    Pipes[i].stopped = 1;
 
-	    if (pipe((int *) pfd) == -1)
+	    if (pipe((int *) pfd) == -1) {
+		perror("pipe");
 		return -1;
+	    }
 
 	    switch (Pipes[i].pid = fork()) {
 	    case -1:		/* fail */
+                perror("fork");
 		return -1;
 	    case 0:		/* child */
+		// FIXME: close other opened descriptor
 		signal(SIGPIPE, SIG_DFL);
 		close(pfd[0]);
 		close(0);
+                assert(open("/dev/null", O_RDONLY) == 0);
 		dup2(pfd[1], 1);
 		dup2(pfd[1], 2);
 		close(pfd[1]);
@@ -111,27 +114,30 @@ int GUI::OpenPipe(char *Command, EModel * notify)
 	    return i;
 	}
     }
+#endif
     return -1;
 }
 
 int GUI::SetPipeView(int id, EModel * notify)
 {
-    if (id < 0 || id > MAX_PIPES)
+#ifndef NO_PIPES
+    if (id < 0 || id >= MAX_PIPES)
 	return -1;
     if (Pipes[id].used == 0)
 	return -1;
 
     Pipes[id].notify = notify;
+#endif
     return 0;
 }
 
 ssize_t GUI::ReadPipe(int id, void *buffer, int len)
 {
-    ssize_t rc;
+    ssize_t rc = -1;
 
-    if (id < 0 || id > MAX_PIPES)
-	return -1;
-    if (Pipes[id].used == 0)
+#ifndef NO_PIPES
+    if (id < 0 || id >= MAX_PIPES
+	|| (Pipes[id].used == 0))
 	return -1;
 
     rc = read(Pipes[id].fd, buffer, len);
@@ -140,18 +146,21 @@ ssize_t GUI::ReadPipe(int id, void *buffer, int len)
 	Pipes[id].fd = -1;
 	return -1;
     }
+
     if (rc == -1) {
 	Pipes[id].stopped = 1;
 	return 0;
     }
+#endif
     return rc;
 }
 
 int GUI::ClosePipe(int id)
 {
     int status = -1;
+#ifndef NO_PIPES
 
-    if (id < 0 || id > MAX_PIPES)
+    if (id < 0 || id >= MAX_PIPES)
 	return -1;
     if (Pipes[id].used == 0)
 	return -1;
@@ -164,4 +173,6 @@ int GUI::ClosePipe(int id)
     alarm(0);
     Pipes[id].used = 0;
     return WEXITSTATUS(status);
+#endif
+    return 0;
 }

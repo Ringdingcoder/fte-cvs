@@ -15,7 +15,8 @@ static int use_esc_hack = 0;
 // #include "slangkbd.h"
 #include "gui.h"
 
-#include <slang/slang.h>
+//#include <slang/slang.h>
+#include <slang.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,26 +29,6 @@ static int use_esc_hack = 0;
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/time.h>
-
-#define MAX_PIPES 4
-//#define PIPE_BUFLEN 4096
-
-typedef struct {
-    int used;
-    int id;
-    int fd;
-    int pid;
-    int stopped;
-    EModel *notify;
-} GPipe;
-
-static GPipe Pipes[MAX_PIPES] =
-{
-    {0},
-    {0},
-    {0},
-    {0}
-};
 
 /* These characters cannot appear on a console, so we can detect
  * them in the output routine.
@@ -237,8 +218,8 @@ int ConInit(int /*XSize */ , int /*YSize */ )
     SLtty_set_suspend_state(0);
 
     for (i = 0; i < 128; i++) {
-	SLtt_set_color(i, NULL, (char *) slang_colors[i & 0x0f],
-		       (char *) slang_colors[((i >> 4) + 0) & 0x07]);
+	SLtt_set_color(i, NULL, const_cast<char *>(slang_colors[i & 0x0f]),
+		       const_cast<char *>(slang_colors[((i >> 4) + 0) & 0x07]));
     }
 
     SLsmg_gotorc(0, 0);
@@ -710,10 +691,8 @@ static TKeyCode ftesl_process_key(int key, int ctrlhack = 0)
 int ConGetEvent(TEventMask /*EventMask */ ,
 		TEvent * Event, int WaitTime, int Delete)
 {
-    int key;
+    int key, rc;
     TKeyEvent *KEvent = &(Event->Key);
-    fd_set readfds;
-    struct timeval timeout;
 
     if (Prev.What != evNone) {
 	*Event = Prev;
@@ -722,26 +701,13 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	return 1;
     }
 
-    Event->What = evNone;
-
     WaitTime = (WaitTime >= 0) ? WaitTime / 100 : 36000;
 
-    FD_ZERO(&readfds);
+    if ((rc = WaitFdPipeEvent(Event, STDIN_FILENO, WaitTime)) <= 0)
+        return rc;
 
-    FD_SET(0, &readfds);
-    for (int p = 0; p < MAX_PIPES; p++)
-	if (Pipes[p].used && Pipes[p].fd != -1)
-	    FD_SET(Pipes[p].fd, &readfds);
-
-    if (WaitTime == -1) {
-	if (select(sizeof(fd_set) * 8, &readfds, NULL, NULL, NULL) < 0)
-	    return -1;
-    } else {
-	timeout.tv_sec = WaitTime / 1000;
-	timeout.tv_usec = (WaitTime % 1000) * 1000;
-	if (select(sizeof(fd_set) * 8, &readfds, NULL, NULL, &timeout) < 0)
-	    return -1;
-    }
+    if (Event->What == evNotify)
+        return 0; // pipe reading
 
     if (SLang_input_pending(0) > 0) {
 	TKeyCode kcode = 0, kcode1;
@@ -845,21 +811,6 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	    Prev = *Event;
 
 	return 1;
-    } else {
-	for (int pp = 0; pp < MAX_PIPES; pp++) {
-	    if (Pipes[pp].used && Pipes[pp].fd != -1 &&
-		FD_ISSET(Pipes[pp].fd, &readfds) &&
-		Pipes[pp].notify) {
-		Event->What = evNotify;
-		Event->Msg.View = 0;
-		Event->Msg.Model = Pipes[pp].notify;
-		Event->Msg.Command = cmPipeRead;
-		Event->Msg.Param1 = pp;
-		Pipes[pp].stopped = 0;
-		return 0;
-	    }
-	    //fprintf(stderr, "Pipe %d\n", Pipes[pp].fd);
-	}
     }
 
     return -1;
@@ -908,96 +859,6 @@ int GUI::ShowEntryScreen()
     if (frames)
 	frames->Repaint();
     return 1;
-}
-
-int GUI::OpenPipe(char *Command, EModel * notify)
-{
-    int i;
-
-    for (i = 0; i < MAX_PIPES; i++) {
-	if (Pipes[i].used == 0) {
-	    int pfd[2];
-
-	    Pipes[i].id = i;
-	    Pipes[i].notify = notify;
-	    Pipes[i].stopped = 1;
-
-	    if (pipe((int *) pfd) == -1)
-		return -1;
-
-	    switch (Pipes[i].pid = fork()) {
-	    case -1:		/* fail */
-		return -1;
-	    case 0:		/* child */
-		signal(SIGPIPE, SIG_DFL);
-		close(pfd[0]);
-		close(0);
-		dup2(pfd[1], 1);
-		dup2(pfd[1], 2);
-		close(pfd[1]);
-		exit(system(Command));
-	    default:
-		close(pfd[1]);
-		fcntl(pfd[0], F_SETFL, O_NONBLOCK);
-		Pipes[i].fd = pfd[0];
-	    }
-	    Pipes[i].used = 1;
-	    return i;
-	}
-    }
-    return -1;
-}
-
-int GUI::SetPipeView(int id, EModel * notify)
-{
-    if (id < 0 || id > MAX_PIPES)
-	return -1;
-    if (Pipes[id].used == 0)
-	return -1;
-
-    Pipes[id].notify = notify;
-    return 0;
-}
-
-ssize_t GUI::ReadPipe(int id, void *buffer, int len)
-{
-    ssize_t rc;
-
-    if (id < 0 || id > MAX_PIPES)
-	return -1;
-    if (Pipes[id].used == 0)
-	return -1;
-
-    rc = read(Pipes[id].fd, buffer, len);
-    if (rc == 0) {
-	close(Pipes[id].fd);
-	Pipes[id].fd = -1;
-	return -1;
-    }
-    if (rc == -1) {
-	Pipes[id].stopped = 1;
-	return 0;
-    }
-    return rc;
-}
-
-int GUI::ClosePipe(int id)
-{
-    int status = -1;
-
-    if (id < 0 || id > MAX_PIPES)
-	return -1;
-    if (Pipes[id].used == 0)
-	return -1;
-    if (Pipes[id].fd != -1)
-	close(Pipes[id].fd);
-
-    kill(Pipes[id].pid, SIGHUP);
-    alarm(1);
-    waitpid(Pipes[id].pid, &status, 0);
-    alarm(0);
-    Pipes[id].used = 0;
-    return WEXITSTATUS(status);
 }
 
 int GUI::RunProgram(int /*mode */ , char *Command)

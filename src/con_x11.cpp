@@ -47,6 +47,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
+#include <X11/XF86keysym.h>
 #include <X11/Xos.h>
 #ifdef USE_XTINIT
 #include <X11/Intrinsic.h>
@@ -594,9 +595,11 @@ static int SetupXWindow(int argc, char **argv)
     }
     if (i == ICON_COUNT) {
         // Everything OK, can create property
-        CARD32 *iconBuffer = (CARD32 *)malloc(iconBufferSize * sizeof(CARD32) + 16);
+        // XChangeProperty takes 32-bit entities in long array
+        // (which is 64bit on x86_64)
+        long *iconBuffer = (long *)malloc(iconBufferSize * sizeof(long) + 16);
         if (iconBuffer) {
-            CARD32 *b = iconBuffer;
+            long *b = iconBuffer;
             for (i = 0; i < ICON_COUNT; i++) {
                 XpmImage &xpm = xpmImage[i];
                 CARD32 *&colors = xpmColors[i];
@@ -1067,6 +1070,8 @@ static const struct {
     { XK_KP_End,         kbEnd | kfGray },
     { XK_KP_Down,        kbDown | kfGray },
     { XK_KP_Next,        kbPgDn| kfGray },
+    { XF86XK_Back,       kbLeft | kfAlt },
+    { XF86XK_Forward,    kbRight | kfAlt },
     { XK_Num_Lock,       kbNumLock },
     { XK_Caps_Lock,      kbCapsLock },
     { XK_Print,          kbPrtScr },

@@ -200,7 +200,10 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                 } else if (
                            i == 0 && X_NOT(State) && (*p == '=') && len > 3 &&
                            (
-                            strncmp(p+1, "pod",  3) == 0
+                            strncmp(p+1, "pod",  3) == 0 ||
+                            strncmp(p+1, "for",  3) == 0 ||
+                            strncmp(p+1, "end",  3) == 0 ||
+                            0
                            )
                           )
                 {

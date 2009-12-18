@@ -427,29 +427,35 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                     State = QSET(hsPerl_String2, '"');
                     Color = CLR_String;
                     goto hilit;
-                } else if (*p == '<' && len > 2 && p[1] == '<' &&
-                           (p[2] == '"' || p[2] == '\'' || p[2] == '_' || (toupper(p[2]) >= 'A' && toupper(p[2]) <= 'Z')))
-                {
-                    int hereDocKeyLen;
+                } else if (*p == '<' && len > 2 && p[1] == '<') {
                     int offset = 2;
-                    if (p[2] == '"' || p[2] == '\'')
-                        offset++;
-                    setHereDoc++;
-                    for (hereDocKeyLen = 0;
-                         hereDocKeyLen < len && (
-                                                 p[offset + hereDocKeyLen] == '_' ||
-                                                 (toupper(p[offset + hereDocKeyLen]) >= 'A' && toupper(p[offset + hereDocKeyLen]) <= 'Z')
-                                                );
-                         ++hereDocKeyLen)
+                    while (p[offset] == '"' ||
+                           p[offset] == '\'' ||
+                           isspace(p[offset]) ||
+                           0)
                     {
-                        hereDocKey[hereDocKeyLen] = p[offset + hereDocKeyLen];
+                        ++offset;
                     }
-                    hereDocKey[hereDocKeyLen] = '\0';
-                    State = hsPerl_Punct;
-                    Color = CLR_Punctuation;
-                    ColorNext();
-                    State = hsPerl_Normal;
-                    continue;
+                    if (p[offset] == '_' || (toupper(p[offset]) >= 'A' && toupper(p[offset]) <= 'Z'))
+                    {
+                        int hereDocKeyLen;
+                        setHereDoc++;
+                        for (hereDocKeyLen = 0;
+                             hereDocKeyLen < len && (
+                                                     p[offset + hereDocKeyLen] == '_' ||
+                                                     (toupper(p[offset + hereDocKeyLen]) >= 'A' && toupper(p[offset + hereDocKeyLen]) <= 'Z')
+                                                    );
+                             ++hereDocKeyLen)
+                        {
+                            hereDocKey[hereDocKeyLen] = p[offset + hereDocKeyLen];
+                        }
+                        hereDocKey[hereDocKeyLen] = '\0';
+                        State = hsPerl_Punct;
+                        Color = CLR_Punctuation;
+                        ColorNext();
+                        State = hsPerl_Normal;
+                        continue;
+                    }
                 } else if (*p == '`') {
                     State = QSET(hsPerl_StringBk, '`');
                     Color = CLR_String;

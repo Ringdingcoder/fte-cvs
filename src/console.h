@@ -87,7 +87,6 @@
 #define cmRenameFile    31   /* TODO: in-place editing of titlebar */
     
 typedef unsigned char TAttr;
-typedef TAttr *PAttr;
 
 // we need to use class instead of casting to short
 // otherwice we would need to resolve CPU ordering issues
@@ -97,8 +96,8 @@ typedef TAttr *PAttr;
 // this is just WILD WILD GUESS....
 class TCell : public PCHAR_INFO {
 public:
-    TCell() : Char(' '), Attr(0) {}
-    TCell(char c, TAttr a) : Char(c), Attr(a) {}
+    TCell() : Char.AsciiChar(' '), Attributes(0x07) {}
+    TCell(char c, TAttr a) : Char.AsciiChar(c), Attributes(a) {}
     char GetChar() const { return Char.AsciiChar; }
     TAttr GetAttr() const { return Attributes; }
     void SetChar(char c) { Char.AsciiChar = c; }
@@ -109,8 +108,12 @@ public:
 class TCell {
     char Char;
     TAttr Attr;
+    operator const char*();
+    operator const unsigned char*();
+    operator unsigned char*();
+    operator char*();
 public:
-    TCell() : Char(' '), Attr(0) {}
+    TCell() : Char(' '), Attr(0x07) {}
     TCell(char c, TAttr a) : Char(c), Attr(a) {}
     char GetChar() const { return Char; }
     TAttr GetAttr() const { return Attr; }
@@ -130,13 +133,13 @@ typedef unsigned long TCommand;
 class EModel; // forward
 class GView;
 
-typedef struct {
+struct TKeyEvent {
     TEventMask What;
     GView* View;
     TKeyCode Code;
-} TKeyEvent;
+};
 
-typedef struct {
+struct TMouseEvent {
     TEventMask What;
     GView* View;
     int X;
@@ -144,40 +147,40 @@ typedef struct {
     unsigned short Buttons;
     unsigned short Count;
     TKeyCode KeyMask;
-} TMouseEvent;
+};
 
-typedef struct {
+struct TMsgEvent {
     TEventMask What;
     GView *View;
     EModel *Model;
     TCommand Command;
     long Param1;
     void *Param2;
-} TMsgEvent;
+};
 
-typedef union {
+union TEvent {
     TEventMask What;
     TKeyEvent Key;
     TMouseEvent Mouse;
     TMsgEvent Msg;
     char fill[32];
-} TEvent;
+};
 
 #define SUBMENU_NORMAL      (-1)
 #define SUBMENU_CONDITIONAL (-2)
 
-typedef struct _mItem {
+struct mItem {
     char *Name;
     char *Arg;
     int SubMenu;
     int Cmd;
-} mItem;
+};
 
-typedef struct _mMenu {
+struct mMenu {
     char *Name;
     int Count;
     mItem *Items;
-} mMenu;
+};
 
 extern int MenuCount;
 extern mMenu *Menus;
@@ -237,9 +240,10 @@ char ConGetDrawChar(int index);
 
 extern char WindowFont[64];
 
-typedef struct {
-  unsigned char r,g,b;
-} TRGBColor;
+struct TRGBColor {
+  unsigned char r, g, b;
+};
+
 extern TRGBColor RGBColor[16];
 extern bool RGBColorValid[16];
 

@@ -15,7 +15,7 @@
 
 #define PRINTF(x) //printf x
 
-#define ISNAME(x)  (isalnum(x) || (x == '_'))
+#define ISNAME(x)  (isalnum(x) || ((x) == '_'))
 
 
 #define hsC_Normal       0
@@ -29,6 +29,7 @@
 #define hsC_CPP_String1 14
 #define hsC_CPP_String2 15
 #define hsC_CPP_ABrace  16
+#define hsC_Tripplet    17
 
 int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, hlState &State, hsState *StateMap, int *ECol) {
     int j = 0;
@@ -39,10 +40,12 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
     int was_include = 0;
 
     for(i = 0; i < Line->Count;) {
-        if (*p != ' ' && *p != 9) firstnw++;
+        if (*p != ' ' && *p != '\t') firstnw++;
         IF_TAB() else {
+            PRINTF(("STATE %d\n", State));
             switch(State) {
             default:
+            case hsC_Tripplet:
             case hsC_Normal:
                 if (toupper(*p) == 'L' && p[1] == '"') {
                     State = hsC_String2;
@@ -54,24 +57,27 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                     goto hilit2;
                 } else if (isalpha(*p) || *p == '_') {
                     j = 0;
-		    while (((i + j) < Line->Count)
-			   && ISNAME(Line->Chars[i + j]))
-			j++;
+                    while (((i + j) < Line->Count)
+                           && ISNAME(Line->Chars[i + j]))
+                        j++;
                     if (BF->GetHilitWord(j, &Line->Chars[i], Color)) {
-			//Color = hcC_Keyword;
-			State = hsC_Keyword;
+                        //Color = hcC_Keyword;
+                        State = hsC_Keyword;
                     } else {
                         int x = i + j;
-			while (x < Line->Count && isspace(Line->Chars[x]))
-			    x++;
-			if (x < Line->Count && Line->Chars[x] == '(') {
+                        while (x < Line->Count && isspace(Line->Chars[x]))
+                            x++;
+                        PRINTF(("LABEL  %c %d\n", Line->Chars[x], x));
+                        if (x < Line->Count && Line->Chars[x] == '(') {
                             Color = CLR_Function;
-			} else if ((x < Line->Count)
-				   && (Line->Chars[x] == ':'
-				       && (x == Line->Count - 1
+                        } else if (State == hsC_Normal
+                                   && (x < Line->Count)
+                                   && (Line->Chars[x] == ':'
+                                       && (x == Line->Count - 1
                                            || Line->Chars[x + 1] != ':'))
                                    && firstnw == 1) {
                             Color = CLR_Label;
+                            PRINTF(("___LABEL  %c %d\n", Line->Chars[x], x));
                         } else {
                             Color = CLR_Normal;
                         }
@@ -95,7 +101,7 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                     State = hsC_CommentL;
                     Color = CLR_Comment;
                     goto hilit2;
-		} else if (isdigit(*p)) {
+                } else if (isdigit(*p)) {
                     // check if it is not floating point number 0.08!
                     if ((len >= 2) && (*p == '0') && p[1] != '.') {
                         if (toupper(p[1]) == 'X') {
@@ -149,8 +155,14 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                     State = hsC_CPP;
                     Color = CLR_CPreprocessor;
                     goto hilit;
+                } else if (*p == '?') {
+                    State = hsC_Tripplet;
+                    Color = CLR_Punctuation;
+                    PRINTF(("----FOUND TRIPPLET\n"));
+                    goto hilit;
                 } else if (ispunct(*p) && *p != '_') {
                     Color = CLR_Punctuation;
+                    PRINTF(("----FOUND PUNKT\n"));
                     goto hilit;
                 }
                 Color = CLR_Normal;
@@ -228,9 +240,8 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                     j = 0;
                     Color = CLR_CPreprocessor;
                     while (((i + j) < Line->Count) &&
-                           (isalnum(Line->Chars[i+j]) ||
-                            (Line->Chars[i + j] == '_'))
-                          ) j++;
+                           (ISNAME(Line->Chars[i+j])))
+                        j++;
                     if (j == 7 && memcmp(Line->Chars + i, "include", 7) == 0)
                         was_include = 1;
                     if (StateMap)
@@ -451,6 +462,7 @@ static int CheckLabel(EBuffer *B, int Line) {
     int P = B->CharOffset(L, B->LineIndented(Line));
     int Cnt = 0;
 
+    PRINTF(("CHECKING LABEL\n"));
     if (Line > 0 && B->RLine(Line - 1)->StateE != hsC_Normal)
         return 0;
 
@@ -459,11 +471,18 @@ static int CheckLabel(EBuffer *B, int Line) {
 
     while (P < L->Count) {
         if (Cnt > 0)
-            if (L->Chars[P] == ':' && (Cnt == 1 || L->Chars[P + 1] != ':')) return 1;
-        if (!isalnum(L->Chars[P]) && L->Chars[P] != '_') return 0;
+            if (L->Chars[P] == ':' && (Cnt == 1 || L->Chars[P + 1] != ':')) {
+                PRINTF(("CHECKING LABEL -> 1!\n"));
+                return 1;
+            }
+        if (!ISNAME(L->Chars[P])) {
+            PRINTF(("NONCHECKING LABEL -> 0\n"));
+            return 0;
+        }
         Cnt++;
         P++;
     }
+    PRINTF(("CHECKING LABEL -> 0\n"));
     return 0;
 }
 
@@ -509,21 +528,21 @@ static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const 
                                     didMatch = 1;
                                 else {
                                     *OPos = B->ScreenPos(B->RLine(Row), Pos);
-				    *OLine = Row;
-				    free(StateMap);
-				    return B->LineIndented(Row);
-				}
-			    }
-			}
-			if (LClose + Pos <= L) {
-			    if (IsState(StateMap + Pos, State, LClose)) {
-				if (memcmp(P + Pos, Close, LClose) == 0) Count--;
-			    }
-			}
-		    }
-		}
-	    }
-	    Pos--;
+                                    *OLine = Row;
+                                    free(StateMap);
+                                    return B->LineIndented(Row);
+                                }
+                            }
+                        }
+                        if (LClose + Pos <= L) {
+                            if (IsState(StateMap + Pos, State, LClose)) {
+                                if (memcmp(P + Pos, Close, LClose) == 0) Count--;
+                            }
+                        }
+                    }
+                }
+            }
+            Pos--;
         }
         if (bolOnly && didMatch && CountX[1] == 0 && CountX[2] == 0) {
             *OPos = 0;
@@ -572,8 +591,8 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
             LOG << "Can't get state maps" << ENDLINE;
             ENDFUNCRC(0);
         }
-	if (L > 0)
-	    while (ColP >= 0) {
+        if (L > 0)
+            while (ColP >= 0) {
             LOG << "ColP: " << ColP << " State: " << (int)StateMap[ColP] << ENDLINE;
             if (StateMap[ColP] == hsC_Normal) {
                 LOG << "CharP: " << BinChar(P[ColP]) << " BolChar: " << BinChar(BolChar) <<
@@ -589,7 +608,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         free(StateMap);
                         ENDFUNCRC(1);
                     }
-		    if (TEST_ZERO) {
+                    if (TEST_ZERO) {
                         free(StateMap);
                         ENDFUNCRC(1);
                     }
@@ -614,14 +633,14 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         free(StateMap);
                         ENDFUNCRC(1);
                     }
-		    if (TEST_ZERO && (Flags & FIND_ENDBLOCK)) {
+                    if (TEST_ZERO && (Flags & FIND_ENDBLOCK)) {
                         free(StateMap);
                         ENDFUNCRC(1);
                     }
                     Count[0]++;
                     break;
                 case '(':
-		    if (TEST_ZERO) {
+                    if (TEST_ZERO) {
                         free(StateMap);
                         ENDFUNCRC(1);
                     }
@@ -645,19 +664,20 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         ColP -= 2;
                         continue;
                     }
+                     break;
                 case ',':
                 case ';':
                     if (TEST_ZERO && BolChar == ' ') {
-			if ((CharP == ';' && (Flags & FIND_SEMICOLON))
-			    || (CharP == ',' && (Flags & FIND_COMMA))
-			    || (CharP == ':' && (Flags & FIND_COLON))) {
+                        if ((CharP == ';' && (Flags & FIND_SEMICOLON))
+                            || (CharP == ',' && (Flags & FIND_COMMA))
+                            || (CharP == ':' && (Flags & FIND_COLON))) {
                             BolChar = CharP;
                             BolCol = ColP;
-			    BolRow = RowP;
-			    // this should be here
+                            BolRow = RowP;
+                            // this should be here
                             // if not say why ???
-			    //free(StateMap);
-			    //return 1;
+                            //free(StateMap);
+                            //return 1;
                         }
                     }
                     if (BolChar == ',' && CharP == ':') {
@@ -666,8 +686,8 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         BolRow = -1;
                         break;
                     }
-		    if ((BolChar == ':' || BolChar == ',')
-			&& (CharP == ';'/* || CharP == ','*/)) {
+                    if ((BolChar == ':' || BolChar == ',')
+                        && (CharP == ';'/* || CharP == ','*/)) {
                         CharP = ':';
                         ColP = BolCol;
                         RowP = BolRow;
@@ -677,6 +697,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                     break;
                 case '?':
                     //if ((Flags & FIND_QUESTION)) {
+                    PRINTF(("FOUND ?"));
                     if (BolChar == ':' || BolChar == ',') {
                         BolChar = ' ';
                         BolCol = -1;
@@ -707,7 +728,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                 {
                     //puts("\nelse\x7");
                     if (Flags & FIND_ELSE) {
-			if (TEST_ZERO) {
+                        if (TEST_ZERO) {
                             CharP = 'e';
                             free(StateMap);
                             ENDFUNCRC(1);
@@ -715,7 +736,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                     }
                     Count[3]++;
                 }
-		if (TEST_ZERO) {
+                if (TEST_ZERO) {
 
                     if ((Flags & FIND_FOR) &&
                         L - ColP >= 3 &&
@@ -841,34 +862,34 @@ static int SkipWhite(EBuffer *B, int Bottom, int &Row, int &Col, int Flags) {
         if (B->GetMap(Row, &StateLen, &StateMap) == 0)
             return 0;
 
-	if (L > 0)
-	    for ( ; Col >= 0 && Col < L;
-		  Col += ((Flags & SKIP_BACK) ? -1 : +1)) {
-		if (P[Col] == ' ' || P[Col] == '\t')
-		    continue;
-		if (StateMap[Col] != hsC_Normal &&
-		    StateMap[Col] != hsC_Keyword &&
-		    StateMap[Col] != hsC_String1 &&
-		    StateMap[Col] != hsC_String2)
-		    continue;
-		if (StateMap[Col] == hsC_Normal && (Flags & SKIP_MATCH)) {
-		    switch (P[Col]) {
-		    case '{': Count[0]--; continue;
-		    case '}': Count[0]++; continue;
-		    case '(': Count[1]--; continue;
-		    case ')': Count[1]++; continue;
-		    case '[': Count[2]--; continue;
-		    case ']': Count[2]++; continue;
-		    }
-		}
-		if (Count[0] == 0 && Count[1] == 0 && Count[2] == 0
-		    && !(Flags & SKIP_TOBOL)) {
-		    free(StateMap);
-		    return 1;
-		}
-	    }
-	free(StateMap);
-	if (Count[0] == 0 && Count[1] == 0 && Count[2] == 0 && (Flags & SKIP_TOBOL))
+        if (L > 0)
+            for ( ; Col >= 0 && Col < L;
+                  Col += ((Flags & SKIP_BACK) ? -1 : +1)) {
+                if (P[Col] == ' ' || P[Col] == '\t')
+                    continue;
+                if (StateMap[Col] != hsC_Normal &&
+                    StateMap[Col] != hsC_Keyword &&
+                    StateMap[Col] != hsC_String1 &&
+                    StateMap[Col] != hsC_String2)
+                    continue;
+                if (StateMap[Col] == hsC_Normal && (Flags & SKIP_MATCH)) {
+                    switch (P[Col]) {
+                    case '{': Count[0]--; continue;
+                    case '}': Count[0]++; continue;
+                    case '(': Count[1]--; continue;
+                    case ')': Count[1]++; continue;
+                    case '[': Count[2]--; continue;
+                    case ']': Count[2]++; continue;
+                    }
+                }
+                if (Count[0] == 0 && Count[1] == 0 && Count[2] == 0
+                    && !(Flags & SKIP_TOBOL)) {
+                    free(StateMap);
+                    return 1;
+                }
+            }
+        free(StateMap);
+        if (Count[0] == 0 && Count[1] == 0 && Count[2] == 0 && (Flags & SKIP_TOBOL))
             return 1;
         if (Flags & SKIP_LINE) {
             return 1;
@@ -1010,7 +1031,7 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
                 I += C_FIRST_INDENT;
             else
                 I += C_INDENT;
-	    PRINTF(("'{' indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+            PRINTF(("'{' indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
 
             if (LookAt(B, Line, 0, "{", hsC_Normal, 0))
                 I -= C_BRACE_OFS;
@@ -1057,7 +1078,7 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
                 //if (CharP == ':') {
                 //    I -= C_COLON_OFS;
                 //}
-                PRINTF(("';' indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+                PRINTF(("';' indent : Line=%d, RowP=%d, ColP=%d, CharP=%c   Ind=%d\n", Line, RowP, ColP, CharP, I));
                 I = B->LineIndented(RowP);
                 if (((PrevRowP != RowP) ||
                      ((PrevRowP == RowP) && (PrevColP != ColP)))
@@ -1088,21 +1109,21 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
                 I = B->LineIndented(RowP);
                 break;
             }
-            PRINTF(("';' -- indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+            PRINTF(("';' -- indent : Line=%d, RowP=%d, ColP=%d, CharP=%c Ind2=%d\n", Line, RowP, ColP, CharP, I));
 
             //            else
             //            if (LookAt(B, Line, 0, "{", hsC_Normal, 0))
             //                I += C_INDENT - C_BRACE_OFS;
 
             return I + ContinuationIndent;
-
+#if 0
         case ':':
-	    ColP--;
+            ColP--;
             PRINTF(("COL-- %d\n", ColP));
-	    if (FindPrevIndent(B, RowP, ColP, CharP,
-			       FIND_SEMICOLON | FIND_COLON | FIND_QUESTION
-			       | FIND_CLASS | FIND_CASE) != 1) {
-		PRINTF(("FOUNPRE \n"));
+            if (FindPrevIndent(B, RowP, ColP, CharP,
+                               FIND_SEMICOLON | FIND_COLON | FIND_QUESTION
+                               | FIND_CLASS | FIND_CASE) != 1) {
+                PRINTF(("FOUNPRE \n"));
                 if (FirstRowP != PrevRowP)
                     ContinuationIndent = C_CONTINUATION;
                 return 0 + ContinuationIndent;
@@ -1112,8 +1133,8 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
 
             switch (CharP) {
             case ':':
-                //ColP++;
-                /*if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD) != 1)
+                /*ColP++;
+                if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD) != 1)
                  return 0;
                  I = B->LineIndented(RowP);// - C_COLON_OFS;
                  PRINTF(("':' 0 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
@@ -1126,9 +1147,10 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
                 I = B->LineIndented(RowP);
                 PRINTF(("!!! FirstRowP=%d, PrevRowP=%d, RowP=%d, I=%d\n", FirstRowP, PrevRowP, RowP, I));
                 PRINTF(("!!! FirstColP=%d, PrevColP=%d, ColP=%d\n", FirstColP, PrevColP, ColP));
-                if (CheckLabel(B, RowP))
+                if (CheckLabel(B, RowP)) {
+                    PRINTF(("CHECKEDLABEL1\n"));
                     I -= C_COLON_OFS;
-                else if (PrevRowP == RowP && FirstRowP == PrevRowP && FirstColP + 1 == PrevColP)
+                } else if (PrevRowP == RowP && FirstRowP == PrevRowP && FirstColP + 1 == PrevColP)
                     I += C_CONTINUATION;
                 if (LookAt(B, Line, 0, "{", hsC_Normal, 0)
                     && LookAt(B, RowP, ColP, "{", hsC_Normal, 0))
@@ -1139,7 +1161,7 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
                 else if (!LookAt(B, Line, 0, "{", hsC_Normal, 0)
                          && LookAt(B, RowP, ColP, "{", hsC_Normal, 0))
                     I -= C_BRACE_OFS;
-                PRINTF(("':' 1 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+                PRINTF(("':' 1 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c   BRACE %d\n", Line, RowP, ColP, CharP, I));
                 break;
             case 'p':
                 ColP++;
@@ -1187,7 +1209,7 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
             }
             PRINTF(("':' -- indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
             return I + ContinuationIndent;
-
+#endif
         case 'i':
         case 's':
         case 'f':
@@ -1298,10 +1320,10 @@ int Indent_C(EBuffer *B, int Line, int PosCursor) {
                     I = IndentCPP(B, Line, StateLen, 0);
                 } else {
                     I = IndentNormal(B, Line, StateLen, StateMap);
-		    if ((StateMap[0] == hsC_Comment
-			 || StateMap[0] == hsC_CommentL
-			 || StateMap[0] == hsC_CPP_Comm)
-			&& ((LookAt(B, Line, 0, "/*", hsC_Comment, 0)
+                    if ((StateMap[0] == hsC_Comment
+                         || StateMap[0] == hsC_CommentL
+                         || StateMap[0] == hsC_CPP_Comm)
+                        && ((LookAt(B, Line, 0, "/*", hsC_Comment, 0)
                              || LookAt(B, Line, 0, "/*", hsC_CPP_Comm, 0)
                              || LookAt(B, Line, 0, "//", hsC_CommentL, 0))))
                     {

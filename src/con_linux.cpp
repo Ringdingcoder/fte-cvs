@@ -119,7 +119,7 @@ static void mouseShow() {
         int pos = (LastMouseX + LastMouseY * VideoCols) * 2 + 4;
         lseek(VcsFd, pos, SEEK_SET);
         read(VcsFd, &MousePosCell, 2);
-        TCell newCell = MousePosCell ^ 0x7700;  // correct ?
+        TCell newCell(0, 0); // FIXME!! MousePosCell ^ 0x7700;  // correct ?
         lseek(VcsFd, pos, SEEK_SET);
         write(VcsFd, &newCell, 2);
         mouseDrawn = 1;
@@ -349,7 +349,7 @@ int ConContinue() {
 }
 
 #ifdef USE_SCRNMAP
-static int conread(int fd, void *p, int len) {   // len should be a multiple of 2
+static ssize_t conread(int fd, void *p, int len) {   // len should be a multiple of 2
     char buf[512];
     char *c = (char *)p;
     char *s = buf;
@@ -357,7 +357,7 @@ static int conread(int fd, void *p, int len) {   // len should be a multiple of 
     if (noCharTrans || (len > 512)) {
         return read(fd, p, len);
     } else {
-        int rlen = read(fd, buf, len);
+        ssize_t rlen = read(fd, buf, len);
         for (int n = 0; n < rlen; n += 2) {
             *c++ = fromScreen[(unsigned char)*s++];
             *c++ = *s++;
@@ -366,7 +366,7 @@ static int conread(int fd, void *p, int len) {   // len should be a multiple of 
     }
 }
 
-static int conwrite(int fd, void *p, int len) {  // len should be a multiple of 2
+static ssize_t conwrite(int fd, void *p, int len) {  // len should be a multiple of 2
     char buf[512];
     char *s = (char *)p;
     char *c = buf;
@@ -388,7 +388,7 @@ static int conwrite(int fd, void *p, int len) {  // len should be a multiple of 
 
 int ConClear() {
     int X, Y;
-    TCell Cell = ' ' | (0x07 << 8);
+    TCell Cell(' ', 0x07);
     ConQuerySize(&X, &Y);
     ConSetBox(0, 0, X, Y, Cell);
     ConSetCursorPos(0, 0);
@@ -443,7 +443,7 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
     TDrawBuffer B;
-    MoveCh(B, Cell & 0xFF, Cell >> 8, W);
+    MoveCh(B, Cell.GetChar(), Cell.GetAttr(), W);
     ConPutLine(X, Y, W, H, B);
     return 0;
 }

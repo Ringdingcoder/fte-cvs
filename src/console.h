@@ -89,10 +89,35 @@
 typedef unsigned char TAttr;
 typedef TAttr *PAttr;
 
-#ifdef NTCONSOLE 
-typedef unsigned long TCell;
+// we need to use class instead of casting to short
+// otherwice we would need to resolve CPU ordering issues
+#ifdef NTCONSOLE
+//typedef unsigned long TCell;
+#error Write TCell class to be compatible with PCHAR_INFO and update methods!
+// this is just WILD WILD GUESS....
+class TCell : public PCHAR_INFO {
+public:
+    TCell() : Char(' '), Attr(0) {}
+    TCell(char c, TAttr a) : Char(c), Attr(a) {}
+    char GetChar() const { return Char.AsciiChar; }
+    TAttr GetAttr() const { return Attributes; }
+    void SetChar(char c) { Char.AsciiChar = c; }
+    void SetAttr(TAttr a) { Attributes = a; }
+    void Set(char c, TAttr a) { SetChar(c); SetAttr(a); }
+};
 #else
-typedef unsigned short TCell;
+class TCell {
+    char Char;
+    TAttr Attr;
+public:
+    TCell() : Char(' '), Attr(0) {}
+    TCell(char c, TAttr a) : Char(c), Attr(a) {}
+    char GetChar() const { return Char; }
+    TAttr GetAttr() const { return Attr; }
+    void SetChar(char c) { Char = c; }
+    void SetAttr(TAttr a) { Attr = a; }
+    void Set(char c, TAttr a) { SetChar(c); SetAttr(a); }
+};
 #endif
 
 typedef TCell *PCell;

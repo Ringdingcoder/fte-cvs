@@ -12,7 +12,7 @@ static int use_esc_hack = 0;
 #include "sysdep.h"
 #include "c_config.h"
 #include "console.h"
-// #include "slangkbd.h"
+//#include "slangkbd.h"
 #include "gui.h"
 
 //#include <slang/slang.h>
@@ -84,11 +84,11 @@ static SLsmg_Char_Type raw_dchs[sizeof(slang_dchs)];
 
 static unsigned char ftesl_get_dch(SLsmg_Char_Type raw)
 {
-    for (int i = 0; i < (int) sizeof(slang_dchs); i++)
+    for (size_t i = 0; i < sizeof(slang_dchs); i++)
 	if (raw_dchs[i].nchars == raw.nchars
 	    && !memcmp(raw_dchs[i].wchars, raw.wchars,
 		       raw.nchars * sizeof(*raw.wchars)))
-	    return DCH_SLANG_C1 + i;
+	    return (unsigned char)(DCH_SLANG_C1 + i);
     return DCH_SLANG_EOL;
 }
 
@@ -285,8 +285,8 @@ static void fte_write_color_chars(PCell Cell, int W)
     SLsmg_set_color(colprev);
     while (W > 0) {
 	for (i = 0; i < W && i < (int) sizeof(buf); i++) {
-	    ch = Cell[i] & 0xff;
-	    col = (Cell[i] >> 8) & 0x7f;
+	    ch = Cell[i].GetChar();
+	    col = Cell[i].GetAttr() & 0x7f;
 	    if (ch <= 127 || ch >= 0xa0) {
 		if (ch < 32)
 		    buf[i] = '.';
@@ -371,13 +371,13 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 	SLsmg_read_raw(linebuf, W);
 	for (i = 0; i < W; i++) {
 	    if (linebuf[i].color & SLSMG_ACS_MASK)
-		Cell[i] = ftesl_get_dch(linebuf[i]);
+		Cell[i].SetChar(ftesl_get_dch(linebuf[i]));
 	    else
 		/*
 		 * FIXME: Handle UTF-8 -- way beyond a quick-and-dirty
 		 * fix.  --MV
 		 */
-		Cell[i] = SLSMG_EXTRACT_CHAR(linebuf[i]);
+		Cell[i].SetChar((char)SLSMG_EXTRACT_CHAR(linebuf[i]));
 	    /*
 	     * FIXME: This preserves only 7 out of 15 bits of color.
 	     * Fortunately, we're dealing with color handles rather than
@@ -385,7 +385,7 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 	     * map these to color data.  As long as we use less than 127
 	     * different colors, things should be OK.  I think.  --MV
 	     */
-	    Cell[i] |= (linebuf[i].color & 0x7f) << 8;
+	    Cell[i].SetAttr(linebuf[i].color & 0x7f);
 	}
 	Cell += W;
 	H--;
@@ -445,11 +445,8 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 {
-    SLsmg_Char_Type *box;
-
-    box = new SLsmg_Char_Type [W * H];
-
-    TCell fill = (((unsigned) Fill) << 8) | ' ';
+    SLsmg_Char_Type *box = new SLsmg_Char_Type [W * H];
+    TCell fill(' ', Fill);
 
     ConGetBoxRaw(X, Y, W, H, box);
 
@@ -615,7 +612,7 @@ static TKeyCode ftesl_process_key(int key, int ctrlhack = 0)
 	else
 	    return keys_ctrlhack[key - 1];
     } else if (key & FTESL_KEY) {
-	kcode = ftesl_getftekey(key & 0x00ff);
+	kcode = ftesl_getftekey((unsigned char)key);
 	if (key & FTESL_KEY_SHIFT)
 	    kcode |= kfShift;
 	if (key & FTESL_KEY_CTRL)
@@ -726,7 +723,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 
 		key = SLang_getkey();
 		if (key == 3) {
-		    SLang_ungetkey(key);
+		    SLang_ungetkey((unsigned char)key);
 		    SLkp_getkey();
 		}
 		if (key >= 'a' && key <= 'z')
@@ -799,7 +796,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 		}
 		escfirst = 0;
 	} else {
-	    SLang_ungetkey(key);
+	    SLang_ungetkey((unsigned char)key);
 	    key = SLkp_getkey();
 	    kcode = ftesl_process_key(key, 0);
 	}
@@ -888,7 +885,7 @@ int GUI::RunProgram(int /*mode */ , char *Command)
 char ConGetDrawChar(int idx)
 {
     static const char * use_tab = NULL;
-    static int use_tab_size = 0;
+    static size_t use_tab_size = 0;
 
     static const char tab[] =
     {

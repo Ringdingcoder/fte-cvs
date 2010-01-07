@@ -887,7 +887,7 @@ char ConGetDrawChar(int idx)
     static const char * use_tab = NULL;
     static size_t use_tab_size = 0;
 
-    static const char tab[] =
+    static const unsigned char tab[] =
     {
 	DCH_SLANG_C1,
 	DCH_SLANG_C2,
@@ -912,7 +912,7 @@ char ConGetDrawChar(int idx)
 	DCH_SLANG_ARIGHT
     };
 
-    static const char tab_linux[] =
+    static const unsigned char tab_linux[] =
     {
 	DCH_SLANG_C1,
 	DCH_SLANG_C2,
@@ -945,12 +945,13 @@ char ConGetDrawChar(int idx)
 
     if (use_tab == NULL) {
 	char *c = getenv("TERM");
-        use_tab = ((c == NULL) || strcmp(c, "linux") != 0) ? tab : tab_linux;
-        use_tab=GetGUICharacters ("Slang",use_tab);
+	use_tab = (const char*)
+	    (((c == NULL) || strcmp(c, "linux") != 0) ? tab : tab_linux);
+	use_tab = GetGUICharacters("Slang", use_tab);
 	use_tab_size = strlen(use_tab);
     }
 
-    assert(idx >= 0 && idx < use_tab_size);
+    assert(idx >= 0 && idx < (int)use_tab_size);
 
     return use_tab[idx];
 }

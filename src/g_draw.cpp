@@ -84,7 +84,7 @@ void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, i
     if (Pos >= Width) return;
     if (Pos + MaxCount > Width) MaxCount = Width - Pos;
     if (MaxCount <= 0) return;
-    for (B += Pos; MaxCount > 0 && (*Ch != 0); B++, MaxCount--) {
+    for (B += Pos; MaxCount > 0 && (*Ch != 0); MaxCount--) {
         if (*Ch == '&' && !was) {
             Ch++;
             MaxCount++;
@@ -96,7 +96,8 @@ void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, i
             B->SetAttr(A1);
             was = 0;
         } else
-            B->SetAttr(A0);
+	    B->SetAttr(A0);
+        B++;
     }
 }
 

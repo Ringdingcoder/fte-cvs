@@ -119,7 +119,8 @@ static void mouseShow() {
         int pos = (LastMouseX + LastMouseY * VideoCols) * 2 + 4;
         lseek(VcsFd, pos, SEEK_SET);
         read(VcsFd, &MousePosCell, 2);
-        TCell newCell(0, 0); // FIXME!! MousePosCell ^ 0x7700;  // correct ?
+        TCell newCell(MousePosCell.GetChar(),
+                      MousePosCell.GetAttr() ^ 0x77);  // correct ?
         lseek(VcsFd, pos, SEEK_SET);
         write(VcsFd, &newCell, 2);
         mouseDrawn = 1;
@@ -490,8 +491,8 @@ int ConSetCursorPos(int X, int Y) {
 
     if (X >= 0 && X < int(VideoCols)) CursorX = X;
     if (Y >= 0 && Y < int(VideoRows)) CursorY = Y;
-    pos[0] = CursorX;
-    pos[1] = CursorY;
+    pos[0] = (char)CursorX;
+    pos[1] = (char)CursorY;
     lseek(VcsFd, 2, SEEK_SET);
     write(VcsFd, pos, 2);
     return 0;

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __SYSDEP_H
-#define __SYSDEP_H
+#ifndef SYSDEP_H
+#define SYSDEP_H
 
 #include <assert.h>
 #include <string.h>
@@ -18,7 +18,6 @@
 #if defined(AIX) || defined(SCO) || defined(NCR)
 #include <strings.h>
 #endif
-#include <stdio.h>
 #include <fcntl.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -201,4 +200,4 @@
 #define false 0
 #endif
 
-#endif // __SYSDEP_H
+#endif // SYSDEP_H

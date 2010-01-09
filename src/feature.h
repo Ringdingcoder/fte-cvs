@@ -9,8 +9,8 @@
 
 /* some stuff does not yet work */
 
-#ifndef __FEATURE_H__
-#define __FEATURE_H__
+#ifndef FEATURE_H
+#define FEATURE_H
 
 #undef CONFIG_EMULATE_VI // todo
 
@@ -90,4 +90,5 @@
 #endif
 
 #define CONFIG_I_COMPLETE
-#endif
+
+#endif // FEATURE_H

@@ -5,6 +5,7 @@
 
 #include <signal.h>
 #include <sys/wait.h>
+#include <stdio.h>
 
 #define MAX_PIPES 20
 

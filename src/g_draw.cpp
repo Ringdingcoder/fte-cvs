@@ -15,8 +15,8 @@
 #   include <windows.h>
 #endif
 
-int CStrLen(const char *p) {
-    int len = 0, was = 0;
+size_t CStrLen(const char *p) {
+    size_t len = 0, was = 0;
     while (*p) {
         if (*p++ == '&' && !was) {
             was = 1;
@@ -29,24 +29,23 @@ int CStrLen(const char *p) {
 
 #ifndef NTCONSOLE
 
-void MoveCh(PCell B, char CCh, TAttr Attr, int Count) {
+void MoveCh(PCell B, char CCh, TAttr Attr, size_t Count) {
     for (;Count > 0; B++, Count--)
         B->Set(CCh, Attr);
 }
 
-void MoveChar(PCell B, int Pos, int Width, const char CCh, TAttr Attr, int Count) {
+void MoveChar(PCell B, int Pos, int Width, const char CCh, TAttr Attr, size_t Count) {
     if (Pos < 0) {
         Count += Pos;
         Pos = 0;
     }
     if (Pos >= Width) return;
     if (Pos + Count > Width) Count = Width - Pos;
-    if (Count <= 0) return;
     for (B += Pos; Count > 0; B++, Count--)
         B->Set(CCh, Attr);
 }
 
-void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int Count) {
+void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Count) {
     if (Pos < 0) {
         Count += Pos;
         Ch -= Pos;
@@ -54,12 +53,11 @@ void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int Count)
     }
     if (Pos >= Width) return;
     if (Pos + Count > Width) Count = Width - Pos;
-    if (Count <= 0) return;
     for (B += Pos; Count > 0; B++, Count--)
         B->Set(*Ch++, Attr);
 }
 
-void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int MaxCount) {
+void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t MaxCount) {
     if (Pos < 0) {
         MaxCount += Pos;
         Ch -= Pos;
@@ -72,7 +70,7 @@ void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int MaxCou
         B->Set(*Ch++, Attr);
 }
 
-void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, int MaxCount) {
+void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, size_t MaxCount) {
     TAttr attr = A0;
     if (Pos < 0) {
         MaxCount += Pos;
@@ -94,33 +92,31 @@ void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, i
     }
 }
 
-void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, int Count) {
+void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
     if (Pos < 0) {
         Count += Pos;
         Pos = 0;
     }
     if (Pos >= Width) return;
     if (Pos + Count > Width) Count = Width - Pos;
-    if (Count <= 0) return;
     for (B += Pos; Count > 0; B++, Count--)
         B->SetAttr(Attr);
 }
 
-void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, int Count) {
+void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
     if (Pos < 0) {
         Count += Pos;
         Pos = 0;
     }
     if (Pos >= Width) return;
     if (Pos + Count > Width) Count = Width - Pos;
-    if (Count <= 0) return;
     for (B += Pos; Count > 0; B++, Count--)
         B->SetAttr(TAttr((B->GetAttr() & 0x0F) | Attr));
 }
 
 #else
 
-void MoveCh(PCell B, char Ch, TAttr Attr, int Count) {
+void MoveCh(PCell B, char Ch, TAttr Attr, size_t Count) {
     PCHAR_INFO p = (PCHAR_INFO) B;
     while (Count > 0) {
         p->Char.AsciiChar = Ch;
@@ -130,7 +126,7 @@ void MoveCh(PCell B, char Ch, TAttr Attr, int Count) {
     }
 }
 
-void MoveChar(PCell B, int Pos, int Width, const char Ch, TAttr Attr, int Count) {
+void MoveChar(PCell B, int Pos, int Width, const char Ch, TAttr Attr, size_t Count) {
     PCHAR_INFO p = (PCHAR_INFO) B;
     if (Pos < 0) {
         Count += Pos;
@@ -138,7 +134,6 @@ void MoveChar(PCell B, int Pos, int Width, const char Ch, TAttr Attr, int Count)
     }
     if (Pos >= Width) return;
     if (Pos + Count > Width) Count = Width - Pos;
-    if (Count <= 0) return;
     for (p += Pos; Count > 0; Count--) {
         p->Char.AsciiChar = Ch;
         p->Attributes = Attr;
@@ -146,7 +141,7 @@ void MoveChar(PCell B, int Pos, int Width, const char Ch, TAttr Attr, int Count)
     }
 }
 
-void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int Count) {
+void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Count) {
     PCHAR_INFO p = (PCHAR_INFO) B;
     
     if (Pos < 0) {
@@ -156,7 +151,6 @@ void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int Count)
     }
     if (Pos >= Width) return;
     if (Pos + Count > Width) Count = Width - Pos;
-    if (Count <= 0) return;
     for (p += Pos; Count > 0; Count--) {
         p->Char.AsciiChar = *Ch++;
         p->Attributes = Attr;
@@ -164,7 +158,7 @@ void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int Count)
     }
 }
 
-void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int MaxCount) {
+void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t MaxCount) {
     PCHAR_INFO p = (PCHAR_INFO) B;
     
     if (Pos < 0) {
@@ -174,7 +168,6 @@ void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int MaxCou
     }
     if (Pos >= Width) return;
     if (Pos + MaxCount > Width) MaxCount = Width - Pos;
-    if (MaxCount <= 0) return;
     for (p += Pos; MaxCount > 0 && (*Ch != 0); MaxCount--) {
         p->Char.AsciiChar = *Ch++;
         p->Attributes = Attr;
@@ -182,7 +175,7 @@ void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int MaxCou
     }
 }
 
-void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, int MaxCount) {
+void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, size_t MaxCount) {
     PCHAR_INFO p = (PCHAR_INFO) B;
     char was;
     //TAttr A;
@@ -194,7 +187,6 @@ void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, i
     }
     if (Pos >= Width) return;
     if (Pos + MaxCount > Width) MaxCount = Width - Pos;
-    if (MaxCount <= 0) return;
     was = 0;
     for (p += Pos; MaxCount > 0 && (*Ch != 0); MaxCount--) {
         if (*Ch == '&' && !was) {
@@ -213,7 +205,7 @@ void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, i
     }
 }
 
-void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, int Count) {
+void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
     PCHAR_INFO p = (PCHAR_INFO) B;
     
     if (Pos < 0) {
@@ -222,12 +214,11 @@ void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, int Count) {
     }
     if (Pos >= Width) return;
     if (Pos + Count > Width) Count = Width - Pos;
-    if (Count <= 0) return;
     for (p += Pos; Count > 0; Count--, p++)
         p->Attributes = Attr;
 }
 
-void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, int Count) {
+void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
     PCHAR_INFO p = (PCHAR_INFO) B;
     
     if (Pos < 0) {
@@ -236,7 +227,6 @@ void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, int Count) {
     }
     if (Pos >= Width) return;
     if (Pos + Count > Width) Count = Width - Pos;
-    if (Count <= 0) return;
     for (p += Pos; Count > 0; Count--) {
         p->Attributes =
             ((unsigned char)(p->Attributes & 0xf)) |

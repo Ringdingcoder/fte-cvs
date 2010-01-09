@@ -11,6 +11,7 @@
 #define CONSOLE_H
 
 #include "feature.h"
+#include <sys/types.h>
 
 /* don't change these, used as index */
 #define DCH_C1 0
@@ -229,15 +230,15 @@ int ConQueryMouseButtons(int *ButtonCount);
 int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete);
 int ConPutEvent(TEvent Event);
 
-void MoveCh(PCell B, char Ch, TAttr Attr, int Count);
-void MoveChar(PCell B, int Pos, int Width, const char Ch, TAttr Attr, int Count);
-void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int Count);
-void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, int MaxCount);
-void MoveCStr(PCell B, int Pos, int Width, const  char* Ch, TAttr A0, TAttr A1, int MaxCount);
-void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, int Count);
-void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, int Count);
+void MoveCh(PCell B, char Ch, TAttr Attr, size_t Count);
+void MoveChar(PCell B, int Pos, int Width, const char Ch, TAttr Attr, size_t Count);
+void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Count);
+void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t MaxCount);
+void MoveCStr(PCell B, int Pos, int Width, const  char* Ch, TAttr A0, TAttr A1, size_t MaxCount);
+void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count);
+void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count);
 
-int CStrLen(const char *s);
+size_t CStrLen(const char *s);
 
 int NewMenu(const char *Name);
 int NewItem(int menu, const char *Name);

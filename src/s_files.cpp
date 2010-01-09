@@ -272,7 +272,7 @@ int RemoveDots(char *Source, char *Dest) {
 }
 #endif
 
-int ExpandPath(const char *Path, char *Expand, int ExpandSize) {
+int ExpandPath(const char *Path, char *Expand, size_t ExpandSize) {
     char Name[MAXPATH];
 
     if (Path[0] == 0) {
@@ -377,7 +377,7 @@ int IsSameFile(const char *Path1, const char *Path2) {
     return 0;
 }
 
-int JustDirectory(const char *Path, char *Dir, int DirSize) {
+int JustDirectory(const char *Path, char *Dir, size_t DirSize) {
     char *p;
 
     if (ExpandPath(Path, Dir, DirSize) == -1)
@@ -388,7 +388,7 @@ int JustDirectory(const char *Path, char *Dir, int DirSize) {
     return 0;
 }
 
-int JustLastDirectory(const char *Path, char *Dir, int DirSize) {
+int JustLastDirectory(const char *Path, char *Dir, size_t DirSize) {
     size_t lastSlash = strlen(Path);
     while (lastSlash > 0 && !ISSEP(Path[lastSlash])) lastSlash--;
 
@@ -408,7 +408,7 @@ int JustLastDirectory(const char *Path, char *Dir, int DirSize) {
     return 0;
 }
 
-int JustFileName(const char *Path, char *Name, int NameSize) {
+int JustFileName(const char *Path, char *Name, size_t NameSize) {
     size_t len = strlen(Path);
 
     while (len > 0 && !ISSEP(Path[len - 1])) len--;
@@ -416,7 +416,7 @@ int JustFileName(const char *Path, char *Name, int NameSize) {
     return 0;
 }
 
-int JustRoot(const char *Path, char *Root, int RootSize) {
+int JustRoot(const char *Path, char *Root, size_t RootSize) {
 #if PATHTYPE == PT_UNIXISH
     strlcpy(Root, SSLASH, RootSize);
 #else
@@ -444,7 +444,7 @@ int IsFullPath(const char *Path) {
         return 0;
 }
 
-const char *ShortFName(const char *Path, int len) {
+const char *ShortFName(const char *Path, size_t len) {
     static char P[MAXPATH];
     char p1[MAXPATH];
     size_t l1;

@@ -104,6 +104,10 @@ public:
     void SetChar(char c) { Char.AsciiChar = c; }
     void SetAttr(TAttr a) { Attributes = a; }
     void Set(char c, TAttr a) { SetChar(c); SetAttr(a); }
+    bool operator==(const TCell &c) const {
+	return (Char.AsciiChar == c.Char.AsciiChar
+		&& Attributes == c.Attributes);
+    }
 };
 #else
 class TCell {
@@ -121,6 +125,9 @@ public:
     void SetChar(TChar c) { Char = c; }
     void SetAttr(TAttr a) { Attr = a; }
     void Set(TChar c, TAttr a) { SetChar(c); SetAttr(a); }
+    bool operator==(const TCell &c) const {
+	return (Char == c.Char && Attr == c.Attr);
+    }
 };
 #endif
 

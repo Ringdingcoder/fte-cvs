@@ -40,7 +40,7 @@ void MoveChar(PCell B, int Pos, int Width, const char CCh, TAttr Attr, size_t Co
         Pos = 0;
     }
     if (Pos >= Width) return;
-    if (Pos + Count > Width) Count = Width - Pos;
+    if ((int)Count > Width - Pos) Count = Width - Pos;
     for (B += Pos; Count > 0; B++, Count--)
         B->Set(CCh, Attr);
 }
@@ -52,7 +52,7 @@ void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Cou
         Pos = 0;
     }
     if (Pos >= Width) return;
-    if (Pos + Count > Width) Count = Width - Pos;
+    if ((int)Count > Width - Pos) Count = Width - Pos;
     for (B += Pos; Count > 0; B++, Count--)
         B->Set(*Ch++, Attr);
 }
@@ -64,9 +64,8 @@ void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Max
         Pos = 0;
     }
     if (Pos >= Width) return;
-    if (Pos + MaxCount > Width) MaxCount = Width - Pos;
-    if (MaxCount <= 0) return;
-    for (B += Pos; MaxCount > 0 && (*Ch != 0); B++, MaxCount--)
+    if ((int)MaxCount > Width - Pos) MaxCount = Width - Pos;
+    for (B += Pos; MaxCount > 0 && *Ch; B++, MaxCount--)
         B->Set(*Ch++, Attr);
 }
 
@@ -78,9 +77,8 @@ void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, s
         Pos = 0;
     }
     if (Pos >= Width) return;
-    if (Pos + MaxCount > Width) MaxCount = Width - Pos;
-    if (MaxCount <= 0) return;
-    for (B += Pos; MaxCount > 0 && (*Ch != 0);) {
+    if ((int)MaxCount > Width - Pos) MaxCount = Width - Pos;
+    for (B += Pos; MaxCount > 0 && *Ch;) {
         if (*Ch == '&' && attr == A0) {
             Ch++;
             attr = A1;
@@ -98,7 +96,7 @@ void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
         Pos = 0;
     }
     if (Pos >= Width) return;
-    if (Pos + Count > Width) Count = Width - Pos;
+    if ((int)Count > Width - Pos) Count = Width - Pos;
     for (B += Pos; Count > 0; B++, Count--)
         B->SetAttr(Attr);
 }
@@ -109,7 +107,7 @@ void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
         Pos = 0;
     }
     if (Pos >= Width) return;
-    if (Pos + Count > Width) Count = Width - Pos;
+    if ((int)Count > Width - Pos) Count = Width - Pos;
     for (B += Pos; Count > 0; B++, Count--)
         B->SetAttr(TAttr((B->GetAttr() & 0x0F) | Attr));
 }

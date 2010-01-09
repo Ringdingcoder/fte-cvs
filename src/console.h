@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __CONSOLE_H__
-#define __CONSOLE_H__
+#ifndef CONSOLE_H
+#define CONSOLE_H
 
 #include "feature.h"
 
@@ -87,6 +87,7 @@
 #define cmRenameFile    31   /* TODO: in-place editing of titlebar */
     
 typedef unsigned char TAttr;
+typedef unsigned char TChar;
 
 // we need to use class instead of casting to short
 // otherwice we would need to resolve CPU ordering issues
@@ -106,7 +107,7 @@ public:
 };
 #else
 class TCell {
-    char Char;
+    TChar Char;
     TAttr Attr;
     operator const char*();
     operator const unsigned char*();
@@ -114,12 +115,12 @@ class TCell {
     operator char*();
 public:
     TCell() : Char(' '), Attr(0x07) {}
-    TCell(char c, TAttr a) : Char(c), Attr(a) {}
-    char GetChar() const { return Char; }
+    TCell(TChar c, TAttr a) : Char(c), Attr(a) {}
+    TChar GetChar() const { return Char; }
     TAttr GetAttr() const { return Attr; }
-    void SetChar(char c) { Char = c; }
+    void SetChar(TChar c) { Char = c; }
     void SetAttr(TAttr a) { Attr = a; }
-    void Set(char c, TAttr a) { SetChar(c); SetAttr(a); }
+    void Set(TChar c, TAttr a) { SetChar(c); SetAttr(a); }
 };
 #endif
 
@@ -247,4 +248,4 @@ struct TRGBColor {
 extern TRGBColor RGBColor[16];
 extern bool RGBColorValid[16];
 
-#endif
+#endif // CONSOLE_H

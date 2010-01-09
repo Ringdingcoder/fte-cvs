@@ -7,9 +7,8 @@
  *
  */
 
-#ifndef __BIND_H
-#define __BIND_H
-
+#ifndef C_BIND_H
+#define C_BIND_H
 
 #include "console.h"
 #include "o_model.h"
@@ -26,10 +25,10 @@ class EAbbrev;
 class EView;
 class EColorize;
 
-typedef struct {
+struct KeySel {
     TKeyCode Mask;
     TKeyCode Key;
-} KeySel;
+};
 
 class EMode {
 public:
@@ -90,7 +89,7 @@ public:
 #define CT_VARIABLE 3
 #define CT_CONCAT   4 /* concatenate strings */
 
-typedef struct {
+struct CommandType {
     int type;
     short repeat;
     short ign;
@@ -98,13 +97,13 @@ typedef struct {
         long num;
         char *string;
     } u;
-} CommandType;
+};
 
-typedef struct {
+struct ExMacro {
     char *Name;
     int Count;
     CommandType *cmds;
-} ExMacro;
+};
 
 class EKey {
 public:
@@ -170,4 +169,4 @@ int AddConcat(int no);
 int HashStr(const char *str, int maxim);
 void SetWordChars(char *w, const char *s);
 
-#endif
+#endif // C_BIND_H

@@ -630,7 +630,7 @@ int ConInit(int XSize, int YSize) {
 }
 
 int ConDone(void) {
-    delete ScreenBuffer;
+    delete[] ScreenBuffer;
     ScreenBuffer = 0;
     return 0;
 }
@@ -651,18 +651,14 @@ int ConClear(void) {
 
 int ConSetTitle(char *Title, char *STitle) {
     char buf[sizeof(winTitle)] = {0};
+
     JustFileName(Title, buf, sizeof(buf));
     if (buf[0] == '\0') // if there is no filename, try the directory name.
         JustLastDirectory(Title, buf, sizeof(buf));
 
-    strncpy(winTitle, "FTE - ", sizeof(winTitle) - 1);
-    if (buf[0] != 0) // if there is a file/dir name, stick it in here.
-    {
-        strncat(winTitle, buf, sizeof(winTitle) - 1 - strlen(winTitle));
-        strncat(winTitle, " - ", sizeof(winTitle) - 1 - strlen(winTitle));
-    }
-    strncat(winTitle, Title, sizeof(winTitle) - 1 - strlen(winTitle));
-    winTitle[sizeof(winTitle) - 1] = 0;
+    snprintf(winTitle, sizeof(winTitle), "FTE - %s%s%s",
+	     buf, buf[0] ? " - " : "", Title);
+
     strncpy(winSTitle, STitle, sizeof(winSTitle) - 1);
     winSTitle[sizeof(winSTitle) - 1] = 0;
     XSetStandardProperties(display, win, winTitle, winSTitle, 0, NULL, 0, NULL);
@@ -711,11 +707,11 @@ void DrawCursor(int Show) {
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
     unsigned int i;
-    char temp[ScreenCols];
     unsigned int attr;
     //unsigned char *p, *ps, *c, *ops;
     unsigned int len, x, l, ox, olen, skip;
     TCell *pCell, *psCell, *opsCell, *cCell;
+    char temp[ScreenCols + 1];
 
     if (X >= (int) ScreenCols || Y >= (int) ScreenRows ||
         X + W > (int) ScreenCols || Y + H > (int) ScreenRows) {
@@ -1953,7 +1949,7 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
         } else if ((strcmp(argv[c], "-noxmb") == 0)
                    || (strcmp(argv[c], "--noxmb") == 0))
             useXMB = 0;
-        else if ((strcmp(argv[c], "-no18n") == 0)
+        else if ((strcmp(argv[c], "-noi18n") == 0)
                    || (strcmp(argv[c], "--noi18n") == 0))
             useI18n = 0;
         else if (strcmp(argv[c], "-name") == 0) {

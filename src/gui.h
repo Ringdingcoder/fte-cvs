@@ -7,18 +7,18 @@
  *
  */
 
-#ifndef __GUI_H
-#define __GUI_H
+#ifndef GUI_H
+#define GUI_H
 
 #include "console.h"
 #include <stdarg.h>
+#include <sys/types.h>
 
 #define RUN_WAIT 0
 #define RUN_ASYNC 1
 
 class GFramePeer;
 class GViewPeer;
-
 class GUI;
 class GFrame;
 
@@ -180,7 +180,7 @@ int DLGPickChoice(GView *View, const char *ATitle, int NSel, va_list ap, int Fla
 #define SEARCH_BACK    0x00000001   // reverse (TODO for regexps)
 #define SEARCH_RE      0x00000002   // use regexp
 #define SEARCH_NCASE   0x00000004   // case
-#define SEARCH_GLOBAL  0x00000008   // start from beggining (or end if BACK)
+#define SEARCH_GLOBAL  0x00000008   // start from begining (or end if BACK)
 #define SEARCH_BLOCK   0x00000010   // search in block
 #define SEARCH_NEXT    0x00000020   // next match
 #define SEARCH_NASK    0x00000040   // ask before replacing
@@ -202,7 +202,7 @@ int DLGPickChoice(GView *View, const char *ATitle, int NSel, va_list ap, int Fla
 
 #define MAXSEARCH 512
 
-typedef struct {
+struct SearchReplaceOptions {
     int ok;
     char strSearch[MAXSEARCH];
     char strReplace[MAXSEARCH];
@@ -210,11 +210,11 @@ typedef struct {
     //
     int resCount;
     int lastInsertLen;
-} SearchReplaceOptions;
+};
 
 int DLGGetFind(GView *View, SearchReplaceOptions &sr);
 int DLGGetFindReplace(GView *View, SearchReplaceOptions &sr);
 
 int WaitFdPipeEvent(TEvent *Event, int fd, int WaitTime);
 
-#endif
+#endif // GUI_H

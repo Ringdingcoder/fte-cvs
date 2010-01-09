@@ -150,25 +150,25 @@ int EBuffer::GetUData(int No, int pos, void **data, int len) {
 
 #define UGETC(rc,no,pos,what) \
     do { void *d; \
-    rc = GetUData(no, pos, &d, sizeof(unsigned char)); \
+    rc = GetUData(no, pos, &d, (int) sizeof(unsigned char)); \
     *(unsigned char *)&what = *(unsigned char *)d; \
-    pos -= sizeof(unsigned char); \
+    pos -= (int) sizeof(unsigned char); \
     } while (0)
 
 #define UGET(rc,no,pos,what) \
     do { void *d; \
-    rc = GetUData(no, pos, &d, sizeof(what)); \
-    memcpy((void *)&what, d, sizeof(what)); \
-    pos -= sizeof(what); \
+    rc = GetUData(no, pos, &d, (int) sizeof(what)); \
+    memcpy((void *)&what, d, (int) sizeof(what)); \
+    pos -= (int) sizeof(what); \
     } while (0)
 
 int EBuffer::Undo(int undo) {
     unsigned char UndoCmd;
     int rc;
-    unsigned long Line;
-    unsigned long Len;
-    unsigned long ACount;
-    unsigned long Col;
+    int Line;
+    int Len;
+    int ACount;
+    int Col;
     void *data;
     
     int No;
@@ -247,7 +247,7 @@ int EBuffer::Undo(int undo) {
         case ucBlock: 
             {
                 EPoint P;
-                unsigned long l;
+                int l;
                 
 //                printf("\tBlock\n");
                 UGET(rc, No, Pos, l); if (rc == 0) return 0;
@@ -271,7 +271,7 @@ int EBuffer::Undo(int undo) {
         case ucFoldDestroy:
             // puts("ucFoldDestroy");
             {
-                unsigned long level;
+                int level;
                 int ff;
                 
                 UGET(rc, No, Pos, Line); if (rc == 0) return 0;
@@ -319,7 +319,7 @@ int EBuffer::Undo(int undo) {
             Pos -= ACount;
             UGET(rc, No, Pos, Col); if (rc == 0) return 0;
             UGET(rc, No, Pos, Line); if (rc == 0) return 0;
-            if (Col==(unsigned long)-1||Line==(unsigned long)-1) {
+            if (Col == -1 || Line == -1) {
                 if (RemoveUserBookmark ((const char *)data)==0) return 0;
             } else {
                 if (PlaceUserBookmark ((const char *)data,EPoint (Line,Col))==0) return 0;

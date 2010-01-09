@@ -8,6 +8,10 @@
  */
 
 #include "feature.h"
+#include "console.h"
+#include "gui.h"
+#include "c_mode.h"
+#include "c_color.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,10 +23,6 @@
 #include <malloc.h>
 #endif
 
-#include "console.h"
-#include "gui.h"
-#include "c_mode.h"
-#include "c_color.h"
 
 #if defined(_DEBUG) && defined(MSVC) && defined(MSVCDEBUG)
 #include <crtdbg.h>

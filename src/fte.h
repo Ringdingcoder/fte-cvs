@@ -70,4 +70,4 @@
 
 #endif //_DEBUG && MSVC && MSVCDEBUG
 
-#endif
+#endif // __FTE_H

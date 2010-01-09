@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __EMODE_H__
-#define __EMODE_H__
+#ifndef C_MODE_H
+#define C_MODE_H
 
 #define CMD_EXT 0x1000  // max 4096 internal commands, check cfte.cpp
 
@@ -31,8 +31,8 @@
 #define CONTEXT_SVN      16
 #define CONTEXT_SVNDIFF  17
 
-//typedef unsigned char ChColor;
-typedef int ChColor;
+typedef unsigned char ChColor;
+//typedef int ChColor;
 
 #define HILIT_PLAIN   0
 #define HILIT_C       1
@@ -141,12 +141,12 @@ typedef int ChColor;
 #define WGETBIT(x,y) \
     (((x)[(unsigned char)(y) / 8] &  (1 << ((unsigned char)(y) % 8))) ? 1 : 0)
 
-typedef struct {
+struct EBufferFlags {
     int num[BFI_COUNT];
     char *str[BFS_COUNT];
     char WordChars[32];
     char CapitalChars[32];
-} EBufferFlags;
+};
 
 extern EBufferFlags DefaultBufferFlags;
 
@@ -269,7 +269,7 @@ extern EBufferFlags DefaultBufferFlags;
 #define STATE_TAGASNEXT    0x0002
 #define STATE_NOGRAB       0x0004
 
-typedef enum {
+enum MacroVariable {
     mvFilePath = 1,  /* directory + name + extension */
     mvFileName,      /* name + extension */
     mvFileDirectory, /* directory + '/' */
@@ -282,6 +282,6 @@ typedef enum {
     mvWord,
     mvLine,
     mvFTEVer
-} MacroVariable;
+};
 
-#endif
+#endif // C_MODE_H

@@ -81,7 +81,7 @@
 #include "icons/fte32x32.xpm"
 #include "icons/fte48x48.xpm"
 #include "icons/fte64x64.xpm"
-#endif
+#endif // USE_XICON
 
 #define MAX_SCRWIDTH 255
 #define MAX_SCRHEIGHT 255
@@ -525,22 +525,24 @@ static int SetupXWindow(int argc, char **argv)
     colorXGC = new ColorXGC();
 
 #ifdef USE_XICON
-    // Set icon using WMHints
-    Pixmap icon_pixmap, icon_shape;
-    if (XpmCreatePixmapFromData(display, win, const_cast<char**>(fte16x16_xpm), &icon_pixmap, &icon_shape, NULL) == XpmSuccess) {
-        XWMHints wm_hints;
-        wm_hints.flags = IconPixmapHint | IconMaskHint;
-        wm_hints.icon_pixmap = icon_pixmap;
-        wm_hints.icon_mask = icon_shape;
-        XSetWMHints(display, win, &wm_hints);
-    }
-
     // Set icons using _NET_WM_ICON property
     static const char **xpmData[ICON_COUNT] = { fte16x16_xpm, ftepm, fte48x48_xpm, fte64x64_xpm };
+    Pixmap icon_pixmap, icon_mask;
     XpmImage xpmImage[ICON_COUNT];
     CARD32 *xpmColors[ICON_COUNT] = { NULL, NULL, NULL, NULL };
     int i, iconBufferSize = 0;
     unsigned int j;
+
+    // Set icon using WMHints
+    if (XpmCreatePixmapFromData(display, win, const_cast<char**>(fte16x16_xpm), &icon_pixmap, &icon_mask, NULL) == XpmSuccess) {
+        XWMHints wm_hints;
+        wm_hints.flags = IconPixmapHint | IconMaskHint;
+        wm_hints.icon_pixmap = icon_pixmap;
+        wm_hints.icon_mask = icon_mask;
+        XSetWMHints(display, win, &wm_hints);
+        XFreePixmap(display, icon_pixmap);
+        XFreePixmap(display, icon_mask);
+    }
 
     // Load icons as XpmImage instances and create their colormaps
     for (i = 0; i < ICON_COUNT; i++) {
@@ -550,7 +552,7 @@ static int SetupXWindow(int argc, char **argv)
         iconBufferSize += 2 + xpm.width * xpm.height;
         colors = (CARD32 *)malloc(xpm.ncolors * sizeof(CARD32));
         if (colors == NULL) {
-            // Need to clear here is cleanup at the end checks for colors[i] to see if XPM was loaded
+            // Need to clear here as cleanup at the end checks for colors[i] to see if XPM was loaded
             XpmFreeXpmImage(&xpm);
             break;
         }
@@ -657,7 +659,7 @@ int ConSetTitle(char *Title, char *STitle) {
         JustLastDirectory(Title, buf, sizeof(buf));
 
     snprintf(winTitle, sizeof(winTitle), "FTE - %s%s%s",
-	     buf, buf[0] ? " - " : "", Title);
+             buf, buf[0] ? " - " : "", Title);
 
     strncpy(winSTitle, STitle, sizeof(winSTitle) - 1);
     winSTitle[sizeof(winSTitle) - 1] = 0;
@@ -1602,11 +1604,11 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
             Event->What = evNone;
         }
 
-	if ((WaitTime == -1 || WaitTime > (int)MouseAutoDelay)
-	    && (LastMouseEvent.What == evMouseAuto) && (EventMask & evMouse)) {
+        if ((WaitTime == -1 || WaitTime > (int)MouseAutoDelay)
+            && (LastMouseEvent.What == evMouseAuto) && (EventMask & evMouse)) {
 
-	    rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
-				 MouseAutoDelay);
+            rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
+                                 MouseAutoDelay);
             if (rc == 0) {
                 *Event = LastMouseEvent;
                 return 0;
@@ -1615,20 +1617,20 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
                    && (LastMouseEvent.What == evMouseDown || LastMouseEvent.What == evMouseMove)
                    && (LastMouseEvent.Mouse.Buttons) && (EventMask & evMouse)) {
 
-	    rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
-				 MouseAutoRepeat);
+            rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
+                                 MouseAutoRepeat);
             if (rc == 0) {
-		LastMouseEvent.What = evMouseAuto;
-		*Event = LastMouseEvent;
+                LastMouseEvent.What = evMouseAuto;
+                *Event = LastMouseEvent;
                 return 0;
             }
-	} else
-	    rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
-				 (WaitTime < 1000) ? WaitTime : 1001);
+        } else
+            rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
+                                 (WaitTime < 1000) ? WaitTime : 1001);
 
         if (rc == 0 || rc == -1)
             return -1;
-	// pipe event has evNotify
+        // pipe event has evNotify
     }
     return 0;
 }

@@ -891,14 +891,10 @@ int EGUI::CmdLoadFiles(int &argc, char **argv) {
 }
 
 int EGUI::Start(int &argc, char **argv) {
-    {
-        int rc;
+    int rc;
 
-        rc = GUI::Start(argc, argv);
-
-        if (rc)
-            return rc;
-    }
+    if ((rc = GUI::Start(argc, argv)))
+        return rc;
 
     if (InterfaceInit(argc, argv) != 0)
         return 2;

@@ -7,15 +7,15 @@
  *
  */
 
-#ifndef __COMMANDS_H__
-#define __COMMANDS_H__
+#ifndef COMMANDS_H
+#define COMMANDS_H
 
-typedef enum {
+enum ExResult {
     ErFAIL = 0,
     ErOK = 1
-} ExResult;
+};
 
-typedef enum {
+enum ExCommands {
     ExNop,
     ExFail,
 
@@ -771,6 +771,6 @@ typedef enum {
 
     ExBlockPasteOver
     /// Delete content's of selection and paste clipboard to current position
-} ExCommands;
+};
 
-#endif
+#endif // COMMANDS_H

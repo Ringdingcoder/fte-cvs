@@ -1056,6 +1056,10 @@ void EGUI::Stop() {
     FreeSvnIgnoreRegexp();
 #endif
 
+#ifdef CONFIG_TAGS
+    TagClear();
+#endif
+
     // free configuration file path
     free(ConfigSourcePath);
     ConfigSourcePath = NULL;

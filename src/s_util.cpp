@@ -42,10 +42,10 @@ static int copyfile(char *f1, char *f2) { // from F1 to F2
     return 0;
 }
 
-char *MakeBackup(char *FileName, char *NewName) {
+char *MakeBackup(const char *FileName, char *NewName) {
 //    static char NewName[260];
-    int l = strlen(FileName);
-    if (l <= 0)
+    size_t l = strlen(FileName);
+    if (!l)
         return NULL;
 
     /* try 1 */

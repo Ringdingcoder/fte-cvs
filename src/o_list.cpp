@@ -669,7 +669,7 @@ int EList::Unmark() {
 }
 
 int EList::ToggleMark() {
-    if (Count > 0)
+    if (Count > 0) {
         if (IsMarked(Row)) {
             if (Unmark(Row) == 1) {
                 NeedsRedraw = 1;
@@ -681,6 +681,7 @@ int EList::ToggleMark() {
                 return ErOK;
             }
         }
+    }
     return ErFAIL;
 }
 

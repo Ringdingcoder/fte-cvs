@@ -26,11 +26,6 @@ class EMode;
 #define bmStream  1
 #define bmColumn  2
 
-#define E_OK          0   // all ok
-#define E_CANCEL      1   // operation cancelled
-#define E_ERROR       2   // error
-#define E_NOMEM       3   // out of memory
-
 #define umDelete      0
 #define umInsert      1
 #define umSplitLine   2
@@ -111,36 +106,36 @@ public:
     ~EPoint() {}
 };
 
-typedef struct _UndoStack {
+struct UndoStack {
     int NextCmd, Record, Undo;
     int UndoPtr;
     int Num;
     void **Data;  
     int *Top;
-} UndoStack;
+};
 
 #ifdef CONFIG_OBJ_ROUTINE
 class RoutineView;
 
-typedef struct _RoutineList {
+struct RoutineList {
     int Count;
     int *Lines;
-} RoutineList;
+};
 #endif
 
 #ifdef CONFIG_BOOKMARKS
-typedef struct _EBookmark {
+struct EBookmark {
     char *Name;
     EPoint BM;
-} EBookmark;
+};
 #endif
 
-typedef struct {
+struct EFold {
     int line;
     unsigned char level;
     unsigned char open;
     unsigned short flags;
-} EFold;
+};
 
 class EEditPort: public EViewPort {
 public:
@@ -808,7 +803,7 @@ extern int suspendLoads;
 
 int DoneEditor();
 
-EBuffer *FindFile(char *FileName);
+EBuffer *FindFile(const char *FileName);
 
 int ParseSearchOption(int replace, char c, unsigned long &opt);
 int ParseSearchOptions(int replace, const char *str, unsigned long &Options);

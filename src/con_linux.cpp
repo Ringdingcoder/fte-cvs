@@ -1186,14 +1186,14 @@ int GUI::RunProgram(int /*mode*/, char *Command) {
 }
 
 char ConGetDrawChar(int idx) {
-    static const char *tab=NULL;
+    static const char *tab = NULL;
 
     if (!tab) {
         if (getenv("ISOCONSOLE")) {
-            tab=GetGUICharacters ("Linux","++++-|+++++>.*-^v :[>");
+            tab = GetGUICharacters("Linux", "++++-|+++++>.*-^v :[>");
         } else {
-            tab=GetGUICharacters ("Linux","Ú¿ÀÙÄ³ÂÃ´ÁÅ\x1AúÄ±°\x1B\x1A");
-//            tab=GetGUICharacters ("Linux","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
+            tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\xFA\x04\xC4\x18\x19\xB1\xB0\x1B\x1A");
+          //tab = GetGUICharacters("Linux","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
         }
     }
     assert(idx >= 0 && idx < int(strlen(tab)));

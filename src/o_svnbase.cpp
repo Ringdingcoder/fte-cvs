@@ -81,7 +81,7 @@ void ESvnBase::AddLine (char *file,int line, const char* msg,int status) {
         l->Line=line;
         l->Msg=msg?strdup (msg):0;
         l->Buf=0;
-        l->Status=status;
+        l->Status = (char)status;
 
         LineCount++;
         Lines=(SvnLine **)realloc (Lines,sizeof (SvnLine *)*LineCount);
@@ -205,8 +205,8 @@ void ESvnBase::NotifyPipe (int APipeId) {
         RxMatchRes RM;
         int i;
 
-        while (GetLine((char *)line, sizeof(line))) {
-            int len=strlen (line);
+        while (GetLine(line, sizeof(line))) {
+            size_t len = strlen(line);
             if (len>0&&line[len-1]=='\n') line[--len]=0;
             for (i=0;i<SvnIgnoreRegexpCount;i++)
                 if (RxExec (SvnIgnoreRegexp[i],line,len,line,&RM)==1) break;
@@ -306,9 +306,8 @@ void ESvnBase::DrawLine (PCell B,int Line,int Col,ChColor color,int Width) {
     if (Line<LineCount)
         if (Col<(int)strlen (Lines[Line]->Msg)) {
             char str[1024];
-            int len;
-
-            len=UnTabStr (str,sizeof (str),Lines[Line]->Msg,strlen (Lines[Line]->Msg));
+	    size_t len = UnTabStr(str,sizeof(str), Lines[Line]->Msg,
+				  strlen(Lines[Line]->Msg));
             if (len>Col) MoveStr (B,0,Width,str+Col,color,Width);
         }
 }
@@ -409,7 +408,7 @@ void ESvnBase::GetName (char *AName,int MaxLen) {
 void ESvnBase::GetInfo (char *AInfo,int MaxLen) {
     char format[128];
 
-    sprintf (format,"%2d %04d/%03d %s (%%.%is) ",ModelNo,Row,Count,Title,MaxLen-24-strlen (Title));
+    sprintf (format,"%2d %04d/%03d %s (%%.%is) ",ModelNo,Row,Count,Title,(int)(MaxLen-24-strlen(Title)));
     sprintf (AInfo,format,Command);
 }
 
@@ -424,7 +423,7 @@ void ESvnBase::GetPath (char *APath,int MaxLen) {
 void ESvnBase::GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen) {
     char format[128];
 
-    sprintf (format,"%s: %%.%is",Title,MaxLen-4-strlen (Title));
+    sprintf (format,"%s: %%.%is",Title,(int)(MaxLen-4-strlen(Title)));
     sprintf (ATitle,format,Command);
     strncpy (ASTitle,Title,SMaxLen);
     ASTitle[SMaxLen-1]=0;

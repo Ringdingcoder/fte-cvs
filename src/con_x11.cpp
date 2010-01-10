@@ -73,6 +73,7 @@
 #include <X11/XlibXtra.h>    /* HCL - HCLXlibInit */
 #endif
 
+//#undef USE_XICON
 #ifdef USE_XICON
 #include <X11/xpm.h>
 
@@ -376,6 +377,9 @@ static void TryLoadFontset(const char *fs)
         if (def != NULL)
             fprintf(stderr, " def_ret: %s\n", def);
     }
+    //else fprintf(stderr, "fonts  %p  %d   %p\n", miss, nMiss, def);
+    if (nMiss)
+	XFreeStringList(miss);
 }
 #endif
 
@@ -830,8 +834,10 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
                   (H - Count) * FontCY,
                   X * FontCX,
                   Y * FontCY);
-        for (l = 0; l < H - Count; l++)
-            memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
+        //for (l = 0; l < H - Count; l++)
+        //    memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
+        l = H - Count;
+        ConGetBox(X, Y + Count, W, l, CursorXYPos(X, Y));
 
         if (ConSetBox(X, Y + l, W, Count, Cell) == -1)
             return -1;
@@ -871,7 +877,7 @@ int ConSetSize(int X, int Y) {
         memcpy(p, CursorXYPos(0, i), MX * sizeof(TCell));
         p += X;
     }
-    delete ScreenBuffer;
+    delete[] ScreenBuffer;
     ScreenBuffer = NewBuffer;
     ScreenCols = X;
     ScreenRows = Y;

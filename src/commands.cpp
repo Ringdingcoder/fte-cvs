@@ -9,7 +9,7 @@
 
 #include "fte.h"
 
-int GetDefaultDirectory(EModel *M, char *Path, int MaxLen) {
+int GetDefaultDirectory(EModel *M, char *Path, size_t MaxLen) {
     if (M) 
         M->GetPath(Path, MaxLen);
     if (!M || Path[0] == 0)

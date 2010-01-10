@@ -357,32 +357,21 @@ EEventMap::~EEventMap() {
     free(Name);
 
     // free menu[]
-    {
-        for (int i = 0; i < EM_MENUS; i++)
-        {
-            free(Menu[i]);
-        }
-    }
+    for (int i = 0; i < EM_MENUS; i++)
+	free(Menu[i]);
 
     // free Abbrev's
-    {
-        EAbbrev *ab;
+    EAbbrev *ab;
 
-        for (int i = 0; i < ABBREV_HASH; i++)
-        {
-            while((ab = abbrev[i]) != NULL)
-            {
-                abbrev[i] = abbrev[i]->next;
-                delete ab;
-            }
-        }
-    }
+    for (int i = 0; i < ABBREV_HASH; i++)
+	while((ab = abbrev[i]) != NULL)
+	{
+	    abbrev[i] = abbrev[i]->next;
+	    delete ab;
+	}
 
     // free keymap's
-    {
-        delete KeyMap;
-    }
-
+    delete KeyMap;
 }
 
 void EEventMap::SetMenu(int which, const char *What) {
@@ -586,10 +575,8 @@ EAbbrev::EAbbrev(const char *aMatch, int aCmd) {
 }
 
 EAbbrev::~EAbbrev() {
-    if (Match)
-        free(Match);
-    if (Replace)
-        free(Replace);
+    free(Match);
+    free(Replace);
 }
 #endif
 

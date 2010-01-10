@@ -1,5 +1,5 @@
-#ifndef __FTEVER_H
-#define __FTEVER_H
+#ifndef FTEVER_H
+#define FTEVER_H
 
 #define MAKE_VERSION(major,minor,release) ((major<<24L) | (minor << 16L) | release)
 
@@ -10,6 +10,6 @@
 #define VERSION       "0.50.02" EXTRA_VERSION
 #define VERNUM        MAKE_VERSION(0x00, 0x50, 0x0002)
 #define COPYRIGHT     "Copyright (c) 1994-1998 Marko Macek\n" \
-                      "Copyright (c) 2000-2009 Others"
+                      "Copyright (c) 2000-2010 Others"
 
-#endif // __FTEVER_H
+#endif // FTEVER_H

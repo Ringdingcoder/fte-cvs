@@ -30,5 +30,9 @@ djgpp2:
 vag:
 	nmake /f fte-vag.mak
 
+.PHONY: tags
+tags:
+	find . -name '*.cpp' -o -name '*.h' | xargs ctags -a
+
 clean:
 	rm -f core *.o *~ .depend defcfg.h defcfg.cnf

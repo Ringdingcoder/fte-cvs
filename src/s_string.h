@@ -2,6 +2,7 @@
 #define __S_STRING_H__
 
 int UnTabStr(char *dest, int maxlen, const char *source, int slen);
+int UnEscStr(char *dest, int maxlen, const char *source, int slen);
 
 #if !defined(HAVE_STRLCPY)
 size_t strlcpy(char *dst, const char *src, size_t size);

@@ -234,7 +234,11 @@ void EMessages::AddError(char *file, int line, char *msg, const char *text, int 
     pe->file = file ? strdup(file) : 0;
     pe->line = line;
     pe->msg = msg ? strdup(msg) : 0;
-    pe->text = text ? strdup(text) : 0;
+    if (text) {
+        size_t len = strlen(text);
+        pe->text = (char*)malloc(len + 1);
+        UnEscStr(pe->text, len+1, text, len);
+    } else pe->text = 0;
     pe->hilit = hilit;
 
     AddError(pe);

@@ -165,10 +165,10 @@ int EBuffer::GetUData(int No, int pos, void **data, int len) {
 int EBuffer::Undo(int undo) {
     unsigned char UndoCmd;
     int rc;
-    int Line;
-    int Len;
-    int ACount;
-    int Col;
+unsigned    int Line;
+unsigned    int Len;
+unsigned    int ACount;
+unsigned    int Col;
     void *data;
     
     int No;
@@ -247,7 +247,7 @@ int EBuffer::Undo(int undo) {
         case ucBlock: 
             {
                 EPoint P;
-                int l;
+unsigned                int l;
                 
 //                printf("\tBlock\n");
                 UGET(rc, No, Pos, l); if (rc == 0) return 0;
@@ -271,7 +271,7 @@ int EBuffer::Undo(int undo) {
         case ucFoldDestroy:
             // puts("ucFoldDestroy");
             {
-                int level;
+unsigned                int level;
                 int ff;
                 
                 UGET(rc, No, Pos, Line); if (rc == 0) return 0;
@@ -319,7 +319,8 @@ int EBuffer::Undo(int undo) {
             Pos -= ACount;
             UGET(rc, No, Pos, Col); if (rc == 0) return 0;
             UGET(rc, No, Pos, Line); if (rc == 0) return 0;
-            if (Col == -1 || Line == -1) {
+//            if (Col == -1 || Line == -1) {
+            if (Col == (unsigned)-1 || Line == (unsigned)-1) {
                 if (RemoveUserBookmark ((const char *)data)==0) return 0;
             } else {
                 if (PlaceUserBookmark ((const char *)data,EPoint (Line,Col))==0) return 0;
@@ -337,7 +338,9 @@ int EBuffer::Undo(int undo) {
             break;
 
         default:
-            assert(1 == "Oops: invalid undo command.\n"[0]);
+            fprintf(stderr, "Oops: invalid undo command  %d.\n", UndoCmd);
+            return 0;
+            //assert(1 == "Oops: invalid undo command.\n"[0]);
         }
 //        puts("\tok");
         

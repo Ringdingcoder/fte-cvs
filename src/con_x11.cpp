@@ -82,7 +82,6 @@
 #include "icons/fte32x32.xpm"
 #include "icons/fte48x48.xpm"
 #include "icons/fte64x64.xpm"
-static Pixmap icon_pixmap, icon_mask;
 #endif // USE_XICON
 
 #define MAX_SCRWIDTH 255
@@ -535,24 +534,32 @@ static int SetupXWindow(int argc, char **argv)
 
 #ifdef USE_XICON
     // Set icons using _NET_WM_ICON property
-    static const char **xpmData[ICON_COUNT] = { fte16x16_xpm, ftepm, fte48x48_xpm, fte64x64_xpm };
+    XpmAttributes attributes;
+    attributes.valuemask = 0;//XpmColormap | XpmDepth | XpmCloseness;
+    //attributes.colormap = colormap;
+    //attributes.depth = DefaultDepth(display, DefaultScreen(display));
+    //attributes.closeness = 40000;
+    //attributes.exactColors = False;
+
+    // Set icon using WMHints
+    if (XpmCreatePixmapFromData(display, win, const_cast<char**>(fte16x16_xpm),
+                                &wm_hints.icon_pixmap, &wm_hints.icon_mask,
+                                &attributes) == XpmSuccess)
+        wm_hints.flags |= IconPixmapHint | IconMaskHint;
+
+    static const char * const *xpmData[ICON_COUNT] = { fte16x16_xpm, ftepm, fte48x48_xpm, fte64x64_xpm };
     XpmImage xpmImage[ICON_COUNT];
     CARD32 *xpmColors[ICON_COUNT] = { NULL, NULL, NULL, NULL };
     int i, iconBufferSize = 0;
     unsigned int j;
 
-    // Set icon using WMHints
-    if (XpmCreatePixmapFromData(display, win, const_cast<char**>(fte16x16_xpm), &icon_pixmap, &icon_mask, NULL) == XpmSuccess) {
-        wm_hints.flags |= IconPixmapHint | IconMaskHint;
-        wm_hints.icon_pixmap = icon_pixmap;
-	wm_hints.icon_mask = icon_mask;
-    }
-
     // Load icons as XpmImage instances and create their colormaps
     for (i = 0; i < ICON_COUNT; i++) {
         XpmImage &xpm = xpmImage[i];
         CARD32 *&colors = xpmColors[i];
-        if (XpmCreateXpmImageFromData(const_cast<char**>(xpmData[i]), &xpm, NULL) != XpmSuccess) break;
+        if (XpmCreateXpmImageFromData(const_cast<char**>(xpmData[i]), &xpm,
+                                      NULL) != XpmSuccess)
+            break;
         iconBufferSize += 2 + xpm.width * xpm.height;
         colors = (CARD32 *)malloc(xpm.ncolors * sizeof(CARD32));
         if (colors == NULL) {
@@ -615,7 +622,7 @@ static int SetupXWindow(int argc, char **argv)
             XpmFreeXpmImage(xpmImage + i);
         }
     }
-#endif
+#endif // USE_XICON
     XSetWMHints(display, win, &wm_hints);
     XResizeWindow(display, win, ScreenCols * FontCX, ScreenRows * FontCY);
     XMapRaised(display, win); // -> Expose
@@ -1242,49 +1249,52 @@ void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent
 }
 
 static void ProcessXEvents(TEvent *Event) {
-    static const char * const event_names[] = {
-	"",
-	"",
-	"KeyPress",
-	"KeyRelease",
-	"ButtonPress",
-	"ButtonRelease",
-	"MotionNotify",
-	"EnterNotify",
-	"LeaveNotify",
-	"FocusIn",
-	"FocusOut",
-	"KeymapNotify",
-	"Expose",
-	"GraphicsExpose",
-	"NoExpose",
-	"VisibilityNotify",
-	"CreateNotify",
-	"DestroyNotify",
-	"UnmapNotify",
-	"MapNotify",
-	"MapRequest",
-	"ReparentNotify",
-	"ConfigureNotify",
-	"ConfigureRequest",
-	"GravityNotify",
-	"ResizeRequest",
-	"CirculateNotify",
-	"CirculateRequest",
-	"PropertyNotify",
-	"SelectionClear",
-	"SelectionRequest",
-	"SelectionNotify",
-	"ColormapNotify",
-	"ClientMessage",
-	"MappingNotify"
-    };
     XEvent event;
 
     Event->What = evNone;
 
     XNextEvent(display, &event);
-    //fprintf(stderr, "event  %d -  %s\n", event.type, event_names[event.type]);
+#if 0
+    // debug - print event name
+    static const char * const event_names[] = {
+        "",
+        "",
+        "KeyPress",
+        "KeyRelease",
+        "ButtonPress",
+        "ButtonRelease",
+        "MotionNotify",
+        "EnterNotify",
+        "LeaveNotify",
+        "FocusIn",
+        "FocusOut",
+        "KeymapNotify",
+        "Expose",
+        "GraphicsExpose",
+        "NoExpose",
+        "VisibilityNotify",
+        "CreateNotify",
+        "DestroyNotify",
+        "UnmapNotify",
+        "MapNotify",
+        "MapRequest",
+        "ReparentNotify",
+        "ConfigureNotify",
+        "ConfigureRequest",
+        "GravityNotify",
+        "ResizeRequest",
+        "CirculateNotify",
+        "CirculateRequest",
+        "PropertyNotify",
+        "SelectionClear",
+        "SelectionRequest",
+        "SelectionNotify",
+        "ColormapNotify",
+        "ClientMessage",
+        "MappingNotify"
+    };
+    fprintf(stderr, "event  %d -  %s\n", event.type, event_names[event.type]);
+#endif
     if (XFilterEvent(&event, None))
         return;
 
@@ -1376,6 +1386,7 @@ static void ProcessXEvents(TEvent *Event) {
                     rect.height= (short) event.xexpose.height;
                     XUnionRectWithRegion(&rect, region, region);
                 }
+                XSync(display, 0); // wait for final expose
             } while (XCheckTypedWindowEvent(display, win, event.type, &event));
 
             // get clipping bounding box for all Exposed areas
@@ -1530,18 +1541,19 @@ static void ProcessXEvents(TEvent *Event) {
                     XTextProperty text_property;
                     char *text_list[1] = {(char *)(CurSelectionData[clip] ? CurSelectionData[clip] : empty)};
 
-                    XICCEncodingStyle style =
+                    int style =
                         event.xselectionrequest.target == XA_STRING ? XStringStyle :
                         event.xselectionrequest.target == proptype_text ? XStdICCTextStyle :
                         event.xselectionrequest.target == proptype_compound_text ? XCompoundTextStyle :
 #ifdef X_HAVE_UTF8_STRING
                         event.xselectionrequest.target == proptype_utf8_string ? XUTF8StringStyle :
 #endif
-                        (XICCEncodingStyle)-1;
+                        -1;
 
                     if (style != -1) {
                         // Can convert
-                        if (XmbTextListToTextProperty(display, text_list, 1, style, &text_property) == Success) {
+                        if (XmbTextListToTextProperty(display, text_list, 1, (XICCEncodingStyle) style,
+                                                      &text_property) == Success) {
                             if (text_property.format == 8) {
                                 // SendSelection supports only 8-bit data (should be always, just safety check)
                                 SendSelection(&notify, event.xselectionrequest.property, text_property.encoding,
@@ -2029,10 +2041,6 @@ GUI::~GUI() {
 #endif
     if (font_struct)
         XFreeFont(display, font_struct);
-#ifdef USE_XICON
-    XFreePixmap(display, icon_pixmap);
-    XFreePixmap(display, icon_mask);
-#endif
     XDestroyWindow(display, win);
     XCloseDisplay(display);
 

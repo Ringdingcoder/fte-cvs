@@ -82,6 +82,7 @@
 #include "icons/fte32x32.xpm"
 #include "icons/fte48x48.xpm"
 #include "icons/fte64x64.xpm"
+static Pixmap icon_pixmap, icon_mask;
 #endif // USE_XICON
 
 #define MAX_SCRWIDTH 255
@@ -528,10 +529,13 @@ static int SetupXWindow(int argc, char **argv)
     if (InitXColors() != 0) return -1;
     colorXGC = new ColorXGC();
 
+    XWMHints wm_hints;
+    wm_hints.flags = InputHint;
+    wm_hints.input = True;
+
 #ifdef USE_XICON
     // Set icons using _NET_WM_ICON property
     static const char **xpmData[ICON_COUNT] = { fte16x16_xpm, ftepm, fte48x48_xpm, fte64x64_xpm };
-    Pixmap icon_pixmap, icon_mask;
     XpmImage xpmImage[ICON_COUNT];
     CARD32 *xpmColors[ICON_COUNT] = { NULL, NULL, NULL, NULL };
     int i, iconBufferSize = 0;
@@ -539,13 +543,9 @@ static int SetupXWindow(int argc, char **argv)
 
     // Set icon using WMHints
     if (XpmCreatePixmapFromData(display, win, const_cast<char**>(fte16x16_xpm), &icon_pixmap, &icon_mask, NULL) == XpmSuccess) {
-        XWMHints wm_hints;
-        wm_hints.flags = IconPixmapHint | IconMaskHint;
+        wm_hints.flags |= IconPixmapHint | IconMaskHint;
         wm_hints.icon_pixmap = icon_pixmap;
-        wm_hints.icon_mask = icon_mask;
-        XSetWMHints(display, win, &wm_hints);
-        XFreePixmap(display, icon_pixmap);
-        XFreePixmap(display, icon_mask);
+	wm_hints.icon_mask = icon_mask;
     }
 
     // Load icons as XpmImage instances and create their colormaps
@@ -616,6 +616,7 @@ static int SetupXWindow(int argc, char **argv)
         }
     }
 #endif
+    XSetWMHints(display, win, &wm_hints);
     XResizeWindow(display, win, ScreenCols * FontCX, ScreenRows * FontCY);
     XMapRaised(display, win); // -> Expose
     return 0;
@@ -1241,11 +1242,49 @@ void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent
 }
 
 static void ProcessXEvents(TEvent *Event) {
+    static const char * const event_names[] = {
+	"",
+	"",
+	"KeyPress",
+	"KeyRelease",
+	"ButtonPress",
+	"ButtonRelease",
+	"MotionNotify",
+	"EnterNotify",
+	"LeaveNotify",
+	"FocusIn",
+	"FocusOut",
+	"KeymapNotify",
+	"Expose",
+	"GraphicsExpose",
+	"NoExpose",
+	"VisibilityNotify",
+	"CreateNotify",
+	"DestroyNotify",
+	"UnmapNotify",
+	"MapNotify",
+	"MapRequest",
+	"ReparentNotify",
+	"ConfigureNotify",
+	"ConfigureRequest",
+	"GravityNotify",
+	"ResizeRequest",
+	"CirculateNotify",
+	"CirculateRequest",
+	"PropertyNotify",
+	"SelectionClear",
+	"SelectionRequest",
+	"SelectionNotify",
+	"ColormapNotify",
+	"ClientMessage",
+	"MappingNotify"
+    };
     XEvent event;
 
     Event->What = evNone;
 
     XNextEvent(display, &event);
+    //fprintf(stderr, "event  %d -  %s\n", event.type, event_names[event.type]);
     if (XFilterEvent(&event, None))
         return;
 
@@ -1990,6 +2029,10 @@ GUI::~GUI() {
 #endif
     if (font_struct)
         XFreeFont(display, font_struct);
+#ifdef USE_XICON
+    XFreePixmap(display, icon_pixmap);
+    XFreePixmap(display, icon_mask);
+#endif
     XDestroyWindow(display, win);
     XCloseDisplay(display);
 

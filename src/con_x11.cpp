@@ -1386,7 +1386,6 @@ static void ProcessXEvents(TEvent *Event) {
                     rect.height= (short) event.xexpose.height;
                     XUnionRectWithRegion(&rect, region, region);
                 }
-                XSync(display, 0); // wait for final expose
             } while (XCheckTypedWindowEvent(display, win, event.type, &event));
 
             // get clipping bounding box for all Exposed areas

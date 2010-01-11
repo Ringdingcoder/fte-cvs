@@ -60,6 +60,8 @@ colorize TCL {
     h_trans { 6, '<', '-', 'Directive' }
     h_trans { 7, '<', '.', 'Special' }
     h_trans { 2, '<', '#', 'Comment' }
+    h_trans { 0, '<', '\\\#', 'Normal' }
+    h_trans { 0, '<', '\\\"', 'String' }
     h_trans { 3, '<', '"', 'String' }
     h_trans { 4, '<', '`', 'String' }
     h_trans { 0, 'S', 'a-zA-Z0-9_', 'Punctuation' }
@@ -99,8 +101,12 @@ mode TCL: PLAIN { # *sh
     Colorizer           = 'TCL';
     MultiLineHilit      = 1;
     AutoHilitParen      = 1;
+    AutoIndent          = 1;
+    Trim                = 1;
+    IndentMode          = 'C';
     
     SaveFolds           = 2;      # save fold info at end of line
-    CommentStart        = ' #';
+    CommentStart        = '#';
     CommentEnd          = '';
+    RoutineRegexp       = /^proc +\w/;
 }

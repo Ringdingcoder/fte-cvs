@@ -98,7 +98,7 @@ class ColorXGC;
 // times in miliseconds
 static const unsigned int MouseAutoDelay = 40;
 static const unsigned int MouseAutoRepeat = 200;
-static const unsigned int MouseMultiClick = 300;
+static const long MouseMultiClick = 300;
 
 static int setUserPosition = 0;
 static int initX = 0, initY = 0;

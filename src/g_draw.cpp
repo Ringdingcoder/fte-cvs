@@ -9,7 +9,7 @@
 
 #include "feature.h"
 #include "console.h"
-
+#include <stdlib.h>
 #ifdef  NTCONSOLE
 #   define  WIN32_LEAN_AND_MEAN 1
 #   include <windows.h>
@@ -36,6 +36,8 @@ void MoveCh(PCell B, char CCh, TAttr Attr, size_t Count) {
 
 void MoveChar(PCell B, int Pos, int Width, const char CCh, TAttr Attr, size_t Count) {
     if (Pos < 0) {
+	if ((int)Count < -Pos)
+            return;
         Count += Pos;
         Pos = 0;
     }
@@ -47,6 +49,8 @@ void MoveChar(PCell B, int Pos, int Width, const char CCh, TAttr Attr, size_t Co
 
 void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Count) {
     if (Pos < 0) {
+	if ((int)Count < -Pos)
+            return;
         Count += Pos;
         Ch -= Pos;
         Pos = 0;
@@ -59,6 +63,8 @@ void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Cou
 
 void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t MaxCount) {
     if (Pos < 0) {
+	if ((int)MaxCount < -Pos)
+            return;
         MaxCount += Pos;
         Ch -= Pos;
         Pos = 0;
@@ -72,6 +78,8 @@ void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Max
 void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, size_t MaxCount) {
     TAttr attr = A0;
     if (Pos < 0) {
+	if ((int)MaxCount < -Pos)
+            return;
         MaxCount += Pos;
         Ch -= Pos;
         Pos = 0;
@@ -92,6 +100,8 @@ void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, s
 
 void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
     if (Pos < 0) {
+	if ((int)Count < -Pos)
+            return;
         Count += Pos;
         Pos = 0;
     }
@@ -103,6 +113,8 @@ void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
 
 void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
     if (Pos < 0) {
+	if ((int)Count < -Pos)
+            return;
         Count += Pos;
         Pos = 0;
     }

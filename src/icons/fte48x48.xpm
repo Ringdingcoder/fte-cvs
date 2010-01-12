@@ -1,5 +1,5 @@
 /* XPM */
-static const char * fte48x48_xpm[] = {
+static const char * const fte48x48_xpm[] = {
 "48 48 45 1",
 ".     c None",
 "+     c #150000",

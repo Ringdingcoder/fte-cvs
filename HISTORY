@@ -2,7 +2,7 @@ Revision history
 -----------------------------------------------------------------------
 0.50.X -- <fill month here> 201X
 
-0.50.3 -- January 2010
+0.50.2 -- January 2010
   + Applied a few submitted patches from various Inet developers
   ! Fixed -noi18n option typo (-no18n)
   ! Fixed mask reset that caused problem with -noi18n startup
@@ -13,7 +13,7 @@ Revision history
   - Cleanup of some compiler warnings
   - Some code indention
 
-0.50.2 -- March 2009
+       -- March 2009
   - Cleanup for new Debian package
   - Various 64bit compilation and gcc cleanup
   ! Fixing bugs in pipe handling

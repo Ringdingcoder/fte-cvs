@@ -158,7 +158,7 @@ int EBuffer::GetUData(int No, int pos, void **data, int len) {
 #define UGET(rc,no,pos,what) \
     do { void *d; \
     rc = GetUData(no, pos, &d, (int) sizeof(what)); \
-    memcpy((void *)&what, d, (int) sizeof(what)); \
+    memcpy(&what, d, sizeof(what)); \
     pos -= (int) sizeof(what); \
     } while (0)
 
@@ -192,7 +192,7 @@ unsigned    int Col;
 //        printf("%d: %d\n", i, ((char *)US.Data[No])[i]);
 //    }
     
-//    printf("Undo %d %d,%d\n", undo, No, Pos); fflush(stdout);
+//   printf("Undo %d %d,%d\n", undo, No, Pos); fflush(stdout);
     
 //    fprintf(stderr, "\nNo = %d, Num = %d\n", No, US.Num);
     UGETC(rc, No, Pos, UndoCmd);

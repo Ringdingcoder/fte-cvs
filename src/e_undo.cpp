@@ -165,10 +165,10 @@ int EBuffer::GetUData(int No, int pos, void **data, int len) {
 int EBuffer::Undo(int undo) {
     unsigned char UndoCmd;
     int rc;
-unsigned    int Line;
-unsigned    int Len;
-unsigned    int ACount;
-unsigned    int Col;
+unsigned    long Line;
+unsigned    long Len;
+unsigned    long ACount;
+unsigned    long Col;
     void *data;
     
     int No;
@@ -247,7 +247,7 @@ unsigned    int Col;
         case ucBlock: 
             {
                 EPoint P;
-unsigned                int l;
+unsigned                long l;
                 
 //                printf("\tBlock\n");
                 UGET(rc, No, Pos, l); if (rc == 0) return 0;
@@ -320,7 +320,7 @@ unsigned                int level;
             UGET(rc, No, Pos, Col); if (rc == 0) return 0;
             UGET(rc, No, Pos, Line); if (rc == 0) return 0;
 //            if (Col == -1 || Line == -1) {
-            if (Col == (unsigned)-1 || Line == (unsigned)-1) {
+            if (Col == (unsigned long)-1 || Line == (unsigned long)-1) {
                 if (RemoveUserBookmark ((const char *)data)==0) return 0;
             } else {
                 if (PlaceUserBookmark ((const char *)data,EPoint (Line,Col))==0) return 0;

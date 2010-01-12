@@ -840,11 +840,10 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
                   (H - Count) * FontCY,
                   X * FontCX,
                   Y * FontCY);
-        //for (l = 0; l < H - Count; l++)
-        //    memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
-        l = H - Count;
-        ConGetBox(X, Y + Count, W, l, CursorXYPos(X, Y));
-
+	for (l = 0; l < H - Count; l++)
+	    memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
+	//l = H - Count;
+	//ConGetBox(X, Y + Count, W, l, CursorXYPos(X, Y));
         if (ConSetBox(X, Y + l, W, Count, Cell) == -1)
             return -1;
     } else if (Way == csDown) {

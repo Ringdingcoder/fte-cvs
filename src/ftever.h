@@ -7,8 +7,8 @@
 #define PROG_CFTE     "cfte"
 #define PROGRAM       PROG_FTE
 #define EXTRA_VERSION "-cvs"
-#define VERSION       "0.50.02" EXTRA_VERSION
-#define VERNUM        MAKE_VERSION(0x00, 0x50, 0x0002)
+#define VERSION       "0.50.03" EXTRA_VERSION
+#define VERNUM        MAKE_VERSION(0x00, 0x50, 0x0003)
 #define COPYRIGHT     "Copyright (c) 1994-1998 Marko Macek\n" \
                       "Copyright (c) 2000-2010 Others"
 

@@ -28,9 +28,13 @@ ChColor hcPlain_Selected = 0x30;
 ChColor hcPlain_Markers = 0x03;
 ChColor hcPlain_Found = 0x40;
 ChColor hcPlain_Keyword = 0x0F;
+#ifdef CONFIG_FOLDS
 ChColor hcPlain_Folds[5] = { 0x0A, 0x0A, 0x0A, 0x0A, 0x0A };
+#endif
 ChColor hcPlain_HilitWord = 0x0D;
+#ifdef CONFIG_BOOKMARKS
 ChColor hcPlain_Bookmark = 0x20;
+#endif
 
 /* LIST */
 //ChColor hcList_Border       = 0x03;
@@ -96,15 +100,19 @@ static const struct {
     { "PLAIN.Markers",     &hcPlain_Markers },
     { "PLAIN.Found",       &hcPlain_Found },
     { "PLAIN.Keyword",     &hcPlain_Keyword },
+#ifdef CONFIG_FOLDS
     { "PLAIN.Folds",       &hcPlain_Folds[0] }, // added some backwards compatibility
     { "PLAIN.Folds0",      &hcPlain_Folds[0] },
     { "PLAIN.Folds1",      &hcPlain_Folds[1] },
     { "PLAIN.Folds2",      &hcPlain_Folds[2] },
     { "PLAIN.Folds3",      &hcPlain_Folds[3] },
     { "PLAIN.Folds4",      &hcPlain_Folds[4] },
+#endif
     { "PLAIN.HilitWord",   &hcPlain_HilitWord },
+#ifdef CONFIG_BOOKMARKS
     { "PLAIN.Bookmark",    &hcPlain_Bookmark },
 
+#endif
     { "ScrollBar.Arrows",  &hcScrollBar_Arrows },
     { "ScrollBar.Back",    &hcScrollBar_Back },
     { "ScrollBar.Fore",    &hcScrollBar_Fore },

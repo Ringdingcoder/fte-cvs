@@ -66,7 +66,7 @@ menu Window {
 #    item "&New " { WinNewFrame }
 #    item;
     item "Split &Horizontal\tShift+F2" { WinHSplit }
-    item "&Close view\tCtrl+Alt+F4" { WinClose }
+    item "&Close view\tShift+Alt+F4" { WinClose }
     item "Close &other views\tF5" { WinZoom }
     item;
     item "Sa&ve Desktop" { DesktopSave }

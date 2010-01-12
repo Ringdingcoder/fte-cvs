@@ -119,7 +119,6 @@ static char res_name[20] = "fte";
 static char res_class[] = "Fte";
 
 static Display *display = 0;
-static Colormap colormap;
 static Atom wm_protocols;
 static Atom wm_delete_window;
 static Atom XA_CLIPBOARD = 0;
@@ -236,7 +235,7 @@ static void SetColor(int i) {
     Colors[i].flags = DoRed | DoGreen | DoBlue;
 }
 
-static int InitXColors() {
+static int InitXColors(Colormap colormap) {
     int i, j;
     long d = 0x7FFFFFFF, d1;
     XColor clr;
@@ -452,8 +451,7 @@ static int SetupXWindow(int argc, char **argv)
     if ((display = XOpenDisplay(ds)) == NULL)
         DieError(1, "XFTE Fatal: could not open display: %s!", ds);
 #endif
-
-    colormap = DefaultColormap(display, DefaultScreen(display));
+    Colormap colormap = DefaultColormap(display, DefaultScreen(display));
 
     XSetWindowAttributes setWindowAttributes;
     setWindowAttributes.bit_gravity =
@@ -474,7 +472,7 @@ static int SetupXWindow(int argc, char **argv)
                         CopyFromParent, InputOutput, CopyFromParent,
                         CWBitGravity, &setWindowAttributes);
 
-    unsigned long mask;
+    unsigned long mask = 0;
     i18n_ctx = (useI18n) ? i18n_open(display, win, &mask) : 0;
 
     if (InitXFonts() != 0)
@@ -525,7 +523,7 @@ static int SetupXWindow(int argc, char **argv)
     XSetWMNormalHints(display, win, &size_hints);
     XSetWMProtocols(display, win, &wm_delete_window, 1);
 
-    if (InitXColors() != 0) return -1;
+    if (InitXColors(colormap) != 0) return -1;
     colorXGC = new ColorXGC();
 
     XWMHints wm_hints;

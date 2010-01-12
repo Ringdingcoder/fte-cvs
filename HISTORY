@@ -1,12 +1,23 @@
 Revision history
 -----------------------------------------------------------------------
-0.50.X -- <fill month here> 2006
+0.50.X -- <fill month here> 201X
+
+0.50.3 -- January 2010
+  + Applied a few submitted patches from various Inet developers
+  ! Fixed -noi18n option typo (-no18n)
+  ! Fixed mask reset that caused problem with -noi18n startup
+  ! Fixed few more memory leaks
+  ! Fixed and extended some menu entries
+  ! Fixed keyboard focus (noticable with twm)
+  - Using more  size_t
+  - Cleanup of some compiler warnings
+  - Some code indention
 
 0.50.2 -- March 2009
   - Cleanup for new Debian package
   - Various 64bit compilation and gcc cleanup
-  - Fixing bugs in pipe handling
-  - Speeding XWindow Expose refresh and cleaning a bit this code
+  ! Fixing bugs in pipe handling
+  + Speeding XWindow Expose refresh and cleaning a bit this code
   - Adding more const
   - Reusing Pipe routines across unix targets
 
@@ -42,7 +53,6 @@ Revision history
   + command to center current line (LineCenter)
   + OS/2: does not need 'clipserv' anymore (experimental, please report bugs).
   + Readonly files are not editable when loaded.
-  + ...
 
 0.45 -- February 1997
   ! bug fixes.
@@ -88,7 +98,6 @@ Revision history
   + PM: Bigger file selection dialog box with history and save position.
   + New commands: IndentFunction, BlockMarkFunction, MoveFunctionPrev,
     MoveFunctionNext. Contributed by: jalving@ibm.net
-  + ...
 
 0.43 -- 15 July 1996
   ! Minor bug fixes.

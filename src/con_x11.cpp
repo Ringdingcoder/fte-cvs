@@ -1169,7 +1169,8 @@ static TEvent LastMouseEvent = { evNone };
 
 #define TM_DIFF(x,y) ((long)(((long)(x) < (long)(y)) ? ((long)(y) - (long)(x)) : ((long)(x) - (long)(y))))
 
-void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent *Event, Time mtime) {
+static void ConvertClickToEvent(int type, int xx, int yy, int button, int state,
+				TEvent *Event, Time mtime) {
     unsigned int myState = 0;
     static unsigned long LastClickTime = 0;
     static short LastClickCount = 0;
@@ -2077,12 +2078,15 @@ int GUI::RunProgram(int mode, char *Command) {
     return system(Cmd);
 }
 
-char ConGetDrawChar(int idx) {
+char ConGetDrawChar(unsigned int idx) {
     static const char *tab = NULL;
+    static size_t len = 0;
 
-    if (!tab)
-        tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
-    assert(idx >= 0 && idx < (int) strlen(tab));
+    if (!tab) {
+	tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
+        len = strlen(tab);
+    }
+    assert(idx < len);
 
     return tab[idx];
 }

@@ -245,7 +245,7 @@ int NewItem(int menu, const char *Name);
 int NewSubMenu(int menu, const char *Name, int submenu, int type);
 int GetMenuId(const char *Name);
 
-char ConGetDrawChar(int index);
+char ConGetDrawChar(unsigned int index);
 
 extern char WindowFont[64];
 

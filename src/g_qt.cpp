@@ -2154,10 +2154,10 @@ void DieError(int rc, const char *msg, ...) {
     exit(rc);
 }
 
-char ConGetDrawChar(int index) {
+char ConGetDrawChar(unsigned int index) {
     static char tab[] = "\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ";
     
-    assert(index >= 0 && index < (int)strlen(tab));
+    assert(index < (int)strlen(tab));
     
     return tab[index];
 }

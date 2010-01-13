@@ -1134,14 +1134,14 @@ int ConPutEvent(TEvent Event)
 	return 0;
 }
 
-char ConGetDrawChar(int index) {
+char ConGetDrawChar(unsigned int index) {
     static const char *tab = NULL;
 
     if (!tab) {
         //tab = GetGUICharacters ("DOS","Ú¿ÀÙÄ³ÂÃ´ÁÅ\x1AúÄ±°");
         tab = GetGUICharacters ("DOS","Ú¿ÀÙÄ³ÂÃ´ÁÅ\x1Aú\x04Ä\x18\x19±°\x1B\x1A");
     }
-    assert(index >= 0 && index < (int)strlen(tab) && strlen(tab) > 20);
+    assert(index < (int)strlen(tab) && strlen(tab) > 20);
 
     return tab[index];
 }

@@ -882,7 +882,7 @@ int GUI::RunProgram(int /*mode */ , char *Command)
     return rc;
 }
 
-char ConGetDrawChar(int idx)
+char ConGetDrawChar(unsigned int idx)
 {
     static const char * use_tab = NULL;
     static size_t use_tab_size = 0;
@@ -951,7 +951,7 @@ char ConGetDrawChar(int idx)
 	use_tab_size = strlen(use_tab);
     }
 
-    assert(idx >= 0 && idx < (int)use_tab_size);
+    assert(idx < (int)use_tab_size);
 
     return use_tab[idx];
 }

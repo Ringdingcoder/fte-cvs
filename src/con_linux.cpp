@@ -1185,7 +1185,7 @@ int GUI::RunProgram(int /*mode*/, char *Command) {
     return rc;
 }
 
-char ConGetDrawChar(int idx) {
+char ConGetDrawChar(unsigned int idx) {
     static const char *tab = NULL;
 
     if (!tab) {
@@ -1196,7 +1196,7 @@ char ConGetDrawChar(int idx) {
           //tab = GetGUICharacters("Linux","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
         }
     }
-    assert(idx >= 0 && idx < int(strlen(tab)));
+    assert(idx < int(strlen(tab)));
 
 #ifdef USE_SCRNMAP
     return fromScreen[(int)tab[idx]];

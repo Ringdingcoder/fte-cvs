@@ -851,13 +851,13 @@ int GUI::ShowEntryScreen() { /*FOLD00*/
     return 1;
 }
 
-char ConGetDrawChar(int index) { /*FOLD00*/
+char ConGetDrawChar(unsigned int index) { /*FOLD00*/
     static const char *tab=NULL;
 
     if (!tab) {
         tab=GetGUICharacters ("WindowsNT","Ú¿ÀÙÄ³ÂÃ´ÁÅ\x1AúÄ±°\x1B\x1A");
     }
-    assert(index >= 0 && index < (int)strlen(tab));
+    assert(index < (int)strlen(tab));
 
     return tab[index];
 }

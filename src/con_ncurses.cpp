@@ -828,7 +828,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
     return 1;
 }
 
-char ConGetDrawChar(int idx)
+char ConGetDrawChar(unsigned int idx)
 {
 	//    return 128+idx;
 	return (char)idx;

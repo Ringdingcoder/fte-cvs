@@ -208,7 +208,7 @@ public:
 #endif
 
     EPoint Match;
-    int MatchLen;
+    size_t MatchLen;
     int MatchCount;
     RxMatchRes MatchRes;
 
@@ -251,10 +251,10 @@ public:
     virtual int ExecCommand(int Command, ExState &State);
     virtual void HandleEvent(TEvent &Event);
     
-    virtual void GetName(char *AName, int MaxLen);
-    virtual void GetPath(char *APath, int MaxLen);
-    virtual void GetInfo(char *AInfo, int MaxLen);
-    virtual void GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen);
+    virtual void GetName(char *AName, size_t MaxLen);
+    virtual void GetPath(char *APath, size_t MaxLen);
+    virtual void GetInfo(char *AInfo, size_t MaxLen);
+    virtual void GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen);
 
     PELine RLine(int No) {
 #ifdef DEBUG_EDITOR
@@ -346,7 +346,7 @@ public:
     int SaveRegion(EPoint *A, EPoint *Z, int FH, int AddCR, int AddLF, int Mode);
     
     int AssertLine(int Line);
-    int InsertLine(EPoint Pos, int ACount, const char *AChars);
+    int InsertLine(EPoint Pos, size_t ACount, const char *AChars);
     
     int UpdateMarker(int Type, int Line, int Col, int Lines, int Cols);
     int UpdateMark(EPoint &M, int Type, int Line, int Col, int Lines, int Cols);
@@ -388,11 +388,11 @@ public:
     
     int NextCommand();
 #ifdef CONFIG_UNDOREDO
-    int PushUData(void *data, int len);
+    int PushUData(const void *data, size_t len);
     int PushULong(unsigned long l);
     int PushUChar(unsigned char ch);
-    int PopUData(void *data, int len);
-    int GetUData(int No, int pos, void **data, int len);
+    int PopUData(void *data, size_t len);
+    int GetUData(int No, int pos, void **data, size_t len);
     int Undo(int undo);
     int Undo();
     int Redo();
@@ -411,16 +411,16 @@ public:
     int DelLine(int Row, int DoMark = 1);
     int UnTabPoint(int Row, int Col);
     int InsLine(int Row, int DoAppend, int DoMark = 1);
-    int DelChars(int Row, int Ofs, int ACount);
-    int InsChars(int Row, int Ofs, int ACount, const char *Buffer);
-    int ChgChars(int Row, int Ofs, int ACount, const char *Buffer);
-    int DelText(int Row, int Col, int ACount, int DoMark = 1);
-    int InsText(int Row, int Col, int ACount, const char *Buffer, int DoMark = 1);
-    int InsLineText(int Row, int Col, int ACount, int Pos, PELine Line);
+    int DelChars(int Row, int Ofs, size_t ACount);
+    int InsChars(int Row, int Ofs, size_t ACount, const char *Buffer);
+    int ChgChars(int Row, int Ofs, size_t ACount, const char *Buffer);
+    int DelText(int Row, int Col, size_t ACount, int DoMark = 1);
+    int InsText(int Row, int Col, size_t ACount, const char *Buffer, int DoMark = 1);
+    int InsLineText(int Row, int Col, size_t ACount, int Pos, PELine Line);
     int SplitLine(int Row, int Col);
     int JoinLine(int Row, int Col);
     int CanUnfold(int Row);
-    int PadLine(int Row, int Length);
+    int PadLine(int Row, size_t Length);
     
     int ShowRow(int Row);
     int HideRow(int Row);
@@ -436,7 +436,7 @@ public:
     void Rehilit(int ToRow);
     void Redraw();
     void FullRedraw();
-    int  GetHilitWord(int len, char *str, ChColor &clr, int IgnCase = 0);
+    int  GetHilitWord(size_t len, char *str, ChColor &clr, int IgnCase = 0);
     
 /////////////////////////////////////////////////////////////////////////////   
 // Utility Routines
@@ -605,7 +605,7 @@ public:
 
     int     InsertChar(char aCh);
     int     TypeChar(char aCh);
-    int     InsertString(const char *aStr, int aCount);
+    int     InsertString(const char *aStr, size_t aCount);
     int     InsertSpacesToTab(int TSize);
     int     InsertTab();
     int     InsertSpace();

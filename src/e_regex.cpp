@@ -764,7 +764,7 @@ int RxTry(RxNode *rx, const char *s) {
     return 0;
 }
 
-int RxExecMatch(RxNode *Regexp, const char *Data, int Len, const char *Start, RxMatchRes *Match, unsigned int RxOpt) {
+int RxExecMatch(RxNode *Regexp, const char *Data, size_t Len, const char *Start, RxMatchRes *Match, unsigned int RxOpt) {
     if (Regexp == 0) return 0;
 
     match = Match;
@@ -776,8 +776,8 @@ int RxExecMatch(RxNode *Regexp, const char *Data, int Len, const char *Start, Rx
     return RxTry(Regexp, Start);
 }
 
-int RxExec(RxNode *Regexp, const char *Data, int Len, const char *Start, RxMatchRes *Match, unsigned int RxOpt) {
-    char Ch;
+int RxExec(RxNode *Regexp, const char *Data, size_t Len, const char *Start, RxMatchRes *Match, unsigned int RxOpt) {
+    int Ch;
     if (Regexp == 0) return 0;
 
     match = Match;
@@ -834,9 +834,9 @@ int RxExec(RxNode *Regexp, const char *Data, int Len, const char *Start, RxMatch
 #define FLAG_UP_NEXT     4
 #define FLAG_DOWN_NEXT   8
 
-static int add(int *len, char **s, const char *a, int alen, int &flag) {
-    int NewLen = *len + alen;
-    int i;
+static int add(size_t *len, char **s, const char *a, size_t alen, int &flag) {
+    size_t NewLen = *len + alen;
+    size_t i;
 
     NewLen = NewLen * 2;
 
@@ -883,8 +883,8 @@ static int add(int *len, char **s, const char *a, int alen, int &flag) {
     return 0;
 }
 
-int RxReplace(const char *rep, const char *Src, int /*len*/, RxMatchRes match, char **Dest, int *Dlen) {
-    int dlen = 0;
+int RxReplace(const char *rep, const char *Src, size_t /*len*/, RxMatchRes match, char **Dest, size_t *Dlen) {
+    size_t dlen = 0;
     char *dest = 0;
     char Ch;
     int n;

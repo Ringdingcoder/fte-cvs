@@ -252,7 +252,7 @@ int EBuffer::LoadRegion(EPoint * /*A*/, int /*FH*/, int /*StripChar*/, int /*Lin
     return 0;
 }
 
-int EBuffer::InsertLine(EPoint Pos, int ACount, const char *AChars) {
+int EBuffer::InsertLine(EPoint Pos, size_t ACount, const char *AChars) {
     if (InsLine(Pos.Row, 0) == 0) return 0;
     if (InsText(Pos.Row, Pos.Col, ACount, AChars) == 0) return 0;
     return 1;
@@ -719,7 +719,7 @@ int EBuffer::InsLine(int Row, int DoAppend, int DoMark) {
     return 1;
 }
 
-int EBuffer::DelChars(int Row, int Ofs, int ACount) {
+int EBuffer::DelChars(int Row, int Ofs, size_t ACount) {
     PELine L;
     
 //    printf("DelChars: %d:%d %d\n", Row, Ofs, ACount);
@@ -755,7 +755,7 @@ int EBuffer::DelChars(int Row, int Ofs, int ACount) {
     return 1;
 }
 
-int EBuffer::InsChars(int Row, int Ofs, int ACount, const char *Buffer) {
+int EBuffer::InsChars(int Row, int Ofs, size_t ACount, const char *Buffer) {
     PELine L;
     
 //    printf("InsChars: %d:%d %d\n", Row, Ofs, ACount);
@@ -813,7 +813,7 @@ int EBuffer::UnTabPoint(int Row, int Col) {
     return 1;
 }
 
-int EBuffer::ChgChars(int Row, int Ofs, int ACount, const char * /*Buffer*/) {
+int EBuffer::ChgChars(int Row, int Ofs, size_t ACount, const char * /*Buffer*/) {
     PELine L;
     
     assert(Row >= 0 && Row < RCount && Ofs >= 0);
@@ -843,7 +843,7 @@ int EBuffer::ChgChars(int Row, int Ofs, int ACount, const char * /*Buffer*/) {
     return 1;
 }
 
-int EBuffer::DelText(int Row, int Col, int ACount, int DoMark) {
+int EBuffer::DelText(int Row, int Col, size_t ACount, int DoMark) {
     int L, B, C;
 
 //    printf("DelTExt: %d:%d %d\n", Row, Col, ACount);
@@ -871,11 +871,11 @@ int EBuffer::DelText(int Row, int Col, int ACount, int DoMark) {
     return 1;
 }
 
-int EBuffer::InsText(int Row, int Col, int ACount, const char *ABuffer, int DoMark) {
+int EBuffer::InsText(int Row, int Col, size_t ACount, const char *ABuffer, int DoMark) {
     int B, L;
     
 //    printf("InsText: %d:%d %d\n", Row, Col, ACount);
-    assert(Row >= 0 && Row < RCount && Col >= 0 && ACount >= 0);
+    assert(Row >= 0 && Row < RCount && Col >= 0);
     if (ACount == 0) return 1;
     if (Modify() == 0) return 0;
     
@@ -892,8 +892,8 @@ int EBuffer::InsText(int Row, int Col, int ACount, const char *ABuffer, int DoMa
     return 1;
 }
 
-int EBuffer::PadLine(int Row, int Length) {
-    int L;
+int EBuffer::PadLine(int Row, size_t Length) {
+    size_t L;
     
     L = LineLen(Row);
     if (L < Length)
@@ -902,7 +902,7 @@ int EBuffer::PadLine(int Row, int Length) {
     return 1;
 }
   
-int EBuffer::InsLineText(int Row, int Col, int ACount, int LCol, PELine Line) {
+int EBuffer::InsLineText(int Row, int Col, size_t ACount, int LCol, PELine Line) {
     int Ofs, Pos, TPos, C, B, L;
     
     //fprintf(stderr, "\n\nInsLineText: %d:%d %d %d", Row, Col, ACount, LCol);

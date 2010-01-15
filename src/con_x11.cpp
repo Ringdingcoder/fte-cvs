@@ -1947,10 +1947,7 @@ int GetXSelection(int *len, char **data, int clipboard) {
         }
     }
     *data = XFetchBytes(display, len);
-    if (*data == 0)
-        return -1;
-    else
-        return 0;
+    return (*data == 0) ? -1 :  0;
 }
 
 int SetXSelection(int len, char *data, int clipboard) {

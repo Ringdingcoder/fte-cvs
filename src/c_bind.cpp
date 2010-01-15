@@ -641,8 +641,7 @@ int NewCommand(const char *Name) {
     return CMacros - 1;
 }
 
-int ExState::GetStrParam(EView *view, char *str, int maxlen) {
-    assert(maxlen >= 0);
+int ExState::GetStrParam(EView *view, char *str, size_t maxlen) {
     if (Macro == -1
 	|| Pos == -1
 	|| Pos >= Macros[Macro].Count)
@@ -663,10 +662,11 @@ int ExState::GetStrParam(EView *view, char *str, int maxlen) {
     if (Pos < Macros[Macro].Count) {
         if (Macros[Macro].cmds[Pos].type == CT_CONCAT) {
             Pos++;
-            int len = strlen(str);
-            int left = maxlen - len;
+            size_t len = strlen(str);
 
-            assert(left >= 0);
+            if (maxlen < len)
+                return 0;
+            size_t left = maxlen - len;
 
             //puts("concat\x7");
             if (GetStrParam(view, str + len, left) == 0)

@@ -80,7 +80,7 @@ int ExComplete::DoCompleteWord()
 
     if (WordsLast <= 0 || !Words[WordPos]) return rc;
 
-    int l = strlen(Words[WordPos]);
+    size_t l = strlen(Words[WordPos]);
 
     if (Buffer->InsText(Buffer->VToR(Orig.Row), Orig.Col, l, Words[WordPos], 1)
         && Buffer->SetPos(Orig.Col + l, Orig.Row)) {
@@ -258,7 +258,7 @@ void ExComplete::RepaintStatus()
     if ((WordsLast > 0) && (WordBegin != NULL) && (Words != NULL)
 	&& (Words[WordPos]) != NULL) {
 	const char *sc = STRCOMPLETE;
-	int p = sizeof(STRCOMPLETE) - 1;
+	size_t p = sizeof(STRCOMPLETE) - 1;
 	if (W < 35) {
 	    // if the width is quite small
 	    sc += p - 1; // jump to last character
@@ -266,21 +266,21 @@ void ExComplete::RepaintStatus()
 	}
 	MoveStr(B, 0, W, sc, COM_NORM, W);
 	// int cur = p;
-	MoveStr(B, p, W, WordBegin, COM_ORIG, W);
+	MoveStr(B, (int)p, W, WordBegin, COM_ORIG, W);
 	p += strlen(WordBegin);
-	int l = strlen(Words[WordPos]);
+	size_t l = strlen(Words[WordPos]);
 	if (WordFixed > 0) {
-	    MoveStr(B, p, W, Words[WordPos], COM_MARK, W);
+	    MoveStr(B, (int)p, W, Words[WordPos], COM_MARK, W);
 	    p += WordFixed;
 	    l -= WordFixed;
 	}
-	MoveStr(B, p, W, Words[WordPos] + WordFixed,
+	MoveStr(B, (int)p, W, Words[WordPos] + WordFixed,
 		(WordFixedCount == 1) ? COM_ORIG : COM_HIGH, W);
 	p += l;
 	char s[100];
 	sprintf(s, "] (T:%d/%d  S:%d)", WordPos + 1, WordsLast,
-		WordFixedCount);
-	MoveStr(B, p, W, s, COM_NORM, W);
+		(int)WordFixedCount);
+	MoveStr(B, (int)p, W, s, COM_NORM, W);
 	// ConSetCursorPos(cur + WordFixed, H - 1);
     } else
 	MoveStr(B, 0, W, STRNOCOMPLETE, COM_ERR, W);

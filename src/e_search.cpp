@@ -472,9 +472,9 @@ int EBuffer::FindRx(RxNode *Rx, SearchReplaceOptions &opt) {
 }
 
 int EBuffer::Find(SearchReplaceOptions &opt) {
-    int slen = strlen(opt.strSearch);
+    size_t slen = strlen(opt.strSearch);
     int Options = opt.Options;
-    int rlen = strlen(opt.strReplace);
+    size_t rlen = strlen(opt.strReplace);
     RxNode *R = NULL;
 
     opt.resCount = -1;
@@ -559,7 +559,7 @@ int EBuffer::Find(SearchReplaceOptions &opt) {
                 PELine L = RLine(Match.Row);
                 int P, R;
                 char *PR = 0;
-                int LR = 0;
+                size_t LR = 0;
 
                 R = Match.Row;
                 P = Match.Col;

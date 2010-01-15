@@ -33,13 +33,14 @@ public:
 
 static int GetHOfsItem(int id, int cur) {
     int pos = 2;
-    int i, len;
+    int i;
+    size_t len;
     
     for (i = 0; i < Menus[id].Count; i++) {
         if (i == cur) return pos;
         if (Menus[id].Items[i].Name) {
             len = CStrLen(Menus[id].Items[i].Name);
-            pos += len + 2;
+            pos += (int)len + 2;
         } else
             pos++;
     }
@@ -48,13 +49,14 @@ static int GetHOfsItem(int id, int cur) {
 
 static int GetHPosItem(int id, int X) {
     int pos = 1;
-    int i, len;
+    int i;
+    size_t len;
     
     for (i = 0; i < Menus[id].Count; i++) {
         if (Menus[id].Items[i].Name) {
             len = CStrLen(Menus[id].Items[i].Name);
-            if (X >= pos && X <= pos + len + 1) return i;
-            pos += len + 2;
+            if (X >= pos && X <= pos + (int)len + 1) return i;
+            pos += (int)len + 2;
         } else 
             pos++;
     }
@@ -64,7 +66,8 @@ static int GetHPosItem(int id, int X) {
 static int DrawHMenu(int x, int y, int id, int active) {
     int pos = 1;
     TDrawBuffer B;
-    int i, len;
+    int i;
+    size_t len;
     TAttr color1, color2;
     int Cols, Rows;
     
@@ -85,7 +88,7 @@ static int DrawHMenu(int x, int y, int id, int active) {
                 len = CStrLen(Menus[id].Items[i].Name);
                 MoveChar(B, pos, Cols, ' ', color1, len + 2);
                 MoveCStr(B, pos + 1, Cols, Menus[id].Items[i].Name, color1, color2, len);
-                pos += len + 2;
+                pos += (int)len + 2;
             } else {
                 MoveChar(B, pos, Cols, ConGetDrawChar(DCH_V), hcMenu_Background, 1);
                 pos++;
@@ -104,9 +107,9 @@ static int GetVPosItem(int id, int w, int X, int Y) {
 }
 
 static int GetVSize(int id, int &X, int &Y) {
-    int xsize = 0;
-    int len;
-    
+    size_t xsize = 0;
+    size_t len;
+
     Y = Menus[id].Count;
     for (int i = 0; i < Y; i++) {
         len = 0;
@@ -115,14 +118,15 @@ static int GetVSize(int id, int &X, int &Y) {
         if (len > xsize)
             xsize = len;
     }
-    X = xsize;
+    X = (int)xsize;
     return 0;
 }
 
 
 static int DrawVMenu(int x, int y, int id, int active) {
     TDrawBuffer B;
-    int i, len;
+    int i;
+    size_t len;
     TAttr color1, color2;
     int w, h;
     
@@ -147,7 +151,7 @@ static int DrawVMenu(int x, int y, int id, int active) {
         if (Menus[id].Items[i].Name) {
             char name[128];
             char *arg = 0;
-            int len2 = 0;
+            size_t len2 = 0;
             
             strcpy(name, Menus[id].Items[i].Name);
             arg = strchr(name, '\t');
@@ -162,9 +166,9 @@ static int DrawVMenu(int x, int y, int id, int active) {
             MoveCh(B, ConGetDrawChar(DCH_V), hcMenu_Background, 1);
             MoveCh(B + w - 1, ConGetDrawChar(DCH_V), hcMenu_Background, 1);
 
-            MoveCStr(B, 2, len + 2, Menus[id].Items[i].Name, color1, color2, len);
+            MoveCStr(B, 2, (int)len + 2, Menus[id].Items[i].Name, color1, color2, len);
             if (arg)
-                MoveCStr(B, w - len2 - 2, w + 4, arg, color1, color2, len2);
+                MoveCStr(B, w - (int)len2 - 2, w + 4, arg, color1, color2, len2);
             
             if (Menus[id].Items[i].SubMenu != -1) {
                 MoveCh(B + w - 2, ConGetDrawChar(DCH_RPTR), color1, 1);

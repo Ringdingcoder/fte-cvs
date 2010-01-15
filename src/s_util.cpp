@@ -110,7 +110,8 @@ int CompletePath(const char *Base, char *Match, int Count) {
     char Name[MAXPATH];
     const char *dirp;
     char *namep;
-    int len, count = 0;
+    size_t len;
+    int count = 0;
     char cname[MAXPATH];
     int hascname = 0;
     RxMatchRes RM;

@@ -1,10 +1,10 @@
 #include "fte.h"
 #include <string.h>
 
-int UnTabStr(char *dest, int maxlen, const char *source, int slen) {
+size_t UnTabStr(char *dest, size_t maxlen, const char *source, size_t slen) {
     char *p = dest;
-    int i;
-    int pos = 0;
+    size_t i;
+    size_t pos = 0;
 
     maxlen--;
     for (i = 0; i < slen; i++) {
@@ -31,10 +31,10 @@ int UnTabStr(char *dest, int maxlen, const char *source, int slen) {
     return pos;
 }
 
-int UnEscStr(char *dest, int maxlen, const char *source, int slen) {
+size_t UnEscStr(char *dest, size_t maxlen, const char *source, size_t slen) {
     char *p = dest;
-    int i;
-    int pos = 0;
+    size_t i;
+    size_t pos = 0;
 
     maxlen--;
     for (i = 0; i < slen; i++) {

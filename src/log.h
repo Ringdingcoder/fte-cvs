@@ -266,7 +266,9 @@ inline ostream_func2_char_size_t FillChar(char const& c, size_t const& num)
 void Log__BinaryData(FunctionLog&, void* bin_data, size_t len, unsigned long line);
 #define LOGBINARYDATA(bin_data,len) Log__BinaryData(LOGOBJNAME,bin_data,len, __LINE__)
 
-#else // defined NO_LOGGING
+#else // defined FTE_NO_LOGGING
+
+#include <iostream>
 
 #define LOG while (0) { std::cout
 #define ENDLINE std::endl; }
@@ -282,6 +284,6 @@ void Log__BinaryData(FunctionLog&, void* bin_data, size_t len, unsigned long lin
 #define BinChar(c) c
 #define LOGBINARYDATA(b,l)
 
-#endif // NO_LOGGING
+#endif // FTE_NO_LOGGING
 
 #endif // __LOGGING_HPP

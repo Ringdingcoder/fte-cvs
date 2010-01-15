@@ -39,9 +39,7 @@ int AddCRegexp(int file, int line, int msg, const char *regexp) {
 void FreeCRegexp()
 {
     while(NCRegexp--)
-    {
         RxFree(CRegexp[NCRegexp].rx);
-    }
 }
 
 EMessages::EMessages(int createFlags, EModel **ARoot, char *ADir, char *ACommand): EList(createFlags, ARoot, "Messages") {
@@ -320,7 +318,7 @@ int EMessages::GetLine(char *Line, int maxim) {
 }
 
 
-static void getWord(char* dest, char*& pin)
+static void getWord(char* dest, const char* pin)
 {
     char *pout, *pend;
     char ch, ec;
@@ -419,9 +417,9 @@ void EMessages::GetErrors() {
             //** Quicky: check for gnumake 'entering directory'
             //** make[x]: entering directory `xxx'
             //** make[x]: leaving...
-            static char t1[] = "entering directory";
-            static char t2[] = "leaving directory";
-            char*   pin;
+            static const char t1[] = "entering directory";
+            static const char t2[] = "leaving directory";
+            const char *pin;
             
             if ( (pin = strstr(line, "]:")) != 0)
             {

@@ -16,18 +16,18 @@
 
 char DesktopFileName[256] = "";
 
-int SaveDesktop(char *FileName) {
+int SaveDesktop(const char *FileName) {
     FILE *fp;
     EModel *M;
-    
+
     fp = fopen(FileName, "w");
     if (fp == 0)
         return 0;
-    
+
     setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer));
-    
+
     fprintf(fp, DESKTOP_VER);
-    
+
     M = ActiveModel;
     while (M) {
         switch(M->GetContext()) {
@@ -62,7 +62,7 @@ int SaveDesktop(char *FileName) {
     return 1;
 }
 
-int LoadDesktop(char *FileName) {
+int LoadDesktop(const char *FileName) {
     FILE *fp;
     char line[512];
     char *p, *e;
@@ -71,13 +71,13 @@ int LoadDesktop(char *FileName) {
 #ifdef CONFIG_TAGS
     TagClear();
 #endif
-    
+
     fp = fopen(FileName, "r");
     if (fp == 0)
         return 0;
 
     //setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer));
-    
+
     if (fgets(line, sizeof(line), fp) == 0 ||
         (strcmp(line, DESKTOP_VER) != 0 &&
         (strcmp(line, DESKTOP_VER1) != 0)))
@@ -138,11 +138,11 @@ int LoadDesktop(char *FileName) {
                 char *c;
 
                 p = line + 2;
-                P.Row = strtol(p, &c, 10);
+                P.Row = (int)strtol(p, &c, 10);
                 if (*c != '|')
                     break;
                 p = c + 1;
-                P.Col = strtol(p, &c, 10);
+                P.Col = (int)strtol(p, &c, 10);
                 if (*c != '|')
                     break;
                 p = c + 1;
@@ -154,7 +154,7 @@ int LoadDesktop(char *FileName) {
                 else
                     break;
                 file = p;
-                
+
                 markIndex.insert(name, file, P);
             }
         }

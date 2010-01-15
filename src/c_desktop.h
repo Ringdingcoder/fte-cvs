@@ -20,8 +20,8 @@
 
 extern char DesktopFileName[256];
 
-int SaveDesktop(char *FileName);
-int LoadDesktop(char *FileName);
+int SaveDesktop(const char *FileName);
+int LoadDesktop(const char *FileName);
 
 #endif
 

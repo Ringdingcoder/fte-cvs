@@ -102,10 +102,10 @@ static const long MouseMultiClick = 300;
 
 static int setUserPosition = 0;
 static int initX = 0, initY = 0;
-static unsigned int ScreenCols = 80;
-static unsigned int ScreenRows = 40;
-static unsigned int CursorX = 0;
-static unsigned int CursorY = 0;
+static int ScreenCols = 80;
+static int ScreenRows = 40;
+static int CursorX = 0;
+static int CursorY = 0;
 static int CursorVisible = 1;
 static int CursorStart, CursorEnd;
 static unsigned long CursorLastTime;
@@ -378,7 +378,7 @@ static void TryLoadFontset(const char *fs)
     }
     //else fprintf(stderr, "fonts  %p  %d   %p\n", miss, nMiss, def);
     if (nMiss)
-	XFreeStringList(miss);
+        XFreeStringList(miss);
 }
 #endif
 
@@ -684,6 +684,19 @@ int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen) {
 }
 
 #define CursorXYPos(x, y) (ScreenBuffer + ((x) + ((y) * ScreenCols)))
+static void DebugShowArea(int X, int Y, int W, int H, int clr)
+{
+    return;
+    fprintf(stderr, "Draw %02d X:%2d Y:%2d  W:%2d x H:%2d\n", clr, X, Y, W, H);
+    XFillRectangle(display, win, colorXGC->GetGC(clr),
+                   X * FontCX, Y * FontCY, W * FontCX,
+                   H * FontCY / ((clr == 13) ? 2 : 1));
+    XEvent e;
+    while (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e))
+        XNextEvent(display, &e);
+    usleep(2000);
+}
+
 
 void DrawCursor(int Show) {
     if (CursorVisible) {
@@ -718,22 +731,22 @@ void DrawCursor(int Show) {
 }
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
-    unsigned int i;
+    int i;
     unsigned int attr;
     //unsigned char *p, *ps, *c, *ops;
-    unsigned int len, x, l, ox, olen, skip;
+    unsigned int len, x, l, skip;
     TCell *pCell, *psCell, *opsCell, *cCell;
     char temp[ScreenCols + 1];
 
-    if (X >= (int) ScreenCols || Y >= (int) ScreenRows ||
-        X + W > (int) ScreenCols || Y + H > (int) ScreenRows) {
+    if (X >= ScreenCols || Y >= ScreenRows ||
+        X + W > ScreenCols || Y + H > ScreenRows) {
         //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
         return -1;
     }
     //XClearArea(display, win, X, Y, W * FontCX, H * FontCY, False);
 
     //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
-    for (i = 0; i < (unsigned int)H; i++) {
+    for (i = 0; i < H; i++) {
         len = W;
         pCell = CursorXYPos(X, Y + i);
         psCell = Cell;
@@ -741,22 +754,17 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         while (len > 0) {
             if (!Refresh) {
                 cCell = CursorXYPos(x, Y + i);
-                skip = 0;
                 opsCell = psCell;
-                ox = x;
-                olen = len;
-                while ((len > 0) && *cCell == *psCell) {
+                for (skip = 0; ((len - skip) > 0) && *cCell == *psCell; skip++) {
                     psCell++;
                     cCell++;
-                    x++;
-                    len--;
-                    skip++;
                 }
-                if (len <= 0) break;
-                if (skip <= 4) {
+                if ((len - skip) <= 0) break;
+                if (0 && skip <= 4) {
                     psCell = opsCell;
-                    x = ox;
-                    len = olen;
+                } else {
+                    x += skip;
+                    len -= skip;
                 }
             }
             pCell = psCell;
@@ -777,6 +785,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
                                    x * FontCX, FontCYD + (Y + i) * FontCY,
                                    temp, l);
 #endif
+            DebugShowArea(x, Y + i, l, 1, 13);
             //temp[l] = 0; printf("%s\n", temp);
             len -= l;
             x += l;
@@ -827,12 +836,12 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
 }
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
-    TCell Cell;
     int l;
 
-    MoveCh(&Cell, ' ', Fill, 1);
+    TCell Cell(' ', Fill);
     DrawCursor(0);
     if (Way == csUp) {
+        DebugShowArea(X, (Y + Count), W, (H - Count), 14);
         XCopyArea(display, win, win, colorXGC->GetGC(0),
                   X * FontCX,
                   (Y + Count) * FontCY,
@@ -840,13 +849,14 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
                   (H - Count) * FontCY,
                   X * FontCX,
                   Y * FontCY);
-	for (l = 0; l < H - Count; l++)
-	    memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
-	//l = H - Count;
-	//ConGetBox(X, Y + Count, W, l, CursorXYPos(X, Y));
-        if (ConSetBox(X, Y + l, W, Count, Cell) == -1)
+        for (l = 0; l < H - Count; l++)
+            memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
+        //l = H - Count;
+        //ConGetBox(X, Y + Count, W, l, CursorXYPos(X, Y));
+        if (Count > 1 && ConSetBox(X, Y + l, W, Count, Cell) == -1)
             return -1;
     } else if (Way == csDown) {
+        DebugShowArea(X, Y, W, (H - Count), 15);
         XCopyArea(display, win, win, colorXGC->GetGC(0),
                   X * FontCX,
                   Y * FontCY,
@@ -857,7 +867,7 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
         for (l = H - 1; l >= Count; l--)
             memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l - Count), W * sizeof(TCell));
 
-        if (ConSetBox(X, Y, W, Count, Cell) == -1)
+        if (Count > 1 && ConSetBox(X, Y, W, Count, Cell) == -1)
             return -1;
     }
     DrawCursor(1);
@@ -982,29 +992,17 @@ static void UpdateWindow1(Region reg) {
 #endif
 
 static void UpdateWindow(int xx, int yy, int ww, int hh) {
-    if (xx + ww > (int)ScreenCols)
+    if (xx + ww > ScreenCols)
         ww = ScreenCols - xx;
 
-    if (yy + hh > (int)ScreenRows)
+    if (yy + hh > ScreenRows)
         hh = ScreenRows - yy;
 
-#if 0
-    /* show redrawn area */
-    XFillRectangle(display, win, colorXGC->GetGC(14),
-                   xx * FontCX, yy * FontCY, ww * FontCX, hh * FontCY);
-    XEvent e;
-    while (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e))
-        XNextEvent(display, &e);
-    //sleep(1);
-#endif
+    //DebugShowArea(xx, yy, ww, hh, 14);
 
-    //fprintf(stderr, "Refresh\tx:%3d  y:%3d  chars:%3d  lines:%3d\n", xx, yy, ww, hh);
     Refresh = 1;
-    PCell p = CursorXYPos(xx, yy);
-    for (int i = 0; i < hh; i++) {
-        ConPutBox(xx, yy + i, ww, 1, p);
-        p += ScreenCols;
-    }
+    for (int i = 0; i < hh; i++)
+        ConPutBox(xx, yy + i, ww, 1, CursorXYPos(xx, yy + i));
     Refresh = 0;
 }
 
@@ -1013,14 +1011,14 @@ static void ResizeWindow(int ww, int hh) {
     int oy = ScreenRows;
     ww /= FontCX; if (ww < 4) ww = 4;
     hh /= FontCY; if (hh < 2) hh = 2;
-    if ((int)ScreenCols != ww || (int)ScreenRows != hh) {
+    if (ScreenCols != ww || ScreenRows != hh) {
         Refresh = 0;
         ConSetSize(ww, hh);
         Refresh = 1;
 #if 1
-        if (ox < (int)ScreenCols)
+        if (ox < ScreenCols)
             UpdateWindow(ox, 0, (ScreenCols - ox), ScreenRows);
-        if (oy < (int)ScreenRows)
+        if (oy < ScreenRows)
             UpdateWindow(0, oy, ScreenCols, (ScreenRows - oy));
 #endif
         //UpdateWindow(0, 0, ScreenCols, ScreenRows);
@@ -1170,7 +1168,7 @@ static TEvent LastMouseEvent = { evNone };
 #define TM_DIFF(x,y) ((long)(((long)(x) < (long)(y)) ? ((long)(y) - (long)(x)) : ((long)(x) - (long)(y))))
 
 static void ConvertClickToEvent(int type, int xx, int yy, int button, int state,
-				TEvent *Event, Time mtime) {
+                                TEvent *Event, Time mtime) {
     unsigned int myState = 0;
     static unsigned long LastClickTime = 0;
     static short LastClickCount = 0;
@@ -1991,7 +1989,8 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
             if (c + 1 < argc) {
 
                 XParseGeometry(argv[++c], &initX, &initY,
-                               &ScreenCols, &ScreenRows);
+                               (unsigned*) &ScreenCols,
+                               (unsigned*) &ScreenRows);
                 if (ScreenCols > MAX_SCRWIDTH)
                     ScreenCols = MAX_SCRWIDTH;
                 else if (ScreenCols < MIN_SCRWIDTH)
@@ -2083,7 +2082,7 @@ char ConGetDrawChar(unsigned int idx) {
     static size_t len = 0;
 
     if (!tab) {
-	tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
+        tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
         len = strlen(tab);
     }
     assert(idx < len);

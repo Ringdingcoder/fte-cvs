@@ -789,7 +789,7 @@ public:
     int PlaceGlobalBookmark(ExState &State);
     int PushGlobalBookmark();
 
-    virtual int GetStrVar(int var, char *str, int buflen);
+    virtual int GetStrVar(int var, char *str, size_t buflen);
     virtual int GetIntVar(int var, int *value);
 
     int SetIndentWithTabs(ExState &State);

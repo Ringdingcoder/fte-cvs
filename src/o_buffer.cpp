@@ -1569,8 +1569,7 @@ int EBuffer::ShowHelpWord(ExState &State) {
     return View->SysShowHelp(State, buf[0] ? buf : 0);
 }
 
-int EBuffer::GetStrVar(int var, char *str, int buflen) {
-    assert(buflen >= 0);
+int EBuffer::GetStrVar(int var, char *str, size_t buflen) {
     if (buflen == 0)
         return 0;
     //puts("variable EBuffer\x7");

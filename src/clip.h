@@ -14,10 +14,10 @@
 extern "C" {
 #endif
 
-typedef struct {
-    unsigned long fLen;
+struct ClipData {
+    size_t fLen;
     char *fChar;
-} ClipData;
+};
 
 int GetClipText(ClipData *cd);
 int PutClipText(ClipData *cd);

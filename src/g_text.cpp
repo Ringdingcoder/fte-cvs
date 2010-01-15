@@ -1196,7 +1196,7 @@ void GUI::ProcessEvent() {
                 break;
             case cmPopupMenu:
                 {
-                    int id = E.Msg.Param1;
+                    long id = E.Msg.Param1;
                     int Cols, Rows;
                     
                     if (id == -1) return;

@@ -194,11 +194,11 @@ inline bool isZeroArray(int* Count, size_t len)
 
 #define TEST_ZERO isZeroArray(Count, sizeof(Count)/sizeof(Count[0]))
 
-typedef struct {
+struct ColorKeywords {
     int TotalCount;
     int count[CK_MAXLEN];
     char *key[CK_MAXLEN];
-} ColorKeywords;
+};
 
 struct HTrans {
     char *match;
@@ -263,7 +263,7 @@ EColorize *FindColorizer(const char *AName);
 
 SyntaxProc GetHilitProc(int id);
 
-int IsState(hsState *Buf, hsState State, int Len);
+int IsState(hsState *Buf, hsState State, size_t Len);
 int LookAt(EBuffer *B, int Row, unsigned int Pos, const char *What, hsState State, int NoWord = 1, int CaseInsensitive = 0);
 inline int LookAtNoCase(EBuffer *B, int Row, unsigned int Pos, const char *What, hsState State, int NoWord = 1)
 { return LookAt(B, Row, Pos, What, State, NoWord, 1); }

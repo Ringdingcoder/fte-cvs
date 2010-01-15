@@ -343,11 +343,12 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
     return 0;
 }
 
-int IsState(hsState *Buf, hsState State, int Len) {
-    int I;
+int IsState(hsState *Buf, hsState State, size_t Len) {
 
-    for(I = 0; I < Len; I++)
-        if (Buf[I] != State) return 0;
+    while (Len-- > 0)
+	if (*Buf++ != State)
+	    return 0;
+
     return 1;
 }
 
@@ -486,10 +487,10 @@ static int CheckLabel(EBuffer *B, int Line) {
 
 static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const char *Open, const char *Close, int *OPos, int *OLine, int matchparens = 0, int bolOnly = 0) {
     char *P;
-    int L;
-    int Pos;
-    int LOpen = strlen(Open);
-    int LClose = strlen(Close);
+    size_t L;
+    size_t Pos;
+    size_t LOpen = strlen(Open);
+    size_t LClose = strlen(Close);
     int StateLen;
     hsState *StateMap;
     int CountX[3] = { 0, 0, 0 };
@@ -525,7 +526,7 @@ static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const 
                                 if (bolOnly)
                                     didMatch = 1;
                                 else {
-                                    *OPos = B->ScreenPos(B->RLine(Row), Pos);
+                                    *OPos = B->ScreenPos(B->RLine(Row), (int)Pos);
                                     *OLine = Row;
                                     free(StateMap);
                                     return B->LineIndented(Row);

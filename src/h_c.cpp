@@ -8,7 +8,6 @@
  */
 
 #include "fte.h"
-#include "log.h"
 
 #ifdef CONFIG_HILIT_C
 
@@ -16,6 +15,7 @@
 #define PRINTF(x) //printf x
 
 #define ISNAME(x)  (isalnum(x) || ((x) == '_'))
+#define ISUPPER(x, c)  ((x) == (c) || ((x) == (c + 32)))
 
 
 #define hsC_Normal       0
@@ -47,11 +47,11 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
             default:
             case hsC_Tripplet:
             case hsC_Normal:
-                if (toupper(*p) == 'L' && p[1] == '"') {
+                if (ISUPPER(*p, 'L') && p[1] == '"') {
                     State = hsC_String2;
                     Color = CLR_String;
                     goto hilit2;
-                } else if (toupper(*p) == 'L' && p[1] == '\'') {
+                } else if (ISUPPER(*p, 'L') && p[1] == '\'') {
                     State = hsC_String1;
                     Color = CLR_String;
                     goto hilit2;
@@ -104,7 +104,7 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                 } else if (isdigit(*p)) {
                     // check if it is not floating point number 0.08!
                     if ((len >= 2) && (*p == '0') && p[1] != '.') {
-                        if (toupper(p[1]) == 'X') {
+                        if (ISUPPER(p[1], 'X')) {
                             Color = CLR_HexNumber;
                             ColorNext();
                             ColorNext();
@@ -126,21 +126,21 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                         ColorNext();
                         while (len && (isdigit(*p) || *p == 'e' || *p == 'E' || *p == '.')) ColorNext();
                         // if it ends with 'f', the number can't have more extras.
-                        if (len && (toupper(*p) == 'F')) {
+                        if (len && (ISUPPER(*p, 'F'))) {
                             ColorNext();
                             continue;
                         }
                     }
                     // allowed extras: u, l, ll, ul, ull, lu, llu
                     int colored_u = 0;
-                    if (len && (toupper(*p) == 'U')) {
+                    if (len && (ISUPPER(*p, 'U'))) {
                         ColorNext();
                         colored_u = 1;
                     }
-                    if (len && (toupper(*p) == 'L')) {
+                    if (len && (ISUPPER(*p, 'L'))) {
                         ColorNext();
-                        if (len && (toupper(*p) == 'L')) ColorNext();
-                        if (! colored_u && len && (toupper(*p) == 'U')) ColorNext();
+                        if (len && (ISUPPER(*p, 'L'))) ColorNext();
+                        if (! colored_u && len && (ISUPPER(*p, 'U'))) ColorNext();
                     }
                     continue;
                 } else if (*p == '\'') {
@@ -267,11 +267,12 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                     continue;
                 } else if (isdigit(*p)) {
                     if ((len >= 2) && (*p == '0')) {
-                        if (toupper(*(p+1)) == 'X') {
+                        if (ISUPPER(p[1], 'X')) {
                             Color = CLR_HexNumber;
                             ColorNext();
                             ColorNext();
-                            while (len && isxdigit(*p)) ColorNext();
+                            while (len && isxdigit(*p))
+                                ColorNext();
                         } else /* assume it's octal */ {
                             Color = CLR_Number;
                             ColorNext();
@@ -280,30 +281,30 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                             if (len && ('8' <= *p && *p <= '9'))
                             {
                                 Color = CLR_Normal;
-                                while (len && !isspace(*p)) ColorNext();
+                                while (len && !isspace(*p))
+                                    ColorNext();
                                 continue;
                             }
                         }
                     } else /* assume it's decimal/floating */ {
                         Color = CLR_Number;
                         ColorNext();
-                        while (len && (isdigit(*p) || *p == 'e' || *p == 'E' || *p == '.')) ColorNext();
-                        // if it ends with 'f', the number can't have more extras.
-                        if (len && (toupper(*p) == 'F')) {
+                        while (len && (isdigit(*p) || *p == 'e' || *p == 'E' || *p == '.'))
                             ColorNext();
-                            continue;
-                        }
+                        // if it ends with 'f', the number can't have more extras.
+                        if (len && (ISUPPER(*p, 'F')))
+                            goto hilit;
                     }
                     // allowed extras: u, l, ll, ul, ull, lu, llu
                     int colored_u = 0;
-                    if (len && (toupper(*p) == 'U')) {
+                    if (len && (ISUPPER(*p, 'U'))) {
                         ColorNext();
                         colored_u = 1;
                     }
-                    if (len && (toupper(*p) == 'L')) {
+                    if (len && (ISUPPER(*p, 'L'))) {
                         ColorNext();
-                        if (len && (toupper(*p) == 'L')) ColorNext();
-                        if (! colored_u && len && (toupper(*p) == 'U')) ColorNext();
+                        if (len && (ISUPPER(*p, 'L'))) ColorNext();
+                        if (! colored_u && len && (ISUPPER(*p, 'U'))) ColorNext();
                     }
                     continue;
                 } else if (*p == '\'') {
@@ -351,23 +352,20 @@ int IsState(hsState *Buf, hsState State, int Len) {
 }
 
 int LookAt(EBuffer *B, int Row, unsigned int Pos, const char *What, hsState State, int NoWord, int CaseInsensitive) {
-    STARTFUNC("LookAt{h_c.cpp}");
-
-    int Len = strlen(What);
+    size_t Len = strlen(What);
 
     if (Row < 0 || Row >= B->RCount) {
-        LOG << "Row out of range: " << Row << " vs " << B->RCount << ENDLINE;
-        ENDFUNCRC(0);
+        PRINTF(("Row out of range: %d vs %d\n", Row, B->RCount));
+        return 0;
     }
     char*        pLine       = B->RLine(Row)->Chars;
     unsigned int uLineLength = B->RLine(Row)->Count;
     Pos = B->CharOffset(B->RLine(Row), Pos);
-    if (Pos + strlen(What) > uLineLength) { ENDFUNCRC(0); }
+    if (Pos + strlen(What) > uLineLength) return 0;
     if (NoWord && uLineLength > Pos + Len && ISNAME(pLine[Pos + Len]))
-    {
-        ENDFUNCRC(0);
-    }
-    LOG << "Check against [" << What << ']' << ENDLINE;
+        return 0;
+
+    PRINTF(("Check against [%c]\n", What));
     if (
         (CaseInsensitive && memicmp(pLine + Pos, What, Len) == 0) ||
         (!CaseInsensitive && memcmp(pLine + Pos, What, Len) == 0)
@@ -375,10 +373,10 @@ int LookAt(EBuffer *B, int Row, unsigned int Pos, const char *What, hsState Stat
     {
         int StateLen;
         hsState *StateMap;
-        if (B->GetMap(Row, &StateLen, &StateMap) == 0) ENDFUNCRC(0);
-        if( IsState(StateMap + Pos, State, strlen(What) ) ) ENDFUNCRC(1);
+        if (B->GetMap(Row, &StateLen, &StateMap) == 0) return 0;
+        if( IsState(StateMap + Pos, State, strlen(What) ) ) return 1;
     }
-        ENDFUNCRC(0);
+    return 0;
 }
 
 #ifdef CONFIG_INDENT_C
@@ -558,8 +556,7 @@ static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const 
 
 static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Flags)
 {
-    STARTFUNC("FindPrevIndent{h_c.cpp}");
-    LOG << "Flags: " << hex << Flags << dec << ENDLINE;
+    //LOG << "Flags: " << hex << Flags << dec << ENDLINE;
     int StateLen;
     hsState *StateMap = 0;
     char *P;
@@ -588,17 +585,17 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
         StateMap = NULL;
         if (B->GetMap(RowP, &StateLen, &StateMap) == 0)
         {
-            LOG << "Can't get state maps" << ENDLINE;
-            ENDFUNCRC(0);
+            //LOG << "Can't get state maps" << ENDLINE;
+            return 0;
         }
         if (L > 0)
             while (ColP >= 0) {
-            LOG << "ColP: " << ColP << " State: " << (int)StateMap[ColP] << ENDLINE;
+            //LOG << "ColP: " << ColP << " State: " << (int)StateMap[ColP] << ENDLINE;
             if (StateMap[ColP] == hsC_Normal) {
-                LOG << "CharP: " << BinChar(P[ColP]) << " BolChar: " << BinChar(BolChar) <<
-                    " BolRow: " << BolRow <<
-                    " BolCol: " << BolCol <<
-                    ENDLINE;
+                //LOG << "CharP: " << BinChar(P[ColP]) << " BolChar: " << BinChar(BolChar) <<
+                //    " BolRow: " << BolRow <<
+                //    " BolCol: " << BolCol <<
+                //    ENDLINE;
                 switch (CharP = P[ColP]) {
                 case '{':
                     if (BolChar == ':' || BolChar == ',') {
@@ -606,11 +603,11 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         ColP = BolCol;
                         RowP = BolRow;
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     if (TEST_ZERO) {
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     Count[0]--;
                     break;
@@ -620,29 +617,29 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         ColP = BolCol;
                         RowP = BolRow;
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     if (BolChar == ';') {
                         CharP = BolChar;
                         ColP = BolCol;
                         RowP = BolRow;
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     if (ColP == 0) { /* speed optimization */
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     if (TEST_ZERO && (Flags & FIND_ENDBLOCK)) {
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     Count[0]++;
                     break;
                 case '(':
                     if (TEST_ZERO) {
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     Count[1]--;
                     break;
@@ -652,7 +649,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                 case '[':
                     if (TEST_ZERO) {
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     Count[2]--;
                     break;
@@ -692,7 +689,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         ColP = BolCol;
                         RowP = BolRow;
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     break;
                 case '?':
@@ -718,7 +715,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         if (TEST_ZERO) {
                             CharP = 'i';
                             free(StateMap);
-                            ENDFUNCRC(1);
+                            return 1;
                         }
                     }
                 }
@@ -731,7 +728,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         if (TEST_ZERO) {
                             CharP = 'e';
                             free(StateMap);
-                            ENDFUNCRC(1);
+                            return 1;
                         }
                     }
                     Count[3]++;
@@ -745,7 +742,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                     {
                         CharP = 'f';
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     if ((Flags & FIND_WHILE) &&
                         L - ColP >= 5 &&
@@ -754,7 +751,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                     {
                         CharP = 'w';
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     if ((Flags & FIND_SWITCH) &&
                         L - ColP >= 6 &&
@@ -763,7 +760,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                     {
                         CharP = 's';
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     if (((Flags & FIND_CASE) || (BolChar == ':')) &&
                         (((L - ColP >= 4) &&
@@ -780,7 +777,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                             RowP = BolRow;
                         }
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     if (((Flags & FIND_CLASS) || (BolChar == ':')) &&
                         (L - ColP >= 5 &&
@@ -794,7 +791,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                             RowP = BolRow;
                         }
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                     if (((Flags & FIND_CLASS) || (BolChar == ':')) &&
                         ((L - ColP >= 6 &&
@@ -814,7 +811,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                             RowP = BolRow;
                         }
                         free(StateMap);
-                        ENDFUNCRC(1);
+                        return 1;
                     }
                 }
             }
@@ -824,7 +821,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
         if (BolChar != ' ' && BolChar != ':' && BolChar != ',') {
             CharP = BolChar;
             ColP = BolCol;
-            ENDFUNCRC(1);
+            return 1;
         }
         RowP--;
         if (RowP >= 0) {
@@ -833,7 +830,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
         }
     }
 #undef TEST_ZERO
-    ENDFUNCRC(0);
+    return 0;
 }
 
 #define SKIP_FORWARD  0
@@ -912,7 +909,6 @@ static int SkipWhite(EBuffer *B, int Bottom, int &Row, int &Col, int Flags) {
 
 
 static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*StateMap*/) {
-    STARTFUNC("IndentNormal{h_c.cpp}");
     int I = 0;
     int Pos, L;
 
@@ -960,7 +956,7 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
             return 0;
 
         PrevColP++;
-        LOG << "PrevRowP=" << PrevRowP << ", PrevColP=" << PrevColP << ENDLINE;
+        //LOG << "PrevRowP=" << PrevRowP << ", PrevColP=" << PrevColP << ENDLINE;
 
         if (FindPrevIndent(B, RowP, ColP, CharP,
                            FIND_IF |
@@ -975,7 +971,7 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
                            FIND_COMMA |
                            FIND_ENDBLOCK) != 1)
         {
-            LOG << "Found: " << ENDLINE;
+            //LOG << "Found: " << ENDLINE;
             if (RowP != PrevRowP)
                 ContinuationIndent = C_CONTINUATION;
             I = 0;
@@ -990,8 +986,8 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
         FirstColP = ColP;
         // FirstCharP = CharP;
 
-        LOG << "FirstRowP=" << FirstRowP << ", FirstColP=" << FirstColP <<
-            ", CharP=" << BinChar(CharP) << ENDLINE;
+        //LOG << "FirstRowP=" << FirstRowP << ", FirstColP=" << FirstColP <<
+        //    ", CharP=" << BinChar(CharP) << ENDLINE;
 
         switch (CharP) {
         case 'c':
@@ -1064,7 +1060,6 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
             }
             PRINTF(("';' Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
 
-            LOG << "  CharP now: " << BinChar(CharP) << ENDLINE;
             switch (CharP) {
             case ',':
             case ';':

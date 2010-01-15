@@ -731,7 +731,7 @@ int EBuffer::PlaceUserBookmark(const char *n,EPoint P) {
             if (BFI(this, BFI_Undo)) {
                 if (PushULong(prev.Row) == 0) return 0;
                 if (PushULong(prev.Col) == 0) return 0;
-                if (PushUData((void *)n,strlen (n)+1) == 0) return 0;
+                if (PushUData(n, strlen(n) + 1) == 0) return 0;
                 if (PushULong(strlen (n)+1) == 0) return 0;
                 if (PushUChar(ucPlaceUserBookmark) == 0) return 0;
             }
@@ -1360,16 +1360,16 @@ int EBuffer::ConfQuit(GxView *V, int multiFile) {
     return 1;
 }
 
-void EBuffer::GetName(char *AName, int MaxLen) {
+void EBuffer::GetName(char *AName, size_t MaxLen) {
     strncpy(AName, FileName, MaxLen);
     AName[MaxLen - 1] = 0;
 }
 
-void EBuffer::GetPath(char *APath, int MaxLen) {
+void EBuffer::GetPath(char *APath, size_t MaxLen) {
     JustDirectory(FileName, APath, MaxLen);
 }
 
-void EBuffer::GetInfo(char *AInfo, int /*MaxLen*/) {
+void EBuffer::GetInfo(char *AInfo, size_t /*MaxLen*/) {
     char buf[256] = {0};
     char winTitle[256] = {0};
 
@@ -1393,18 +1393,22 @@ void EBuffer::GetInfo(char *AInfo, int /*MaxLen*/) {
             winTitle);
 }
 
-void EBuffer::GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen) {
+void EBuffer::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
     char *p;
 
-    strncpy(ATitle, FileName, MaxLen - 1);
-    ATitle[MaxLen - 1] = 0;
-    p = SepRChr(FileName);
-    if (p) {
-        strncpy(ASTitle, p + 1, SMaxLen - 1);
-        ASTitle[SMaxLen - 1] = 0;
-    } else {
-        strncpy(ASTitle, FileName, SMaxLen - 1);
-        ASTitle[SMaxLen - 1] = 0;
+    if (MaxLen > 0) {
+        strncpy(ATitle, FileName, MaxLen - 1);
+        ATitle[MaxLen - 1] = 0;
+        if (SMaxLen > 0) {
+            p = SepRChr(FileName);
+            if (p) {
+                strncpy(ASTitle, p + 1, SMaxLen - 1);
+                ASTitle[SMaxLen - 1] = 0;
+            } else {
+                strncpy(ASTitle, FileName, SMaxLen - 1);
+                ASTitle[SMaxLen - 1] = 0;
+            }
+        }
     }
 }
 
@@ -1603,13 +1607,11 @@ int EBuffer::GetStrVar(int var, char *str, int buflen) {
     case mvFileExtension:
         {
             char buf[MAXPATH];
-            char *dot, *dot2;
+            char *dot;
 
             JustFileName(FileName, buf, sizeof(buf));
 
-            dot = strchr(buf, '.');
-            while ((dot2 = strchr(dot + 1, '.')) != NULL)
-                dot = dot2;
+            dot = strrchr(buf, '.');
             if (dot)
                 strlcpy(str, dot, buflen);
             else

@@ -79,7 +79,7 @@ static void Fail(CurPos &cp, const char *s, ...) {
 static int LoadFile(const char *WhereName, const char *CfgName, int Level = 1);
 static void DefineWord(const char *w);
 
-static void PutObject(CurPos &cp, int xtag, int xlen, void *obj) {
+static void PutObject(CurPos &cp, int xtag, size_t xlen, void *obj) {
     unsigned char tag = (unsigned char)xtag;
     unsigned short len = (unsigned short)xlen;
     unsigned char l[2];

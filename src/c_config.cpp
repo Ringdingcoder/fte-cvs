@@ -321,9 +321,9 @@ static void SetRGBColor(const char *string) {
         return;
     }
     RGBColorValid[idx] = true;
-    RGBColor[idx].r = r;
-    RGBColor[idx].g = g;
-    RGBColor[idx].b = b;
+    RGBColor[idx].r = (unsigned char) r;
+    RGBColor[idx].g = (unsigned char) g;
+    RGBColor[idx].b = (unsigned char) b;
 }
 
 static int SetGlobalString(long what, const char *string) {
@@ -1272,7 +1272,7 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
     ln = (l[3] << 24) + (l[2] << 16) + (l[1] << 8) + l[0];
 
     if (ln != VERNUM) {
-        LOG << hex << ln << " != " << VERNUM << ENDLINE;
+        LOG << std::hex << ln << " != " << VERNUM << ENDLINE;
         free(buffer);
         DieError(0, "Bad .CNF version.");
         ENDFUNCRC(-1);

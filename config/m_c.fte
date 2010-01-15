@@ -97,8 +97,11 @@ colorize C {
 	'short',
 	'signed',
 	'static',
+	'size_t',
+	'ssize_t',
 	'uint',
 	'uint16_t',
+	'uint32_t',
 	'uint64_t',
 	'uint8_t',
 	'unsigned',
@@ -152,7 +155,7 @@ colorize C {
 }
 
 mode C: PLAIN {      # C/C++ Mode
-    FileNameRx		= /\.\c{c|h|{cpp}|{cxx}|{hpp}|{cc}|{xs}}$/;
+    FileNameRx		= /\.\c{c|h|{cpp}|{cxx}|{hpp}|{cc}|{hh}|{xs}}$/;
     HilitOn		= 1;
     Colorizer		= 'C';
     AutoIndent		= 1;

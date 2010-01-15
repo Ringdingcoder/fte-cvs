@@ -71,7 +71,7 @@ int EBuffer::PushUChar(unsigned char ch) {
 }
 
 
-int EBuffer::PushUData(void *data, int len) {
+int EBuffer::PushUData(const void *data, size_t len) {
     int N;
     int Order = 1;
     
@@ -122,7 +122,7 @@ int EBuffer::PushUData(void *data, int len) {
     return 1;
 }
 
-int EBuffer::GetUData(int No, int pos, void **data, int len) {
+int EBuffer::GetUData(int No, int pos, void **data, size_t len) {
     int N;
     
     if (No == -1)

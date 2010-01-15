@@ -345,8 +345,8 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
 
 int IsState(hsState *Buf, hsState State, size_t Len) {
 
-    while (Len-- > 0)
-	if (*Buf++ != State)
+    for (;Len-- > 0; Buf++)
+	if (*Buf != State)
 	    return 0;
 
     return 1;

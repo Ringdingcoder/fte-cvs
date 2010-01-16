@@ -735,8 +735,14 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	case KEY_UP:
 	    KEvent->Code = kbUp;
 	    break;
+	case KEY_SF:
+	    KEvent->Code = kfShift | kbDown;
+	    break;
 	case KEY_DOWN:
 	    KEvent->Code = kbDown;
+	    break;
+	case KEY_SR:
+	    KEvent->Code = kfShift | kbUp;
 	    break;
 	case KEY_RIGHT:
 	    KEvent->Code = kbRight;

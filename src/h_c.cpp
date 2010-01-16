@@ -488,7 +488,6 @@ static int CheckLabel(EBuffer *B, int Line) {
 static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const char *Open, const char *Close, int *OPos, int *OLine, int matchparens = 0, int bolOnly = 0) {
     char *P;
     size_t L;
-    size_t Pos;
     size_t LOpen = strlen(Open);
     size_t LClose = strlen(Close);
     int StateLen;
@@ -503,8 +502,7 @@ static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const 
         L = B->RLine(Row)->Count;
         StateMap = NULL;
         if (B->GetMap(Row, &StateLen, &StateMap) == 0) return -1;
-        Pos = L - 1;
-        if (L > 0) while (Pos >= 0) {
+        for (int Pos = (int)L - 1; Pos >= 0; Pos--) {
             if (P[Pos] != ' ' && P[Pos] != 9) {
                 if (StateMap[Pos] == hsC_Normal) {
                     switch (P[Pos]) {
@@ -526,7 +524,7 @@ static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const 
                                 if (bolOnly)
                                     didMatch = 1;
                                 else {
-                                    *OPos = B->ScreenPos(B->RLine(Row), (int)Pos);
+                                    *OPos = B->ScreenPos(B->RLine(Row), Pos);
                                     *OLine = Row;
                                     free(StateMap);
                                     return B->LineIndented(Row);

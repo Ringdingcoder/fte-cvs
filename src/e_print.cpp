@@ -10,8 +10,8 @@
 #include "fte.h"
 
 int EBuffer::BlockPrint() {
-    static char cr = 13;
-    static char lf = 10;
+    const char cr = 13;
+    const char lf = 10;
     EPoint B, E;
     int L;
     int A, Z;
@@ -125,8 +125,8 @@ int EBuffer::BlockPrint() {
 
 
 int EBuffer::FilePrint() {
-    static char cr = 13;
-    static char lf = 10;
+    const char cr = 13;
+    const char lf = 10;
     int l;
     FILE *fp;
     unsigned long ByteCount = 0;

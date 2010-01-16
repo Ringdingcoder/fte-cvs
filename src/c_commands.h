@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef C_COMMANDS_H
+#define C_COMMANDS_H
 
 enum ExResult {
     ErFAIL = 0,
@@ -773,4 +773,4 @@ enum ExCommands {
     /// Delete content's of selection and paste clipboard to current position
 };
 
-#endif // COMMANDS_H
+#endif // C_COMMANDS_H

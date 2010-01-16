@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __REGEX_H
-#define __REGEX_H
+#ifndef E_REGEX_H
+#define E_REGEX_H
 
 /*
  * Operator:
@@ -84,9 +84,7 @@
 
 #define RX_CASE         1  // matchcase
 
-typedef struct _RxNode RxNode;
-
-struct _RxNode {
+struct RxNode {
     short fWhat;
     short fLen;
     RxNode *fPrev;
@@ -108,4 +106,4 @@ int RxExec(RxNode *Regexp, const char *Data, size_t Len, const char *Start, RxMa
 int RxReplace(const char *rep, const char *Src, size_t len, RxMatchRes match, char **Dest, size_t *Dlen);
 void RxFree(RxNode *Node);
 
-#endif
+#endif // E_REGEX_H

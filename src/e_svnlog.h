@@ -8,13 +8,14 @@
  * discard on view close.
  */
 
-#ifndef _SVNLOG_H_
-#define _SVNLOG_H_
+#ifndef E_SVNLOG_H
+#define E_SVNLOG_H
 
 #include "feature.h"
-#include "e_buffer.h"
 
 #ifdef CONFIG_OBJ_SVN
+
+#include "e_buffer.h"
 
 class ESvnLog:public EBuffer {
     public:
@@ -45,6 +46,6 @@ class ESvnLog:public EBuffer {
 
 extern ESvnLog *SvnLogView;
 
-#endif
+#endif // CONFIG_OBJ_SVN
 
-#endif
+#endif // E_SVNLOG_H

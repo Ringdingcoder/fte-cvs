@@ -7,31 +7,32 @@
  *
  */
 
-#ifndef __TAGS_H
-#define __TAGS_H
+#ifndef E_TAGS_H
+#define E_TAGS_H
 
 #include "feature.h"
+
+#ifdef CONFIG_TAGS
+
 #include <stdio.h> // FILE
 
 class EView;
 class EBuffer;
 
-#ifdef CONFIG_TAGS
-
-int TagsAdd(char *FileName);
+int TagsAdd(const char *FileName);
 int TagsSave(FILE *fp);
 int TagsLoad(int id);
 
-int TagLoad(char *FileName);
+int TagLoad(const char *FileName);
 void TagClear();
-int TagGoto(EView *V, char *Tag);
+int TagGoto(EView *V, const char *Tag);
 int TagDefined(const char *Tag);
-int TagFind(EBuffer *B, EView *V, char *Tag);
-int TagComplete(char **Words, int *WordsPos, int WordsMax, char *Tag);
+int TagFind(EBuffer *B, EView *V, const char *Tag);
+int TagComplete(char **Words, int *WordsPos, int WordsMax, const char *Tag);
 int TagNext(EView *V);
 int TagPrev(EView *V);
 int TagPop(EView *V);
 
 #endif
 
-#endif // __TAGS_H
+#endif // E_TAGS_H

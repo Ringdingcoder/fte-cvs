@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __CONKBD_H__
-#define __CONKBD_H__
+#ifndef CONKBD_H
+#define CONKBD_H
 
 #define kfAltXXX    0x01000000L
 #define kfModifier  0x02000000L
@@ -74,4 +74,4 @@
 #define kbSysReq     (kfSpecial | 0x403)
 #define kbBreak      (kfSpecial | 0x404)
 
-#endif
+#endif // CONKBD_H

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __UNDO_H__
-#define __UNDO_H__
+#ifndef E_UNDO_H
+#define E_UNDO_H
 
 /*
  * only core operations can be directly undone
@@ -21,26 +21,28 @@
  * - Block marking
  */
  
-#define ucInsLine          1
-#define ucDelLine          2
-#define ucInsChars         3
-#define ucDelChars         4
+enum UndoCommands {
+    ucInsLine,
+    ucDelLine,
+    ucInsChars,
+    ucDelChars,
 
-#define ucJoinLine         5
-#define ucSplitLine        6
+    ucJoinLine,
+    ucSplitLine,
 
-#define ucPosition         7
-#define ucBlock            8
-#define ucModified         9
+    ucPosition,
+    ucBlock,
+    ucModified,
 
-#define ucFoldCreate       11
-#define ucFoldDestroy      12
-#define ucFoldPromote      13
-#define ucFoldDemote       14
-#define ucFoldOpen         15
-#define ucFoldClose        16
+    ucFoldCreate,
+    ucFoldDestroy,
+    ucFoldPromote,
+    ucFoldDemote,
+    ucFoldOpen,
+    ucFoldClose,
 
-#define ucPlaceUserBookmark  17
-#define ucRemoveUserBookmark 18
+    ucPlaceUserBookmark,
+    ucRemoveUserBookmark
+};
 
-#endif
+#endif // E_UNDO_H

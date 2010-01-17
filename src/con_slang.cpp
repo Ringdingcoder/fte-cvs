@@ -705,18 +705,19 @@ static int parseEsc(void)
 
     if (!key)
 	return kbEsc;
-    else if (key >= 'a' && key <= 'z')
-	return ((key + 'A' - 'a') | kfAlt);
-    else if (key >= 'A' && key <= 'Z') {
+    if (key >= 'a' && key <= 'z')
+	return (kfAlt | (key + 'A' - 'a'));
+
+    char seq[8] = { (char)key, 0 };
+    unsigned seqpos = 1;
+
+    if (key >= 'A' && key <= 'Z') {
 	int key1;
 	if (!(key1 = getkey(0)))
-	    return (key | kfAlt);
-	/* longer esc sequence... unget */
-	SLang_ungetkey((unsigned char)key1);
+	    return (kfAlt | key);
+	/* longer esc sequence... */
+	seq[seqpos++] = (char)key1;
     } 
-
-    char seq[8] = { (char) key, 0 };
-    unsigned seqpos = 1;
 
     /* read whole Esc sequence */
     while (seqpos < 7 && (seq[seqpos] = (char)getkey(0))) {
@@ -734,8 +735,8 @@ static int parseEsc(void)
 int ConGetEvent(TEventMask /*EventMask */ ,
 		TEvent * Event, int WaitTime, int Delete)
 {
-    int key, rc;
     TKeyEvent *KEvent = &(Event->Key);
+    int key, rc;
 
     if (Prev.What != evNone) {
 	*Event = Prev;
@@ -757,17 +758,17 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	return -1;
     else if (key == 27) // Esc
 	key = parseEsc();
-    else if (key == 13)
+    else if (key == '\n' || key == '\r')
 	key = kbEnter;
-    else if (key == 9)
+    else if (key == '\t')
 	key = kbTab;
     else if (key == 8 || key == 127)
 	key = kbBackSp;
     else if (key > 'A' && key < 'Z')
 	key = kfShift | (key + 'a' - 'A');
     else if (key < 32)
-	key = kfCtrl | (key - 1 + 'A');
-    else if (key > 127)
+	key = kfCtrl | (key + 'A' - 1);
+    else if (key > 255)
 	key = kbEsc;
 
     Event->What = evKeyDown;
@@ -883,8 +884,8 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	return 1;
     }
 
-#endif
     return -1;
+#endif
 }
 
 int ConPutEvent(TEvent Event)

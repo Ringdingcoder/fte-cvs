@@ -1,6 +1,13 @@
 Revision history
 -----------------------------------------------------------------------
-0.50.X -- <fill month here> 201X
+0.50.2b3 -- <fill month here> 201X
+
+0.50.2b3 -- Janury 2010
+  + Completely new keyboard handling for Slang version - 
+    it gets usable - still not as comfortable as X version,
+    but good enough especially in gnome-terminal.
+    (more Esc sequences could be easily integrated)
+  - ongoing size_t conversion
 
 0.50.2b2 -- January 2010
   + Applied a few submitted patches from various Inet developers

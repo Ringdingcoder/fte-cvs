@@ -547,6 +547,7 @@ int ConQueryMouseButtons(int *ButtonCount)
 
 static TEvent Prev = { evNone };
 
+#if 0
 static const TKeyCode keys_ctrlhack[] =
 {
     kfAlt,
@@ -683,7 +684,265 @@ static TKeyCode ftesl_process_key(int key, int ctrlhack = 0)
 	    return '?';
 	}
 }
+#endif
+/*
+ * Handling escape sequencies is quite complex
+ * easiest seems to be usage of multi-level tables
+ * instead of creating complex if/else code
+ *
+ * Of course, there is no way to cover all sequence
+ */
 
+struct SlangDecode {
+    const SlangDecode *table;
+    int key;
+    char ch;
+};
+
+static const SlangDecode t_bl_1_semicolon_2[] = {
+    { 0, kfShift | kbUp,    'A' },
+    { 0, kfShift | kbDown,  'B' },
+    { 0, kfShift | kbRight, 'C' },
+    { 0, kfShift | kbLeft,  'D' },
+
+    { 0, kfShift | kbHome,  'H' },
+    { 0, kfShift | kbEnd,   'F' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_1_semicolon_3[] = {
+    { 0, kfAlt | kbUp,    'A' },
+    { 0, kfAlt | kbDown,  'B' },
+    { 0, kfAlt | kbRight, 'C' },
+    { 0, kfAlt | kbLeft,  'D' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_1_semicolon[] = {
+    { t_bl_1_semicolon_2, 0, '2' },
+    { t_bl_1_semicolon_3, 0, '3' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_1[] = {
+    { 0, kbHome,           '~' },
+    { 0, kbF6,             '7' },
+    { 0, kbF7,             '8' },
+    { 0, kbF8,             '9' },
+    { t_bl_1_semicolon, 0, ';' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_2_semicolon_2[] = {
+    { 0, kfShift | kbIns, '~' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_2_semicolon_3[] = {
+    { 0, kfAlt | kbIns, '~' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_2_semicolon[] = {
+    { t_bl_2_semicolon_2, 0, '2' },
+    { t_bl_2_semicolon_3, 0, '3' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_2[] = {
+    { 0, kbIns, '~' },
+    { 0, kbF9,  '0' },
+    { 0, kbF10, '1' },
+    { 0, kbF11, '3' },
+    { 0, kbF12, '4' },
+    { t_bl_2_semicolon, 0, ';' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_3_semicolon_2[] = {
+    { 0, kfShift | kbDel, '~' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_3_semicolon_3[] = {
+    { 0, kfAlt | kbDel, '~' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_3_semicolon[] = {
+    { t_bl_3_semicolon_2, 0, '2' },
+    { t_bl_3_semicolon_3, 0, '3' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_3[] = {
+    { 0, kbDel, '~' },
+    { t_bl_3_semicolon, 0, ';' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_4[] = {
+    { 0, kbEnd, '~' },
+    //{ t_bl_4_semicolon, 0, ';' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_5_semicolon_3[] = {
+    { 0, kfAlt | kbPgUp, '~' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_5_semicolon[] = {
+    { t_bl_5_semicolon_3, 0, '3' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_5[] = {
+    { 0, kbPgUp, '~' },
+    { t_bl_5_semicolon, 0, ';' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_6_semicolon_3[] = {
+    { 0, kfAlt | kbPgDn, '~' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_6_semicolon[] = {
+    { t_bl_6_semicolon_3, 0, '3' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_6[] = {
+    { 0, kbPgDn, '~' },
+    { t_bl_6_semicolon, 0, ';' },
+    { 0 }
+};
+
+static const SlangDecode t_bl_bl[] = {
+    { 0, kbF1, 'A' },
+    { 0, kbF2, 'B' },
+    { 0, kbF3, 'C' },
+    { 0, kbF4, 'D' },
+    { 0, kbF5, 'E' },
+    { 0 }
+};
+
+static const SlangDecode t_bl[] = {
+    { t_bl_1, 0,  '1' },
+    { t_bl_2, 0,  '2' },
+    { t_bl_3, 0,  '3' },
+    { t_bl_4, 0,  '4' },
+    { t_bl_5, 0,  '5' },
+    { t_bl_6, 0,  '6' },
+
+
+    { 0, kbUp,    'A' },
+    { 0, kbDown,  'B' },
+    { 0, kbRight, 'C' },
+    { 0, kbLeft,  'D' },
+    { 0, kbPrtScr,  'P' },
+    { 0, kfShift | kbTab,  'Z' },
+
+    { t_bl_bl, 0, '[' },
+    { 0 }
+};
+
+static const SlangDecode t_O_1_semicolon_3[] = {
+    { 0, kfAlt | kbF3, 'R' },
+    { 0 }
+};
+
+static const SlangDecode t_O_1_semicolon[] = {
+    { t_O_1_semicolon_3, 0, '3' },
+    { 0 }
+};
+
+static const SlangDecode t_O_1[] = {
+    { t_O_1_semicolon, 0, ';' },
+    { 0 }
+};
+
+
+static const SlangDecode t_O[] = {
+    { 0, kbHome, 'H' },
+    { 0, kbEnd,  'F' },
+    { t_O_1, 0,  '1' },
+    { 0 }
+};
+
+static const SlangDecode t_start[] = {
+    { t_bl, 0,   '[' },
+    { t_bl_2, 0, '2' },
+    { t_O, 0,    'O' },
+    { 0, kfAlt | kbBackSp, 127 },
+    { 0, kfAlt | kbEnter,  10 },
+    { 0, kfAlt | ',', ',' },
+    { 0, kfAlt | '.', '.' },
+    { 0, kfAlt | '/', '/' },
+    { 0, kfAlt | ';', ';' },
+    { 0, kfAlt | '\'', '\'' },
+    { 0, kfAlt | '\\', '\\' },
+    { 0, kfAlt | ']', ']' },
+    { 0, kfAlt | '-', '-' },
+    { 0, kfAlt | '=', '=' },
+    { 0 }
+};
+
+static int getkey(int tsecs)
+{
+    int key;
+    if (SLang_input_pending(tsecs) > 0) {
+	key = SLang_getkey();
+	//fprintf(stderr, "readkey  0x%2x  %d  %c\n", key, key, isprint(key) ? key : ' ');
+    } else
+	key = 0;
+
+    return key;
+}
+
+static int parseEsc(void)
+{
+    const SlangDecode *tab = t_start;
+    int key = getkey(0);
+
+    if (key >= 'a' && key <= 'z') {
+	key -= 'a' - 'A';
+	key |= kfAlt;
+    } else if (key >= 'A' && key <= 'Z') {
+	int key1;
+	if ((key1 = getkey(0))) {
+	    SLang_ungetkey((unsigned char)key1);
+	    goto parse;
+	}
+	key |= kfAlt;
+    } else {
+parse:
+	char seq[10] = { (char) key };
+	size_t seqpos = 1;
+	while (tab->ch) {
+	    if (tab->ch == key) {
+		if (tab->table) {
+		    //fprintf(stderr, "    -> switch table %p -> %p\n", tab, tab->table);
+		    tab = tab->table;
+		    key = getkey(0);
+		    seq[seqpos++] = (char)key;
+		    continue;
+		}
+		//fprintf(stderr, "Found key:      0x%x  %s\n", tab->key, seq);
+		return tab->key;
+	    }
+	    tab++;
+	}
+	while (key && (key = getkey(0)) && (seqpos < (sizeof(seq) - 1)))
+	    seq[seqpos++] = (char)key;
+	seq[seqpos] = 0;
+	fprintf(stderr, "FIXME: Unknown Esc sequence: \"%s\"\n", seq);
+	key = kbEsc;
+    }
+
+    return key; // return as plain Esc
+}
 
 int ConGetEvent(TEventMask /*EventMask */ ,
 		TEvent * Event, int WaitTime, int Delete)
@@ -706,6 +965,33 @@ int ConGetEvent(TEventMask /*EventMask */ ,
     if (Event->What == evNotify)
         return 0; // pipe reading
 
+    key = getkey(0);
+    if (!key)
+	return -1;
+    else if (key == 0x1b)
+	key = parseEsc();
+    else if (key == 13)
+	key = kbEnter;
+    else if (key == 9)
+	key = kbTab;
+    else if (key == 8 || key == 127)
+	key = kbBackSp;
+    else if (key > 'A' && key < 'Z')
+	key = kfShift | (key + 'a' - 'A');
+    else if (key < 32)
+        key = kfCtrl | (key - 1 + 'A');
+    else if (key > 127)
+	key = kbEsc;
+
+    Event->What = evKeyDown;
+    KEvent->Code = key;
+
+    if (!Delete)
+	Prev = *Event;
+
+    return 1;
+
+#if 0
     if (SLang_input_pending(0) > 0) {
 	TKeyCode kcode = 0, kcode1;
 
@@ -810,6 +1096,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	return 1;
     }
 
+#endif
     return -1;
 }
 
@@ -884,9 +1171,6 @@ int GUI::RunProgram(int /*mode */ , char *Command)
 
 char ConGetDrawChar(unsigned int idx)
 {
-    static const char * use_tab = NULL;
-    static size_t use_tab_size = 0;
-
     static const unsigned char tab[] =
     {
 	DCH_SLANG_C1,
@@ -942,16 +1226,18 @@ char ConGetDrawChar(unsigned int idx)
     //    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k',
     //    'l', 'm', 'n', 'o', 'p', 'q'
     //};
+     static const char * use_tab = NULL;
+     static size_t use_tab_size = 0;
 
-    if (use_tab == NULL) {
-	char *c = getenv("TERM");
+     if (use_tab == NULL) {
+	const char *c = getenv("TERM");
 	use_tab = (const char*)
 	    (((c == NULL) || strcmp(c, "linux") != 0) ? tab : tab_linux);
 	use_tab = GetGUICharacters("Slang", use_tab);
 	use_tab_size = strlen(use_tab);
-    }
+     }
 
-    assert(idx < (int)use_tab_size);
+     assert(idx < use_tab_size);
 
-    return use_tab[idx];
+     return use_tab[idx];
 }

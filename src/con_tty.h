@@ -252,7 +252,9 @@ static struct TTYEscDecode {
     { "OH", kbHome },
 
     { "\x7f", kfAlt | kbBackSp },
-    { "\x0a", kfAlt | kbEnter },
+    { "\r", kfAlt | kbEnter },
+    { "\n", kfAlt | kbEnter },
+    { "\t", kfAlt | kbTab },
     { "\x1b", kbEsc },
     { ",", kfAlt | ',' },
     { ".", kfAlt | '.' },

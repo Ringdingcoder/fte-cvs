@@ -10,175 +10,80 @@
 #include <stdlib.h>
 #include <stdio.h> // fprintf
 
-/*
- * Sorted via qsort in runtime so there is NO const here!
- */
-static struct TTYEscDecode {
+static const struct TTYEscDecode {
     char seq[8];
     int key;
-} tty_esc_seq[] = {
-    { "[1;2A", kfShift | kbUp },
-    { "[1;3A", kfAlt | kbUp },
-    { "[1;5A", kfCtrl | kbUp },
-    { "[1;6A", kfCtrl | kfShift | kbUp },
-
-    { "[2A", kfShift | kbUp },
-    { "[5A", kfCtrl | kbUp },
-    { "[6A", kfCtrl | kfShift | kbUp },
+} tty_esc_seq_c[] = {
+    /* '%' replaced with 2..8  with modified  Alt | Ctrl | Shift */
+    { "[1;%A", kbUp },
+    { "[%A", kbUp },
     { "[A", kbUp },
 
-    { "[1;2B", kfShift | kbDown },
-    { "[1;3B", kfAlt | kbDown },
-    { "[1;5B", kfCtrl | kbDown },
-    { "[1;6B", kfCtrl | kfShift | kbDown },
-
-    { "[2B", kfShift | kbDown },
-    { "[5B", kfCtrl | kbDown },
-    { "[6B", kfCtrl | kfShift | kbDown },
+    { "[1;%B", kbDown },
+    { "[%B", kbDown },
     { "[B", kbDown },
 
-    { "[1;2C", kfShift | kbRight },
-    { "[1;3C", kfAlt | kbRight },
-    { "[1;5C", kfCtrl | kbRight },
-    { "[1;6C", kfCtrl | kfShift | kbRight },
-
-    { "[2C", kfShift | kbRight },
-    { "[5C", kfCtrl | kbRight },
-    { "[6C", kfCtrl | kfShift | kbRight },
+    { "[1;%C", kbRight },
+    { "[%C", kbRight },
     { "[C", kbRight },
 
-    { "[1;2D", kfShift | kbLeft },
-    { "[1;3D", kfAlt | kbLeft },
-    { "[1;5D", kfCtrl | kbLeft },
-    { "[1;6D", kfCtrl | kfShift | kbLeft },
-
-    { "[2D", kfShift | kbLeft },
-    { "[5D", kfCtrl | kbLeft },
-    { "[6D", kfCtrl | kfShift | kbLeft },
+    { "[1;%D", kbLeft },
+    { "[%D", kbLeft },
     { "[D", kbLeft },
 
-    { "[1;2F", kfShift | kbEnd },
-    { "[1;3F", kfAlt | kbEnd },
-    { "[1;5F", kfCtrl | kbEnd },
-    { "[1;6F", kfCtrl | kfShift | kbEnd },
-
-    { "[2F", kfShift | kbEnd },
-    { "[5F", kfCtrl | kbEnd },
-    { "[6F", kfCtrl | kfShift | kbEnd },
+    { "[1;%F", kbEnd },
+    { "[%F", kbEnd },
     { "[F", kbEnd },
 
-    { "[1;2H", kfShift | kbHome },
-    { "[1;3H", kfAlt | kbHome },
-    { "[1;5H", kfCtrl | kbHome },
-    { "[1;6H", kfCtrl | kfShift | kbHome },
-
-    { "[2H", kfShift | kbHome },
-    { "[5H", kfCtrl | kbHome },
-    { "[6H", kfCtrl | kfShift | kbHome },
+    { "[1;%H", kbHome },
+    { "[%H", kbHome },
     { "[H", kbHome },
 
-    { "[1;2P", kfShift | kbF1 },
-    { "[1;3P", kfAlt | kbF1 },
-    { "[1;5P", kfCtrl | kbF1 },
-    { "[1;6P", kfCtrl | kfShift | kbF1 },
+    { "[1;%P", kbF1 },
+    { "[1;%Q", kbF2 },
+    { "[1;%R", kbF3 },
+    { "[1;%S", kbF4 },
 
-    { "[1;2Q", kfShift | kbF2 },
-    { "[1;3Q", kfAlt | kbF2 },
-    { "[1;5Q", kfCtrl | kbF2 },
-    { "[1;6Q", kfCtrl | kfShift | kbF2 },
-
-    { "[1;2R", kfShift | kbF3 },
-    { "[1;3R", kfAlt | kbF3 },
-    { "[1;5R", kfCtrl | kbF3 },
-    { "[1;6R", kfCtrl | kfShift | kbF3 },
-
-    { "[1;2S", kfShift | kbF4 },
-    { "[1;3S", kfAlt | kbF4 },
-    { "[1;5S", kfCtrl | kbF4 },
-    { "[1;6S", kfCtrl | kfShift | kbF4 },
-
-    { "[15;2~", kfShift | kbF5 },
-    { "[15;3~", kfAlt | kbF5 },
-    { "[15;5~", kfCtrl | kbF5 },
-    { "[15;6~", kfCtrl | kfShift | kbF5 },
+    { "[15;%~", kbF5 },
     { "[15~", kbF5 },
 
-    { "[17;2~", kfShift | kbF6 },
-    { "[17;3~", kfAlt | kbF6 },
-    { "[17;5~", kfCtrl | kbF6 },
-    { "[17;6~", kfCtrl | kfShift | kbF6 },
+    { "[17;%~", kbF6 },
     { "[17~", kbF6 },
 
-    { "[18;2~", kfShift | kbF7 },
-    { "[18;3~", kfAlt | kbF7 },
-    { "[18;5~", kfCtrl | kbF7 },
-    { "[18;6~", kfCtrl | kfShift | kbF7 },
+    { "[18;%~", kbF7 },
     { "[18~", kbF7 },
 
-    { "[19;2~", kfShift | kbF8 },
-    { "[19;3~", kfAlt | kbF8 },
-    { "[19;5~", kfCtrl | kbF8 },
-    { "[19;6~", kfCtrl | kfShift | kbF8 },
+    { "[19;%~", kbF8 },
     { "[19~", kbF8 },
 
-    { "[20;2~", kfShift | kbF9 },
-    { "[20;3~", kfAlt | kbF9 },
-    { "[20;5~", kfCtrl | kbF9 },
-    { "[20;6~", kfCtrl | kfShift | kbF9 },
+    { "[20;%~", kbF9 },
     { "[20~", kbF9 },
 
-    { "[21;2~", kfShift | kbF10 },
-    { "[21;3~", kfAlt | kbF10 },
-    { "[21;5~", kfCtrl | kbF10 },
-    { "[21;6~", kfCtrl | kfShift | kbF10 },
+    { "[21;%~", kbF10 },
     { "[21~", kbF10 },
 
-    { "[23;2~", kfShift | kbF11 },
-    { "[23;3~", kfAlt | kbF11 },
-    { "[23;5~", kfCtrl | kbF11 },
-    { "[23;6~", kfCtrl | kfShift | kbF11 },
+    { "[23;%~", kbF11 },
     { "[23~", kbF11 },
 
-    { "[24;2~", kfShift | kbF12 },
-    { "[24;3~", kfAlt | kbF12 },
-    { "[24;5~", kfCtrl | kbF12 },
-    { "[24;6~", kfCtrl | kfShift | kbF12 },
+    { "[24;%~", kbF12 },
     { "[24~", kbF12 },
 
-    { "[1;2~", kfShift | kbHome },
-    { "[1;3~", kfAlt | kbHome },
-    { "[1;5~", kfCtrl | kbHome },
-    { "[1;6~", kfCtrl | kfShift | kbHome },
+    { "[1;%~", kbHome },
     { "[1~", kbHome },
 
-    { "[2;2~", kfShift | kbIns },
-    { "[2;3~", kfAlt | kbIns },
-    { "[2;5~", kfCtrl | kbIns },
-    { "[2;6~", kfCtrl | kfShift | kbIns },
+    { "[2;%~", kbIns },
     { "[2~", kbIns },
 
-    { "[3;2~", kfShift | kbDel },
-    { "[3;3~", kfAlt | kbDel },
-    { "[3;5~", kfCtrl | kbDel },
-    { "[3;6~", kfCtrl | kfShift | kbDel },
+    { "[3;%~", kbDel },
     { "[3~", kbDel },
 
-    { "[4;2~", kfShift | kbEnd },
-    { "[4;3~", kfAlt | kbEnd },
-    { "[4;5~", kfCtrl | kbEnd },
-    { "[4;6~", kfCtrl | kfShift | kbEnd },
+    { "[4;%~", kbEnd },
     { "[4~", kbEnd },
 
-    { "[5;2~", kfShift | kbPgUp },
-    { "[5;3~", kfAlt | kbPgUp },
-    { "[5;5~", kfCtrl | kbPgUp },
-    { "[5;6~", kfCtrl | kfShift | kbPgUp },
+    { "[5;%~", kbPgUp },
     { "[5~", kbPgUp },
 
-    { "[6;2~", kfShift | kbPgDn },
-    { "[6;3~", kfAlt | kbPgDn },
-    { "[6;5~", kfCtrl | kbPgDn },
-    { "[6;6~", kfCtrl | kfShift | kbPgDn },
+    { "[6;%~", kbPgDn },
     { "[6~", kbPgDn },
 
     { "[25~", kfShift | kbF1 },
@@ -199,54 +104,26 @@ static struct TTYEscDecode {
     { "[P", kbPrtScr },
     { "[Z", kfShift | kbTab },
 
-    { "O1;2P", kfShift | kbF1 },
-    { "O1;3P", kfAlt | kbF1 },
-    { "O1;5P", kfCtrl | kbF1 },
-    { "O1;6P", kfCtrl | kfShift | kbF1 },
-    { "O2P", kfShift | kbF1 },
-    { "O3P", kfAlt | kbF1 },
-    { "O5P", kfCtrl | kbF1 },
-    { "O6P", kfCtrl | kfShift | kbF1 },
+    { "O1;%P", kbF1 },
+    { "O%P", kbF1 },
     { "OP", kbF1 },
 
-    { "O1;2Q", kfShift | kbF2 },
-    { "O1;3Q", kfAlt | kbF2 },
-    { "O1;5Q", kfCtrl | kbF2 },
-    { "O1;6Q", kfCtrl | kfShift | kbF2 },
-    { "O2Q", kfShift | kbF2 },
-    { "O3Q", kfAlt | kbF2 },
-    { "O5Q", kfCtrl | kbF2 },
-    { "O6Q", kfCtrl | kfShift | kbF2 },
+    { "O1;%Q", kbF2 },
+    { "O%Q", kbF2 },
     { "OQ", kbF2 },
 
-    { "O1;2R", kfShift | kbF3 },
-    { "O1;3R", kfAlt | kbF3 },
-    { "O1;5R", kfCtrl | kbF3 },
-    { "O1;6R", kfCtrl | kfShift | kbF3 },
-    { "O2R", kfShift | kbF3 },
-    { "O3R", kfAlt | kbF3 },
-    { "O5R", kfCtrl | kbF3 },
-    { "O6R", kfCtrl | kfShift | kbF3 },
+    { "O1;%R", kbF3 },
+    { "O%R", kbF3 },
     { "OR", kbF3 },
 
-    { "O1;2S", kfShift | kbF4 },
-    { "O1;3S", kfAlt | kbF4 },
-    { "O1;5S", kfCtrl | kbF4 },
-    { "O1;6S", kfCtrl | kfShift | kbF4 },
-    { "O2S", kfShift | kbF4 },
-    { "O3S", kfAlt | kbF4 },
-    { "O5S", kfCtrl | kbF4 },
-    { "O6S", kfCtrl | kfShift | kbF4 },
+    { "O1;%S", kbF4 },
+    { "O%S", kbF4 },
     { "OS", kbF4 },
 
-    { "O5A", kfCtrl | kbUp },
-    { "O6A", kfCtrl | kfShift | kbUp },
-    { "O5B", kfCtrl | kbDown },
-    { "O6B", kfCtrl | kfShift | kbDown },
-    { "O5C", kfCtrl | kbRight },
-    { "O6C", kfCtrl | kfShift | kbRight },
-    { "O5D", kfCtrl | kbLeft },
-    { "O6D", kfCtrl | kfShift | kbLeft },
+    { "O%A", kbUp },
+    { "O%B", kbDown },
+    { "O%C", kbRight },
+    { "O%D", kbLeft },
 
     { "OF", kbEnd },
     { "OH", kbHome },
@@ -271,6 +148,10 @@ static struct TTYEscDecode {
     { "[", kfAlt | '[' },
 };
 
+/* Sorted via qsort in runtime so there is NO const here! */
+static struct TTYEscDecode tty_esc_seq[7 * sizeof(tty_esc_seq_c) / sizeof(tty_esc_seq_c[0])];
+static unsigned tty_esc_size = 0;
+
 static int TTYEscComp(const void *a, const void *b)
 {
     int c = strcmp(((const TTYEscDecode*)a)->seq,
@@ -283,10 +164,10 @@ static int TTYEscComp(const void *a, const void *b)
     exit(-1);
 }
 
-static int TTYEscParse(const char *seq)
+static int TTYEscParse1(const char *seq)
 {
     unsigned H = 0, L = 0;
-    unsigned R = sizeof(tty_esc_seq) / sizeof(tty_esc_seq[0]);
+    unsigned R = tty_esc_size;
     int c;
 
     while (L < R) {
@@ -306,11 +187,72 @@ static int TTYEscParse(const char *seq)
     return kbEsc;
 }
 
+static int TTYEscParse(const char *seq)
+{
+    unsigned i, H = 0, L = 0;
+    unsigned R = tty_esc_size;
+    int c;
+
+    while (L < R) {
+	H = L + (R - L) / 2;
+
+	//if ((c = strcmp(seq, tty_esc_seq[H].seq)) == 0) {
+        // replace strcmp with direct char compare
+	for (i = 0; (tty_esc_seq[H].seq[i]
+		     && !(c = (seq[i] - tty_esc_seq[H].seq[i]))); ++i)
+	    ;
+	if (c == 0 && tty_esc_seq[H].seq[i] == 0) {
+	    //fprintf(stderr, "Found key: 0x%x  %s  %s\n",
+	    //        tty_esc_seq[H].key, tty_esc_seqast [H].seq, seq);
+	    return tty_esc_seq[H].key;
+	} else if (c < 0)
+	    R = H;
+	else // (c > 0)
+	    L = H + 1;
+    }
+
+    // for detecting unknown Esq sequences - sfte 2>/tmp/newesc
+    fprintf(stderr, "FIXME: Unknown Esc sequence: \"%s\"\n", seq);
+    return kbEsc;
+}
+
+/*
+ * Create table from template and replace '%' with character numbers
+ * from '2' to '8' with appropriate Alt, Ctrl, Shift modifiers
+ */
 static void TTYEscInit(void)
 {
-    qsort(tty_esc_seq, sizeof(tty_esc_seq)/sizeof(tty_esc_seq[0]),
-	  sizeof(TTYEscDecode), TTYEscComp);
+    for (unsigned i = 0; i < sizeof(tty_esc_seq_c)/sizeof(tty_esc_seq_c[0]); ++i) {
+	for (int j = '2'; j <= '8'; ++j) {
+            tty_esc_seq[tty_esc_size].key = tty_esc_seq_c[i].key;
+	    strcpy(tty_esc_seq[tty_esc_size].seq, tty_esc_seq_c[i].seq);
+	    char *r = strchr(tty_esc_seq[tty_esc_size].seq, '%');
+	    if (!r) {
+		tty_esc_size++;
+		break;
+	    }
+            *r = (char)j;
+	    switch (j) {
+	    case '2': tty_esc_seq[tty_esc_size].key |= kfShift; break;
+	    case '3': tty_esc_seq[tty_esc_size].key |= kfAlt; break;
+	    case '4': tty_esc_seq[tty_esc_size].key |= kfAlt | kfShift; break;
+	    case '5': tty_esc_seq[tty_esc_size].key |= kfCtrl; break;
+	    case '6': tty_esc_seq[tty_esc_size].key |= kfCtrl | kfShift; break;
+	    case '7': tty_esc_seq[tty_esc_size].key |= kfCtrl | kfAlt; break;
+	    case '8': tty_esc_seq[tty_esc_size].key |= kfAlt | kfCtrl | kfShift; break;
+	    }
+            tty_esc_size++;
+	}
+    }
 
-    //for (unsigned i = 0; i < sizeof(seqtable)/sizeof(seqtable[0]); i++)
-    //    fprintf(stderr, "%d %s %x\n", i, seqtable[i].seq, seqtable[i].key);
+    qsort(tty_esc_seq, tty_esc_size, sizeof(TTYEscDecode), TTYEscComp);
+#if 0
+    const char * const test[] = { "[1;2A", "OF", "ODS", "[1;8R", 0 };
+    for (unsigned i = 0; test[i]; i++) {
+        fprintf(stderr, "search %s  %d\n", test[i], TTYEscParse(test[i]));
+    }
+    //for (unsigned i = 0; i < tty_esc_size; ++i)
+    //    fprintf(stderr, "%d %s %x\n", i, tty_esc_seq[i].seq, tty_esc_seq[i].key);
+    exit(0);
+#endif
 }

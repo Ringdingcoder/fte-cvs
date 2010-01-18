@@ -153,19 +153,21 @@ int ECvsLog::ConfQuit (GxView *V,int /*multiFile*/) {
 }
 
 // Shown in "Closing xxx..." message when closing model
-void ECvsLog::GetName (char *AName,int MaxLen) {
-    strncpy (AName,"CVS log",MaxLen);
+void ECvsLog::GetName (char *AName, size_t MaxLen) {
+    strlcpy(AName, "CVS log", MaxLen);
 }
 
 // Shown in buffer list
-void ECvsLog::GetInfo (char *AInfo,int /*MaxLen*/) {
-    sprintf(AInfo,"%2d %04d:%03d%cCVS log: %-140s",ModelNo,1+CP.Row,1+CP.Col,Modified?'*':' ',FileName);
+void ECvsLog::GetInfo (char *AInfo, size_t MaxLen) {
+    snprintf(AInfo, MaxLen, "%2d %04d:%03d%cCVS log: %s",
+	     ModelNo, 1 + CP.Row, 1 + CP.Col,
+	     Modified?'*':' ', FileName);
 }
 
 // Normal and short title (normal for window, short for icon in X)
-void ECvsLog::GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen) {
-    strncpy (ATitle,"CVS log",MaxLen);
-    strncpy (ASTitle,"CVS log",SMaxLen);
+void ECvsLog::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
+    strlcpy(ATitle, "CVS log", MaxLen);
+    strlcpy(ASTitle, "CVS log", SMaxLen);
 }
 
 #endif

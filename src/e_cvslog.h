@@ -31,15 +31,17 @@ class ECvsLog:public EBuffer {
         // list     - list of filenames
         // incexc   - status of files to print/not to print
         // exc      - incexc is exclusion
-        void ListFiles (int &p,const int fCount,const char *title,const int cnt,const int *position,const int *len,const char *status,const char *list,const char *excinc,const int exc=0);
+	void ListFiles(int &p, const int fCount, const char *title, int cnt,
+		       const int *position, const int *len, const char *status,
+		       const char *list, const char *excinc, const int exc = 0);
 
         virtual int CanQuit ();
         virtual int ConfQuit (GxView *V,int multiFile=0);
         virtual EViewPort *CreateViewPort (EView *V);
 
-        virtual void GetName(char *AName, int MaxLen);
-        virtual void GetInfo(char *AInfo, int MaxLen);
-        virtual void GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen);
+        virtual void GetName(char *AName, size_t MaxLen);
+        virtual void GetInfo(char *AInfo, size_t MaxLen);
+        virtual void GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen);
 };
 
 extern ECvsLog *CvsLogView;

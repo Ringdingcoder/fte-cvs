@@ -153,19 +153,21 @@ int ESvnLog::ConfQuit (GxView *V,int /*multiFile*/) {
 }
 
 // Shown in "Closing xxx..." message when closing model
-void ESvnLog::GetName (char *AName,int MaxLen) {
-    strncpy (AName,"SVN log",MaxLen);
+void ESvnLog::GetName (char *AName, size_t MaxLen) {
+    strlcpy(AName, "SVN log", MaxLen);
 }
 
 // Shown in buffer list
-void ESvnLog::GetInfo (char *AInfo,int /*MaxLen*/) {
-    sprintf(AInfo,"%2d %04d:%03d%cSVN log: %-140s",ModelNo,1+CP.Row,1+CP.Col,Modified?'*':' ',FileName);
+void ESvnLog::GetInfo (char *AInfo, size_t MaxLen) {
+    snprintf(AInfo, MaxLen, "%2d %04d:%03d%cSVN log: %s",
+	     ModelNo, 1 + CP.Row, 1 + CP.Col,
+	     Modified ? '*' : ' ', FileName);
 }
 
 // Normal and short title (normal for window, short for icon in X)
-void ESvnLog::GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen) {
-    strncpy (ATitle,"SVN log",MaxLen);
-    strncpy (ASTitle,"SVN log",SMaxLen);
+void ESvnLog::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
+    strlcpy (ATitle, "SVN log", MaxLen);
+    strlcpy (ASTitle, "SVN log", SMaxLen);
 }
 
 #endif

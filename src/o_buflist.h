@@ -31,8 +31,8 @@ public:
     int getMatchingLine (int start, int direction);
     virtual int Activate(int No);
     void CancelSearch();
-    virtual void GetInfo(char *AInfo, int MaxLen);
-    virtual void GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen);
+    virtual void GetInfo(char *AInfo, size_t MaxLen);
+    virtual void GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen);
 };
 
 #endif

@@ -251,13 +251,11 @@ void BufferView::CancelSearch() {
     Msg(S_INFO, "");
 }
 
-void BufferView::GetInfo(char *AInfo, int /*MaxLen*/) {
-    sprintf(AInfo, "%2d %04d/%03d Buffers", ModelNo, Row + 1, Count);
+void BufferView::GetInfo(char *AInfo, size_t MaxLen) {
+    snprintf(AInfo, MaxLen, "%2d %04d/%03d Buffers", ModelNo, Row + 1, Count);
 }
 
-void BufferView::GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen) {
-    strncpy(ATitle, "Buffers", MaxLen);
-    ATitle[MaxLen - 1] = 0;
-    strncpy(ASTitle, "Buffers", SMaxLen);
-    ASTitle[SMaxLen - 1] = 0;
+void BufferView::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
+    strlcpy(ATitle, "Buffers", MaxLen);
+    strlcpy(ASTitle, "Buffers", SMaxLen);
 }

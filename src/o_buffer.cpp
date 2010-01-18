@@ -1667,7 +1667,7 @@ int EBuffer::GetStrVar(int var, char *str, size_t buflen) {
                 wordEnd = P;
 
                 // calculate total length for buffer copy
-                int length = wordEnd - wordBegin;
+                size_t length = wordEnd - wordBegin;
 
                 if ((length + 1) < buflen)
                 {
@@ -1694,7 +1694,7 @@ int EBuffer::GetStrVar(int var, char *str, size_t buflen) {
             if (L->Count > 0)
             {
                 // calculate total length for buffer copy
-                int length = L->Count;
+                size_t length = L->Count;
 
                 if ((length + 1) < buflen)
                 {

@@ -39,9 +39,9 @@ class ESvnLog:public EBuffer {
         virtual int ConfQuit (GxView *V,int multiFile=0);
         virtual EViewPort *CreateViewPort (EView *V);
 
-        virtual void GetName(char *AName, int MaxLen);
-        virtual void GetInfo(char *AInfo, int MaxLen);
-        virtual void GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen);
+        virtual void GetName(char *AName, size_t MaxLen);
+        virtual void GetInfo(char *AInfo, size_t MaxLen);
+        virtual void GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen);
 };
 
 extern ESvnLog *SvnLogView;

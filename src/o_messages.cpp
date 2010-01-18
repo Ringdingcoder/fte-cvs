@@ -225,18 +225,13 @@ void EMessages::AddError(Error *p) {
 void EMessages::AddError(char *file, int line, char *msg, const char *text, int hilit) {
     Error *pe;
 
-    pe = (Error *) malloc(sizeof(Error));
-    if (pe == 0)
-        return ;
+    if (!(pe = (Error *) malloc(sizeof(Error))))
+	return;
 
     pe->file = file ? strdup(file) : 0;
     pe->line = line;
     pe->msg = msg ? strdup(msg) : 0;
-    if (text) {
-        size_t len = strlen(text);
-        pe->text = (char*)malloc(len + 1);
-        UnEscStr(pe->text, len+1, text, len);
-    } else pe->text = 0;
+    pe->text = text ? strdup(text) : 0;
     pe->hilit = hilit;
 
     AddError(pe);
@@ -262,7 +257,7 @@ void EMessages::FreeErrors() {
     BufLen = BufPos = 0;
 }
 
-int EMessages::GetLine(char *Line, int maxim) {
+int EMessages::GetLine(char *Line, size_t maxim) {
     int rc;
     char *p;
     int l;
@@ -288,7 +283,8 @@ int EMessages::GetLine(char *Line, int maxim) {
     p = (char *)memchr(MsgBuf + BufPos, '\n', l);
     if (p) {
         *p = 0;
-        strcpy(Line, MsgBuf + BufPos);
+        UnEscStr(Line, maxim, MsgBuf + BufPos, p - (MsgBuf + BufPos));
+        //strcpy(Line, MsgBuf + BufPos);
         l = strlen(Line);
         if (l > 0 && Line[l - 1] == '\r')
             Line[l - 1] = 0;
@@ -303,7 +299,8 @@ int EMessages::GetLine(char *Line, int maxim) {
     } else {
         if (l == 0) 
             return 0;
-        memcpy(Line, MsgBuf + BufPos, l);
+        UnEscStr(Line, maxim, MsgBuf + BufPos, l);
+        //memcpy(Line, MsgBuf + BufPos, l);
         Line[l] = 0;
         if (l > 0 && Line[l - 1] == '\r')
             Line[l - 1] = 0;

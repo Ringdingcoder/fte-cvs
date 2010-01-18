@@ -39,10 +39,10 @@ public:
     virtual int CanActivate(int Line);
     virtual int Activate(int No);
     
-    virtual void GetName(char *AName, int MaxLen);
-    virtual void GetPath(char *APath, int MaxLen);
-    virtual void GetInfo(char *AInfo, int MaxLen);
-    virtual void GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen);
+    virtual void GetName(char *AName, size_t MaxLen);
+    virtual void GetPath(char *APath, size_t MaxLen);
+    virtual void GetInfo(char *AInfo, size_t MaxLen);
+    virtual void GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen);
     
     int isDir(int No);
     int FmChDir(const char* Name);

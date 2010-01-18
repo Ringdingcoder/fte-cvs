@@ -439,19 +439,23 @@ int EDirectory::FmLoad(const char *Name, EView *XView) {
     return FileLoad(0, FilePath, NULL, XView);
 }
 
-void EDirectory::GetName(char *AName, int MaxLen) {
-    strncpy(AName, Path, MaxLen);
-    AName[MaxLen - 1] = 0;
-    Slash(AName, 0);
+void EDirectory::GetName(char *AName, size_t MaxLen) {
+    if (MaxLen > 0) {
+	strncpy(AName, Path, MaxLen);
+	AName[MaxLen - 1] = 0;
+	Slash(AName, 0);
+    }
 }
 
-void EDirectory::GetPath(char *APath, int MaxLen) {
-    strncpy(APath, Path, MaxLen);
-    APath[MaxLen - 1] = 0;
-    Slash(APath, 0);
+void EDirectory::GetPath(char *APath, size_t MaxLen) {
+    if (MaxLen > 0) {
+	strncpy(APath, Path, MaxLen);
+	APath[MaxLen - 1] = 0;
+	Slash(APath, 0);
+    }
 }
 
-void EDirectory::GetInfo(char *AInfo, int /*MaxLen*/) {
+void EDirectory::GetInfo(char *AInfo, size_t /*MaxLen*/) {
     char buf[256] = {0};
     char winTitle[256] = {0};
 
@@ -479,19 +483,20 @@ void EDirectory::GetInfo(char *AInfo, int /*MaxLen*/) {
             Path);*/
 }
 
-void EDirectory::GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen) {
+void EDirectory::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
+
+    if (!MaxLen)
+	return;
 
     strncpy(ATitle, Path, MaxLen - 1);
-    ATitle[MaxLen - 1] = 0;
+    ATitle[MaxLen] = 0;
 
-    {
-        char P[MAXPATH];
-        strlcpy(P, Path, sizeof(P));
-        Slash(P, 0);
+    char P[MAXPATH];
+    strlcpy(P, Path, sizeof(P));
+    Slash(P, 0);
 
-        JustDirectory(P, ASTitle, SMaxLen);
-        Slash(ASTitle, 1);
-    }
+    JustDirectory(P, ASTitle, SMaxLen);
+    Slash(ASTitle, 1);
 }
 
 int EDirectory::ChangeDir(ExState &State) {

@@ -7,23 +7,23 @@
  *
  */
 
-#ifndef __MESSAGES_H__
-#define __MESSAGES_H__
+#ifndef O_MESSAGES_H
+#define O_MESSAGES_H
 
 #ifdef CONFIG_OBJ_MESSAGES
-typedef struct {
+struct Error {
     char *file;
     int line;
     char *msg;
     char *text;
     int hilit;
     EBuffer *Buf;
-} Error;
+};
 
 struct aDir
 {
-    aDir*       next;
-    char*       name;
+    aDir* next;
+    char* name;
 };
 
 class EMessages: public EList {
@@ -61,7 +61,7 @@ public:
     void AddError(char *file, int line, char *msg, const char *text, int hilit=0);
     
     void FreeErrors();
-    int GetLine(char *Line, int maxim);
+    int GetLine(char *Line, size_t MaxLen);
     void GetErrors();
     int Compile(char *Command);
     void ShowError(EView *V, int err);
@@ -89,6 +89,6 @@ extern EMessages *CompilerMsgs;
 
 void FreeCRegexp();
 
-#endif
+#endif // CONFIG_OBJ_MESSAGES
 
-#endif
+#endif // O_MESSAGES_H

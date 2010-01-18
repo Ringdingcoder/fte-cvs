@@ -142,12 +142,14 @@ void ESvnBase::NotifyDelete (EModel *Deleting) {
     }
 }
 
-int ESvnBase::GetLine(char *Line, int max) {
+int ESvnBase::GetLine(char *Line, size_t max) {
     int rc;
     char *p;
     int l;
 
     //fprintf(stderr, "GetLine: %d\n", Running);
+    if (!max)
+	return 0;
 
     *Line = 0;
     if (Running && PipeId != -1) {
@@ -195,7 +197,7 @@ int ESvnBase::GetLine(char *Line, int max) {
     return 1;
 }
 
-void ESvnBase::ParseLine (char *line,int) {
+void ESvnBase::ParseLine (char *line, size_t) {
     AddLine (0,-1,line);
 }
 
@@ -400,33 +402,32 @@ EEventMap *ESvnBase::GetEventMap () {
 }
 
 // Shown in "Closing xxx..." message when closing model
-void ESvnBase::GetName (char *AName,int MaxLen) {
-    strncpy (AName,Title,MaxLen);
+void ESvnBase::GetName(char *AName, size_t MaxLen) {
+    strlcpy(AName, Title, MaxLen);
 }
 
 // Shown in buffer list
-void ESvnBase::GetInfo (char *AInfo,int MaxLen) {
-    char format[128];
+void ESvnBase::GetInfo(char *AInfo, size_t MaxLen) {
+    snprintf(AInfo, MaxLen, "%2d %04d/%03d %s (%s)",
+	     ModelNo, Row, Count, Title, Command);
 
-    sprintf (format,"%2d %04d/%03d %s (%%.%is) ",ModelNo,Row,Count,Title,(int)(MaxLen-24-strlen(Title)));
-    sprintf (AInfo,format,Command);
+    if (MaxLen > 1)
+	AInfo[MaxLen - 2] = ')';
+
+    if (MaxLen > 0)
+	AInfo[MaxLen - 1] = 0;
 }
 
 // Used to get default directory of model
-void ESvnBase::GetPath (char *APath,int MaxLen) {
-    strncpy (APath,Directory,MaxLen);
-    APath[MaxLen-1]=0;
-    Slash (APath,0);
+void ESvnBase::GetPath(char *APath, size_t MaxLen) {
+    strlcpy(APath, Directory, MaxLen);
+    Slash (APath, 0);
 }
 
 // Normal and short title (normal for window, short for icon in X)
-void ESvnBase::GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen) {
-    char format[128];
-
-    sprintf (format,"%s: %%.%is",Title,(int)(MaxLen-4-strlen(Title)));
-    sprintf (ATitle,format,Command);
-    strncpy (ASTitle,Title,SMaxLen);
-    ASTitle[SMaxLen-1]=0;
+void ESvnBase::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
+    snprintf(ATitle, MaxLen, "%s: %s", Title, Command);
+    strlcpy(ASTitle, Title, SMaxLen);
 }
 
 #endif

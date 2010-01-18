@@ -109,17 +109,17 @@ int RoutineView::GetContext() {
     return CONTEXT_ROUTINES;
 }
 
-void RoutineView::GetName(char *AName, int MaxLen) {
-    strncpy(AName, "Routines", MaxLen);
+void RoutineView::GetName(char *AName, size_t MaxLen) {
+    strlcpy(AName, "Routines", MaxLen);
 }
 
-void RoutineView::GetInfo(char *AInfo, int /*MaxLen*/) {
-    sprintf(AInfo, "%2d %04d/%03d Routines (%s)", ModelNo, Row + 1, Count, Buffer->FileName);
+void RoutineView::GetInfo(char *AInfo, size_t MaxLen) {
+    snprintf(AInfo, MaxLen, "%2d %04d/%03d Routines (%s)",
+	    ModelNo, Row + 1, Count, Buffer->FileName);
 }
 
-void RoutineView::GetTitle(char *ATitle, int /*MaxLen*/, char *ASTitle, int SMaxLen) {
-    sprintf(ATitle, "Routines: %s", Buffer->FileName);
-    strncpy(ASTitle, "Routines", SMaxLen);
-    ASTitle[SMaxLen - 1] = 0;
+void RoutineView::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
+    snprintf(ATitle, MaxLen, "Routines: %s", Buffer->FileName);
+    strlcpy(ASTitle, "Routines", SMaxLen);
 }
 #endif

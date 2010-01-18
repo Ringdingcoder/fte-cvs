@@ -50,8 +50,8 @@ class ESvnBase:public EList {
         void FindFileLines (EBuffer *B);
         virtual void NotifyDelete (EModel *Deleting);
 
-        int GetLine (char *Line,int max);
-        virtual void ParseLine (char *line,int len);
+        int GetLine(char *Line, size_t max);
+        virtual void ParseLine (char *line, size_t len);
         void NotifyPipe (int APipeId);
         // Returns 0 if OK - calls ContinuePipe() several times to complete command for all files
         virtual int RunPipe (char *Dir,char *Command,char *OnFiles);
@@ -75,10 +75,10 @@ class ESvnBase:public EList {
 
         virtual int GetContext () {return CONTEXT_SVNBASE;}
         virtual EEventMap *GetEventMap ();
-        virtual void GetName (char *AName,int MaxLen);
-        virtual void GetInfo (char *AInfo,int MaxLen);
-        virtual void GetPath (char *APath,int MaxLen);
-        virtual void GetTitle (char *ATitle,int MaxLen,char *ASTitle,int SMaxLen);
+        virtual void GetName(char *AName, size_t MaxLen);
+        virtual void GetInfo(char *AInfo, size_t MaxLen);
+        virtual void GetPath(char *APath, size_t MaxLen);
+        virtual void GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen);
 };
 
 int AddSvnIgnoreRegexp (const char *);

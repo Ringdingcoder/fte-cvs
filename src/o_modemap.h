@@ -35,9 +35,9 @@ public:
     virtual char* FormatLine(int Line);
     virtual void UpdateList();
     virtual int CanActivate(int Line);
-    virtual void GetName(char *AName, int MaxLen);
-    virtual void GetInfo(char *AInfo, int MaxLen);
-    virtual void GetTitle(char *ATitle, int MaxLen, char *ASTitle, int SMaxLen);
+    virtual void GetName(char *AName, size_t MaxLen);
+    virtual void GetInfo(char *AInfo, size_t MaxLen);
+    virtual void GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen);
 };
 
 extern EventMapView *TheEventMapView;

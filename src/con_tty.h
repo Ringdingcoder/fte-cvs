@@ -18,18 +18,22 @@ static const struct TTYEscDecode {
     { "[1;%A", kbUp },
     { "[%A", kbUp },
     { "[A", kbUp },
+    { "[a", kfShift | kbUp },
 
     { "[1;%B", kbDown },
     { "[%B", kbDown },
     { "[B", kbDown },
+    { "[b", kfShift | kbDown },
 
     { "[1;%C", kbRight },
     { "[%C", kbRight },
     { "[C", kbRight },
+    { "[c", kfShift | kbRight },
 
     { "[1;%D", kbLeft },
     { "[%D", kbLeft },
     { "[D", kbLeft },
+    { "[d", kfShift | kbLeft },
 
     { "[1;%F", kbEnd },
     { "[%F", kbEnd },
@@ -162,29 +166,6 @@ static int TTYEscComp(const void *a, const void *b)
     fprintf(stderr, "ERROR: seqtable has duplicated Esc sequence \"%s\"!\n",
 	    ((const TTYEscDecode*)a)->seq);
     exit(-1);
-}
-
-static int TTYEscParse1(const char *seq)
-{
-    unsigned H = 0, L = 0;
-    unsigned R = tty_esc_size;
-    int c;
-
-    while (L < R) {
-	H = L + (R - L) / 2;
-	if ((c = strcmp(seq, tty_esc_seq[H].seq)) == 0) {
-	    //fprintf(stderr, "Found key:      0x%x  %s  %s\n",
-	    //	seqtable[H].key, seqtable[H].seq, seq);
-	    return tty_esc_seq[H].key;
-	} else if (c < 0)
-	    R = H;
-	else // (c > 0)
-	    L = H + 1;
-    }
-
-    // for detecting unknown Esq sequences - sfte 2>/tmp/newesc
-    fprintf(stderr, "FIXME: Unknown Esc sequence: \"%s\"\n", seq);
-    return kbEsc;
 }
 
 static int TTYEscParse(const char *seq)

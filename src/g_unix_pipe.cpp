@@ -132,7 +132,7 @@ int GUI::SetPipeView(int id, EModel * notify)
     return 0;
 }
 
-ssize_t GUI::ReadPipe(int id, void *buffer, int len)
+ssize_t GUI::ReadPipe(int id, void *buffer, size_t len)
 {
     ssize_t rc = -1;
 

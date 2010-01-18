@@ -172,7 +172,7 @@ public:
     ~GFramePeer();
     
     int ConSetTitle(char *Title, char *STitle);
-    int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen);
+    int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen);
     
     int ConSetSize(int X, int Y);
     int ConQuerySize(int *X, int *Y);
@@ -2955,7 +2955,7 @@ int GFramePeer::ConSetTitle(char *Title, char *STitle) {
     return 1;
 }
 
-int GFramePeer::ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen) {
+int GFramePeer::ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
     WinQueryWindowText(hwndFrame, MaxLen, Title);
     WinQueryWindowText(hwndFrame, SMaxLen, STitle);
     return 1;
@@ -3111,7 +3111,7 @@ int GFrame::ConSetTitle(char *Title, char *STitle) {
     return Peer->ConSetTitle(Title, STitle);
 }
 
-int GFrame::ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen) {
+int GFrame::ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
     return Peer->ConGetTitle(Title, MaxLen, STitle, SMaxLen);
 }
 
@@ -3811,7 +3811,7 @@ int GUI::SetPipeView(int id, EModel *notify) {
     return 0;
 }
 
-int GUI::ReadPipe(int id, void *buffer, int len) {
+int GUI::ReadPipe(int id, void *buffer, size_t len) {
     int l;
     //ULONG ulPostCount;
     

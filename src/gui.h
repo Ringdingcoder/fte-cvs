@@ -80,7 +80,7 @@ public:
     virtual ~GFrame();
     
     int ConSetTitle(char *Title, char *STitle);
-    int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen);
+    int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen);
     
     int ConSetSize(int X, int Y);
     int ConQuerySize(int *X, int *Y);
@@ -139,7 +139,7 @@ public:
     
     int OpenPipe(char *Command, EModel *notify);
     int SetPipeView(int id, EModel *notify);
-    ssize_t ReadPipe(int id, void *buffer, int len);
+    ssize_t ReadPipe(int id, void *buffer, size_t len);
     int ClosePipe(int id);
 
     int multiFrame();

@@ -199,7 +199,7 @@ int ConDone();
 int ConSuspend();
 int ConContinue();
 int ConSetTitle(char *Title, char *STitle);
-int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen);
+int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen);
 
 int ConClear();
 int ConPutBox(int X, int Y, int W, int H, PCell Cell);

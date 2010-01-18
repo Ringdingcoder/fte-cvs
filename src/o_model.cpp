@@ -141,10 +141,10 @@ int EModel::ConfQuit(GxView * /*V*/, int /*multiFile*/) {
 int EModel::GetContext() { return CONTEXT_NONE; }
 EEventMap *EModel::GetEventMap() { return 0; }
 int EModel::BeginMacro() { return 1; }
-void EModel::GetName(char *AName, int /*MaxLen*/) { *AName = 0; }
-void EModel::GetPath(char *APath, int /*MaxLen*/) { *APath = 0; }
-void EModel::GetInfo(char *AInfo, int /*MaxLen*/) { *AInfo = 0; }
-void EModel::GetTitle(char *ATitle, int /*MaxLen*/, char *ASTitle, int /*SMaxLen*/) { *ATitle = 0; *ASTitle = 0; }
+void EModel::GetName(char *AName, size_t /*MaxLen*/) { *AName = 0; }
+void EModel::GetPath(char *APath, size_t /*MaxLen*/) { *APath = 0; }
+void EModel::GetInfo(char *AInfo, size_t /*MaxLen*/) { *AInfo = 0; }
+void EModel::GetTitle(char *ATitle, size_t /*MaxLen*/, char *ASTitle, size_t /*SMaxLen*/) { *ATitle = 0; *ASTitle = 0; }
 void EModel::NotifyPipe(int /*PipeId*/) { }
 
 void EModel::NotifyDelete(EModel * /*Deleted*/) {
@@ -178,7 +178,7 @@ void EModel::UpdateTitle() {
     }
 }
 
-int EModel::GetStrVar(int var, char *str, int buflen) {
+int EModel::GetStrVar(int var, char *str, size_t buflen) {
     switch (var) {
     case mvCurDirectory:
         return GetDefaultDirectory(this, str, buflen);

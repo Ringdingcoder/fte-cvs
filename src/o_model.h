@@ -67,11 +67,11 @@ public:
     virtual int ExecCommand(int Command, ExState &State);
     virtual void HandleEvent(TEvent &Event);
 
-    virtual void GetName(char *AName, int MaxLen);
-    virtual void GetPath(char *APath, int MaxLen);
-    virtual void GetInfo(char *AInfo, int MaxLen);
-    virtual void GetTitle(char *ATitle, int MaxLen,
-                          char *ASTitle, int SMaxLen);
+    virtual void GetName(char *AName, size_t MaxLen);
+    virtual void GetPath(char *APath, size_t MaxLen);
+    virtual void GetInfo(char *AInfo, size_t MaxLen);
+    virtual void GetTitle(char *ATitle, size_t MaxLen,
+                          char *ASTitle, size_t SMaxLen);
 
     void UpdateTitle();
 
@@ -79,7 +79,7 @@ public:
     virtual int CanQuit();
     virtual int ConfQuit(GxView *V, int multiFile = 0);
 
-    virtual int GetStrVar(int var, char *str, int buflen);
+    virtual int GetStrVar(int var, char *str, size_t buflen);
     virtual int GetIntVar(int var, int *value);
 
     virtual void NotifyPipe(int PipeId);
@@ -196,7 +196,7 @@ public:
     void DeleteModel(EModel *M);
     int CanQuit();
 
-    int GetStrVar(int var, char *str, int buflen);
+    int GetStrVar(int var, char *str, size_t buflen);
     int GetIntVar(int var, int *value);
 };
 

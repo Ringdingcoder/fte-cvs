@@ -181,6 +181,15 @@ static struct TTYEscDecode {
     { "[6;6~", kfCtrl | kfShift | kbPgDn },
     { "[6~", kbPgDn },
 
+    { "[25~", kfShift | kbF1 },
+    { "[26~", kfShift | kbF2 },
+    { "[28~", kfShift | kbF3 },
+    { "[29~", kfShift | kbF4 },
+    { "[31~", kfShift | kbF5 },
+    { "[32~", kfShift | kbF6 },
+    { "[33~", kfShift | kbF7 },
+    { "[34~", kfShift | kbF8 },
+
     { "[[A", kbF1 },
     { "[[B", kbF2 },
     { "[[C", kbF3 },
@@ -229,15 +238,6 @@ static struct TTYEscDecode {
     { "O5S", kfCtrl | kbF4 },
     { "O6S", kfCtrl | kfShift | kbF4 },
     { "OS", kbF4 },
-
-    { "[25~", kfShift | kbF1 },
-    { "[26~", kfShift | kbF2 },
-    { "[28~", kfShift | kbF3 },
-    { "[29~", kfShift | kbF4 },
-    { "[31~", kfShift | kbF5 },
-    { "[32~", kfShift | kbF6 },
-    { "[33~", kfShift | kbF7 },
-    { "[34~", kfShift | kbF8 },
 
     { "O5A", kfCtrl | kbUp },
     { "O6A", kfCtrl | kfShift | kbUp },

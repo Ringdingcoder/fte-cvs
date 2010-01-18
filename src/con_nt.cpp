@@ -917,11 +917,9 @@ int ConSetTitle(char *Title, char *STitle) { /*FOLD00*/
     return 0;
 }
 
-int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen) { /*FOLD00*/
-    strncpy(Title, winTitle, MaxLen);
-    Title[MaxLen - 1] = 0;
-    strncpy(STitle, winSTitle, SMaxLen);
-    STitle[SMaxLen - 1] = 0;
+int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) { /*FOLD00*/
+    strlcpy(Title, winTitle, MaxLen);
+    strlcpy(STitle, winSTitle, SMaxLen);
     return 0;
 }
 
@@ -1521,7 +1519,7 @@ int GUI::SetPipeView(int id, EModel *notify) /*FOLD00*/
 }
 
 
-ssize_t GUI::ReadPipe(int id, void *buffer, int len) /*FOLD00*/
+ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) /*FOLD00*/
 {
     //int     l;
     GPipe*  p;
@@ -1813,7 +1811,7 @@ int GUI::SetPipeView(int id, EModel *notify) {
     return 0;
 }
 
-ssize_t GUI::ReadPipe(int id, void *buffer, int len) {
+ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
     ssize_t l;
     //ULONG ulPostCount;
 

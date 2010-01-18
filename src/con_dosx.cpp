@@ -1054,7 +1054,7 @@ int GUI::SetPipeView(int id, EModel *notify) {
     return 0;
 }
 
-ssize_t GUI::ReadPipe(int id, void *buffer, int len) {
+ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
 #ifdef DJGPP
     ssize_t rc;
     if (id < 0 || id >= MAX_PIPES)
@@ -1118,7 +1118,7 @@ int ConSetTitle(char *Title, char *STitle) {
 	return 0;
 }
 
-int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen) {
+int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
 	strlcpy(Title, "FTE", MaxLen);
 	strlcpy(STitle, "FTE", SMaxLen);
 	return 0;

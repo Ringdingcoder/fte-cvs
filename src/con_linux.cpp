@@ -350,7 +350,7 @@ int ConContinue() {
 }
 
 #ifdef USE_SCRNMAP
-static ssize_t conread(int fd, void *p, int len) {   // len should be a multiple of 2
+static ssize_t conread(int fd, void *p, size_t len) {   // len should be a multiple of 2
     char buf[512];
     char *c = (char *)p;
     char *s = buf;
@@ -359,7 +359,7 @@ static ssize_t conread(int fd, void *p, int len) {   // len should be a multiple
         return read(fd, p, len);
     } else {
         ssize_t rlen = read(fd, buf, len);
-        for (int n = 0; n < rlen; n += 2) {
+        for (unsigned n = 0; n < rlen; n += 2) {
             *c++ = fromScreen[(unsigned char)*s++];
             *c++ = *s++;
         }
@@ -367,7 +367,7 @@ static ssize_t conread(int fd, void *p, int len) {   // len should be a multiple
     }
 }
 
-static ssize_t conwrite(int fd, void *p, int len) {  // len should be a multiple of 2
+static ssize_t conwrite(int fd, void *p, size_t len) {  // len should be a multiple of 2
     char buf[512];
     char *s = (char *)p;
     char *c = buf;
@@ -375,7 +375,7 @@ static ssize_t conwrite(int fd, void *p, int len) {  // len should be a multiple
     if (noCharTrans || (len > 512)) {
         return write(fd, p, len);
     } else {
-        for (int n = 0; n < len; n += 2) {
+        for (unsigned n = 0; n < len; n += 2) {
             *c++ = toScreen[(unsigned char)*s++];
             *c++ = *s++;
         }
@@ -399,7 +399,7 @@ int ConClear() {
 int ConSetTitle(char */*Title*/, char */*STitle*/) {
     return 0;
 }
-int ConGetTitle(char *Title, int /*MaxLen*/, char */*STitle*/, int /*SMaxLen*/) {
+int ConGetTitle(char *Title, size_t /*MaxLen*/, char */*STitle*/, size_t /*SMaxLen*/) {
     *Title = 0;
     return 0;
 }
@@ -1121,7 +1121,7 @@ int GUI::SetPipeView(int id, EModel *notify) {
     return 0;
 }
 
-ssize_t GUI::ReadPipe(int id, void *buffer, int len) {
+ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
     ssize_t rc;
 
     if (id < 0 || id > MAX_PIPES)
@@ -1187,6 +1187,7 @@ int GUI::RunProgram(int /*mode*/, char *Command) {
 
 char ConGetDrawChar(unsigned int idx) {
     static const char *tab = NULL;
+    static size_t tablen = 0;
 
     if (!tab) {
         if (getenv("ISOCONSOLE")) {
@@ -1194,9 +1195,10 @@ char ConGetDrawChar(unsigned int idx) {
         } else {
             tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\xFA\x04\xC4\x18\x19\xB1\xB0\x1B\x1A");
           //tab = GetGUICharacters("Linux","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
-        }
+	}
+        tablen = strlen(tab);
     }
-    assert(idx < int(strlen(tab)));
+    assert(idx < tablen);
 
 #ifdef USE_SCRNMAP
     return fromScreen[(int)tab[idx]];

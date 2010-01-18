@@ -677,7 +677,7 @@ int ConSetTitle(char *Title, char *STitle) {
     return 0;
 }
 
-int ConGetTitle(char *Title, int MaxLen, char *STitle, int SMaxLen) {
+int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
     strlcpy(Title, winTitle, MaxLen);
     strlcpy(STitle, winSTitle, SMaxLen);
     return 0;

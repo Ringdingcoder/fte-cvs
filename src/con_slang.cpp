@@ -15,6 +15,7 @@ static int use_esc_hack = 0;
 //#include "slangkbd.h"
 #include "gui.h"
 #include "con_tty.h"
+#include "s_string.h"
 
 //#include <slang/slang.h>
 #include <slang.h>
@@ -262,10 +263,10 @@ int ConSetTitle(char * /*Title */ , char * /*STitle */ )
     return 0;
 }
 
-int ConGetTitle(char *Title, int /*MaxLen */
-		, char * /*STitle */ , int /*SMaxLen */ )
+int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen)
 {
-    *Title = '\0';
+    strlcpy(Title, "", MaxLen);
+    strlcpy(STitle, "", SMaxLen);
     return 0;
 }
 

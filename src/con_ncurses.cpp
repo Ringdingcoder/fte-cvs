@@ -15,6 +15,8 @@
 #include "c_config.h"
 #include "console.h"
 #include "gui.h"
+#include "con_tty.h"
+#include "s_string.h"
 
 /* Escape sequence delay in milliseconds */
 #define escDelay 10
@@ -113,7 +115,7 @@ static int fte_curses_attr[256];
 static int key_sup = 0;
 static int key_sdown = 0;
 
-static int ConInitColors()
+static int conInitColors()
 {
 	int c = 0;
 	int colors = has_colors();
@@ -157,7 +159,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 
 	ESCDELAY = escDelay;
 	initscr();
-	ConInitColors();
+	conInitColors();
 #ifdef CONFIG_MOUSE
 	mousemask(ALL_MOUSE_EVENTS|REPORT_MOUSE_POSITION, NULL);
 #endif
@@ -207,10 +209,10 @@ int ConSetTitle(char * /*Title */ , char * /*STitle */ )
 	return 0;
 }
 
-int ConGetTitle(char *Title, int /*MaxLen */
-	, char * /*STitle */ , int /*SMaxLen */ )
+int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen)
 {
-	*Title = '\0';
+	strlcpy(Title, "", MaxLen);
+	strlcpy(STitle, "", SMaxLen);
 	return 0;
 }
 
@@ -457,8 +459,7 @@ int ConQueryMouseButtons(int *ButtonCount)
 	return 0;
 }
 
-static int ConGetMouseEvent(
-	TEvent * Event)
+static int ConGetMouseEvent(TEvent *Event)
 {
 	MEVENT mevent;
 	if(getmouse(&mevent) == ERR)
@@ -509,132 +510,125 @@ static int ConGetMouseEvent(
 }
 #endif
 
-static TEvent Prev =
-{evNone};
+static TEvent Prev = { evNone };
 
-static int ConGetEscEvent(TEvent *Event)
+#if 1
+static int ConGetEscEvent(void)
+{
+	int key;
+	char seq[8];
+	unsigned seqpos = 1;
+
+	key = getch();
+	seq[0] = (char)key;
+	if (key == ERR)
+		return kbEsc;
+
+	if (key >= 'a' && key <= 'z' ) /* Alt-A == Alt-a*/
+		return (kfAlt | (key + 'A' - 'a'));
+
+	while (seqpos < 7 && (key = getch()) != ERR)
+		seq[seqpos++] = (char)key;
+	seq[seqpos] = 0;
+	//fprintf(stderr, "DECODE %d  %s\n", seqpos, seq);
+
+	if (seqpos == 2) {
+		key = seq[0];
+		if (key < 32)
+			return (kfAlt| kfCtrl | (key + 'A' - 1));
+	}
+
+	return TTYEscParse(seq);
+}
+
+#else
+/*
+ * Routine would have to be far more complex
+ * to handle majority of esq sequences
+ *
+ * Using string table and TTYEscParse
+ */
+static int ConGetEscEvent(void)
 {
 	int ch;
+	int code = 0;
 
-	TKeyEvent *KEvent = &(Event->Key);
-
-	keypad(stdscr,0);
-
-	timeout(escDelay);
-
-	ch = getch();
-	if(ch == 033)
-	{
+	if ((ch = getch()) == 27) {
 		ch = getch();
-       		if(ch == '[' || ch == 'O') KEvent->Code |= kfAlt;
-
+		if (ch == '[' || ch == 'O')
+			code |= kfAlt;
 	}
 
-	if(ch == ERR)
-	{
-       		KEvent->Code |= kbEsc;
-	}
-	else if(ch == '[' || ch == 'O')
-	{
+	if (ch == ERR)
+		return kbEsc;
+
+	if (ch == '[' || ch == 'O') {
 		int ch1 = getch();
-		int ch2 = '\0';
-		if(ch1 >= '1' &&  ch1 <= '8')
-		{
-			ch2 = getch();
-			if(ch2 == ERR) ch2 = '\0';
-		}
-
-		if(ch1 == ERR) /* translate to Alt-[ or Alt-O */
-		{
-       			KEvent->Code |= (kfAlt| ch);
-		}
-		else if(ch2 == '~' || ch2 == '$')
-		{
-			if(ch2 == '$')
-				 KEvent->Code |= kfShift;
-			switch(ch1 - '0')
-			{
-				case 1: KEvent->Code |= kbHome; break;
-				case 2: KEvent->Code |= kbIns; break;
-				case 3: KEvent->Code |= kbDel; break;
-				case 4: KEvent->Code |= kbEnd; break;
-				case 5: KEvent->Code |= kbPgUp; break;
-				case 6: KEvent->Code |= kbPgDn; break;
-				case 7: KEvent->Code |= kbHome; break;
-				case 8: KEvent->Code |= kbEnd; break;
-				default: Event->What |= evNone; break;
+		int ch2 = 0;
+		if (ch1 >= '1' && ch1 <= '8') {
+			if ((ch2 = getch()) == ';') {
+				if ((ch1 = getch()) == ERR
+                                    || ch1 < '1' || ch1 > '8')
+                                        return kbEsc;
+				ch2 = 0;
 			}
 		}
-		else
-		{
-			if(ch2)
+
+		if (ch1 == ERR) /* translate to Alt-[ or Alt-O */
+			return  (kfAlt | ch);
+
+		if (ch2 == '~' || ch2 == '$') {
+			if (ch2 == '$')
+				 code |= kfShift;
+			switch (ch1 - '0')
 			{
+				case 1: code |= kbHome; break;
+				case 2: code |= kbIns; break;
+				case 3: code |= kbDel; break;
+				case 4: code |= kbEnd; break;
+				case 5: code |= kbPgUp; break;
+				case 6: code |= kbPgDn; break;
+				case 7: code |= kbHome; break;
+				case 8: code |= kbEnd; break;
+				default: code = 0; break;
+			}
+		} else {
+			if (ch2) {
 				int ctAlSh = ch2 - '1';
-				if(ctAlSh & 0x4) KEvent->Code |= kfCtrl;
-				if(ctAlSh & 0x2) KEvent->Code |= kfAlt;
-				if(ctAlSh & 0x1) KEvent->Code |= kfShift;
+				if (ctAlSh & 0x4) code |= kfCtrl;
+				if (ctAlSh & 0x2) code |= kfAlt;
+				if (ctAlSh & 0x1) code |= kfShift;
 			}
 
-			switch(ch1)
-			{
-
-			case 'A':
-       				KEvent->Code |= kbUp; break;
-			case 'B':
-       				KEvent->Code |= kbDown; break;
-			case 'C':
-       				KEvent->Code |= kbRight; break;
-			case 'D':
-       				KEvent->Code |= kbLeft; break;
-			case 'F':
-       				KEvent->Code |= kbEnd; break;
-			case 'H':
-       				KEvent->Code |= kbHome; break;
-
-			case 'a':
-       				KEvent->Code |= (kfShift | kbUp); break;
-			case 'b':
-       				KEvent->Code |= (kfShift | kbDown); break;
-			case 'c':
-       				KEvent->Code |= (kfShift | kbRight); break;
-			case 'd':
-       				KEvent->Code |= (kfShift | kbLeft); break;
-			default:
-				Event->What = evNone;
-				break;
+			switch(ch1) {
+			case 'A': code |= kbUp; break;
+			case 'B': code |= kbDown; break;
+			case 'C': code |= kbRight; break;
+			case 'D': code |= kbLeft; break;
+			case 'F': code |= kbEnd; break;
+			case 'H': code |= kbHome; break;
+			case 'a': code |= (kfShift | kbUp); break;
+			case 'b': code |= (kfShift | kbDown); break;
+			case 'c': code |= (kfShift | kbRight); break;
+			case 'd': code |= (kfShift | kbLeft); break;
+			default:  code = 0; break;
 			}
 		}
-	}
-	else
-	{
-		KEvent->Code |= kfAlt;
-		if(ch == '\r' || ch == '\n')
-		{
-			KEvent->Code |= kbEnter;
-		}
-		else if(ch == '\t')
-		{
-			KEvent->Code |= kbTab;
-		}
-		else if(ch < 32)
-		{
-			KEvent->Code |=  (kfCtrl | (ch+ 0100));
-		}
-		else
-		{
+	} else {
+		code |= kfAlt;
+		if(ch == '\r' || ch == '\n') code |= kbEnter;
+		else if(ch == '\t') code |= kbTab;
+		else if(ch < 32) code |=  (kfCtrl | (ch+ 0100));
+		else {
 			if(ch > 0x60 && ch < 0x7b ) /* Alt-A == Alt-a*/
-			{
 				ch -= 0x20;
-			}
-			KEvent->Code |= ch;
+			code |= ch;
 		}
 	}
 
-	timeout(-1);
-    	keypad(stdscr,1);
-
-	return 1;
+	return code;
 }
+#endif
 
 int ConGetEvent(TEventMask /*EventMask */ ,
 		TEvent * Event, int WaitTime, int Delete)
@@ -660,40 +654,28 @@ int ConGetEvent(TEventMask /*EventMask */ ,
     Event->What = evKeyDown;
     KEvent->Code = 0;
 
+    //fprintf(stderr, "READKEY %d %s\n", ch, keyname(ch));
     if(SevenBit && ch > 127 && ch < 256)
     {
 	KEvent->Code |= kfAlt;
 	ch -= 128;
 	if(ch > 0x60 && ch < 0x7b ) /* Alt-A == Alt-a*/
-	{
 	    ch-=0x20;
-	}
     }
 
-    if(ch < 0)
-    {
-	Event->What = evNone;
+    if (ch < 0) Event->What = evNone;
+    else if (ch == 27) {
+		keypad(stdscr,0);
+		timeout(escDelay);
+		if (!(KEvent->Code = ConGetEscEvent()))
+			Event->What = evNone;
+		timeout(-1);
+		keypad(stdscr,1);
     }
-    else if(ch == 27)
-    {
-	ConGetEscEvent(Event);
-    }
-    else if(ch == '\r' || ch == '\n')
-    {
-	KEvent->Code |= kbEnter;
-    }
-    else if(ch == '\t')
-    {
-	KEvent->Code |= kbTab;
-    }
-    else if(ch < 32)
-    {
-	KEvent->Code |=  (kfCtrl | (ch+ 0100));
-    }
-    else if(ch < 256)
-    {
-	KEvent->Code |= ch;
-    }
+    else if(ch == '\r' || ch == '\n') KEvent->Code |= kbEnter;
+    else if(ch == '\t') KEvent->Code |= kbTab;
+    else if(ch < 32) KEvent->Code |=  (kfCtrl | (ch+ 0100));
+    else if(ch < 256) KEvent->Code |= ch;
     else // > 255
     {
 	switch(ch)
@@ -708,112 +690,126 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	    ConGetMouseEvent(Event);
 	    break;
 #endif
-	case KEY_SRIGHT:
-	    KEvent->Code = kfShift | kbRight;
-	    break;
-	case KEY_SLEFT:
-	    KEvent->Code = kfShift | kbLeft;
-	    break;
-	case KEY_SDC:
-	    KEvent->Code = kfShift | kbDel;
-	    break;
-	case KEY_SIC:
-	    KEvent->Code = kfShift | kbIns;
-	    break;
-	case KEY_SHOME:
-	    KEvent->Code = kfShift | kbHome;
-	    break;
-	case KEY_SEND:
-	    KEvent->Code = kfShift | kbEnd;
-	    break;
-	case KEY_SNEXT:
-	    KEvent->Code = kfShift | kbPgDn;
-	    break;
-	case KEY_SPREVIOUS:
-	    KEvent->Code = kfShift | kbPgUp;
-	    break;
-	case KEY_UP:
-	    KEvent->Code = kbUp;
-	    break;
-	case KEY_SF:
-	    KEvent->Code = kfShift | kbDown;
-	    break;
-	case KEY_DOWN:
-	    KEvent->Code = kbDown;
-	    break;
-	case KEY_SR:
-	    KEvent->Code = kfShift | kbUp;
-	    break;
-	case KEY_RIGHT:
-	    KEvent->Code = kbRight;
-	    break;
-	case KEY_LEFT:
-	    KEvent->Code = kbLeft;
-	    break;
-	case KEY_DC:
-	    KEvent->Code = kbDel;
-	    break;
-	case KEY_IC:
-	    KEvent->Code = kbIns;
-	    break;
-	case KEY_BACKSPACE:
-	    KEvent->Code = kbBackSp;
-	    break;
-	case KEY_HOME:
-	    KEvent->Code = kbHome;
-	    break;
-	case KEY_END:
+	case KEY_UP: KEvent->Code = kbUp; break;
+	case KEY_SR: KEvent->Code = kfShift | kbUp; break;
+	case 559: KEvent->Code = kfAlt | kbUp; break; // kUP3
+	case 561: KEvent->Code = kfCtrl | kbUp; break; // kUP5
+
+	case KEY_DOWN: KEvent->Code = kbDown; break;
+	case KEY_SF: KEvent->Code = kfShift | kbDown; break;
+	case 518: KEvent->Code = kfAlt | kbDown; break; // kDN3
+	case 520: KEvent->Code = kfCtrl | kbDown; break; // kDN5
+
+	case KEY_RIGHT: KEvent->Code = kbRight; break;
+	case KEY_SRIGHT: KEvent->Code = kfShift | kbRight; break;
+	case 553: KEvent->Code = kfAlt | kbRight; break;  // kRIT3
+	case 555: KEvent->Code = kfCtrl | kbRight; break; // kRIT5
+	case 556: KEvent->Code = kfCtrl | kfShift | kbRight; break; // kRIT6
+
+	case KEY_LEFT: KEvent->Code = kbLeft; break;
+	case KEY_SLEFT: KEvent->Code = kfShift | kbLeft; break;
+	case 538: KEvent->Code = kfAlt | kbLeft; break; // kLFT3
+	case 540: KEvent->Code = kfCtrl | kbLeft; break; // kLFT5
+	case 541: KEvent->Code = kfCtrl | kfShift | kbLeft; break; // kLFT6
+
+	case KEY_DC: KEvent->Code = kbDel; break;
+	case KEY_SDC: KEvent->Code = kfShift | kbDel; break;
+
+	case KEY_IC: KEvent->Code = kbIns; break;
+	case KEY_SIC: KEvent->Code = kfShift | kbIns; break;
+
+	case KEY_BACKSPACE: KEvent->Code = kbBackSp; break;
+
+	case KEY_HOME: KEvent->Code = kbHome; break;
+	case KEY_SHOME: KEvent->Code = kfShift | kbHome; break;
+	case 528: KEvent->Code = kfCtrl | kbHome; break; // kHOM3
+	case 530: KEvent->Code = kfAlt | kbHome; break; // kHOM5
+	case 532: KEvent->Code = kfAlt | kfCtrl | kbHome; break; // kHOM7
+
 	case KEY_LL: // used in old termcap/infos
-	    KEvent->Code = kbEnd;
-	    break;
-	case KEY_NPAGE:
-	    KEvent->Code = kbPgDn;
-	    break;
-	case KEY_PPAGE:
-	    KEvent->Code = kbPgUp;
-	    break;
-	case KEY_F(1):
-	    KEvent->Code = kbF1;
-	    break;
-	case KEY_F(2):
-	    KEvent->Code = kbF2;
-	    break;
-	case KEY_F(3):
-	    KEvent->Code = kbF3;
-	    break;
-	case KEY_F(4):
-	    KEvent->Code = kbF4;
-	    break;
-	case KEY_F(5):
-	    KEvent->Code = kbF5;
-	    break;
-	case KEY_F(6):
-	    KEvent->Code = kbF6;
-	    break;
-	case KEY_F(7):
-	    KEvent->Code = kbF7;
-	    break;
-	case KEY_F(8):
-	    KEvent->Code = kbF8;
-	    break;
-	case KEY_F(9):
-	    KEvent->Code = kbF9;
-	    break;
-	case KEY_F(10):
-	    KEvent->Code = kbF10;
-	    break;
-	case KEY_F(11):
-	    KEvent->Code = kbF11;
-	    break;
-	case KEY_F(12):
-	    KEvent->Code = kbF12;
-	    break;
-	case KEY_B2:
-	    KEvent->Code = kbCenter;
-	    break;
-	case KEY_ENTER: /* shift enter */
-	    KEvent->Code |= kbEnter;
-	    break;
+	case KEY_END: KEvent->Code = kbEnd; break;
+	case KEY_SEND: KEvent->Code = kfShift | kbEnd; break;
+	case 523: KEvent->Code = kfAlt | kbEnd; break; // kEND3
+	case 524: KEvent->Code = kfAlt | kfShift | kbEnd; break; // kEND4
+	case 525: KEvent->Code = kfCtrl | kbEnd; break; // kEND5
+	case 526: KEvent->Code = kfCtrl | kfShift | kbEnd; break; // kEND6
+	case 527: KEvent->Code = kfAlt | kfCtrl | kbEnd; break; // kEND7
+
+	case KEY_NPAGE: KEvent->Code = kbPgDn; break;
+	case KEY_SNEXT: KEvent->Code = kfShift | kbPgDn; break;
+	case 543: KEvent->Code = kfAlt | kbPgDn; break; // kNXT3
+	case 545: KEvent->Code = kfCtrl | kbPgDn; break; // kNXT5
+	case 547: KEvent->Code = kfAlt | kfCtrl | kbPgDn; break; // kNXT7
+
+	case KEY_PPAGE: KEvent->Code = kbPgUp; break;
+	case KEY_SPREVIOUS: KEvent->Code = kfShift | kbPgUp; break;
+	case 548: KEvent->Code = kfAlt | kbPgUp; break; // kPRV3
+	case 550: KEvent->Code = kfCtrl | kbPgUp; break; // kPRV5
+	case 552: KEvent->Code = kfAlt | kfCtrl | kbPgUp; break; // kPRV7
+
+	case KEY_F(1): KEvent->Code = kbF1; break;
+	case KEY_F(13): KEvent->Code = kfShift | kbF1; break;
+	case KEY_F(25): KEvent->Code = kfCtrl | kbF1; break;
+	case KEY_F(37): KEvent->Code = kfCtrl | kfShift | kbF1; break;
+
+	case KEY_F(2): KEvent->Code = kbF2; break;
+	case KEY_F(14): KEvent->Code = kfShift | kbF2; break;
+	case KEY_F(26): KEvent->Code = kfCtrl | kbF2; break;
+	case KEY_F(38): KEvent->Code = kfCtrl | kfShift | kbF2; break;
+
+	case KEY_F(3): KEvent->Code = kbF3; break;
+	case KEY_F(15): KEvent->Code = kfShift | kbF3; break;
+	case KEY_F(27): KEvent->Code = kfCtrl | kbF3; break;
+	case KEY_F(39): KEvent->Code = kfCtrl | kfShift | kbF3; break;
+
+	case KEY_F(4): KEvent->Code = kbF4; break;
+	case KEY_F(16): KEvent->Code = kfShift | kbF4; break;
+	case KEY_F(28): KEvent->Code = kfCtrl | kbF4; break;
+	case KEY_F(40): KEvent->Code = kfCtrl | kfShift | kbF4; break;
+
+	case KEY_F(5): KEvent->Code = kbF5; break;
+	case KEY_F(17): KEvent->Code = kfShift | kbF5; break;
+	case KEY_F(29): KEvent->Code = kfCtrl | kbF5; break;
+	case KEY_F(41): KEvent->Code = kfCtrl | kfShift | kbF5; break;
+
+	case KEY_F(6): KEvent->Code = kbF6; break;
+	case KEY_F(18): KEvent->Code = kfShift | kbF6; break;
+	case KEY_F(30): KEvent->Code = kfCtrl | kbF6; break;
+	case KEY_F(42): KEvent->Code = kfCtrl | kfShift | kbF6; break;
+
+	case KEY_F(7): KEvent->Code = kbF7; break;
+	case KEY_F(19): KEvent->Code = kfShift | kbF7; break;
+	case KEY_F(31): KEvent->Code = kfCtrl | kbF7; break;
+	case KEY_F(43): KEvent->Code = kfCtrl | kfShift | kbF7; break;
+
+	case KEY_F(8): KEvent->Code = kbF8; break;
+	case KEY_F(20): KEvent->Code = kfShift | kbF8; break;
+	case KEY_F(32): KEvent->Code = kfCtrl | kbF8; break;
+	case KEY_F(44): KEvent->Code = kfCtrl | kfShift | kbF8; break;
+
+	case KEY_F(9): KEvent->Code = kbF9; break;
+	case KEY_F(21): KEvent->Code = kfShift | kbF9; break;
+	case KEY_F(33): KEvent->Code = kfCtrl | kbF9; break;
+	case KEY_F(45): KEvent->Code = kfCtrl | kfShift | kbF9; break;
+
+	case KEY_F(10): KEvent->Code = kbF10; break;
+	case KEY_F(22): KEvent->Code = kfShift | kbF10; break;
+	case KEY_F(34): KEvent->Code = kfCtrl | kbF10; break;
+	case KEY_F(46): KEvent->Code = kfCtrl | kfShift | kbF10; break;
+
+	case KEY_F(11): KEvent->Code = kbF11; break;
+	case KEY_F(23): KEvent->Code = kfShift | kbF11; break;
+	case KEY_F(35): KEvent->Code = kfCtrl | kbF11; break;
+	case KEY_F(47): KEvent->Code = kfCtrl | kfShift | kbF11; break;
+
+	case KEY_F(12): KEvent->Code = kbF12; break;
+	case KEY_F(24): KEvent->Code = kfShift | kbF12; break;
+	case KEY_F(36): KEvent->Code = kfCtrl | kbF12; break;
+	case KEY_F(48): KEvent->Code = kfCtrl | kfShift | kbF12; break;
+
+	case KEY_B2: KEvent->Code = kbCenter; break;
+	case KEY_ENTER: KEvent->Code = kbEnter; break; /* shift enter */
+
 	default:
 	    if(key_sdown != 0 && ch == key_sdown)
 		KEvent->Code = kfShift | kbDown;
@@ -852,6 +848,7 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize)
 	fArgv = argv;
 	::ConInit(-1, -1);
 	::ConSetSize(XSize, YSize);
+	TTYEscInit();
 	gui = this;
 }
 

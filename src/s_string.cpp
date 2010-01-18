@@ -2,83 +2,53 @@
 #include <string.h>
 
 size_t UnTabStr(char *dest, size_t maxlen, const char *source, size_t slen) {
+    const char * const end = dest + maxlen - 1;
     char *p = dest;
-    size_t i;
-    size_t pos = 0;
+    unsigned pos = 0;
 
-    maxlen--;
-    for (i = 0; i < slen; i++) {
-        if (maxlen > 0) {
-            if (source[i] == '\t') {
-                do {
-                    if (maxlen > 0) {
-                        *p++ = ' ';
-                        maxlen--;
-                    }
-                    pos++;
-                } while (pos & 0x7);
-            } else {
-                *p++ = source[i];
-                pos++;
-                maxlen--;
-            }
-        } else
-            break;
+    for (unsigned i = 0; p < end && i < slen; ++i) {
+	if (source[i] == '\t') {
+	    do {
+		if (p < end)
+		    *p++ = ' ';
+	    } while (++pos & 0x7);
+	} else {
+	    *p++ = source[i];
+	    pos++;
+	}
     }
 
-    //dest[pos] = 0;
-    *p = '\0';
+    if (p <= end)
+	*p = '\0';
+
     return pos;
 }
 
 size_t UnEscStr(char *dest, size_t maxlen, const char *source, size_t slen) {
+    const char * const end = dest + maxlen - 1;
     char *p = dest;
-    size_t i;
-    size_t pos = 0;
 
-    maxlen--;
-    for (i = 0; i < slen; i++) {
-        if (maxlen > 0) {
-            if (source[i] == 0x1B) { // ESC-seq
-                if (i + 1 < slen) {
-                    i++;
-                    if (source[i] == '[')
-                    {
-                      i++;
-                      while( i < slen &&
-                            ((source[i] >= '0' && source[i] <= '9')
-                            || source[i] == ';'))
-                      {
-                        i++;
-                      }
-                    }
-                    else
-                    {
-                        *p++ = '^';
-                        pos++;
-                        maxlen--;
-                    }
-                }
-                else
-                {
-                    *p++ = '^';
-                    pos++;
-                    maxlen--;
-                }
-            } else if (source[i] == (char)0xE2 && i+2 < slen && source[i+1] == (char)0x80) { // Spec symbol used by gcc. Hide it and next char
-                i += 2;
-            } else {
-                *p++ = source[i];
-                pos++;
-                maxlen--;
-            }
-        } else
-            break;
+    for (unsigned i = 0; p < end && i < slen; ++i) {
+	if (source[i] == 0x1B) { // ESC-seq
+	    if (++i < slen && (source[i] == '[')) {
+		while (++i < slen &&
+		       ((source[i] >= '0' && source[i] <= '9')
+			|| source[i] == ';'))
+		    ;
+	    } else
+		*p++ = '^';
+	} else if (source[i] == (char)0xE2 && (i + 1) < slen && source[i + 1] == (char)0x80) {
+	    // Replace localized UTF8 apostrophes used by gcc.
+	    *p++ = '\'';
+	    i += 2;
+	} else
+	    *p++ = source[i];
     }
 
-    //dest[pos] = 0;
-    *p = '\0';
-    return pos;
+    if (p <= end)
+	*p = '\0';
+
+    return p - dest;
 }
 
 #if !defined(HAVE_STRLCPY)
@@ -87,7 +57,7 @@ size_t strlcpy(char *dst, const char *src, size_t size)
     size_t ret = strlen(src);
 
     if (size) {
-        size_t len = (ret >= size) ? size-1 : ret;
+        size_t len = (ret >= size) ? size - 1 : ret;
         memcpy(dst, src, len);
         dst[len] = '\0';
     }

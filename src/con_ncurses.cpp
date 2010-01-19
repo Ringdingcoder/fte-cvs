@@ -133,7 +133,7 @@ static int conInitColors()
 					{
 						short pair = short(bg*8+fg);
 						if(c!=0) init_pair(pair, fte_curses_colors[fg], fte_curses_colors[bg]);
-						fte_curses_attr[c] = short((fgb ? A_BOLD : 0) | COLOR_PAIR(pair));
+						fte_curses_attr[c] = unsigned(fgb ? A_BOLD : 0) | COLOR_PAIR(pair);
 					}
 					else
 					{
@@ -161,7 +161,17 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 	initscr();
 	conInitColors();
 #ifdef CONFIG_MOUSE
-	mousemask(ALL_MOUSE_EVENTS|REPORT_MOUSE_POSITION, NULL);
+	mouseinterval(200);
+#if 1
+	mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
+#else
+	mousemask(BUTTON1_CLICKED | BUTTON2_CLICKED | BUTTON3_CLICKED |
+		  BUTTON4_CLICKED
+#if NCURSES_MOUSE_VERSION > 1
+		  | BUTTON5_CLICKED
+#endif
+		  , 0);
+#endif
 #endif
 	/*    cbreak (); */
 	raw();
@@ -462,50 +472,60 @@ int ConQueryMouseButtons(int *ButtonCount)
 static int ConGetMouseEvent(TEvent *Event)
 {
 	MEVENT mevent;
-	if(getmouse(&mevent) == ERR)
-	{
+	mmask_t& bstate = mevent.bstate;
+	if (getmouse(&mevent) == ERR) {
 		 Event->What = evNone;
 		 return -1;
 	}
-	mmask_t bstate = mevent.bstate;
-
+#if 0
+	fprintf(stderr, "EVENT %x  %x %x  %d  %d\n", (int)bstate,
+		(int)BUTTON_CTRL, (int)BUTTON_CTRL, (int)mevent.x, (int)mevent.y);
+	for (int i = 1; i <=5; ++i)
+		fprintf(stderr, "EVENTXXX %d R:%lx P:%lx C:%lx D:%lx T:%lx E:%lx\n",
+			i, BUTTON_RELEASE(bstate, i),
+			BUTTON_PRESS(bstate, i),
+			BUTTON_CLICK(bstate, i),
+			BUTTON_DOUBLE_CLICK(bstate, i),
+			BUTTON_TRIPLE_CLICK(bstate, i),
+			BUTTON_RESERVED_EVENT(bstate, i));
+#endif
 	Event->What = evNone;
-	if(bstate & BUTTON1_PRESSED)
-	{
-		Event->What = Event->Mouse.What = evMouseDown;
-		Event->Mouse.X = mevent.x;
-		Event->Mouse.Y = mevent.y;
-		Event->Mouse.Buttons = 1;
+	Event->Mouse.X = mevent.x;
+	Event->Mouse.Y = mevent.y;
+	Event->Mouse.Buttons = 0;
+
+	if (BUTTON_PRESS(bstate, 1)) {
+		Event->Mouse.What = evMouseDown;
+		Event->Mouse.Buttons |= 1;
 		Event->Mouse.Count = 1;
-	}
-	else if(bstate & BUTTON1_RELEASED)
-	{
-		Event->What = Event->Mouse.What = evMouseUp;
-		Event->Mouse.X = mevent.x;
-		Event->Mouse.Y = mevent.y;
-		Event->Mouse.Buttons = 1;
-		Event->Mouse.Count = (bstate & BUTTON1_DOUBLE_CLICKED)? 2: 1;
-	}
-	else if(bstate & BUTTON1_CLICKED)
-	{
-		Event->What = Event->Mouse.What = evMouseDown;
-		Event->Mouse.X = mevent.x;
-		Event->Mouse.Y = mevent.y;
-		Event->Mouse.Buttons = 1;
+	} else if (BUTTON_RELEASE(bstate, 1)) {
+		Event->Mouse.What = evMouseUp;
+		Event->Mouse.Count = (BUTTON_DOUBLE_CLICK(bstate, 1)) ? 2 : 1;
+	} else if (BUTTON_CLICK(bstate, 1)) {
+		Event->Mouse.What = evMouseDown;
+		Event->Mouse.Buttons |= 1;
 		Event->Mouse.Count = 1;
-		mevent.bstate ^= BUTTON1_CLICKED;
+		//mevent.bstate ^= BUTTON1_CLICKED;
 		mevent.bstate |= BUTTON1_RELEASED;
 		ungetmouse(&mevent);
-	}
-	else if(bstate & BUTTON1_DOUBLE_CLICKED)
-	{
-		Event->Mouse.X = mevent.x;
-		Event->Mouse.Y = mevent.y;
-		Event->Mouse.Buttons = 1;
+	} else if (BUTTON_DOUBLE_CLICK(bstate, 1)) {
+		Event->Mouse.What = evMouseDown;
+		Event->Mouse.Buttons |= 1;
 		Event->Mouse.Count = 2;
 		mevent.bstate |= BUTTON1_RELEASED;
 		ungetmouse(&mevent);
+	} else if (BUTTON_PRESS(bstate, 4)
+		   || (bstate & (BUTTON2_PRESSED | REPORT_MOUSE_POSITION))) {
+		/* Scroll screen */
+		Event->What = evCommand;
+		Event->Msg.Param1 = 10;
+		/* HACK - with control move in opposite direction
+		 * as the 'upward' scroll is really slow with plain Button4
+		 */
+		Event->Msg.Command = (bstate & (BUTTON_CTRL | BUTTON4_PRESSED))
+			? cmVScrollUp : cmVScrollDown;
 	}
+
 	return 0;
 }
 #endif
@@ -516,17 +536,15 @@ static TEvent Prev = { evNone };
 static int ConGetEscEvent(void)
 {
 	int key;
-	char seq[8];
-	unsigned seqpos = 1;
 
-	key = getch();
-	seq[0] = (char)key;
-	if (key == ERR)
+	if ((key = getch()) == ERR)
 		return kbEsc;
 
 	if (key >= 'a' && key <= 'z' ) /* Alt-A == Alt-a*/
 		return (kfAlt | (key + 'A' - 'a'));
 
+	char seq[8] = { (char)key };
+	unsigned seqpos = 1;
 	while (seqpos < 7 && (key = getch()) != ERR)
 		seq[seqpos++] = (char)key;
 	seq[seqpos] = 0;
@@ -534,7 +552,7 @@ static int ConGetEscEvent(void)
 
 	if (seqpos == 2) {
 		key = seq[0];
-		if (key < 32)
+		if (key > 0 && key < 32)
 			return (kfAlt| kfCtrl | (key + 'A' - 1));
 	}
 
@@ -665,6 +683,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 
     if (ch < 0) Event->What = evNone;
     else if (ch == 27) {
+		//fprintf(stderr, "ESCAPEEVENT %x\n", (int)ch);
 		keypad(stdscr,0);
 		timeout(escDelay);
 		if (!(KEvent->Code = ConGetEscEvent()))
@@ -832,7 +851,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 
 char ConGetDrawChar(unsigned int idx)
 {
-	//    return 128+idx;
+	//return 128+idx;
 	return (char)idx;
 }
 

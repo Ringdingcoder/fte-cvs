@@ -2005,7 +2005,7 @@ void DieError(int rc, const char *msg, ...) {
 }
 
 char ConGetDrawChar(unsigned int index) {
-    static char tab[] = "\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ";
+    static const char tab[] = "\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ";
 
     assert(index < strlen(tab));
 

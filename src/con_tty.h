@@ -136,20 +136,51 @@ static const struct TTYEscDecode {
     { "\r", kfAlt | kbEnter },
     { "\n", kfAlt | kbEnter },
     { "\t", kfShift  | kbTab },
+    { "\x08", kfAlt  | kbBackSp },
     { "\x1b", kbEsc },
-    { ",", kfAlt | ',' },
-    { ".", kfAlt | '.' },
-    { "/", kfAlt | '/' },
+    { "`", kfAlt | '`' },
+    { "1", kfAlt | '1' },
+    { "2", kfAlt | '2' },
+    { "3", kfAlt | '3' },
+    { "4", kfAlt | '4' },
+    { "5", kfAlt | '5' },
+    { "6", kfAlt | '6' },
+    { "7", kfAlt | '7' },
+    { "8", kfAlt | '8' },
+    { "9", kfAlt | '9' },
+    { "0", kfAlt | '0' },
+    { "-", kfAlt | '-' },
+    { "=", kfAlt | '=' },
+    { "[", kfAlt | '[' },
+    { "]", kfAlt | ']' },
     { ";", kfAlt | ';' },
     { "'", kfAlt | '\'' },
     { "\\", kfAlt | '\\' },
-    { "]", kfAlt | ']' },
-    { "-", kfAlt | '-' },
-    { "=", kfAlt | '=' },
-    { "{", kfShift | kfAlt | '{' },
-    { "}", kfShift | kfAlt | '}' },
+    { ",", kfAlt | ',' },
+    { ".", kfAlt | '.' },
+    { "/", kfAlt | '/' },
+    { "~", kfAlt | kfShift |'~' },
+    { "!", kfAlt | kfShift | '!' },
+    { "@", kfAlt | kfShift | '@' },
+    { "#", kfAlt | kfShift | '#' },
+    { "$", kfAlt | kfShift | '$' },
+    { "%", kfAlt | kfShift | '%' },
+    { "^", kfAlt | kfShift | '^' },
+    { "&", kfAlt | kfShift | '&' },
+    { "*", kfAlt | kfShift | '*' },
+    { "(", kfAlt | kfShift | '(' },
+    { ")", kfAlt | kfShift | ')' },
+    { "_", kfAlt | kfShift | '_' },
+    { "+", kfAlt | kfShift | '+' },
+    { "{", kfAlt | kfShift | '{' },
+    { "}", kfAlt | kfShift | '}' },
+    { "|", kfAlt | kfShift | '|' },
+    { ":", kfAlt | kfShift | ':' },
+    { "\"", kfAlt | kfShift | '"' },
+    { "<", kfAlt | kfShift | '<' },
+    { ">", kfAlt | kfShift | '>' },
+    { "?", kfAlt | kfShift | '?' },
 
-    { "[", kfAlt | '[' },
 };
 
 /* Sorted via qsort in runtime so there is NO const here! */
@@ -174,11 +205,22 @@ static int TTYEscParse(const char *seq)
     unsigned R = tty_esc_size;
     int c;
 
+    if (seq[1] == 0) {
+	if (seq[0] > 0 && seq[0] < 32) {
+	    if (seq[0] != '\n' && seq[0] != '\t' && seq[0] != 8 && seq[0] != 27)
+		return (kfAlt | kfCtrl | (seq[0] + 'A' - 1));
+	} else if (seq[0] >= 'A' && seq[0] <= 'Z')
+	    return (kfAlt | kfShift | (seq[0] + 'A' - 'a'));
+	else if (seq[0] >= 'a' && seq[0] <= 'a')
+	    return (kfAlt | seq[0]);
+    }
+
+    // standard routine for binary search
     while (L < R) {
 	H = L + (R - L) / 2;
 
 	//if ((c = strcmp(seq, tty_esc_seq[H].seq)) == 0) {
-        // replace strcmp with direct char compare
+	// replace strcmp with direct char compare
 	for (i = 0; (tty_esc_seq[H].seq[i]
 		     && !(c = (seq[i] - tty_esc_seq[H].seq[i]))); ++i)
 	    ;
@@ -193,7 +235,8 @@ static int TTYEscParse(const char *seq)
     }
 
     // for detecting unknown Esq sequences - sfte 2>/tmp/newesc
-    fprintf(stderr, "FIXME: Unknown Esc sequence: \"%s\"\n", seq);
+    //fprintf(stderr, "FIXME: Unknown Esc sequence: \"%s\"\n", seq);
+    for (int i = 0; seq[i]; ++i) fprintf(stderr, "FIXME: Unknown Esc sequence: \"%d  %x  %c\"\n", seq[i], seq[i], isprint(seq[i]) ? seq[i] : ' ');
     return kbEsc;
 }
 
@@ -204,15 +247,16 @@ static int TTYEscParse(const char *seq)
 static void TTYEscInit(void)
 {
     for (unsigned i = 0; i < sizeof(tty_esc_seq_c)/sizeof(tty_esc_seq_c[0]); ++i) {
-	for (int j = '2'; j <= '8'; ++j) {
-            tty_esc_seq[tty_esc_size].key = tty_esc_seq_c[i].key;
+	for (unsigned j = '2'; j <= '8'; ++j) {
+	    tty_esc_seq[tty_esc_size].key = tty_esc_seq_c[i].key;
 	    strcpy(tty_esc_seq[tty_esc_size].seq, tty_esc_seq_c[i].seq);
 	    char *r = strchr(tty_esc_seq[tty_esc_size].seq, '%');
-	    if (!r) {
+	    // also skip '%' replacement if it's the first character in the string
+	    if (!r || tty_esc_seq[tty_esc_size].seq[0] == '%') {
 		tty_esc_size++;
 		break;
 	    }
-            *r = (char)j;
+	    *r = (char)j;
 	    switch (j) {
 	    case '2': tty_esc_seq[tty_esc_size].key |= kfShift; break;
 	    case '3': tty_esc_seq[tty_esc_size].key |= kfAlt; break;
@@ -222,7 +266,7 @@ static void TTYEscInit(void)
 	    case '7': tty_esc_seq[tty_esc_size].key |= kfCtrl | kfAlt; break;
 	    case '8': tty_esc_seq[tty_esc_size].key |= kfAlt | kfCtrl | kfShift; break;
 	    }
-            tty_esc_size++;
+	    tty_esc_size++;
 	}
     }
 

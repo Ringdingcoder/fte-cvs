@@ -290,21 +290,15 @@ static void fte_write_color_chars(PCell Cell, int W)
 	    ch = Cell[i].GetChar();
 	    col = Cell[i].GetAttr() & 0x7f;
 	    if (ch <= 127 || ch >= 0xa0) {
-		if (ch < 32)
-		    buf[i] = '.';
-		else
-		    buf[i] = ch;
+		buf[i] = (ch < 32) ? '.' : (char)ch;
 		chset = 0;
 	    } else {
 		buf[i] = slang_dchs[ch - 128];
 		chset = 1;
 	    }
 
-
-
 	    if (col != colprev || chset != chsetprev)
 		break;
-
 	}
 
 	if (i > 0) {

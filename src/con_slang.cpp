@@ -546,8 +546,8 @@ static TEvent Prev = { evNone };
 #if 0
 static const TKeyCode keys_ctrlhack[] =
 {
-    kfAlt,
-    kbHome,
+    kfAlt,  // A
+    kbHome, // B
     kfCtrl,
     kbDown,
     kbEnd,
@@ -706,14 +706,6 @@ static int parseEsc(void)
     char seq[8] = { (char)key, 0 };
     unsigned seqpos = 1;
 
-    if (key >= 'A' && key <= 'Z') {
-	int key1;
-	if (!(key1 = getkey(0)))
-	    return (kfAlt | key);
-	/* longer esc sequence... */
-	seq[seqpos++] = (char)key1;
-    } 
-
     /* read whole Esc sequence */
     while (seqpos < 7 && (seq[seqpos] = (char)getkey(0))) {
 	if (seq[seqpos] <= ' ') {
@@ -759,7 +751,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	key = kbTab;
     else if (key == 8 || key == 127)
 	key = kbBackSp;
-    else if (key > 'A' && key < 'Z')
+    else if (key >= 'A' && key <= 'Z')
 	key = kfShift | (key + 'a' - 'A');
     else if (key < 32)
 	key = kfCtrl | (key + 'A' - 1);

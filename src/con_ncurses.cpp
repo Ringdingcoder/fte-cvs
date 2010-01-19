@@ -676,13 +676,13 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 
     if (ch < 0) Event->What = evNone;
     else if (ch == 27) {
-		fprintf(stderr, "ESCAPEEVENT %x\n", (int)ch);
-		keypad(stdscr,0);
-		timeout(escDelay);
-		if (!(KEvent->Code = ConGetEscEvent()))
-			Event->What = evNone;
-		timeout(-1);
-		keypad(stdscr,1);
+	//fprintf(stderr, "ESCAPEEVENT %x\n", (int)ch);
+	keypad(stdscr,0);
+	timeout(escDelay);
+	if (!(KEvent->Code = ConGetEscEvent()))
+	    Event->What = evNone;
+	timeout(-1);
+	keypad(stdscr,1);
     }
     else if (ch == '\n' || ch == '\r')
 	KEvent->Code |= kbEnter;

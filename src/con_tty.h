@@ -108,6 +108,14 @@ static const struct TTYEscDecode {
     { "[P", kbPrtScr },
     { "[Z", kfShift | kbTab },
 
+    { "O%A", kbUp },
+    { "O%B", kbDown },
+    { "O%C", kbRight },
+    { "O%D", kbLeft },
+
+    { "OF", kbEnd },
+    { "OH", kbHome },
+
     { "O1;%P", kbF1 },
     { "O%P", kbF1 },
     { "OP", kbF1 },
@@ -124,18 +132,10 @@ static const struct TTYEscDecode {
     { "O%S", kbF4 },
     { "OS", kbF4 },
 
-    { "O%A", kbUp },
-    { "O%B", kbDown },
-    { "O%C", kbRight },
-    { "O%D", kbLeft },
-
-    { "OF", kbEnd },
-    { "OH", kbHome },
-
     { "\x7f", kfAlt | kbBackSp },
     { "\r", kfAlt | kbEnter },
     { "\n", kfAlt | kbEnter },
-    { "\t", kfAlt | kbTab },
+    { "\t", kfShift  | kbTab },
     { "\x1b", kbEsc },
     { ",", kfAlt | ',' },
     { ".", kfAlt | '.' },

@@ -421,7 +421,7 @@ EAbbrev *EMode::FindAbbrev(const char *string) {
 #endif
 
 static const struct {
-    const char *Name;
+    const char Name[8];
     TKeyCode Key;
 } KeyList[] = {
     { "Esc", kbEsc },

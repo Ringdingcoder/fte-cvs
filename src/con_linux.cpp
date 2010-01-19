@@ -1192,9 +1192,11 @@ char ConGetDrawChar(unsigned int idx) {
         if (getenv("ISOCONSOLE")) {
             tab = GetGUICharacters("Linux", "++++-|+++++>.*-^v :[>");
         } else {
-            tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\x09\x0a\xC4\x18\x19\xB1\xB0\x1B\x1A");
-          //tab = GetGUICharacters("Linux","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
-	}
+            /* it's hard to pick usable charset between way to many fonts */
+            tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A.\x0A\xC4\x18\x19\xB1\xB0\x1B\x1A");
+            //tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\xFA\x04\xC4\x18\x19\xB1\xB0\x1B\x1A");
+            //tab = GetGUICharacters("Linux", "\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
+        }
         tablen = strlen(tab);
     }
     assert(idx < tablen);

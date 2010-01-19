@@ -245,7 +245,7 @@ static chtype GetDch(int idx)
 		case DCH_M1: return ACS_HLINE;
 		case DCH_M2: return ACS_LTEE;
 		case DCH_M3: return ACS_RTEE;
-		case DCH_M4 : return 'o'; break;
+		case DCH_M4 : return '.'; break;
 		case DCH_X: return  'X'; break;
 		case DCH_RPTR: return ACS_RARROW; break;
 		case DCH_EOL: return ACS_BULLET; break;
@@ -548,13 +548,6 @@ static int ConGetEscEvent(void)
 	while (seqpos < 7 && (key = getch()) != ERR)
 		seq[seqpos++] = (char)key;
 	seq[seqpos] = 0;
-	//fprintf(stderr, "DECODE %d  %s\n", seqpos, seq);
-
-	if (seqpos == 2) {
-		key = seq[0];
-		if (key > 0 && key < 32)
-			return (kfAlt| kfCtrl | (key + 'A' - 1));
-	}
 
 	return TTYEscParse(seq);
 }
@@ -683,7 +676,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 
     if (ch < 0) Event->What = evNone;
     else if (ch == 27) {
-		//fprintf(stderr, "ESCAPEEVENT %x\n", (int)ch);
+		fprintf(stderr, "ESCAPEEVENT %x\n", (int)ch);
 		keypad(stdscr,0);
 		timeout(escDelay);
 		if (!(KEvent->Code = ConGetEscEvent()))
@@ -691,10 +684,16 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 		timeout(-1);
 		keypad(stdscr,1);
     }
-    else if(ch == '\r' || ch == '\n') KEvent->Code |= kbEnter;
-    else if(ch == '\t') KEvent->Code |= kbTab;
-    else if(ch < 32) KEvent->Code |=  (kfCtrl | (ch+ 0100));
-    else if(ch < 256) KEvent->Code |= ch;
+    else if (ch == '\n' || ch == '\r')
+	KEvent->Code |= kbEnter;
+    else if (ch == '\t')
+	KEvent->Code |= kbTab;
+    else if (ch >= 'A' && ch <= 'Z')
+	KEvent->Code |= kfShift | (ch + 'a' - 'A');
+    else if (ch < 32)
+	KEvent->Code |=  (kfCtrl | (ch + 'A' - 1)); // +0100
+    else if (ch < 256)
+	KEvent->Code |= ch;
     else // > 255
     {
 	switch(ch)

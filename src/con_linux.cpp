@@ -113,16 +113,53 @@ static unsigned char fromScreen[256];
 int GetKeyEvent(TEvent *Event);
 int GetMouseEvent(TEvent *Event);
 
+static ssize_t conread(int fd, void *p, size_t len) {   // len should be a multiple of 2
+    char *buf = (char *)alloca(len);
+    char *c = (char *)p;
+    char *s = buf;
+
+    ssize_t rlen = read(fd, buf, len);
+    for (unsigned n = 0; n < rlen; n += 2) {
+#ifdef USE_SCRNMAP
+	if (!noCharTrans)
+	    c[BYTE_ORDER == BIG_ENDIAN] = fromScreen[(unsigned char)*s++];
+	else
+#endif
+	    c[BYTE_ORDER == BIG_ENDIAN] = *s++;
+	c[BYTE_ORDER != BIG_ENDIAN] = *s++;
+	c += 2;
+    }
+    return rlen;
+}
+
+static ssize_t conwrite(int fd, void *p, size_t len) {  // len should be a multiple of 2
+    char *buf = (char *)alloca(len);
+    char *s = (char *)p;
+    char *c = buf;
+
+    for (unsigned n = 0; n < len; n += 2) {
+#ifdef USE_SCRNMAP
+	if (!noCharTrans)
+	    c[BYTE_ORDER == BIG_ENDIAN] = toScreen[(unsigned char)*s++];
+	else
+#endif
+	    c[BYTE_ORDER == BIG_ENDIAN] = *s++;
+	c[BYTE_ORDER != BIG_ENDIAN] = *s++;
+	c += 2;
+    }
+    return write(fd, buf, len);
+}
+
 static void mouseShow() {
 #ifdef USE_GPM
     if (GpmFd != -1 && VcsFd != -1 && drawPointer && mouseDrawn == 0) {
         int pos = (LastMouseX + LastMouseY * VideoCols) * 2 + 4;
         lseek(VcsFd, pos, SEEK_SET);
-        read(VcsFd, &MousePosCell, 2);
+        conread(VcsFd, &MousePosCell, 2);
         TCell newCell(MousePosCell.GetChar(),
                       MousePosCell.GetAttr() ^ 0x77);  // correct ?
         lseek(VcsFd, pos, SEEK_SET);
-        write(VcsFd, &newCell, 2);
+        conwrite(VcsFd, &newCell, 2);
         mouseDrawn = 1;
     }
 #endif
@@ -133,7 +170,7 @@ static void mouseHide() {
     if (GpmFd != -1 && VcsFd != -1 && drawPointer && mouseDrawn == 1) {
         int pos = (LastMouseX + LastMouseY * VideoCols) * 2 + 4;
         lseek(VcsFd, pos, SEEK_SET);
-        write(VcsFd, &MousePosCell, 2);
+        conwrite(VcsFd, &MousePosCell, 2);
         mouseDrawn = 0;
     }
 #endif
@@ -348,44 +385,6 @@ int ConContinue() {
 #endif
     return 0;
 }
-
-#ifdef USE_SCRNMAP
-static ssize_t conread(int fd, void *p, size_t len) {   // len should be a multiple of 2
-    char buf[512];
-    char *c = (char *)p;
-    char *s = buf;
-
-    if (noCharTrans || (len > 512)) {
-        return read(fd, p, len);
-    } else {
-        ssize_t rlen = read(fd, buf, len);
-        for (unsigned n = 0; n < rlen; n += 2) {
-            *c++ = fromScreen[(unsigned char)*s++];
-            *c++ = *s++;
-        }
-        return rlen;
-    }
-}
-
-static ssize_t conwrite(int fd, void *p, size_t len) {  // len should be a multiple of 2
-    char buf[512];
-    char *s = (char *)p;
-    char *c = buf;
-
-    if (noCharTrans || (len > 512)) {
-        return write(fd, p, len);
-    } else {
-        for (unsigned n = 0; n < len; n += 2) {
-            *c++ = toScreen[(unsigned char)*s++];
-            *c++ = *s++;
-        }
-        return write(fd, buf, len);
-    }
-}
-#else
-#define conread(fd,b,len) read(fd,b,len)
-#define conwrite(fd,b,len) write(fd,b,len)
-#endif
 
 int ConClear() {
     int X, Y;
@@ -1193,7 +1192,7 @@ char ConGetDrawChar(unsigned int idx) {
         if (getenv("ISOCONSOLE")) {
             tab = GetGUICharacters("Linux", "++++-|+++++>.*-^v :[>");
         } else {
-            tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\xFA\x04\xC4\x18\x19\xB1\xB0\x1B\x1A");
+            tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\x09\x0a\xC4\x18\x19\xB1\xB0\x1B\x1A");
           //tab = GetGUICharacters("Linux","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
 	}
         tablen = strlen(tab);
@@ -1201,7 +1200,7 @@ char ConGetDrawChar(unsigned int idx) {
     assert(idx < tablen);
 
 #ifdef USE_SCRNMAP
-    return fromScreen[(int)tab[idx]];
+    return fromScreen[(unsigned char)tab[idx]];
 #else
     return tab[idx];
 #endif

@@ -229,8 +229,8 @@ struct {
     { 0, 0 }
 };
 
-char shftwrng[]  = "~!@#$%^&*()_+{}|:\"<>?";
-char shftright[] = "`1234567890-=[]\\;',./";
+static const char shftwrng[]  = "~!@#$%^&*()_+{}|:\"<>?";
+static const char shftright[] = "`1234567890-=[]\\;',./";
 
 int ReadConsoleEvent(TEvent *E) /*FOLD00*/
 {
@@ -857,7 +857,7 @@ char ConGetDrawChar(unsigned int index) { /*FOLD00*/
     if (!tab) {
         tab=GetGUICharacters ("WindowsNT","Ú¿ÀÙÄ³ÂÃ´ÁÅ\x1AúÄ±°\x1B\x1A");
     }
-    assert(index < (int)strlen(tab));
+    assert(index < strlen(tab));
 
     return tab[index];
 }

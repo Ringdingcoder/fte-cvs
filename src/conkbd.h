@@ -10,15 +10,15 @@
 #ifndef CONKBD_H
 #define CONKBD_H
 
-#define kfAltXXX    0x01000000L
-#define kfModifier  0x02000000L
-#define kfSpecial   0x00010000L
-#define kfAlt       0x00100000L
-#define kfCtrl      0x00200000L
-#define kfShift     0x00400000L
-#define kfGray      0x00800000L
-#define kfKeyUp     0x10000000L
-#define kfAll       0x00F00000L
+#define kfAltXXX    0x01000000
+#define kfModifier  0x02000000
+#define kfSpecial   0x00010000
+#define kfAlt       0x00100000
+#define kfCtrl      0x00200000
+#define kfShift     0x00400000
+#define kfGray      0x00800000
+#define kfKeyUp     0x10000000
+#define kfAll       0x00F00000
 
 #define isAltXXX(x) (((x) & (kfAltXXX)) != 0)
 #define isAlt(x)  (((x) & kfAlt) != 0)

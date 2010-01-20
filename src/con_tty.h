@@ -131,56 +131,6 @@ static const struct TTYEscDecode {
     { "O1;%S", kbF4 },
     { "O%S", kbF4 },
     { "OS", kbF4 },
-
-    { "\x7f", kfAlt | kbBackSp },
-    { "\r", kfAlt | kbEnter },
-    { "\n", kfAlt | kbEnter },
-    { "\t", kfShift  | kbTab },
-    { "\x08", kfAlt  | kbBackSp },
-    { "\x1b", kbEsc },
-    { "`", kfAlt | '`' },
-    { "1", kfAlt | '1' },
-    { "2", kfAlt | '2' },
-    { "3", kfAlt | '3' },
-    { "4", kfAlt | '4' },
-    { "5", kfAlt | '5' },
-    { "6", kfAlt | '6' },
-    { "7", kfAlt | '7' },
-    { "8", kfAlt | '8' },
-    { "9", kfAlt | '9' },
-    { "0", kfAlt | '0' },
-    { "-", kfAlt | '-' },
-    { "=", kfAlt | '=' },
-    { "[", kfAlt | '[' },
-    { "]", kfAlt | ']' },
-    { ";", kfAlt | ';' },
-    { "'", kfAlt | '\'' },
-    { "\\", kfAlt | '\\' },
-    { ",", kfAlt | ',' },
-    { ".", kfAlt | '.' },
-    { "/", kfAlt | '/' },
-    { "~", kfAlt | kfShift |'~' },
-    { "!", kfAlt | kfShift | '!' },
-    { "@", kfAlt | kfShift | '@' },
-    { "#", kfAlt | kfShift | '#' },
-    { "$", kfAlt | kfShift | '$' },
-    { "%", kfAlt | kfShift | '%' },
-    { "^", kfAlt | kfShift | '^' },
-    { "&", kfAlt | kfShift | '&' },
-    { "*", kfAlt | kfShift | '*' },
-    { "(", kfAlt | kfShift | '(' },
-    { ")", kfAlt | kfShift | ')' },
-    { "_", kfAlt | kfShift | '_' },
-    { "+", kfAlt | kfShift | '+' },
-    { "{", kfAlt | kfShift | '{' },
-    { "}", kfAlt | kfShift | '}' },
-    { "|", kfAlt | kfShift | '|' },
-    { ":", kfAlt | kfShift | ':' },
-    { "\"", kfAlt | kfShift | '"' },
-    { "<", kfAlt | kfShift | '<' },
-    { ">", kfAlt | kfShift | '>' },
-    { "?", kfAlt | kfShift | '?' },
-
 };
 
 /* Sorted via qsort in runtime so there is NO const here! */
@@ -201,22 +151,34 @@ static int TTYEscComp(const void *a, const void *b)
 
 static int TTYEscParse(const char *seq)
 {
-    unsigned i, H = 0, L = 0;
-    unsigned R = tty_esc_size;
-    int c;
-
     if (seq[1] == 0) {
-	if (seq[0] > 0 && seq[0] < 32) {
-	    if (seq[0] != '\n' && seq[0] != '\t' && seq[0] != 8 && seq[0] != 27)
-		return (kfAlt | kfCtrl | (seq[0] + 'A' - 1));
-	} else if (seq[0] >= 'A' && seq[0] <= 'Z')
-	    return (kfAlt | kfShift | (seq[0] + 'A' - 'a'));
-	else if (seq[0] >= 'a' && seq[0] <= 'a')
-	    return (kfAlt | seq[0]);
+	char ch = seq[0];
+	if (ch > 0 && ch < 32) {
+	    switch (ch) {
+	    case '\t': return (kfShift | kbTab);
+	    case '\n': return (kfAlt | kbEnter);
+	    case 8:    return (kfAlt | kbBackSp);
+	    case 27:   return (kfAlt | kbEsc);
+	    default:   return (kfAlt | kfCtrl | (ch + 'A' - 1));
+	    }
+	} else if (ch == 0x7f)
+	    return kfAlt | kbBackSp;
+	else if (ch >= 'a' && ch <= 'z')
+	    return (kfAlt | ch);
+	else if (ch >= 'A' && ch <= 'Z')
+	    return (kfAlt | kfShift | (ch + 'A' - 'a'));
+	else if (strchr("`1234567890-=[];'\\,./", ch))
+	    return (kfAlt | ch);
+	else if (strchr("~!@#$%%^&*()_+{}:\"|<>?", ch))
+	    return (kfAlt | kfShift | ch);
     }
 
     // standard routine for binary search
+    unsigned i, H = 0, L = 0;
+    unsigned R = tty_esc_size;
+
     while (L < R) {
+        int c;
 	H = L + (R - L) / 2;
 
 	//if ((c = strcmp(seq, tty_esc_seq[H].seq)) == 0) {

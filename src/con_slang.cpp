@@ -112,6 +112,15 @@ static const char *const slang_colors[] =
     "white",
 };
 
+
+static volatile int ScreenSizeChanged;
+
+static void sigwinch_handler(int sig)
+{
+    ScreenSizeChanged = 1;
+    SLsignal(SIGWINCH, sigwinch_handler);
+}
+
 int ConInit(int /*XSize */ , int /*YSize */ )
 {
     SLtt_get_terminfo();
@@ -123,6 +132,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 	return -1;
     }
 
+    SLsignal(SIGWINCH, sigwinch_handler);
     if (SLsmg_init_smg() == -1) {
 	SLang_reset_tty();
 	return -1;
@@ -203,7 +213,6 @@ static void fte_write_color_chars(PCell Cell, int W)
 	    if (ch <= 127 || ch >= 0xa0) {
 		buf[i] = (ch < 32) ? '.' : (char)ch;
 		chset = 0;
-		//buf[i] = ' ';
 	    } else {
 		buf[i] = slang_dchs[ch - 128];
 		chset = 1;
@@ -229,8 +238,8 @@ static void fte_write_color_chars(PCell Cell, int W)
 	    chsetprev = chset;
 	}
     }
-    SLsmg_set_char_set(0);
-    SLsmg_set_color(0);
+    //SLsmg_set_char_set(0);
+    //SLsmg_normal_video();
 }
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell)
@@ -497,6 +506,15 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 {
     TKeyEvent *KEvent = &(Event->Key);
     int key, rc;
+
+    if (ScreenSizeChanged) {
+	ScreenSizeChanged = 0;
+	SLtt_get_screen_size();
+	SLsmg_reinit_smg();
+	Event->What = evCommand;
+	Event->Msg.Command = cmResize;
+	return 1;
+    }
 
     if (Prev.What != evNone) {
 	*Event = Prev;

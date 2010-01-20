@@ -7,8 +7,6 @@
  *
  */
 
-static int use_esc_hack = 0;
-
 #include "sysdep.h"
 #include "c_config.h"
 #include "console.h"
@@ -114,93 +112,8 @@ static const char *const slang_colors[] =
     "white",
 };
 
-/*
- * Definitions for keyboard handling under SLang.
- */
-
-#define FTESL_KEY            0x00001000		// A key defined by me
-#define FTESL_KEY_SHIFT      0x00002000		// Key with Shift
-#define FTESL_KEY_CTRL       0x00004000		// Key with Ctrl
-#define FTESL_KEY_ALT        0x00008000		// Key with Alt
-#define FTESL_KEY_GRAY       0x00010000		// Gray Key
-
-#define FTESL_KEY_ENTER      13
-#define FTESL_KEY_TAB         9
-#define FTESL_KEY_ESC        27
-#define FTESL_KEY_BACKSP      8
-
-#define FTESL_KEY_CTRLAND(x)    (x+1-'a')
-
-static const TKeyCode speckeys[] =
-{
-    kbF1,
-    kbF2,
-    kbF3,
-    kbF4,
-    kbF5,
-    kbF6,
-    kbF7,
-    kbF8,
-    kbF9,
-    kbF10,
-    kbF11,
-    kbF12,
-    kbHome,
-    kbEnd,
-    kbPgUp,
-    kbPgDn,
-    kbIns,
-    kbDel,
-    kbUp,
-    kbDown,
-    kbLeft,
-    kbRight,
-    kbEnter,
-    kbEsc,
-    kbBackSp,
-    kbSpace,
-    kbTab,
-    kbCenter,
-};
-
-/*
-static int ftesl_getkeysym(TKeyCode keycode)
-{
-    unsigned key = keyCode(keycode);
-    int ksym = -1;
-
-    for (unsigned i = 0; i < sizeof(speckeys) / sizeof(TKeyCode); i++) {
-	if (key == speckeys[i]) {
-	    ksym = (int) i;
-	    break;
-	}
-    }
-
-    if (ksym < 0 && key < 256) {
-	ksym = (int) key;
-    }
-
-    if (ksym < 0)
-	return ksym;
-
-    if (keycode & kfAlt)
-	ksym |= FTESL_KEY_ALT;
-    if (keycode & kfCtrl)
-	ksym |= FTESL_KEY_CTRL;
-    if (keycode & kfShift)
-	ksym |= FTESL_KEY_SHIFT;
-    if (keycode & kfGray)
-	ksym |= FTESL_KEY_GRAY;
-
-    ksym |= FTESL_KEY;
-    return ksym;
-}
-*/
-
 int ConInit(int /*XSize */ , int /*YSize */ )
 {
-    unsigned i;
-
     SLtt_get_terminfo();
 
     if (SLkp_init() == -1) {
@@ -216,13 +129,11 @@ int ConInit(int /*XSize */ , int /*YSize */ )
     }
 
     SLang_set_abort_signal(NULL);
-
     SLtty_set_suspend_state(0);
 
-    for (i = 0; i < 128; i++) {
+    for (unsigned i = 0; i < 128; ++i)
 	SLtt_set_color(i, NULL, const_cast<char *>(slang_colors[i & 0x0f]),
-		       const_cast<char *>(slang_colors[((i >> 4) + 0) & 0x07]));
-    }
+		       const_cast<char *>(slang_colors[(i >> 4) & 0x07]));
 
     SLsmg_gotorc(0, 0);
     SLsmg_set_char_set(1);
@@ -234,7 +145,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 
     SLsmg_set_char_set(0);
 
-    use_esc_hack = (getenv("FTESL_ESC_HACK") != NULL);
+    //use_esc_hack = (getenv("FTESL_ESC_HACK") != NULL);
 
     return 0;
 }
@@ -280,18 +191,19 @@ int ConClear()
 static void fte_write_color_chars(PCell Cell, int W)
 {
     int i = 0;
-    int chset = 0, chsetprev = 0;
-    unsigned char ch, col = 0x70, colprev = 0x70;
+    int chset = 0, chsetprev = 2;
+    unsigned char ch, col = 0, colprev = 0x80;
     char buf[256];
 
-    SLsmg_set_color(colprev);
     while (W > 0) {
 	for (i = 0; i < W && i < (int) sizeof(buf); i++) {
 	    ch = Cell[i].GetChar();
 	    col = Cell[i].GetAttr() & 0x7f;
+	    //fprintf(stderr, "W: %d  i:%d  ch: %d %c  col: %2x / %2x\n", W, i, ch, ch, col, Cell[i].GetAttr() & 0x7f);
 	    if (ch <= 127 || ch >= 0xa0) {
 		buf[i] = (ch < 32) ? '.' : (char)ch;
 		chset = 0;
+		//buf[i] = ' ';
 	    } else {
 		buf[i] = slang_dchs[ch - 128];
 		chset = 1;
@@ -318,6 +230,7 @@ static void fte_write_color_chars(PCell Cell, int W)
 	}
     }
     SLsmg_set_char_set(0);
+    SLsmg_set_color(0);
 }
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell)
@@ -332,7 +245,6 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 	H--;
     }
     ConSetCursorPos(CurX, CurY);
-    SLsmg_refresh();
 
     return 0;
 }
@@ -422,7 +334,6 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell)
 	H--;
     }
     ConSetCursorPos(CurX, CurY);
-    SLsmg_refresh();
 
     return 0;
 }
@@ -473,6 +384,7 @@ int ConQuerySize(int *X, int *Y)
 
 int ConSetCursorPos(int X, int Y)
 {
+    //SLsmg_write_string("X");
     SLsmg_gotorc(Y, X);
     SLsmg_refresh();
     return 0;
@@ -542,145 +454,6 @@ int ConQueryMouseButtons(int *ButtonCount)
 }
 
 static TEvent Prev = { evNone };
-
-#if 0
-static const TKeyCode keys_ctrlhack[] =
-{
-    kfAlt,  // A
-    kbHome, // B
-    kfCtrl,
-    kbDown,
-    kbEnd,
-
-    kbF1,
-    kfCtrl | 'G',
-    kbBackSp,
-    kbTab,
-    kfCtrl | 'J',
-
-    kfCtrl | 'K',
-    kbLeft,
-    kbEnter,
-    kbPgDn,
-    kfCtrl | 'O',
-
-    kbPgUp,
-    kbIns,
-    kbRight,
-    kfShift,
-    kfCtrl | 'T',
-
-    kbUp,
-    kfCtrl | 'V',
-    kfCtrl | 'W',
-    kbCenter,
-    kfCtrl | 'Y',
-
-    kbDel,
-    kbEsc,
-    kbCtrl | '\\',
-    kbCtrl | ']',
-    kbCtrl | '^',
-    kbCtrl | '_'
-};
-
-static TKeyCode ftesl_getftekey(unsigned char key)
-{
-    if (key < 32)
-	return speckeys[key];
-    else
-	return (TKeyCode) key;
-}
-
-/*
- * Keyboard handling with SLang.
- */
-static TKeyCode ftesl_process_key(int key, int ctrlhack = 0)
-{
-    TKeyCode kcode;
-
-    //fprintf(stderr, "KEY  %03d \n", key);
-    if (key < 256 && key >= 32) {
-	return (TKeyCode) key;
-    } else if (key >= 1 && key <= 31 && key != 13 && key != 9 && key != 8
-	       && key != 27) {
-	if (!ctrlhack)
-	    return ((key + 'A' - 1) & 0xff) | kfCtrl;
-	else
-	    return keys_ctrlhack[key - 1];
-    } else if (key & FTESL_KEY) {
-	kcode = ftesl_getftekey((unsigned char)key);
-	if (key & FTESL_KEY_SHIFT)
-	    kcode |= kfShift;
-	if (key & FTESL_KEY_CTRL)
-	    kcode |= kfCtrl;
-	if (key & FTESL_KEY_ALT)
-	    kcode |= kfAlt;
-	if (key & FTESL_KEY_GRAY)
-	    kcode |= kfGray;
-	return kcode;
-    } else
-	switch (key) {
-	case SL_KEY_UP:
-	    return kbUp;
-	case SL_KEY_DOWN:
-	    return kbDown;
-	case SL_KEY_LEFT:
-	    return kbLeft;
-	case SL_KEY_RIGHT:
-	    return kbRight;
-	case SL_KEY_PPAGE:
-	    return kbPgUp;
-	case SL_KEY_NPAGE:
-	    return kbPgDn;
-	case SL_KEY_HOME:
-	    return kbHome;
-	case SL_KEY_END:
-	    return kbEnd;
-	case SL_KEY_BACKSPACE:
-	case FTESL_KEY_BACKSP:
-	    return kbBackSp;
-	case SL_KEY_ENTER:
-	case FTESL_KEY_ENTER:
-	    return kbEnter;
-	case SL_KEY_IC:
-	    return kbIns;
-	case SL_KEY_DELETE:
-	    return kbDel;
-	case SL_KEY_F(1):
-	    return kbF1;
-	case SL_KEY_F(2):
-	    return kbF2;
-	case SL_KEY_F(3):
-	    return kbF3;
-	case SL_KEY_F(4):
-	    return kbF4;
-	case SL_KEY_F(5):
-	    return kbF5;
-	case SL_KEY_F(6):
-	    return kbF6;
-	case SL_KEY_F(7):
-	    return kbF7;
-	case SL_KEY_F(8):
-	    return kbF8;
-	case SL_KEY_F(9):
-	    return kbF9;
-	case SL_KEY_F(10):
-	    return kbF10;
-	case SL_KEY_F(11):
-	    return kbF11;
-	case SL_KEY_F(12):
-	    return kbF12;
-	case FTESL_KEY_TAB:
-	    return kbTab;
-	case FTESL_KEY_ESC:
-	case SL_KEY_ERR:
-	    return kbEsc;
-	default:
-	    return '?';
-	}
-}
-#endif
 
 static int getkey(int tsecs)
 {
@@ -765,114 +538,6 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	Prev = *Event;
 
     return 1;
-
-#if 0
-    if (SLang_input_pending(0) > 0) {
-	TKeyCode kcode = 0, kcode1;
-
-	key = SLang_getkey();
-	int escfirst = 1;
-
-	if (key == 27)
-	    while (1) {
-		if (use_esc_hack) {
-		    if (SLang_input_pending(1) == 0) {
-			kcode = kbEsc;
-			break;
-		    }
-		}
-
-		key = SLang_getkey();
-		if (key == 3) {
-		    SLang_ungetkey((unsigned char)key);
-		    SLkp_getkey();
-		}
-		if (key >= 'a' && key <= 'z')
-		    key -= 'a' - 'A';
-		if (key == 27) {
-		    kcode = kbEsc;
-		    break;
-		} else if (key == '[' && escfirst) {
-		    unsigned char kbuf[2];
-
-		    kbuf[0] = 27;
-		    kbuf[1] = (char) key;
-		    SLang_ungetkey_string(kbuf, 2);
-		    key = SLkp_getkey();
-		    if (key == 0xFFFF) {
-			if (SLang_input_pending(0) == 0) {
-			    /*
-			     * SLang got an unknown key and ate it.
-			     * beep and bonk out.
-			     */
-			    SLtt_beep();
-			    return -1;
-			}
-			/*
-			 * SLang encountered an unknown key sequence, so we
-			 * try to parse the sequence one by one and thus
-			 * enable the user to configure a binding for it
-			 */
-			key = SLang_getkey();
-			if (key != 27) {
-			    SLtt_beep();
-			    SLang_flush_input();
-			    return -1;
-			}
-		    }
-		    kcode = ftesl_process_key(key, 0);
-		    break;
-		} else {
-		    kcode1 = ftesl_process_key(key, 1);
-		    if (keyCode(kcode1) == kbF1) {
-			key = SLang_getkey();
-			switch (key) {
-			case '0':
-			    kcode |= kbF10;
-			    break;
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-			    kcode |= kbF1 + key - '1';
-			    break;
-			case 'a':
-			case 'b':
-			    kcode |= kbF11 + key - 'a';
-			    break;
-			}
-		    } else
-			kcode |= kcode1;
-
-		    if (keyCode(kcode) != 0) {
-			if (escfirst)
-			    kcode |= kfAlt;
-			break;
-		    }
-		}
-		escfirst = 0;
-	} else {
-	    SLang_ungetkey((unsigned char)key);
-	    key = SLkp_getkey();
-	    kcode = ftesl_process_key(key, 0);
-	}
-
-	Event->What = evKeyDown;
-	KEvent->Code = kcode;
-
-	if (!Delete)
-	    Prev = *Event;
-
-	return 1;
-    }
-
-    return -1;
-#endif
 }
 
 int ConPutEvent(TEvent Event)
@@ -1017,3 +682,335 @@ char ConGetDrawChar(unsigned int idx)
 
      return use_tab[idx];
 }
+
+#if 0 /*fold00*/
+    if (SLang_input_pending(0) > 0) {
+	TKeyCode kcode = 0, kcode1;
+
+	key = SLang_getkey();
+	int escfirst = 1;
+
+	if (key == 27)
+	    while (1) {
+		if (use_esc_hack) {
+		    if (SLang_input_pending(1) == 0) {
+			kcode = kbEsc;
+			break;
+		    }
+		}
+
+		key = SLang_getkey();
+		if (key == 3) {
+		    SLang_ungetkey((unsigned char)key);
+		    SLkp_getkey();
+		}
+		if (key >= 'a' && key <= 'z')
+		    key -= 'a' - 'A';
+		if (key == 27) {
+		    kcode = kbEsc;
+		    break;
+		} else if (key == '[' && escfirst) {
+		    unsigned char kbuf[2];
+
+		    kbuf[0] = 27;
+		    kbuf[1] = (char) key;
+		    SLang_ungetkey_string(kbuf, 2);
+		    key = SLkp_getkey();
+		    if (key == 0xFFFF) {
+			if (SLang_input_pending(0) == 0) {
+			    /*
+			     * SLang got an unknown key and ate it.
+			     * beep and bonk out.
+			     */
+			    SLtt_beep();
+			    return -1;
+			}
+			/*
+			 * SLang encountered an unknown key sequence, so we
+			 * try to parse the sequence one by one and thus
+			 * enable the user to configure a binding for it
+			 */
+			key = SLang_getkey();
+			if (key != 27) {
+			    SLtt_beep();
+			    SLang_flush_input();
+			    return -1;
+			}
+		    }
+		    kcode = ftesl_process_key(key, 0);
+		    break;
+		} else {
+		    kcode1 = ftesl_process_key(key, 1);
+		    if (keyCode(kcode1) == kbF1) {
+			key = SLang_getkey();
+			switch (key) {
+			case '0':
+			    kcode |= kbF10;
+			    break;
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			    kcode |= kbF1 + key - '1';
+			    break;
+			case 'a':
+			case 'b':
+			    kcode |= kbF11 + key - 'a';
+			    break;
+			}
+		    } else
+			kcode |= kcode1;
+
+		    if (keyCode(kcode) != 0) {
+			if (escfirst)
+			    kcode |= kfAlt;
+			break;
+		    }
+		}
+		escfirst = 0;
+	} else {
+	    SLang_ungetkey((unsigned char)key);
+	    key = SLkp_getkey();
+	    kcode = ftesl_process_key(key, 0);
+	}
+
+	Event->What = evKeyDown;
+	KEvent->Code = kcode;
+
+	if (!Delete)
+	    Prev = *Event;
+
+	return 1;
+    }
+
+    return -1;
+#endif
+ /*FOLD00*/
+#if 0 /*fold00*/
+/*
+ * Definitions for keyboard handling under SLang.
+ */
+
+#define FTESL_KEY            0x00001000		// A key defined by me
+#define FTESL_KEY_SHIFT      0x00002000		// Key with Shift
+#define FTESL_KEY_CTRL       0x00004000		// Key with Ctrl
+#define FTESL_KEY_ALT        0x00008000		// Key with Alt
+#define FTESL_KEY_GRAY       0x00010000		// Gray Key
+
+#define FTESL_KEY_ENTER      13
+#define FTESL_KEY_TAB         9
+#define FTESL_KEY_ESC        27
+#define FTESL_KEY_BACKSP      8
+
+#define FTESL_KEY_CTRLAND(x)    (x+1-'a')
+
+static int use_esc_hack = 0;
+
+static const TKeyCode speckeys[] =
+{
+    kbF1,
+    kbF2,
+    kbF3,
+    kbF4,
+    kbF5,
+    kbF6,
+    kbF7,
+    kbF8,
+    kbF9,
+    kbF10,
+    kbF11,
+    kbF12,
+    kbHome,
+    kbEnd,
+    kbPgUp,
+    kbPgDn,
+    kbIns,
+    kbDel,
+    kbUp,
+    kbDown,
+    kbLeft,
+    kbRight,
+    kbEnter,
+    kbEsc,
+    kbBackSp,
+    kbSpace,
+    kbTab,
+    kbCenter,
+};
+
+/*
+static int ftesl_getkeysym(TKeyCode keycode)
+{
+    unsigned key = keyCode(keycode);
+    int ksym = -1;
+
+    for (unsigned i = 0; i < sizeof(speckeys) / sizeof(TKeyCode); i++) {
+	if (key == speckeys[i]) {
+	    ksym = (int) i;
+	    break;
+	}
+    }
+
+    if (ksym < 0 && key < 256) {
+	ksym = (int) key;
+    }
+
+    if (ksym < 0)
+	return ksym;
+
+    if (keycode & kfAlt)
+	ksym |= FTESL_KEY_ALT;
+    if (keycode & kfCtrl)
+	ksym |= FTESL_KEY_CTRL;
+    if (keycode & kfShift)
+	ksym |= FTESL_KEY_SHIFT;
+    if (keycode & kfGray)
+	ksym |= FTESL_KEY_GRAY;
+
+    ksym |= FTESL_KEY;
+    return ksym;
+}
+*/
+
+static const TKeyCode keys_ctrlhack[] =
+{
+    kfAlt,  // A
+    kbHome, // B
+    kfCtrl,
+    kbDown,
+    kbEnd,
+
+    kbF1,
+    kfCtrl | 'G',
+    kbBackSp,
+    kbTab,
+    kfCtrl | 'J',
+
+    kfCtrl | 'K',
+    kbLeft,
+    kbEnter,
+    kbPgDn,
+    kfCtrl | 'O',
+
+    kbPgUp,
+    kbIns,
+    kbRight,
+    kfShift,
+    kfCtrl | 'T',
+
+    kbUp,
+    kfCtrl | 'V',
+    kfCtrl | 'W',
+    kbCenter,
+    kfCtrl | 'Y',
+
+    kbDel,
+    kbEsc,
+    kbCtrl | '\\',
+    kbCtrl | ']',
+    kbCtrl | '^',
+    kbCtrl | '_'
+};
+
+static TKeyCode ftesl_getftekey(unsigned char key)
+{
+    if (key < 32)
+	return speckeys[key];
+    else
+	return (TKeyCode) key;
+}
+
+/*
+ * Keyboard handling with SLang.
+ */
+static TKeyCode ftesl_process_key(int key, int ctrlhack = 0)
+{
+    TKeyCode kcode;
+
+    //fprintf(stderr, "KEY  %03d \n", key);
+    if (key < 256 && key >= 32) {
+	return (TKeyCode) key;
+    } else if (key >= 1 && key <= 31 && key != 13 && key != 9 && key != 8
+	       && key != 27) {
+	if (!ctrlhack)
+	    return ((key + 'A' - 1) & 0xff) | kfCtrl;
+	else
+	    return keys_ctrlhack[key - 1];
+    } else if (key & FTESL_KEY) {
+	kcode = ftesl_getftekey((unsigned char)key);
+	if (key & FTESL_KEY_SHIFT)
+	    kcode |= kfShift;
+	if (key & FTESL_KEY_CTRL)
+	    kcode |= kfCtrl;
+	if (key & FTESL_KEY_ALT)
+	    kcode |= kfAlt;
+	if (key & FTESL_KEY_GRAY)
+	    kcode |= kfGray;
+	return kcode;
+    } else
+	switch (key) {
+	case SL_KEY_UP:
+	    return kbUp;
+	case SL_KEY_DOWN:
+	    return kbDown;
+	case SL_KEY_LEFT:
+	    return kbLeft;
+	case SL_KEY_RIGHT:
+	    return kbRight;
+	case SL_KEY_PPAGE:
+	    return kbPgUp;
+	case SL_KEY_NPAGE:
+	    return kbPgDn;
+	case SL_KEY_HOME:
+	    return kbHome;
+	case SL_KEY_END:
+	    return kbEnd;
+	case SL_KEY_BACKSPACE:
+	case FTESL_KEY_BACKSP:
+	    return kbBackSp;
+	case SL_KEY_ENTER:
+	case FTESL_KEY_ENTER:
+	    return kbEnter;
+	case SL_KEY_IC:
+	    return kbIns;
+	case SL_KEY_DELETE:
+	    return kbDel;
+	case SL_KEY_F(1):
+	    return kbF1;
+	case SL_KEY_F(2):
+	    return kbF2;
+	case SL_KEY_F(3):
+	    return kbF3;
+	case SL_KEY_F(4):
+	    return kbF4;
+	case SL_KEY_F(5):
+	    return kbF5;
+	case SL_KEY_F(6):
+	    return kbF6;
+	case SL_KEY_F(7):
+	    return kbF7;
+	case SL_KEY_F(8):
+	    return kbF8;
+	case SL_KEY_F(9):
+	    return kbF9;
+	case SL_KEY_F(10):
+	    return kbF10;
+	case SL_KEY_F(11):
+	    return kbF11;
+	case SL_KEY_F(12):
+	    return kbF12;
+	case FTESL_KEY_TAB:
+	    return kbTab;
+	case FTESL_KEY_ESC:
+	case SL_KEY_ERR:
+	    return kbEsc;
+	default:
+	    return '?';
+	}
+}
+#endif

@@ -1,14 +1,13 @@
 /*    c_history.h
  *
  *    Copyright (c) 1994-1996, Marko Macek
- *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
  */
 
-#ifndef __FPOSHIST_H__
-#define __FPOSHIST_H__
+#ifndef C_HISTORY_H
+#define C_HISTORY_H
 
 #ifdef CONFIG_HISTORY
 
@@ -18,36 +17,36 @@
 #define HISTORY_NAME "fte.his"
 #endif
 
-typedef struct {
+struct HBookmark {
     char *Name;
     int Row,Col;
-} HBookmark;
+};
 
-typedef struct {
+struct FPosHistory {
     char *FileName;
     int Row, Col;
     HBookmark **Books;
     int BookCount;
-} FPosHistory;
+};
 
 #define MAX_INPUT_HIST 128
 
-typedef struct {
+struct InputHistory {
     int Count;
     char **Line;
     int *Id;
-} InputHistory;
+};
 
 extern char HistoryFileName[256];
 
 void ClearHistory();
-int SaveHistory(char *FileName);
-int LoadHistory(char *FileName);
+int SaveHistory(const char *FileName);
+int LoadHistory(const char *FileName);
 
-int UpdateFPos(char *FileName, int Row, int Col);
-int RetrieveFPos(char *FileName, int &Row, int &Col);
+int UpdateFPos(const char *FileName, int Row, int Col);
+int RetrieveFPos(const char *FileName, int &Row, int &Col);
 
-int AddInputHistory(int Id, char *String);
+int AddInputHistory(int Id, const char *String);
 int CountInputHistory(int Id);
 int GetInputHistory(int Id, char *String, int maxlen, int Nth);
 
@@ -82,6 +81,6 @@ int StoreBookmarks(EBuffer *buf);
 #define HIST_SVNDIFF   16
 #define HIST_SVNCOMMIT 17
 
-#endif
+#endif // CONFIG_HISTORY
 
-#endif
+#endif // C_HISTORY_H

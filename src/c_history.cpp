@@ -43,7 +43,7 @@ void ClearHistory() { /*FOLD00*/
     }
 }
 
-int SaveHistory(char *FileName) { /*FOLD00*/
+int SaveHistory(const char *FileName) { /*FOLD00*/
     FILE *fp;
     
     fp = fopen(FileName, "w");
@@ -74,7 +74,7 @@ int SaveHistory(char *FileName) { /*FOLD00*/
     return 1;
 }
 
-int LoadHistory(char *FileName) { /*FOLD00*/
+int LoadHistory(const char *FileName) { /*FOLD00*/
     FILE *fp;
     char line[2048];
     char *p, *e;
@@ -188,7 +188,7 @@ int LoadHistory(char *FileName) { /*FOLD00*/
     return 1;
 }
 
-int UpdateFPos(char *FileName, int Row, int Col) { /*fold00*/
+int UpdateFPos(const char *FileName, int Row, int Col) { /*FOLD00*/
     int L = 0, R = FPHistoryCount, M, N;
     FPosHistory *fp, **NH;
     int cmp;
@@ -246,7 +246,7 @@ int UpdateFPos(char *FileName, int Row, int Col) { /*fold00*/
     return 1;
 }
 
-int RetrieveFPos(char *FileName, int &Row, int &Col) { /*FOLD00*/
+int RetrieveFPos(const char *FileName, int &Row, int &Col) { /*FOLD00*/
     int L = 0, R = FPHistoryCount, M;
     int cmp;
 
@@ -269,7 +269,7 @@ int RetrieveFPos(char *FileName, int &Row, int &Col) { /*FOLD00*/
     return 0;
 }
 
-int AddInputHistory(int Id, char *String) { /*FOLD00*/
+int AddInputHistory(int Id, const char *String) { /*FOLD00*/
     char *s = NULL; // get rid of a "might not be initialised" warning
     int i;
     // First check if it is already in list
@@ -310,7 +310,7 @@ int CountInputHistory(int Id) { /*FOLD00*/
     return c;
 }
 
-int GetInputHistory(int Id, char *String, int len, int Nth) { /*fold00*/
+int GetInputHistory(int Id, char *String, int len, int Nth) { /*FOLD00*/
     int i = 0;
 
     assert(len > 0);
@@ -332,7 +332,7 @@ int GetInputHistory(int Id, char *String, int len, int Nth) { /*fold00*/
 /*
  * Get bookmarks for given Buffer (file) from history.
  */
-int RetrieveBookmarks(EBuffer *buffer) { /*fold00*/
+int RetrieveBookmarks(EBuffer *buffer) { /*FOLD00*/
 #ifdef CONFIG_BOOKMARKS
     int L = 0, R = FPHistoryCount, M,i;
     int cmp;
@@ -372,7 +372,7 @@ int RetrieveBookmarks(EBuffer *buffer) { /*fold00*/
 /*
  * Store given Buffer's bookmarks to history.
  */
-int StoreBookmarks(EBuffer *buffer) { /*fold00*/
+int StoreBookmarks(EBuffer *buffer) { /*FOLD00*/
 #ifdef CONFIG_BOOKMARKS
     int L = 0, R = FPHistoryCount, M,i,j;
     int cmp;

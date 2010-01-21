@@ -5,4 +5,5 @@ fte-terminal
 fte-xwindow
 *substvars
 *debhelper
+*.log
 tmp

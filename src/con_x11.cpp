@@ -2002,7 +2002,7 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
                    || (strcmp(argv[c], "--noxmb") == 0))
             useXMB = 0;
         else if ((strcmp(argv[c], "-noi18n") == 0)
-                   || (strcmp(argv[c], "--noi18n") == 0))
+                 || (strcmp(argv[c], "--noi18n") == 0))
             useI18n = 0;
         else if (strcmp(argv[c], "-name") == 0) {
             if (c + 1 < argc) {

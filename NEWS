@@ -5,9 +5,18 @@ Revision history
 0.50.2b3 -- Janury 2010
   + Completely new keyboard handling for Slang version - 
     it gets usable - still not as comfortable as X version,
-    but good enough especially in gnome-terminal.
+    but good enough especially in gnome-terminal
     (more Esc sequences could be easily integrated)
   - ongoing size_t conversion
+  ! Fixed mouse handling for ncurses
+  ! Fixed A_BOLD usage for ncurses
+  + Adapted also keyboard handling for ncurses version
+  + Extended with wheel scroll (HACK - use Ctrl key and scroll mouse down
+    makes the window scrolling upward - somewhat faster then regular upward
+    scroll - not sure why is this so much faster)
+  ! Fixed portability issue for 'vfte' for bigendian machines
+  - slightly modified set of extra character displayed for vfte
+  ! Fixed screen resize for both sfte and nfte tty frontends
 
 0.50.2b2 -- January 2010
   + Applied a few submitted patches from various Inet developers

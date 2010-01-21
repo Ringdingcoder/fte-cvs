@@ -163,6 +163,7 @@ int ConDone(void)
 {
     SLsmg_reset_smg();
     SLang_reset_tty();
+
     return 0;
 }
 
@@ -170,12 +171,14 @@ int ConSuspend(void)
 {
     SLsmg_suspend_smg();
     SLang_reset_tty();
+
     return 0;
 }
 int ConContinue(void)
 {
     SLang_init_tty(-1, 0, 1);
     SLsmg_resume_smg();
+
     return 0;
 }
 
@@ -188,6 +191,7 @@ int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen)
 {
     strlcpy(Title, "", MaxLen);
     strlcpy(STitle, "", SMaxLen);
+
     return 0;
 }
 
@@ -195,6 +199,7 @@ int ConClear()
 {
     SLsmg_cls();
     SLsmg_refresh();
+
     return 0;
 }
 
@@ -238,7 +243,8 @@ static void fte_write_color_chars(PCell Cell, int W)
 	    chsetprev = chset;
 	}
     }
-    //SLsmg_set_char_set(0);
+    if (chsetprev)
+	SLsmg_set_char_set(0);
     //SLsmg_normal_video();
 }
 
@@ -280,7 +286,7 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell)
     int CurX, CurY, i;
     SLsmg_Char_Type *linebuf;
 
-    linebuf = new SLsmg_Char_Type [W];
+    linebuf = new SLsmg_Char_Type[W];
 
     ConQueryCursorPos(&CurX, &CurY);
     while (H > 0) {
@@ -361,7 +367,7 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 {
-    SLsmg_Char_Type *box = new SLsmg_Char_Type [W * H];
+    SLsmg_Char_Type *box = new SLsmg_Char_Type[W * H];
     TCell fill(' ', Fill);
 
     ConGetBoxRaw(X, Y, W, H, box);
@@ -374,7 +380,7 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 	ConSetBox(X, Y, W, Count, fill);
     }
 
-    delete [] (box);
+    delete[] box;
 
     return 0;
 }
@@ -388,6 +394,7 @@ int ConQuerySize(int *X, int *Y)
 {
     *X = SLtt_Screen_Cols;
     *Y = SLtt_Screen_Rows;
+
     return 0;
 }
 
@@ -412,12 +419,14 @@ int ConShowCursor()
 {
     CurVis = 1;
     SLtt_set_cursor_visibility(1);
+
     return 0;
 }
 int ConHideCursor()
 {
     CurVis = 0;
     SLtt_set_cursor_visibility(0);
+
     return 0;
 }
 int ConCursorVisible()
@@ -459,6 +468,7 @@ int ConMouseVisible()
 int ConQueryMouseButtons(int *ButtonCount)
 {
     *ButtonCount = 0;
+
     return 0;
 }
 
@@ -561,6 +571,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 int ConPutEvent(TEvent Event)
 {
     Prev = Event;
+
     return 0;
 }
 
@@ -601,6 +612,7 @@ int GUI::ShowEntryScreen()
     ConShowMouse();
     if (frames)
 	frames->Repaint();
+
     return 1;
 }
 
@@ -621,10 +633,11 @@ int GUI::RunProgram(int /*mode */ , char *Command)
     ConShowMouse();
     ConQuerySize(&W1, &H1);
 
-    if (W != W1 || H != H1) {
+    if (W != W1 || H != H1)
 	frames->Resize(W1, H1);
-    }
+
     frames->Repaint();
+
     return rc;
 }
 

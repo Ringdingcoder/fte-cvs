@@ -18,6 +18,10 @@
 #include "con_tty.h"
 #include "s_string.h"
 
+#include <signal.h>
+#include <sys/ioctl.h>
+#include <termios.h>
+
 /* Escape sequence delay in milliseconds */
 #define escDelay 10
 
@@ -36,78 +40,52 @@ static const short fte_curses_colors[] =
 
 
 static PCell *SavedScreen = 0;
-static int SavedW = 0, SavedH = 0;
 static int MaxSavedW = 0, MaxSavedH = 0;
+
+static int ScreenSizeChanged;
+static void curses_winch_handler(int signum)
+{
+    ScreenSizeChanged = 1;
+    signal(SIGWINCH, curses_winch_handler);
+}
+
 
 /* Routine to allocate/reallocate and zero space for screen buffer,
    represented as a dynamic array of dynamic PCell lines */
-static void SaveScreen() {
+static void SaveScreen(void) {
 	int NewSavedW, NewSavedH;
+
 	ConQuerySize(&NewSavedW, &NewSavedH);
-	if (!SavedScreen)
-	{
-		SavedScreen = (PCell *) malloc(NewSavedH *sizeof(PCell));
-		for(int j=0 ; j < NewSavedH; j++)
-		{
-			SavedScreen[j] = (PCell)malloc(NewSavedW * sizeof(TCell));
-			bzero(SavedScreen[j], sizeof(SavedScreen[j]));
+	//fprintf(stderr, "SAVESCREEN  %d %d\n", NewSavedW, NewSavedH);
+
+	if (SavedScreen && NewSavedW > MaxSavedW) { /* Expand and zero maximum width if needed */
+		for (int i = 0 ; i < MaxSavedH; ++i) {
+			SavedScreen[i] = (PCell)realloc(SavedScreen[i], NewSavedW * sizeof(TCell));
+			memset(SavedScreen[i] + MaxSavedW, 0, (NewSavedW - MaxSavedW) * sizeof(TCell));
 		}
-		MaxSavedW = SavedW = NewSavedW;
-		MaxSavedH = SavedH = NewSavedH;
 	}
-	else
-	{
-		if(NewSavedW > MaxSavedW) /* Expand maximum width if needed */
-		{
-			for(int i=0 ; i < MaxSavedH; i++)
-			{
-//				assert(sizeof(SavedScreen[i]) == MaxSavedH);
-				SavedScreen[i] = (PCell)realloc(SavedScreen[i], NewSavedW * sizeof(TCell));
-			}
-			MaxSavedW = NewSavedW;
+	MaxSavedW = NewSavedW;
+
+	if (NewSavedH > MaxSavedH) { /* Expand and zero maximum height if needed */
+		SavedScreen = (PCell *)realloc(SavedScreen, NewSavedH * sizeof(PCell));
+		for (int i = MaxSavedH; i < NewSavedH; ++i) {
+			SavedScreen[i] = (PCell)malloc(MaxSavedW * sizeof(TCell));
+			memset(SavedScreen[i], 0, MaxSavedW * sizeof(TCell));
 		}
-		if(NewSavedW > SavedW) /* Zero newly expanded screen */
-		{
-			for(int i=0 ; i < MaxSavedH; i++)
-			{
-				bzero(SavedScreen[i]+SavedW, NewSavedW - SavedW);
-			}
-		}
-		if(NewSavedH > MaxSavedH) /* Expand Maximum height if needed */
-		{
-			SavedScreen = (PCell *)realloc(SavedScreen, NewSavedH *sizeof(PCell));
-			for(int i=MaxSavedH ; i < NewSavedH; i++)
-			{
-				SavedScreen[i] = (PCell)malloc(MaxSavedW * sizeof(TCell));
-			}
-			MaxSavedH = NewSavedH;
-		}
-		if(NewSavedH > SavedH) /* Zero newly expanded screen */
-		{
-			for(int i=SavedH ; i < NewSavedH; i++)
-			{
-				 bzero(SavedScreen[i], MaxSavedW);
-			}
-		}
-		SavedW = NewSavedW;
-		SavedH = NewSavedH;
+		MaxSavedH = NewSavedH;
 	}
 }
 
-static void free_savedscreen()
+static void ReleaseScreen()
 {
-	if (! SavedScreen)
+	if (!SavedScreen)
 		return;
 	for (int i = 0; i < MaxSavedH; i++)
-	{
 		if (SavedScreen[i])
-		{
 			free(SavedScreen[i]);
-			SavedScreen[i] = NULL;
-		}
-	}
 	free(SavedScreen);
 	SavedScreen = NULL;
+	MaxSavedH = MaxSavedW = 0;
 }
 
 static int fte_curses_attr[256];
@@ -115,7 +93,7 @@ static int fte_curses_attr[256];
 static int key_sup = 0;
 static int key_sdown = 0;
 
-static int conInitColors()
+static int InitColors()
 {
 	int c = 0;
 	int colors = has_colors();
@@ -159,7 +137,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 
 	ESCDELAY = escDelay;
 	initscr();
-	conInitColors();
+	InitColors();
 #ifdef CONFIG_MOUSE
 	mouseinterval(200);
 #if 1
@@ -180,12 +158,12 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 	keypad(stdscr,1);
 	meta(stdscr,1);
 	SaveScreen();
+	signal(SIGWINCH, curses_winch_handler);
 
 	/* find shift up/down */
-	for(ch = KEY_MAX +1;;ch++)
-	{
-		s = keyname(ch);
-		if(s == NULL) break;
+	for (ch = KEY_MAX +1; ; ch++) {
+		if (!(s = keyname(ch)))
+		      break;
 
 		if(!strcmp(s, "kUP"))
 			key_sup = ch;
@@ -201,7 +179,7 @@ int ConDone(void)
 {
 	keypad(stdscr,0);
 	endwin();
-	free_savedscreen();
+	ReleaseScreen();
 	return 0;
 }
 
@@ -228,36 +206,36 @@ int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen)
 
 int ConClear() /* not used? */
 {
+	clear();
 	refresh();
 	return 0;
 }
 
 static chtype GetDch(int idx)
 {
-	switch(idx)
-	{
-		case DCH_C1: return ACS_ULCORNER;
-		case DCH_C2: return ACS_URCORNER;
-		case DCH_C3: return ACS_LLCORNER;
-		case DCH_C4: return ACS_LRCORNER;
-		case DCH_H: return ACS_HLINE;
-		case DCH_V: return ACS_VLINE;
-		case DCH_M1: return ACS_HLINE;
-		case DCH_M2: return ACS_LTEE;
-		case DCH_M3: return ACS_RTEE;
-		case DCH_M4 : return '.'; break;
-		case DCH_X: return  'X'; break;
-		case DCH_RPTR: return ACS_RARROW; break;
-		case DCH_EOL: return ACS_BULLET; break;
-		case DCH_EOF: return ACS_DIAMOND; break;
-		case DCH_END: return ACS_HLINE; break;
-		case DCH_AUP: return ACS_UARROW; break;
-		case DCH_ADOWN: return ACS_DARROW; break;
-		case DCH_HFORE: return ACS_BLOCK; break;
-		case DCH_HBACK: return ACS_CKBOARD; break;
-		case DCH_ALEFT: return ACS_LARROW; break;
-		case DCH_ARIGHT: return ACS_RARROW; break;
-		default: return '@';
+	switch(idx) {
+	case DCH_C1: return ACS_ULCORNER;
+	case DCH_C2: return ACS_URCORNER;
+	case DCH_C3: return ACS_LLCORNER;
+	case DCH_C4: return ACS_LRCORNER;
+	case DCH_H: return ACS_HLINE;
+	case DCH_V: return ACS_VLINE;
+	case DCH_M1: return ACS_HLINE;
+	case DCH_M2: return ACS_LTEE;
+	case DCH_M3: return ACS_RTEE;
+	case DCH_M4 : return '.';
+	case DCH_X: return  'X';
+	case DCH_RPTR: return ACS_RARROW;
+	case DCH_EOL: return ACS_BULLET;
+	case DCH_EOF: return ACS_DIAMOND;
+	case DCH_END: return ACS_HLINE;
+	case DCH_AUP: return ACS_UARROW;
+	case DCH_ADOWN: return ACS_DARROW;
+	case DCH_HFORE: return ACS_BLOCK;
+	case DCH_HBACK: return ACS_CKBOARD;
+	case DCH_ALEFT: return ACS_LARROW;
+	case DCH_ARIGHT: return ACS_RARROW;
+	default: return '@';
 	}
 }
 
@@ -268,52 +246,41 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 	int CurX, CurY;
 	getyx(stdscr, CurY, CurX);
 	int yy = Y;
+	//static int x = 0;
+	//fprintf(stderr, "%5d: refresh done  %d  %d   %d x %d   L:%d C:%d\n", x++, X, Y, W, H, LINES, COLS);
 
 	if (Y + H > LINES)
 		H = LINES - Y;
 
-	for(int j =0 ; j < H; j++)
+	for (int j =0 ; j < H; j++)
 	{
-		memcpy(SavedScreen[Y+j]+X, Cell, W*sizeof(TCell)); // copy outputed line to saved screen
-		move(yy++,X);
-		for ( int i=0; i < W; i++)
+		memcpy(SavedScreen[Y + j] + X, Cell, W * sizeof(TCell)); // copy outputed line to saved screen
+		move(yy++, X);
+		for (int i = 0; i < W; i++)
 		{
 			unsigned char ch = Cell->GetChar();
 			int attr = fte_curses_attr[Cell->GetAttr()];
-			if(attr != last_attr)
-			{
+			if (attr != last_attr) {
 				wattrset(stdscr,attr);
 				last_attr = attr;
-			}
-			else attr = 0;
+			} else
+			    attr = 0;
 
-			if(ch < 32)
-			{
-				if(ch <= 20)
-				{
-					waddch(stdscr,GetDch(ch));
-				}
-				else
-					waddch(stdscr,'.');
-			}
-			else if(ch < 128 || ch >= 160)
-			{
-				waddch(stdscr,ch);
-			}
+			if (ch < 32)
+				waddch(stdscr, (ch <= 20) ? GetDch(ch) : '.');
+			else if (ch < 128 || ch >= 160)
+				waddch(stdscr, ch);
 			/*		    else if(ch < 180)
 			 {
 			 waddch(stdscr,GetDch(ch-128));
 			 }
 			 */
 			else
-			{
-				waddch(stdscr,'.');
-			}
+				waddch(stdscr, '.');
 			Cell++;
 		}
 	}
-
-	move(CurY,CurX);
+	move(CurY, CurX);
 	refresh();
 
 	return 0;
@@ -321,10 +288,9 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 {
-	for(int j = 0 ; j < H; j++)
-	{
+	for (int j = 0 ; j < H; j++) {
 		memcpy(Cell, SavedScreen[Y+j]+X, W*sizeof(TCell));
-		Cell+=W;
+		Cell += W;
 	}
 
 	return 0;
@@ -334,9 +300,7 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 int ConPutLine(int X, int Y, int W, int H, PCell Cell)
 {
 	for (int j=0 ; j < H; j++)
-	{
 		ConPutBox(X, Y+j, W, 1, Cell);
-	}
 
 	return 0;
 }
@@ -359,7 +323,7 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 {
 	PCell box;
 
-	box = new TCell [W * H];
+	box = new TCell[W * H];
 
 	TCell fill(' ', Fill);
 	ConGetBox(X, Y, W, H, box);
@@ -372,7 +336,7 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 		ConSetBox(X, Y, W, Count, fill);
 	}
 
-	delete [] (box);
+	delete[] box;
 
 	return 0;
 }
@@ -381,16 +345,6 @@ int ConSetSize(int /*X */ , int /*Y */ )
 {
 	return -1;
 }
-
-static void ResizeWindow(int ww, int hh) {
-	SaveScreen();
-	if (frames)
-	{
-		frames->Resize(ww, hh);
-		frames->Repaint();
-	}
-}
-
 
 int ConQuerySize(int *X, int *Y)
 {
@@ -418,6 +372,7 @@ int ConShowCursor()
 {
 	CurVis = 1;
 	curs_set(1);
+	refresh();
 	return 0;
 }
 int ConHideCursor()
@@ -641,12 +596,44 @@ static int ConGetEscEvent(void)
 }
 #endif
 
+static int ResizeWindow()
+{
+	struct winsize {
+	    unsigned short ws_row;
+	    unsigned short ws_col;
+	    unsigned short ws_xpixel;   /* unused */
+	    unsigned short ws_ypixel;
+	} ws = { 0 };
+
+	ScreenSizeChanged = 0;
+	if (ioctl(1, TIOCGWINSZ, &ws) == -1
+	    || !ws.ws_row || !ws.ws_col)
+	    return -1;
+	if (is_term_resized(ws.ws_row, ws.ws_col)) {
+	    LINES = ws.ws_row;
+	    COLS = ws.ws_col;
+	    resize_term(LINES, COLS);
+	    SaveScreen();
+	    ConClear();
+	    //fprintf(stderr, "SIGNAL RESIZE  %d  %d\n", COLS, LINES);
+	}
+
+	return 1;
+}
+
 int ConGetEvent(TEventMask /*EventMask */ ,
 		TEvent * Event, int WaitTime, int Delete)
 {
     int rtn;
     TKeyEvent *KEvent = &(Event->Key);
-    if(WaitTime == 0) return -1;
+
+    if (ScreenSizeChanged && ResizeWindow() > 0) {
+	Event->What = evCommand;
+	Event->Msg.Command = cmResize;
+	return 1;
+    }
+
+    if (WaitTime == 0) return -1;
 
     if (Prev.What != evNone) {
 	*Event = Prev;
@@ -699,9 +686,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	switch(ch)
 	{
 	case KEY_RESIZE:
-	    ResizeWindow(COLS,LINES);
-	    Event->What = evNone;
-	    break;
+	    break; // already handled
 #ifdef CONFIG_MOUSE
 	case KEY_MOUSE:
 	    Event->What = evNone;
@@ -878,12 +863,12 @@ GUI::~GUI()
 
 int GUI::ConSuspend(void)
 {
-	return::ConSuspend();
+	return ::ConSuspend();
 }
 
 int GUI::ConContinue(void)
 {
-	return::ConContinue();
+	return ::ConContinue();
 }
 
 int GUI::ShowEntryScreen()

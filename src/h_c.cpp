@@ -488,8 +488,8 @@ static int CheckLabel(EBuffer *B, int Line) {
 static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const char *Open, const char *Close, int *OPos, int *OLine, int matchparens = 0, int bolOnly = 0) {
     char *P;
     size_t L;
-    size_t LOpen = strlen(Open);
-    size_t LClose = strlen(Close);
+    const size_t LOpen = strlen(Open);
+    const size_t LClose = strlen(Close);
     int StateLen;
     hsState *StateMap;
     int CountX[3] = { 0, 0, 0 };
@@ -502,7 +502,7 @@ static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const 
         L = B->RLine(Row)->Count;
         StateMap = NULL;
         if (B->GetMap(Row, &StateLen, &StateMap) == 0) return -1;
-        for (int Pos = (int)L - 1; Pos >= 0; Pos--) {
+        for (int Pos = (int)L - 1; L > 0 && Pos >= 0; Pos--) {
             if (P[Pos] != ' ' && P[Pos] != 9) {
                 if (StateMap[Pos] == hsC_Normal) {
                     switch (P[Pos]) {
@@ -539,7 +539,6 @@ static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const 
                     }
                 }
             }
-            Pos--;
         }
         if (bolOnly && didMatch && CountX[1] == 0 && CountX[2] == 0) {
             *OPos = 0;

@@ -14,35 +14,39 @@
 #include <sys/types.h>
 
 /* don't change these, used as index */
-#define DCH_C1 0
-#define DCH_C2 1
-#define DCH_C3 2
-#define DCH_C4 3
-#define DCH_H  4
-#define DCH_V  5
-#define DCH_M1 6
-#define DCH_M2 7
-#define DCH_M3 8
-#define DCH_M4 9
-#define DCH_X  10
-#define DCH_RPTR 11
-#define DCH_EOL 12
-#define DCH_EOF 13
-#define DCH_END 14
-#define DCH_AUP 15
-#define DCH_ADOWN 16
-#define DCH_HFORE 17
-#define DCH_HBACK 18
-#define DCH_ALEFT 19
-#define DCH_ARIGHT 20
+enum {
+    DCH_C1,
+    DCH_C2,
+    DCH_C3,
+    DCH_C4,
+    DCH_H,
+    DCH_V,
+    DCH_M1,
+    DCH_M2,
+    DCH_M3,
+    DCH_M4,
+    DCH_X, // 10
+    DCH_RPTR,
+    DCH_EOL,
+    DCH_EOF,
+    DCH_END,
+    DCH_AUP,
+    DCH_ADOWN,
+    DCH_HFORE,
+    DCH_HBACK,
+    DCH_ALEFT,
+    DCH_ARIGHT
+};
 
 #define ConMaxCols 256
 #define ConMaxRows 128
 
-#define csUp       0
-#define csDown     1
-#define csLeft     2
-#define csRight    3
+enum TEventScroll {
+    csUp,
+    csDown,
+    csLeft,
+    csRight
+};
 
 #define evNone             0
 #define evKeyDown     0x0001
@@ -61,32 +65,34 @@
 
 #include "conkbd.h"
 
-#define cmRefresh   1
-#define cmResize    2
-#define cmClose     3
-#define cmPipeRead  4
-#define cmMainMenu  5
-#define cmPopupMenu 6
+enum TEventCommands {
+    cmRefresh = 1,
+    cmResize,
+    cmClose,
+    cmPipeRead,
+    cmMainMenu,
+    cmPopupMenu, // 6
 
-/* vertical scroll */
-    
-#define cmVScrollUp     10
-#define cmVScrollDown   11
-#define cmVScrollPgUp   12
-#define cmVScrollPgDn   13
-#define cmVScrollMove   14
-    
+    /* vertical scroll */
+
+    cmVScrollUp, // 10
+    cmVScrollDown,
+    cmVScrollPgUp,
+    cmVScrollPgDn,
+    cmVScrollMove, // 14
+
 /* horizontal scroll */
-    
-#define cmHScrollLeft   15
-#define cmHScrollRight  16
-#define cmHScrollPgLt   17
-#define cmHScrollPgRt   18
-#define cmHScrollMove   19
 
-#define cmDroppedFile   30
-#define cmRenameFile    31   /* TODO: in-place editing of titlebar */
-    
+    cmHScrollLeft, // 15
+    cmHScrollRight,
+    cmHScrollPgLt,
+    cmHScrollPgRt,
+    cmHScrollMove, // 19
+
+    cmDroppedFile = 30,
+    cmRenameFile   /* TODO: in-place editing of titlebar */
+};
+
 typedef unsigned char TAttr;
 typedef unsigned char TChar;
 
@@ -187,7 +193,7 @@ struct mItem {
 
 struct mMenu {
     char *Name;
-    int Count;
+    unsigned Count;
     mItem *Items;
 };
 
@@ -250,7 +256,7 @@ char ConGetDrawChar(unsigned int index);
 extern char WindowFont[64];
 
 struct TRGBColor {
-  unsigned char r, g, b;
+    unsigned char r, g, b;
 };
 
 extern TRGBColor RGBColor[16];

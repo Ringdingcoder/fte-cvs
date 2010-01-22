@@ -101,7 +101,7 @@ struct CommandType {
 
 struct ExMacro {
     char *Name;
-    int Count;
+    unsigned Count;
     CommandType *cmds;
 };
 
@@ -157,7 +157,7 @@ int CmdNum(const char *Cmd);
 void ExecKey(EKey *Key);
 EKey *SetKey(EEventMap *aMap, const char *Key);
 int ParseKey(const char *Key, KeySel &ks);
-int GetKeyName(char *Key, int KeySize, KeySel &ks);
+int GetKeyName(char *Key, size_t KeySize, KeySel &ks);
 
 int NewCommand(const char *Name);
 int RunCommand(int Command);

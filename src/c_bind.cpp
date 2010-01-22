@@ -501,7 +501,7 @@ int ParseKey(const char *Key, KeySel &ks) {
     return 0;
 }
 
-int GetKeyName(char *Key, int KeySize, KeySel &ks) {
+int GetKeyName(char *Key, size_t KeySize, KeySel &ks) {
     strlcpy(Key, "", KeySize);
 
     if (ks.Key  & kfAlt)   strlcat(Key, "A+", KeySize);
@@ -527,7 +527,7 @@ int GetKeyName(char *Key, int KeySize, KeySel &ks) {
         else
             strlcat(Key, c, KeySize);
     } else {
-        for (int i = 0; i < int(sizeof(KeyList)/sizeof(KeyList[0])); i++)
+        for (unsigned i = 0; i < sizeof(KeyList)/sizeof(KeyList[0]); ++i)
             if (KeyList[i].Key == keyCode(ks.Key)) {
                 strlcat(Key, KeyList[i].Name, KeySize);
                 break;
@@ -691,11 +691,10 @@ int ExState::GetIntParam(EView *view, int *value) {
 }
 
 int HashStr(const char *p, int maxim) {
-    unsigned int i = 1;
+    int i = 1;
 
-    while (p && *p) {
-        i += i ^ (i << 3) ^ (unsigned int)(*p) ^ (i >> 3);
-        p++;
-    }
+    while (p && *p)
+	i += i ^ (i << 3) ^ (int)(*p++) ^ (i >> 3);
+
     return i % maxim;
 }

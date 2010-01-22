@@ -32,7 +32,7 @@ struct FPosHistory {
 #define MAX_INPUT_HIST 128
 
 struct InputHistory {
-    int Count;
+    unsigned Count;
     char **Line;
     int *Id;
 };

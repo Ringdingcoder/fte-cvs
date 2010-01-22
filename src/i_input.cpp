@@ -9,7 +9,7 @@
 
 #include "fte.h"
 
-ExInput::ExInput(const char *APrompt, char *ALine, unsigned int ABufLen, Completer AComp, int Select, int AHistId): ExView() {
+ExInput::ExInput(const char *APrompt, char *ALine, size_t ABufLen, Completer AComp, int Select, int AHistId): ExView() {
     assert(ABufLen > 0);
     MaxLen = ABufLen - 1;
     Comp = AComp;

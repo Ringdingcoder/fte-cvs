@@ -20,7 +20,7 @@ public:
     char *CurStr;
     unsigned int Pos;
     unsigned int LPos;
-    unsigned int MaxLen;
+    size_t MaxLen;
     Completer Comp;
     int TabCount;
     int HistId;
@@ -28,7 +28,7 @@ public:
     unsigned int SelStart;
     unsigned int SelEnd;
     
-    ExInput(const char *APrompt, char *ALine, unsigned int AMaxLen, Completer AComp, int Select, int AHistId);
+    ExInput(const char *APrompt, char *ALine, size_t AMaxLen, Completer AComp, int Select, int AHistId);
     virtual ~ExInput();
     virtual void Activate(int gotfocus);
     

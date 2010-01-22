@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __HILIT_H__
-#define __HILIT_H__
+#ifndef C_HILIT_H
+#define C_HILIT_H
 
 #include "console.h"
 #include "c_mode.h"
@@ -184,9 +184,9 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
 
 #define CK_MAXLEN 64
 
-inline bool isZeroArray(int* Count, size_t len)
+static inline bool isZeroArray(int* Count, size_t len)
 {
-    for (size_t i = 0; i < len; ++i)
+    for (unsigned i = 0; i < len; ++i)
         if (Count[i] != 0)
             return 0;
     return 1;
@@ -270,4 +270,4 @@ inline int LookAtNoCase(EBuffer *B, int Row, unsigned int Pos, const char *What,
 
 #endif
 
-#endif
+#endif // C_HILIT_H

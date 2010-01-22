@@ -34,18 +34,16 @@ const char *GetCommandName(int Command) {
         else
             return "?NONE?";
     }
-    for (int i = 0; i < int(sizeof(Command_Table) / sizeof(Command_Table[0])); i++)
+    for (unsigned i = 0; i < (sizeof(Command_Table) / sizeof(Command_Table[0])); i++)
         if (Command_Table[i].CmdId == Command)
             return Command_Table[i].Name;
     return "?invalid?";
 }
 
 int CmdNum(const char *Cmd) {
-    int i;
+    unsigned i;
 
-    for (i = 0;
-         i < int(sizeof(Command_Table) / sizeof(Command_Table[0]));
-         i++)
+    for (i = 0; i < sizeof(Command_Table) / sizeof(Command_Table[0]); i++)
         if (strcmp(Cmd, Command_Table[i].Name) == 0)
             return Command_Table[i].CmdId;
     for (i = 0; i < CMacros; i++)
@@ -199,7 +197,7 @@ static void InitWordChars() {
 
 void SetWordChars(char *w, const char *s) {
     const char *p;
-    memset((void *)w, 0, 32);
+    memset(w, 0, 32);
 
     p = s;
     while (p && *p) {
@@ -276,7 +274,7 @@ EMode::~EMode() {
     RxFree(MatchLineRx);
 
     // free strings from flags
-    for (int i=0; i<BFS_COUNT; i++)
+    for (unsigned i = 0; i < BFS_COUNT; i++)
         free(Flags.str[i]);
 }
 
@@ -461,7 +459,6 @@ static const struct {
 int ParseKey(const char *Key, KeySel &ks) {
     const unsigned char *p = (const unsigned char *)Key;
     TKeyCode KeyFlags = 0;
-    int i;
 
     ks.Mask = 0;
     ks.Key = 0;
@@ -485,7 +482,7 @@ int ParseKey(const char *Key, KeySel &ks) {
         }
         p += 2;
     }
-    for (i = 0; i < int(sizeof(KeyList)/sizeof(KeyList[0])); i++)
+    for (unsigned i = 0; i < sizeof(KeyList)/sizeof(KeyList[0]); i++)
         if (strcmp((const char *)p, KeyList[i].Name) == 0) {
             ks.Key = KeyList[i].Key;
             break;

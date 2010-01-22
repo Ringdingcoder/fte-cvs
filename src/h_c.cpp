@@ -656,7 +656,7 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                         ColP -= 2;
                         continue;
                     }
-                     break;
+                    /* pass through (case:)*/
                 case ',':
                 case ';':
                     if (TEST_ZERO && BolChar == ' ') {

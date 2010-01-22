@@ -691,10 +691,10 @@ int ExState::GetIntParam(EView *view, int *value) {
 }
 
 int HashStr(const char *p, int maxim) {
-    int i = 1;
+    unsigned int i = 1;
 
     while (p && *p)
-	i += i ^ (i << 3) ^ (int)(*p++) ^ (i >> 3);
+	i += i ^ (i << 3) ^ (unsigned int)(*p++) ^ (i >> 3);
 
     return i % maxim;
 }

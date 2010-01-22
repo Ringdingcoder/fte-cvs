@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __EXASCII_H
-#define __EXASCII_H
+#ifndef I_ASCII_H
+#define I_ASCII_H
 
 class ExASCII: public ExView {
 public:
@@ -27,4 +27,4 @@ public:
     virtual void RepaintStatus();
 };
 
-#endif
+#endif // I_ASCII_H

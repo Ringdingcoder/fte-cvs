@@ -15,21 +15,22 @@
 #define PRINTF(x) //printf x
 
 #define ISNAME(x)  (isalnum(x) || ((x) == '_'))
-#define ISUPPER(x, c)  ((x) == (c) || ((x) == (c + 32)))
+#define ISUPPER(x, c)  ((x) == (c) || ((x) == (c + 'a' - 'A')))
 
-
-#define hsC_Normal       0
-#define hsC_Comment      1
-#define hsC_CommentL     2
-#define hsC_Keyword      4
-#define hsC_String1     10
-#define hsC_String2     11
-#define hsC_CPP         12
-#define hsC_CPP_Comm    13
-#define hsC_CPP_String1 14
-#define hsC_CPP_String2 15
-#define hsC_CPP_ABrace  16
-#define hsC_Tripplet    17
+enum {
+    hsC_Normal,
+    hsC_Comment,
+    hsC_CommentL,
+    hsC_Keyword,
+    hsC_String1,
+    hsC_String2,
+    hsC_CPP,
+    hsC_CPP_Comm,
+    hsC_CPP_String1,
+    hsC_CPP_String2,
+    hsC_CPP_ABrace,
+    hsC_Tripplet
+};
 
 int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, hlState &State, hsState *StateMap, int *ECol) {
     int j = 0;
@@ -56,10 +57,9 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                     Color = CLR_String;
                     goto hilit2;
                 } else if (isalpha(*p) || *p == '_') {
-                    j = 0;
-                    while (((i + j) < Line->Count)
-                           && ISNAME(Line->Chars[i + j]))
-                        j++;
+                    for (j = 0; (((i + j) < Line->Count)
+                                 && ISNAME(Line->Chars[i + j])); j++)
+                        ;
                     if (BF->GetHilitWord(j, &Line->Chars[i], Color)) {
                         //Color = hcC_Keyword;
                         State = hsC_Keyword;
@@ -78,9 +78,9 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                                    && firstnw == 1) {
                             Color = CLR_Label;
                             PRINTF(("___LABEL  %c %d\n", Line->Chars[x], x));
-                        } else {
+                        } else
                             Color = CLR_Normal;
-                        }
+
                         State = hsC_Normal;
                     }
                     if (StateMap)
@@ -345,9 +345,9 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
 
 int IsState(hsState *Buf, hsState State, size_t Len) {
 
-    for (;Len-- > 0; Buf++)
-	if (*Buf != State)
-	    return 0;
+    for (;Len > 0; Buf++, --Len)
+        if (*Buf != State)
+            return 0;
 
     return 1;
 }
@@ -359,19 +359,16 @@ int LookAt(EBuffer *B, int Row, unsigned int Pos, const char *What, hsState Stat
         PRINTF(("Row out of range: %d vs %d\n", Row, B->RCount));
         return 0;
     }
-    char*        pLine       = B->RLine(Row)->Chars;
-    unsigned int uLineLength = B->RLine(Row)->Count;
+    char* pLine          = B->RLine(Row)->Chars;
+    unsigned uLineLength = B->RLine(Row)->Count;
     Pos = B->CharOffset(B->RLine(Row), Pos);
     if (Pos + strlen(What) > uLineLength) return 0;
     if (NoWord && uLineLength > Pos + Len && ISNAME(pLine[Pos + Len]))
         return 0;
 
     PRINTF(("Check against [%c]\n", What));
-    if (
-        (CaseInsensitive && memicmp(pLine + Pos, What, Len) == 0) ||
-        (!CaseInsensitive && memcmp(pLine + Pos, What, Len) == 0)
-       )
-    {
+    if ((CaseInsensitive && memicmp(pLine + Pos, What, Len) == 0)
+        || (!CaseInsensitive && memcmp(pLine + Pos, What, Len) == 0)) {
         int StateLen;
         hsState *StateMap;
         if (B->GetMap(Row, &StateLen, &StateMap) == 0) return 0;
@@ -487,7 +484,7 @@ static int CheckLabel(EBuffer *B, int Line) {
 
 static int SearchBackMatch(int Count, EBuffer *B, int Row, hsState State, const char *Open, const char *Close, int *OPos, int *OLine, int matchparens = 0, int bolOnly = 0) {
     char *P;
-    size_t L;
+    int L;
     const size_t LOpen = strlen(Open);
     const size_t LClose = strlen(Close);
     int StateLen;
@@ -1109,7 +1106,7 @@ static int IndentNormal(EBuffer *B, int Line, int /*StateLen*/, hsState * /*Stat
             //                I += C_INDENT - C_BRACE_OFS;
 
             return I + ContinuationIndent;
-#if 0
+#if 1
         case ':':
             ColP--;
             PRINTF(("COL-- %d\n", ColP));

@@ -327,7 +327,7 @@ EListPort *EList::GetVPort() {
     return (EListPort *)View->Port;
 }
 
-void EList::SetTitle(char *ATitle) {
+void EList::SetTitle(const char *ATitle) {
     if (Title)
         free(Title);
     Title = strdup(ATitle);
@@ -336,7 +336,7 @@ void EList::SetTitle(char *ATitle) {
 }
     
 
-int EList::ExecCommand(int Command, ExState &State) {
+int EList::ExecCommand(ExCommands Command, ExState &State) {
     int W = 1;
     int H = 1;
     
@@ -360,7 +360,7 @@ int EList::ExecCommand(int Command, ExState &State) {
     case ExMoveFileEnd:          return MoveFileEnd();
     case ExMoveLineStart:        return MoveLineStart();
     case ExMoveLineEnd:          return MoveLineEnd();
-    case ExRescan:               RescanList();            return ErOK;
+    case ExRescan:               RescanList(); return ErOK;
     case ExActivate:             return Activate();
     case ExListMark:             return Mark();
     case ExListUnmark:           return Unmark();
@@ -368,6 +368,8 @@ int EList::ExecCommand(int Command, ExState &State) {
     case ExListMarkAll:          return MarkAll();
     case ExListUnmarkAll:        return UnmarkAll();
     case ExListToggleMarkAll:    return ToggleMarkAll();
+    default:
+	;
     }
     return EModel::ExecCommand(Command, State);
 }

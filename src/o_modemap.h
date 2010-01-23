@@ -27,7 +27,7 @@ public:
     void FreeView();
     void ViewMap(EEventMap *Map);
 
-    virtual int ExecCommand(int Command, ExState &State);
+    virtual int ExecCommand(ExCommands Command, ExState &State);
     virtual EEventMap *GetEventMap();
     virtual int GetContext();
 

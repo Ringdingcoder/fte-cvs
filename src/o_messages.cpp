@@ -183,7 +183,7 @@ EEventMap *EMessages::GetEventMap() {
     return FindEventMap("MESSAGES");
 }
 
-int EMessages::ExecCommand(int Command, ExState &State) {
+int EMessages::ExecCommand(ExCommands Command, ExState &State) {
     switch (Command) {
     case ExChildClose:
         if (Running == 0 || PipeId == -1)
@@ -198,10 +198,11 @@ int EMessages::ExecCommand(int Command, ExState &State) {
             AddError(0, -1, 0, s);
         }
         return ErOK;
-        
     case ExActivateInOtherWindow:
         ShowError(View->Next, Row);
         return ErOK;
+    default:
+        ;
     }
     return EList::ExecCommand(Command, State);
 }
@@ -263,7 +264,7 @@ int EMessages::GetLine(char *Line, size_t maxim) {
     int l;
     
     //fprintf(stderr, "GetLine: %d\n", Running);
-    
+
     *Line = 0;
     if (Running && PipeId != -1) {
         rc = gui->ReadPipe(PipeId, MsgBuf + BufLen, sizeof(MsgBuf) - BufLen);

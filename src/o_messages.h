@@ -55,7 +55,7 @@ public:
     
     virtual int GetContext() { return CONTEXT_MESSAGES; }
     virtual EEventMap *GetEventMap();
-    virtual int ExecCommand(int Command, ExState &State);
+    virtual int ExecCommand(ExCommands Command, ExState &State);
 
     void AddError(Error *p);
     void AddError(char *file, int line, char *msg, const char *text, int hilit=0);

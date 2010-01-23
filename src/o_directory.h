@@ -26,7 +26,7 @@ public:
     
     virtual int GetContext();
     virtual EEventMap *GetEventMap();
-    virtual int ExecCommand(int Command, ExState &State);
+    virtual int ExecCommand(ExCommands Command, ExState &State);
     virtual void HandleEvent(TEvent &Event);
     
     virtual void DrawLine(PCell B, int Line, int Col, ChColor color, int Width);

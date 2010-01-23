@@ -11,6 +11,7 @@
 #define O_MODEL_H
 
 #include "console.h" // TEvent
+#include "c_commands.h"
 
 class EView;
 class EEventMap;
@@ -64,7 +65,7 @@ public:
     virtual int GetContext();
     virtual EEventMap *GetEventMap();
     virtual int BeginMacro();
-    virtual int ExecCommand(int Command, ExState &State);
+    virtual int ExecCommand(ExCommands Command, ExState &State);
     virtual void HandleEvent(TEvent &Event);
 
     virtual void GetName(char *AName, size_t MaxLen);
@@ -113,7 +114,7 @@ public:
     virtual int GetContext();
     virtual EEventMap *GetEventMap();
     virtual int BeginMacro();
-    virtual int ExecCommand(int Command, ExState &State);
+    virtual int ExecCommand(ExCommands Command, ExState &State);
 
     virtual void HandleEvent(TEvent &Event);
     virtual void UpdateView();

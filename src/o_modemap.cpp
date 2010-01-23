@@ -135,7 +135,7 @@ EEventMap *EventMapView::GetEventMap() {
     return FindEventMap("EVENTMAPVIEW");
 }
 
-int EventMapView::ExecCommand(int Command, ExState &State) {
+int EventMapView::ExecCommand(ExCommands Command, ExState &State) {
     return EList::ExecCommand(Command, State);
 }
 

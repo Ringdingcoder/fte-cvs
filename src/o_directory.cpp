@@ -184,7 +184,7 @@ int EDirectory::isDir(int No) {
     return IsDirectory(FilePath);
 }
 
-int EDirectory::ExecCommand(int Command, ExState &State) {
+int EDirectory::ExecCommand(ExCommands Command, ExState &State) {
     switch (Command) {
     case ExActivateInOtherWindow:
         SearchLen = 0;
@@ -264,6 +264,8 @@ int EDirectory::ExecCommand(int Command, ExState &State) {
         SearchLen = 0;
         Msg(S_INFO, "");
         return FmRmDir(Files[Row]->Name());
+    default:
+        ;
     }
     return EList::ExecCommand(Command, State);
 }
@@ -401,33 +403,24 @@ int EDirectory::FmRmDir(char const* Name)
     Slash(FilePath, 1);
     strcat(FilePath, Name);
 
-    int choice =
-        View->MView->Win->Choice(GPC_CONFIRM,
-                                 "Remove File",
-                                 2, "O&K", "&Cancel",
-                                 "Remove %s?", Name);
+    int choice = View->MView->Win->Choice(GPC_CONFIRM, "Remove File",
+					  2, "O&K", "&Cancel",
+					  "Remove %s?", Name);
 
-    if (choice == 0)
-    {
-        if (unlink(FilePath) == 0)
-        {
+    if (choice == 0) {
+        if (unlink(FilePath) == 0) {
             // put the cursor to the previous row
             --Row;
 
             // There has to be a more efficient way of doing this ...
             return RescanDir();
         }
-        else
-        {
-            Msg(S_INFO, "Failed to remove %s", Name);
-            return 0;
-        }
+	Msg(S_INFO, "Failed to remove %s", Name);
+	return 0;
     }
-    else
-    {
-        Msg(S_INFO, "Cancelled");
-        return 0;
-    }
+
+    Msg(S_INFO, "Cancelled");
+    return 0;
 }
 
 int EDirectory::FmLoad(const char *Name, EView *XView) {

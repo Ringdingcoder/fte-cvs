@@ -9,7 +9,7 @@
 
 #include "fte.h"
 
-ELine::ELine(int ACount, const char *AChars) {
+ELine::ELine(size_t ACount, const char *AChars) {
     Chars = NULL; 
     Count = ACount; 
     Allocate(Count); 
@@ -22,7 +22,7 @@ ELine::ELine(int ACount, const char *AChars) {
         memset(Chars, ' ', Count);
 }
 
-ELine::ELine(char *AChars, int ACount) {
+ELine::ELine(char *AChars, size_t ACount) {
     Chars = AChars;
     Count = ACount; 
 #ifdef CONFIG_SYNTAX_HILIT
@@ -35,8 +35,8 @@ ELine::~ELine() {
 	free(Chars);
 }
 
-int ELine::Allocate(unsigned int Bytes) { 
-    unsigned int Allocated;
+int ELine::Allocate(size_t Bytes) {
+    size_t Allocated;
     
     Allocated = (Bytes | CHAR_TRESHOLD);
     if (Chars) 

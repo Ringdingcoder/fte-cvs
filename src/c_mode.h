@@ -12,50 +12,56 @@
 
 #define CMD_EXT 0x1000  // max 4096 internal commands, check cfte.cpp
 
-#define CONTEXT_NONE      0
-#define CONTEXT_FILE      1
-#define CONTEXT_DIRECTORY 2
-#define CONTEXT_MESSAGES  3
-#define CONTEXT_SHELL     4
-#define CONTEXT_INPUT     5
-#define CONTEXT_CHOICE    6
-#define CONTEXT_LIST      7
-#define CONTEXT_CHAR      8
-#define CONTEXT_BUFFERS   9
-#define CONTEXT_ROUTINES 10
-#define CONTEXT_MAPVIEW  11
-#define CONTEXT_CVSBASE  12
-#define CONTEXT_CVS      13
-#define CONTEXT_CVSDIFF  14
-#define CONTEXT_SVNBASE  15
-#define CONTEXT_SVN      16
-#define CONTEXT_SVNDIFF  17
+enum Context_e {
+    CONTEXT_NONE,
+    CONTEXT_FILE,
+    CONTEXT_DIRECTORY,
+    CONTEXT_MESSAGES,
+    CONTEXT_SHELL,
+    CONTEXT_INPUT,
+    CONTEXT_CHOICE,
+    CONTEXT_LIST,
+    CONTEXT_CHAR,
+    CONTEXT_BUFFERS,
+    CONTEXT_ROUTINES, // 10
+    CONTEXT_MAPVIEW,
+    CONTEXT_CVSBASE,
+    CONTEXT_CVS,
+    CONTEXT_CVSDIFF,
+    CONTEXT_SVNBASE,
+    CONTEXT_SVN,
+    CONTEXT_SVNDIFF
+};
 
 typedef unsigned char ChColor;
 //typedef int ChColor;
 
-#define HILIT_PLAIN   0
-#define HILIT_C       1
-#define HILIT_HTML    2
-#define HILIT_MAKE    3
-#define HILIT_REXX    4
-#define HILIT_DIFF    5
-#define HILIT_IPF     6
-#define HILIT_PERL    7
-#define HILIT_MERGE   8
-#define HILIT_ADA     9
-#define HILIT_MSG    10
-#define HILIT_SH     11
-#define HILIT_PASCAL 12
-#define HILIT_TEX    13
-#define HILIT_FTE    14
-#define HILIT_CATBS  15
-#define HILIT_SIMPLE 16
+enum Hilit_e {
+    HILIT_PLAIN,
+    HILIT_C,
+    HILIT_HTML,
+    HILIT_MAKE,
+    HILIT_REXX,
+    HILIT_DIFF,
+    HILIT_IPF,
+    HILIT_PERL,
+    HILIT_MERGE,
+    HILIT_ADA,
+    HILIT_MSG, // 10
+    HILIT_SH,
+    HILIT_PASCAL,
+    HILIT_TEX,
+    HILIT_FTE,
+    HILIT_CATBS,
+    HILIT_SIMPLE // 16
+};
 
-#define INDENT_PLAIN  0
-#define INDENT_C      1
-#define INDENT_REXX   2
-#define INDENT_SIMPLE 3
+enum Indent_{
+    INDENT_PLAIN,
+    INDENT_C,
+    INDENT_REXX,
+    INDENT_SIMPLE
+};
 
 #define BFI_AutoIndent          0
 #define BFI_Insert              1
@@ -64,7 +70,14 @@ typedef unsigned char ChColor;
 #define BFI_ExpandTabs          4
 #define BFI_Trim                5
 #define BFI_TabSize             6
+
+#define BFI_Colorizer           7
+#define BFI_IndentMode          8
+
 #define BFI_ShowTabs            9
+
+
+
 #define BFI_HardMode           15
 #define BFI_Undo               16
 #define BFI_ReadOnly           17
@@ -85,8 +98,6 @@ typedef unsigned char ChColor;
 #define BFI_LeftMargin         28
 #define BFI_RightMargin        29
 
-#define BFI_Colorizer           7
-#define BFI_IndentMode          8
 
 #define BFI_LineChar           10
 #define BFI_StripChar          11
@@ -218,36 +229,38 @@ extern EBufferFlags DefaultBufferFlags;
 
 #define COL_SyntaxParser 1
 
-#define CLR_Normal         0
-#define CLR_Keyword        1
-#define CLR_String         2
-#define CLR_Comment        3
-#define CLR_CPreprocessor  4
-#define CLR_Regexp         5
-#define CLR_Header         6
-#define CLR_Quotes         7
-#define CLR_Number         8
-#define CLR_HexNumber      9
-#define CLR_OctalNumber   10
-#define CLR_FloatNumber   11
-#define CLR_Function      12
-#define CLR_Command       13
-#define CLR_Tag           14
-#define CLR_Punctuation   15
-#define CLR_New           16
-#define CLR_Old           17
-#define CLR_Changed       18
-#define CLR_Control       19
-#define CLR_Separator     20
-#define CLR_Variable      21
-#define CLR_Symbol        22
-#define CLR_Directive     23
-#define CLR_Label         24
-#define CLR_Special       25
-#define CLR_QuoteDelim    26
-#define CLR_RegexpDelim   27
+enum Color_e {
+    CLR_Normal,
+    CLR_Keyword,
+    CLR_String,
+    CLR_Comment,
+    CLR_CPreprocessor,
+    CLR_Regexp,
+    CLR_Header,
+    CLR_Quotes,
+    CLR_Number,
+    CLR_HexNumber,
+    CLR_OctalNumber, // 10
+    CLR_FloatNumber,
+    CLR_Function,
+    CLR_Command,
+    CLR_Tag,
+    CLR_Punctuation,
+    CLR_New,
+    CLR_Old,
+    CLR_Changed,
+    CLR_Control,
+    CLR_Separator, // 20
+    CLR_Variable,
+    CLR_Symbol,
+    CLR_Directive,
+    CLR_Label,
+    CLR_Special,
+    CLR_QuoteDelim,
+    CLR_RegexpDelim,
 
-#define COUNT_CLR         28
+    COUNT_CLR
+};
 
 #define MATCH_MUST_BOL     0x0001
 #define MATCH_MUST_BOLW    0x0002

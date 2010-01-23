@@ -489,14 +489,10 @@ static int getkey(int tsecs)
 static int parseEsc(void)
 {
     int key = getkey(0);
-
-    if (!key)
-	return kbEsc;
-    if (key >= 'a' && key <= 'z')
-	return (kfAlt | (key + 'A' - 'a'));
-
     char seq[8] = { (char)key, 0 };
     unsigned seqpos = 1;
+
+    if ((key && key < 'a') || key > 'z')
 
     /* read whole Esc sequence */
     while (seqpos < 7 && (seq[seqpos] = (char)getkey(0))) {
@@ -508,7 +504,7 @@ static int parseEsc(void)
     }
     seq[seqpos] = 0;
 
-    return TTYEscParse(seq);
+    return TTYParseEsc(seq);
 }
 
 int ConGetEvent(TEventMask /*EventMask */ ,
@@ -579,10 +575,11 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize)
 {
     fArgc = argc;
     fArgv = argv;
-    ::ConInit(-1, -1);
-    ::ConSetSize(XSize, YSize);
-    TTYEscInit();
-    gui = this;
+    if (TTYInitTable() == 0) {
+	::ConInit(-1, -1);
+	::ConSetSize(XSize, YSize);
+	gui = this;
+    }
 }
 
 GUI::~GUI()
@@ -643,8 +640,7 @@ int GUI::RunProgram(int /*mode */ , char *Command)
 
 char ConGetDrawChar(unsigned int idx)
 {
-    static const unsigned char tab[] =
-    {
+    static const unsigned char tab[] = {
 	DCH_SLANG_C1,
 	DCH_SLANG_C2,
 	DCH_SLANG_C3,
@@ -668,8 +664,7 @@ char ConGetDrawChar(unsigned int idx)
 	DCH_SLANG_ARIGHT
     };
 
-    static const unsigned char tab_linux[] =
-    {
+    static const unsigned char tab_linux[] = {
 	DCH_SLANG_C1,
 	DCH_SLANG_C2,
 	DCH_SLANG_C3,
@@ -692,8 +687,7 @@ char ConGetDrawChar(unsigned int idx)
 	DCH_SLANG_ALEFT,
 	DCH_SLANG_ARIGHT
     };
-    //static const char tab_linux1[] =
-    //{
+    //static const char tab_linux1[] = {
     //    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     //    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k',
     //    'l', 'm', 'n', 'o', 'p', 'q'

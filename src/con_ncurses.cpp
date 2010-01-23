@@ -8,15 +8,17 @@
  */
 #include "feature.h"
 
-#include <ncurses.h>
-#include <unistd.h>
-
 #include "sysdep.h"
 #include "c_config.h"
 #include "console.h"
 #include "gui.h"
 #include "con_tty.h"
 #include "s_string.h"
+#include "o_model.h"  // Msg
+#include "s_util.h"  // S_ERROR
+
+#include <ncurses.h>
+//#include <unistd.h>
 
 #include <signal.h>
 #include <sys/ioctl.h>
@@ -504,7 +506,9 @@ static int ConGetEscEvent(void)
 		seq[seqpos++] = (char)key;
 	seq[seqpos] = 0;
 
-	return TTYEscParse(seq);
+	if (!(key = TTYParseEsc(seq)))
+	    ;//Msg(S_ERROR, "Sequence '%s' not found.", seq);
+        return key;
 }
 
 #else
@@ -849,10 +853,11 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize)
 {
 	fArgc = argc;
 	fArgv = argv;
-	::ConInit(-1, -1);
-	::ConSetSize(XSize, YSize);
-	TTYEscInit();
-	gui = this;
+	if (TTYInitTable() == 0) {
+	    ::ConInit(-1, -1);
+	    ::ConSetSize(XSize, YSize);
+	    gui = this;
+	}
 }
 
 GUI::~GUI()

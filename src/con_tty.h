@@ -10,10 +10,10 @@
 #include <stdlib.h>
 #include <stdio.h> // fprintf
 
-static const struct TTYEscDecode {
+static const struct TTYDecodeSeq {
     char seq[8];
     int key;
-} tty_esc_seq_c[] = {
+} tty_seq_table_c[] = {
     /* '%' replaced with 2..8  with modified  Alt | Ctrl | Shift */
     { "[1;%A", kbUp },
     { "[%A", kbUp },
@@ -134,27 +134,29 @@ static const struct TTYEscDecode {
 };
 
 /* Sorted via qsort in runtime so there is NO const here! */
-static struct TTYEscDecode tty_esc_seq[7 * sizeof(tty_esc_seq_c) / sizeof(tty_esc_seq_c[0])];
-static unsigned tty_esc_size = 0;
+static struct TTYDecodeSeq tty_esc_seq[7 * sizeof(tty_seq_table_c) / sizeof(tty_seq_table_c[0])];
+static unsigned tty_seq_size = 0;
 
-static int TTYEscComp(const void *a, const void *b)
+static int TTYCompSeq(const void *a, const void *b)
 {
-    int c = strcmp(((const TTYEscDecode*)a)->seq,
-		   ((const TTYEscDecode*)b)->seq);
-    if (c)
-	return c;
+    int c = strcmp(((const TTYDecodeSeq*)a)->seq,
+		   ((const TTYDecodeSeq*)b)->seq);
+    if (c == 0) {
+        tty_seq_size = 0;
+	fprintf(stderr, "ERROR: tty_seq_table_c contains duplicate Escape sequence \"%s\"!\n",
+		((const TTYDecodeSeq*)a)->seq);
+    }
 
-    fprintf(stderr, "ERROR: seqtable has duplicated Esc sequence \"%s\"!\n",
-	    ((const TTYEscDecode*)a)->seq);
-    exit(-1);
+    return c;
 }
 
-static int TTYEscParse(const char *seq)
+static int TTYParseEsc(const char *seq)
 {
     if (seq[1] == 0) {
 	char ch = seq[0];
-	if (ch > 0 && ch < 32) {
+	if (ch < 32) {
 	    switch (ch) {
+	    case 0: return kbEsc;
 	    case '\t': return (kfShift | kbTab);
 	    case '\n': return (kfAlt | kbEnter);
 	    case 8:    return (kfAlt | kbBackSp);
@@ -164,9 +166,9 @@ static int TTYEscParse(const char *seq)
 	} else if (ch == 0x7f)
 	    return kfAlt | kbBackSp;
 	else if (ch >= 'a' && ch <= 'z')
-	    return (kfAlt | ch);
+	    return (kfAlt | (ch + 'A' - 'a'));
 	else if (ch >= 'A' && ch <= 'Z')
-	    return (kfAlt | kfShift | (ch + 'A' - 'a'));
+	    return (kfAlt | kfShift | ch);
 	else if (strchr("`1234567890-=[];'\\,./", ch))
 	    return (kfAlt | ch);
 	else if (strchr("~!@#$%%^&*()_+{}:\"|<>?", ch))
@@ -175,7 +177,7 @@ static int TTYEscParse(const char *seq)
 
     // standard routine for binary search
     unsigned i, H = 0, L = 0;
-    unsigned R = tty_esc_size;
+    unsigned R = tty_seq_size;
 
     while (L < R) {
         int c;
@@ -206,40 +208,47 @@ static int TTYEscParse(const char *seq)
  * Create table from template and replace '%' with character numbers
  * from '2' to '8' with appropriate Alt, Ctrl, Shift modifiers
  */
-static void TTYEscInit(void)
+static int TTYInitTable(void)
 {
-    for (unsigned i = 0; i < sizeof(tty_esc_seq_c)/sizeof(tty_esc_seq_c[0]); ++i) {
+    for (unsigned i = 0; i < sizeof(tty_seq_table_c)/sizeof(tty_seq_table_c[0]); ++i) {
 	for (unsigned j = '2'; j <= '8'; ++j) {
-	    tty_esc_seq[tty_esc_size].key = tty_esc_seq_c[i].key;
-	    strcpy(tty_esc_seq[tty_esc_size].seq, tty_esc_seq_c[i].seq);
-	    char *r = strchr(tty_esc_seq[tty_esc_size].seq, '%');
-	    // also skip '%' replacement if it's the first character in the string
-	    if (!r || tty_esc_seq[tty_esc_size].seq[0] == '%') {
-		tty_esc_size++;
+	    static const int kf[] = {
+		kfShift, // '2'
+		kfAlt,
+		kfAlt | kfShift,
+		kfCtrl,
+		kfCtrl | kfShift,
+		kfCtrl | kfAlt,
+		kfAlt | kfCtrl | kfShift // '8'
+	    };
+	    tty_esc_seq[tty_seq_size].key = tty_seq_table_c[i].key;
+	    strcpy(tty_esc_seq[tty_seq_size].seq, tty_seq_table_c[i].seq);
+	    char *r = strchr(tty_esc_seq[tty_seq_size].seq, '%');
+	    if (!r) {
+		tty_seq_size++;
 		break;
 	    }
 	    *r = (char)j;
-	    switch (j) {
-	    case '2': tty_esc_seq[tty_esc_size].key |= kfShift; break;
-	    case '3': tty_esc_seq[tty_esc_size].key |= kfAlt; break;
-	    case '4': tty_esc_seq[tty_esc_size].key |= kfAlt | kfShift; break;
-	    case '5': tty_esc_seq[tty_esc_size].key |= kfCtrl; break;
-	    case '6': tty_esc_seq[tty_esc_size].key |= kfCtrl | kfShift; break;
-	    case '7': tty_esc_seq[tty_esc_size].key |= kfCtrl | kfAlt; break;
-	    case '8': tty_esc_seq[tty_esc_size].key |= kfAlt | kfCtrl | kfShift; break;
-	    }
-	    tty_esc_size++;
+	    tty_esc_seq[tty_seq_size++].key |= kf[j - '2'];
 	}
     }
 
-    qsort(tty_esc_seq, tty_esc_size, sizeof(TTYEscDecode), TTYEscComp);
+    qsort(tty_esc_seq, tty_seq_size, sizeof(TTYDecodeSeq), TTYCompSeq);
+
+    if (!tty_seq_size)
+        return 1;
+
+    return 0;
+
 #if 0
     const char * const test[] = { "[1;2A", "OF", "ODS", "[1;8R", 0 };
-    for (unsigned i = 0; test[i]; i++) {
-        fprintf(stderr, "search %s  %d\n", test[i], TTYEscParse(test[i]));
-    }
-    //for (unsigned i = 0; i < tty_esc_size; ++i)
-    //    fprintf(stderr, "%d %s %x\n", i, tty_esc_seq[i].seq, tty_esc_seq[i].key);
-    exit(0);
+    for (unsigned i = 0; test[i]; i++)
+        fprintf(stderr, "search %s  %d\n", test[i], TTYParseEsc(test[i]));
+
+
+    for (unsigned i = 0; i < tty_seq_size; ++i)
+	fprintf(stderr, "%d %s %x\n", i, tty_esc_seq[i].seq, tty_esc_seq[i].key);
+
+    return 1;
 #endif
 }

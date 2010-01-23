@@ -41,7 +41,7 @@ int Hilit_FTE(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line,
                            (isalnum(Line->Chars[i+j]) ||
                             (Line->Chars[i + j] == '_'))
                           ) j++;
-                    if (BF->GetHilitWord(j, &Line->Chars[i], Color)) {
+                    if (BF->GetHilitWord(Color, &Line->Chars[i], j)) {
                         State = hsFTE_Keyword;
                     } else {
                         Color = CLR_Normal;
@@ -167,4 +167,4 @@ int Hilit_FTE(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line,
     *ECol = C;
     return 0;
 }
-#endif
+#endif // CONFIG_HILIT_FTE

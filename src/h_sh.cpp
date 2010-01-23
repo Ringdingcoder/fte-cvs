@@ -60,7 +60,7 @@ int Hilit_SH(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, 
                     else if (p[j] == '*' || p[j] == ')')
                         Color = CLR_Normal;
                     else {
-                        if (!BF->GetHilitWord(j, p, Color, 0)) {
+                        if (!BF->GetHilitWord(Color, p, j, 0)) {
                             // Color for good match is set by this function
                             Color = (CommandStr == 1) ? CLR_Command : CLR_Normal;
                             //printf("Command %d %c%c\n",

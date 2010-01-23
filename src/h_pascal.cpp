@@ -37,7 +37,7 @@ int Hilit_PASCAL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Li
                            (isalnum(Line->Chars[i+j]) ||
                             (Line->Chars[i + j] == '_'))
                           ) j++;
-                    if (BF->GetHilitWord(j, &Line->Chars[i], Color, 1)) {
+                    if (BF->GetHilitWord(Color, &Line->Chars[i], j, 1)) {
                         //                        Color = hcC_Keyword;
                         State = hsPas_Keyword;
                     } else {

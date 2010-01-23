@@ -97,7 +97,7 @@ int Hilit_MSG(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine* Line,
                            (isalnum(Line->Chars[i+j]) ||
                             (Line->Chars[i + j] == '_'))
                           ) j++;
-                    if (BF->GetHilitWord(j, Line->Chars + i, Color, 1)) ;
+                    if (BF->GetHilitWord(Color, Line->Chars + i, j, 1)) ;
                     else {
                         Color = DefColor;
                     }
@@ -117,7 +117,7 @@ int Hilit_MSG(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine* Line,
             }
         }
     } else
-#endif
+#endif // CONFIG_WORD_HILIT
     if (ExpandTabs) { /* use slow mode */
         for (i = 0; i < Line->Count;) {
             IF_TAB() else {

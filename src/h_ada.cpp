@@ -40,7 +40,7 @@ int Hilit_ADA(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line,
                             (Line->Chars[i + j] == '_') ||
                             (Line->Chars[i + j] == '\''))
                           ) j++;
-                    if (BF->GetHilitWord(j, &Line->Chars[i], Color, 1)) {
+                    if (BF->GetHilitWord(Color, &Line->Chars[i], j, 1)) {
                         State = hsAda_Keyword;
                     } else {
                         int x;
@@ -126,4 +126,4 @@ int Hilit_ADA(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line,
     *ECol = C;
     return 0;
 }
-#endif
+#endif // CONFIG_HILIT_ADA

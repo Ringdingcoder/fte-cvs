@@ -50,7 +50,7 @@ int Hilit_TEX(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line,
                            (isalnum(Line->Chars[i+j])/* ||
                            (Line->Chars[i + j] == '_')*/)
                           ) j++;
-                    if (BF->GetHilitWord(j, &Line->Chars[i], Color, 0)) {
+                    if (BF->GetHilitWord(Color, &Line->Chars[i], j, 0)) {
                     }
                     if (StateMap)
                         memset(StateMap + i, State, j);

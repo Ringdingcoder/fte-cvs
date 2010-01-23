@@ -218,7 +218,7 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                            (isalnum(Line->Chars[i+j]) ||
                             (Line->Chars[i + j] == '_' || Line->Chars[i + j] == '\''))
                            ) j++;
-                    if (BF->GetHilitWord(j, &Line->Chars[i], Color)) {
+                    if (BF->GetHilitWord(Color, &Line->Chars[i], j)) {
                         //Color = hcPERL_Keyword;
                         State = hsPerl_Keyword;
                         if (strncmp(p, "sub", 3) == 0)
@@ -722,4 +722,4 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
     *ECol = C;
     return 0;
 }
-#endif
+#endif // CONFIG_HILIT_PERL

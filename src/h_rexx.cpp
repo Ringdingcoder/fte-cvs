@@ -66,7 +66,7 @@ int Hilit_REXX(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                         Color = CLR_Function;
                         wascall = 0;
                     } else {
-                        if (BF->GetHilitWord(j, Line->Chars + i, Color, 1))
+                        if (BF->GetHilitWord(Color, Line->Chars + i, j, 1))
                             State = hsREXX_Keyword;
                         else {
                             int x;

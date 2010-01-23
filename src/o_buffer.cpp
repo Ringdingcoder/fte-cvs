@@ -10,7 +10,7 @@
 #include "fte.h"
 #include "ftever.h"
 
-SearchReplaceOptions LSearch = { 0 };
+SearchReplaceOptions LSearch;
 int suspendLoads = 0;
 
 EViewPort *EBuffer::CreateViewPort(EView *V) {
@@ -910,7 +910,7 @@ int EBuffer::FileReload(ExState &/*State*/) {
     return Reload();
 }
 
-int EBuffer::FileSaveAs(char *FName) {
+int EBuffer::FileSaveAs(const char *FName) {
     char Name[MAXPATH];
 
     if (ExpandPath(FName, Name, sizeof(Name)) == -1) {
@@ -954,7 +954,7 @@ int EBuffer::FileSaveAs(ExState &State) {
     return FileSaveAs(FName);
 }
 
-int EBuffer::FileWriteTo(char *FName) {
+int EBuffer::FileWriteTo(const char *FName) {
     char Name[MAXPATH];
 
     if (ExpandPath(FName, Name, sizeof(Name)) == -1) {

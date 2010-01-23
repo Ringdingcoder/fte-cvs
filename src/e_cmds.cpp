@@ -453,8 +453,8 @@ int EBuffer::ScrollUp(int Lines) {
 int EBuffer::MoveBeginOrNonWhite() {
     if (CP.Col == 0)
         return MoveFirstNonWhite();
-    else
-        return MoveLineStart();
+
+    return MoveLineStart();
 }
 
 int EBuffer::MoveBeginLinePageFile() {
@@ -464,8 +464,8 @@ int EBuffer::MoveBeginLinePageFile() {
         return MoveFileStart();
     else if (CP.Col == 0)
         return MovePageStart();
-    else
-        return MoveLineStart();
+
+    return MoveLineStart();
 }
 
 int EBuffer::MoveEndLinePageFile() {
@@ -1312,7 +1312,7 @@ int EBuffer::SetRightMargin() {
     return 1;
 }
 
-int EBuffer::ChangeMode(char *AMode) {
+int EBuffer::ChangeMode(const char *AMode) {
     if (FindMode(AMode) != 0) {
         Mode = FindMode(AMode);
         Flags = Mode->Flags;
@@ -1326,7 +1326,7 @@ int EBuffer::ChangeMode(char *AMode) {
     return 0;
 }
 
-int EBuffer::ChangeKeys(char *AMode) {
+int EBuffer::ChangeKeys(const char *AMode) {
     if (FindMode(AMode) != 0) {
         Mode = FindMode(AMode);
         HilitProc = 0;
@@ -1339,7 +1339,7 @@ int EBuffer::ChangeKeys(char *AMode) {
     return 0;
 }
 
-int EBuffer::ChangeFlags(char *AMode) {
+int EBuffer::ChangeFlags(const char *AMode) {
     if (FindMode(AMode) != 0) {
         EMode *XMode;
         XMode = FindMode(AMode);
@@ -1353,4 +1353,3 @@ int EBuffer::ChangeFlags(char *AMode) {
     Msg(S_ERROR, "Mode '%s' not found.", AMode);
     return 0;
 }
-

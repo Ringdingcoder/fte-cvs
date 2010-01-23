@@ -210,6 +210,8 @@ struct SearchReplaceOptions {
     //
     int resCount;
     int lastInsertLen;
+
+    SearchReplaceOptions() { memset(this, 0, sizeof(*this)); }
 };
 
 int DLGGetFind(GView *View, SearchReplaceOptions &sr);

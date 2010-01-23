@@ -122,17 +122,15 @@ int ParseSearchReplace(EBuffer *B, const char *str, int replace, SearchReplaceOp
     return 1;
 }
 
-int EBuffer::FindStr(char *Data, int Len, int Options) {
+int EBuffer::FindStr(const char *Data, size_t Len, int Options) {
     SearchReplaceOptions opt;
-
-    memset(&opt, 0, sizeof(opt));
 
     opt.Options = Options;
 
     return FindStr(Data, Len, opt);
 }
 
-int EBuffer::FindStr(char *Data, int Len, SearchReplaceOptions &opt) {
+int EBuffer::FindStr(const char *Data, size_t Len, SearchReplaceOptions &opt) {
     int Options = opt.Options;
     int LLen, Start, End;
     int C, L;
@@ -141,7 +139,7 @@ int EBuffer::FindStr(char *Data, int Len, SearchReplaceOptions &opt) {
 
     if (Options & SEARCH_RE)
         return 0;
-    if (Len <= 0)
+    if (!Len)
         return 0;
 
     if (Options & SEARCH_NOPOS) {
@@ -782,7 +780,7 @@ int EBuffer::CompleteWord() {
 #endif
 }
 
-int EBuffer::Search(ExState &State, char *aString, int Options, int /*CanResume*/) {
+int EBuffer::Search(ExState &State, const char *aString, int Options, int /*CanResume*/) {
     char find[MAXSEARCH+1] = "";
     int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
     int Next = 0;
@@ -819,7 +817,7 @@ int EBuffer::SearchAgain(ExState &/*State*/, unsigned int Options) {
     return 1;
 }
 
-int EBuffer::SearchReplace(ExState &State, char *aString, char *aReplaceString, int Options) {
+int EBuffer::SearchReplace(ExState &State, const char *aString, const char *aReplaceString, int Options) {
     char find[MAXSEARCH+1] = "";
     char replace[MAXSEARCH+1] = "";
     int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
@@ -969,7 +967,7 @@ int EBuffer::ShowPosition() {
 }
 
 #ifdef CONFIG_BOOKMARKS
-int EBuffer::PlaceBookmark(char *Name, EPoint P) {
+int EBuffer::PlaceBookmark(const char *Name, EPoint P) {
     int i;
     EBookmark *p;
 
@@ -990,7 +988,7 @@ int EBuffer::PlaceBookmark(char *Name, EPoint P) {
     return 1;
 }
 
-int EBuffer::RemoveBookmark(char *Name) {
+int EBuffer::RemoveBookmark(const char *Name) {
     int i;
 
     for (i = 0; i < BMCount; i++) {
@@ -1006,7 +1004,7 @@ int EBuffer::RemoveBookmark(char *Name) {
     return 0;
 }
 
-int EBuffer::GetBookmark(char *Name, EPoint &P) {
+int EBuffer::GetBookmark(const char *Name, EPoint &P) {
     for (int i = 0; i < BMCount; i++)
         if (strcmp(Name, BMarks[i].Name) == 0) {
             P = BMarks[i].BM;
@@ -1033,7 +1031,7 @@ int EBuffer::GetBookmarkForLine(int searchFrom, int searchForLine, char *&Name, 
     return -1;
 }
 
-int EBuffer::GotoBookmark(char *Name) {
+int EBuffer::GotoBookmark(const char *Name) {
     for (int i = 0; i < BMCount; i++)
         if (strcmp(Name, BMarks[i].Name) == 0) {
             return CenterNearPosR(BMarks[i].BM.Col, BMarks[i].BM.Row);

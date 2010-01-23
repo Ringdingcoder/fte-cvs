@@ -11,7 +11,7 @@
 
 #ifdef CONFIG_SYNTAX_HILIT
 static const struct {
-    const char *Name;
+    const char Name[8];
     int Num;
     SyntaxProc Proc;
 } HilitModes[] = {
@@ -58,7 +58,7 @@ static const struct {
 };
 
 static const struct {
-    const char *Name;
+    const char Name[8];
     int Num;
 } IndentModes[] = {
 #ifdef CONFIG_INDENT_C
@@ -229,10 +229,10 @@ void HState::InitState() {
     nextKwdNoCharState = -1;
 }
 
-int HState::GetHilitWord(int len, char *str, ChColor &clr) {
+int HState::GetHilitWord(ChColor &clr, const char *str, size_t len) {
     char *p;
 
-    if (len >= CK_MAXLEN || len < 1)
+    if (len >= CK_MAXLEN || !len)
         return 0;
 
     p = keywords.key[len];
@@ -314,4 +314,4 @@ void HMachine::AddTrans(HTrans &aTrans) {
     transCount++;
 }
 
-#endif
+#endif // CONFIG_SYNTAX_HILIT

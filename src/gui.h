@@ -13,6 +13,7 @@
 #include "console.h"
 #include <stdarg.h>
 #include <sys/types.h>
+#include <string.h>
 
 #define RUN_WAIT 0
 #define RUN_ASYNC 1
@@ -79,7 +80,7 @@ public:
     GFrame(int XSize, int YSize);
     virtual ~GFrame();
     
-    int ConSetTitle(char *Title, char *STitle);
+    int ConSetTitle(const char *Title, const char *STitle);
     int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen);
     
     int ConSetSize(int X, int Y);

@@ -70,7 +70,7 @@ class ESvnBase:public EList {
         virtual int Mark (int Line);
         virtual int Unmark (int Line);
 
-        virtual int ExecCommand(int Command, ExState &State);
+        virtual int ExecCommand(ExCommands Command, ExState &State);
         void ShowLine (EView *V,int err);
 
         virtual int GetContext () {return CONTEXT_SVNBASE;}

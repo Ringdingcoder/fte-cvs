@@ -142,7 +142,7 @@ void ECvsBase::NotifyDelete (EModel *Deleting) {
     }
 }
 
-int ECvsBase::GetLine(char *Line, int max) {
+int ECvsBase::GetLine(char *Line, size_t max) {
     int rc;
     char *p;
     int l;
@@ -195,7 +195,7 @@ int ECvsBase::GetLine(char *Line, int max) {
     return 1;
 }
 
-void ECvsBase::ParseLine (char *line,int) {
+void ECvsBase::ParseLine(const char *line, size_t) {
     AddLine (0,-1,line);
 }
 
@@ -205,8 +205,8 @@ void ECvsBase::NotifyPipe (int APipeId) {
         RxMatchRes RM;
         int i;
 
-        while (GetLine((char *)line, sizeof(line))) {
-            int len=strlen (line);
+        while (GetLine(line, sizeof(line))) {
+            size_t len = strlen(line);
             if (len>0&&line[len-1]=='\n') line[--len]=0;
             for (i=0;i<CvsIgnoreRegexpCount;i++)
                 if (RxExec (CvsIgnoreRegexp[i],line,len,line,&RM)==1) break;
@@ -354,23 +354,25 @@ int ECvsBase::Unmark (int Line) {
     } else return 0;
 }
 
-int ECvsBase::ExecCommand(int Command, ExState &State) {
+int ECvsBase::ExecCommand(ExCommands Command, ExState &State) {
     switch (Command) {
-        case ExChildClose:
-            if (Running == 0 || PipeId == -1)
-                break;
-            ClosePipe ();
-            {
-                char s[30];
+    case ExChildClose:
+        if (Running == 0 || PipeId == -1)
+            break;
+        ClosePipe ();
+        {
+            char s[30];
 
-                sprintf(s, "[aborted, status=%d]", ReturnCode);
-                AddLine(0, -1, s);
-            }
-            return ErOK;
+            sprintf(s, "[aborted, status=%d]", ReturnCode);
+            AddLine(0, -1, s);
+        }
+        return ErOK;
 
-        case ExActivateInOtherWindow:
-            ShowLine(View->Next, Row);
-            return ErOK;
+    case ExActivateInOtherWindow:
+        ShowLine(View->Next, Row);
+        return ErOK;
+    default:
+	;
     }
     return EList::ExecCommand(Command, State);
 }

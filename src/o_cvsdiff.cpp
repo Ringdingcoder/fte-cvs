@@ -81,10 +81,14 @@ int ECvsDiff::RunPipe (char *ADir,char *ACommand,char *AOnFiles) {
     return ECvsBase::RunPipe (ADir,ACommand,AOnFiles);
 }
 
-int ECvsDiff::ExecCommand(int Command, ExState &State) {
+int ECvsDiff::ExecCommand(ExCommands Command, ExState &State) {
     switch (Command) {
-        case ExBlockCopy:return BlockCopy (0);
-        case ExBlockCopyAppend:return BlockCopy (1);
+    case ExBlockCopy:
+        return BlockCopy(0);
+    case ExBlockCopyAppend:
+        return BlockCopy(1);
+    default:
+        ;
     }
     return EList::ExecCommand(Command, State);
 }

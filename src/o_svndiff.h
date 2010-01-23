@@ -7,8 +7,8 @@
  * to clipboard and allows to jump to lines in real sources.
  */
 
-#ifndef __SVNDIFF_H__
-#define __SVNDIFF_H__
+#ifndef O_SVNDIFF_H
+#define O_SVNDIFF_H
 
 #ifdef CONFIG_OBJ_SVN
 
@@ -25,7 +25,7 @@ class ESvnDiff:public ESvnBase {
         // Returns 0 if OK
         virtual int RunPipe (char *Dir,char *Command,char *Info);
 
-        virtual int ExecCommand(int Command, ExState &State);
+        virtual int ExecCommand(ExCommands Command, ExState &State);
         int BlockCopy (int Append);
 
         virtual int GetContext () {return CONTEXT_SVNDIFF;}
@@ -34,6 +34,6 @@ class ESvnDiff:public ESvnBase {
 
 extern ESvnDiff *SvnDiffView;
 
-#endif
+#endif // CONFIG_OBJ_SVN
 
-#endif
+#endif // O_SVNDIFF_H

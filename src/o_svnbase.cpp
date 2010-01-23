@@ -143,7 +143,7 @@ void ESvnBase::NotifyDelete (EModel *Deleting) {
 }
 
 int ESvnBase::GetLine(char *Line, size_t max) {
-    int rc;
+    ssize_t rc;
     char *p;
     int l;
 
@@ -310,7 +310,7 @@ void ESvnBase::DrawLine (PCell B,int Line,int Col,ChColor color,int Width) {
             char str[1024];
 	    size_t len = UnTabStr(str,sizeof(str), Lines[Line]->Msg,
 				  strlen(Lines[Line]->Msg));
-            if (len>Col) MoveStr (B,0,Width,str+Col,color,Width);
+            if ((int)len > Col) MoveStr (B,0,Width,str+Col,color,Width);
         }
 }
 
@@ -355,23 +355,24 @@ int ESvnBase::Unmark (int Line) {
     } else return 0;
 }
 
-int ESvnBase::ExecCommand(int Command, ExState &State) {
+int ESvnBase::ExecCommand(ExCommands Command, ExState &State) {
     switch (Command) {
-        case ExChildClose:
-            if (Running == 0 || PipeId == -1)
-                break;
-            ClosePipe ();
-            {
-                char s[30];
+    case ExChildClose:
+        if (Running == 0 || PipeId == -1)
+            break;
+        ClosePipe ();
+        {
+            char s[30];
 
-                sprintf(s, "[aborted, status=%d]", ReturnCode);
-                AddLine(0, -1, s);
-            }
-            return ErOK;
-
-        case ExActivateInOtherWindow:
-            ShowLine(View->Next, Row);
-            return ErOK;
+            sprintf(s, "[aborted, status=%d]", ReturnCode);
+            AddLine(0, -1, s);
+        }
+        return ErOK;
+    case ExActivateInOtherWindow:
+        ShowLine(View->Next, Row);
+        return ErOK;
+    default:
+	;
     }
     return EList::ExecCommand(Command, State);
 }

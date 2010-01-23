@@ -34,7 +34,7 @@ class ECvsBase:public EList {
         CvsLine **Lines;
         int Running;
 
-        int BufLen;
+        size_t BufLen;
         int BufPos;
         int PipeId;
         int ReturnCode;
@@ -50,8 +50,8 @@ class ECvsBase:public EList {
         void FindFileLines (EBuffer *B);
         virtual void NotifyDelete (EModel *Deleting);
 
-        int GetLine (char *Line,int max);
-        virtual void ParseLine (char *line,int len);
+        int GetLine (char *Line, size_t max);
+        virtual void ParseLine (const char *line, size_t len);
         void NotifyPipe (int APipeId);
         // Returns 0 if OK - calls ContinuePipe() several times to complete command for all files
         virtual int RunPipe (char *Dir,char *Command,char *OnFiles);
@@ -70,7 +70,7 @@ class ECvsBase:public EList {
         virtual int Mark (int Line);
         virtual int Unmark (int Line);
 
-        virtual int ExecCommand(int Command, ExState &State);
+        virtual int ExecCommand(ExCommands Command, ExState &State);
         void ShowLine (EView *V,int err);
 
         virtual int GetContext () {return CONTEXT_CVSBASE;}

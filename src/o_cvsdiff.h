@@ -25,7 +25,7 @@ class ECvsDiff:public ECvsBase {
         // Returns 0 if OK
         virtual int RunPipe (char *Dir,char *Command,char *Info);
 
-        virtual int ExecCommand(int Command, ExState &State);
+        virtual int ExecCommand(ExCommands Command, ExState &State);
         int BlockCopy (int Append);
 
         virtual int GetContext () {return CONTEXT_CVSDIFF;}

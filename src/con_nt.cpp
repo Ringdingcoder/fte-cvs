@@ -896,7 +896,7 @@ int GUI::RunProgram(int mode, char *Command) { /*FOLD00*/
     return rc;
 }
 
-int ConSetTitle(char *Title, char *STitle) { /*FOLD00*/
+int ConSetTitle(const char *Title, const char *STitle) { /*FOLD00*/
     char buf[sizeof(winTitle)] = {0};
     JustFileName(Title, buf, sizeof(buf));
     if (buf[0] == '\0') // if there is no filename, try the directory name.

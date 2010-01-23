@@ -1114,7 +1114,7 @@ int GUI::RunProgram(int mode, char *Command) {
 	return rc;
 }
 
-int ConSetTitle(char *Title, char *STitle) {
+int ConSetTitle(const char *Title, const char *STitle) {
 	return 0;
 }
 

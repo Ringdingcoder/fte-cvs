@@ -204,7 +204,7 @@ int ConInit(int XSize, int YSize);
 int ConDone();
 int ConSuspend();
 int ConContinue();
-int ConSetTitle(char *Title, char *STitle);
+int ConSetTitle(const char *Title, const char *STitle);
 int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen);
 
 int ConClear();

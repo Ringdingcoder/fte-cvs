@@ -130,7 +130,7 @@ public:
     GFramePeer(GFrame *frame, int Width, int Height);
     ~GFramePeer();
 
-    int ConSetTitle(char *Title, char *STitle);
+    int ConSetTitle(const char *Title, const char *STitle);
     int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen);
 
     int ConSetSize(int X, int Y);
@@ -1335,7 +1335,7 @@ int GFramePeer::ConQuerySize(int *X, int *Y) {
 //        --*X;
 //}
 
-int GFramePeer::ConSetTitle(char *Title, char *STitle) {
+int GFramePeer::ConSetTitle(const char *Title, const char *STitle) {
     XSetStandardProperties(display, XtWindow(ShellWin), Title, STitle, 0, NULL, 0, NULL);
     return 1;
 }
@@ -1386,7 +1386,7 @@ GFrame::~GFrame() {
     Next = Prev = 0;
 }
 
-int GFrame::ConSetTitle(char *Title, char *STitle) {
+int GFrame::ConSetTitle(const char *Title, const char *STitle) {
     return Peer->ConSetTitle(Title, STitle);
 }
 

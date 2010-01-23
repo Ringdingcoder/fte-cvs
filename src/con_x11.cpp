@@ -661,7 +661,7 @@ int ConClear(void) {
     return ConPutLine(0, 0, ScreenCols, ScreenRows, B);
 }
 
-int ConSetTitle(char *Title, char *STitle) {
+int ConSetTitle(const char *Title, const char *STitle) {
     char buf[sizeof(winTitle)] = {0};
 
     JustFileName(Title, buf, sizeof(buf));

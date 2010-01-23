@@ -194,7 +194,7 @@ int ConContinue(void)
 	return 0;
 }
 
-int ConSetTitle(char * /*Title */ , char * /*STitle */ )
+int ConSetTitle(const char * /*Title */, const char * /*STitle */)
 {
 	return 0;
 }

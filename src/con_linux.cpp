@@ -395,7 +395,7 @@ int ConClear() {
     return 0;
 }
 
-int ConSetTitle(char */*Title*/, char */*STitle*/) {
+int ConSetTitle(const char */*Title*/, const char */*STitle*/) {
     return 0;
 }
 int ConGetTitle(char *Title, size_t /*MaxLen*/, char */*STitle*/, size_t /*SMaxLen*/) {
@@ -850,7 +850,7 @@ int GetKeyEvent(TEvent *Event) {
                 KeyCode = toupper(KeyCode);
 
             if (KTYP(keysym) == KT_DEAD) {
-                for (int i = 0;(unsigned) i < sizeof(DeadTrans) / sizeof(DeadTrans[0]); i++) {
+                for (unsigned i = 0; i < sizeof(DeadTrans) / sizeof(DeadTrans[0]); i++) {
                     if (DeadTrans[i].KeySym == keysym) {
                         dead_key = DeadTrans[i].Diacr;
                         return -1;

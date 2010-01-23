@@ -421,10 +421,8 @@ int JustRoot(const char *Path, char *Root, size_t RootSize) {
     strlcpy(Root, SSLASH, RootSize);
 #else
     if (RootSize >= 4)
-    {
-        strncpy(Root, Path, 3);
-        Root[3] = 0;
-    }
+        strlcpy(Root, Path, 3);
+
 #endif
     return 0;
 }

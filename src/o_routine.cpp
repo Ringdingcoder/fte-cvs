@@ -39,13 +39,12 @@ EEventMap *RoutineView::GetEventMap() {
     return FindEventMap("ROUTINES");
 }
 
-int RoutineView::ExecCommand(int Command, ExState &State) {
+int RoutineView::ExecCommand(ExCommands Command, ExState &State) {
     switch (Command) {
     case ExRescan:
         Buffer->ScanForRoutines();
         UpdateList();
         return ErOK;
-
     case ExActivateInOtherWindow:
         if (Row < Buffer->rlst.Count) {
             View->Next->SwitchToModel(Buffer);
@@ -53,9 +52,10 @@ int RoutineView::ExecCommand(int Command, ExState &State) {
             return ErOK;
         }
         return ErFAIL;
-        
     case ExCloseActivate:
         return ErFAIL;
+    default:
+        ;
     }
     return EList::ExecCommand(Command, State);
 }

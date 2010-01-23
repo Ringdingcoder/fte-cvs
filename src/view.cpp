@@ -141,7 +141,7 @@ int EView::BeginMacro() {
     return Model ? Model->BeginMacro() : 0;
 }
 
-int EView::ExecCommand(int Command, ExState &State) {
+int EView::ExecCommand(ExCommands Command, ExState &State) {
     switch (Command) {
     case ExSwitchTo:            return SwitchTo(State);
     case ExFilePrev:            return FilePrev();
@@ -247,6 +247,8 @@ int EView::ExecCommand(int Command, ExState &State) {
     case ExRemoveGlobalBookmark:return RemoveGlobalBookmark(State);
     case ExGotoGlobalBookmark:  return GotoGlobalBookmark(State);
     case ExPopGlobalBookmark:   return PopGlobalBookmark();
+    default:
+        ;
     }
     return Model ? Model->ExecCommand(Command, State) : 0;
 }

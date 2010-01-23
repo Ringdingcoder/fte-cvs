@@ -19,7 +19,7 @@ public:
     RoutineView(int createFlags, EModel **ARoot, EBuffer *AB);
     virtual ~RoutineView();
     virtual EEventMap *GetEventMap();
-    virtual int ExecCommand(int Command, ExState &State);
+    virtual int ExecCommand(ExCommands Command, ExState &State);
     virtual void DrawLine(PCell B, int Line, int Col, ChColor color, int Width);
     virtual char* FormatLine(int Line);
     virtual int Activate(int No);

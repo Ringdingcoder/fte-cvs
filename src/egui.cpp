@@ -305,7 +305,7 @@ void EGUI::DispatchEvent(GFrame *frame, GView *view, TEvent &Event) {
 
     if (Event.What == evNone ||
         (Event.What == evMouseMove && Event.Mouse.Buttons == 0))
-        return ;
+        return;
 
     if (Event.What == evNotify && Event.Msg.Command == cmPipeRead) {
         Event.Msg.Model->NotifyPipe(Event.Msg.Param1);
@@ -981,7 +981,7 @@ void EGUI::Stop() {
         {
             free(Macros[CMacros].Name);
 
-            for (int i=0; i<Macros[CMacros].Count; ++i)
+            for (unsigned i = 0; i < Macros[CMacros].Count; ++i)
                 if (Macros[CMacros].cmds[i].type == CT_STRING)
                     free(Macros[CMacros].cmds[i].u.string);
 

@@ -7,15 +7,17 @@
  *
  */
 
-#ifndef __S_UTIL_H__
-#define __S_UTIL_H__
+#ifndef S_UTIL_H
+#define S_UTIL_H
 
 #define USE_CtrlEnter    1
 
-#define S_BUSY     0
-#define S_INFO     1
-#define S_BOLD     2
-#define S_ERROR    3
+enum {
+    S_BUSY,
+    S_INFO,
+    S_BOLD,
+    S_ERROR
+};
 
 class EView;
 class EBuffer;
@@ -31,4 +33,4 @@ int MultiFileLoad(int createFlags, const char *FileName, const char *Mode, EView
 int SetDefaultDirectory(EModel *M);
 int GetDefaultDirectory(EModel *M, char *Path, size_t MaxLen);
 
-#endif
+#endif // S_UTIL_H

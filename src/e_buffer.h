@@ -47,7 +47,7 @@ extern char FileBuffer[RWBUFSIZE];
 
 #define ChClass(x)  (WGETBIT(Flags.WordChars, (x)) ? 1 : 0)
 #define ChClassK(x) (((x) == ' ' || (x) == 9) ? 2 : ChClass(x))
-    
+
 #define InRange(a,x,b) (((a) <= (x)) && ((x) < (b)))
 #define Min(a,b) (((a) < (b))?(a):(b))
 #define Max(a,b) (((a) > (b))?(a):(b))
@@ -82,16 +82,16 @@ typedef class EPoint* PEPoint;
 
 class ELine {
 public:
-    int Count;
+    size_t Count;
     char *Chars;
 #ifdef CONFIG_SYNTAX_HILIT
     hlState StateE;
 #endif
-    
-    ELine(int ACount, const char *AChars);
-    ELine(char *AChars, int ACount);
+
+    ELine(size_t ACount, const char *AChars);
+    ELine(char *AChars, size_t ACount);
     ~ELine();
-    int Allocate(unsigned int Bytes);
+    int Allocate(size_t Bytes);
 
 //    int Length(EBufferFlags *CurFlags);
 };
@@ -110,7 +110,7 @@ struct UndoStack {
     int NextCmd, Record, Undo;
     int UndoPtr;
     int Num;
-    void **Data;  
+    void **Data;
     int *Top;
 };
 
@@ -146,7 +146,7 @@ public:
 
     EEditPort(EBuffer *B, EView *V);
     virtual ~EEditPort();
-    
+
     virtual void HandleEvent(TEvent &Event);
 #ifdef CONFIG_MOUSE
     virtual void HandleMouse(TEvent &Event);
@@ -155,7 +155,7 @@ public:
     virtual void RepaintView();
     virtual void UpdateStatus();
     virtual void RepaintStatus();
-    
+
     virtual void Resize(int Width, int Height);
     int SetTop(int Col, int Row);
     virtual void GetPos();
@@ -196,7 +196,7 @@ public:
     int RGap;
     int RCount;
     PELine *LL;
-    
+
     int VAllocated;   // visible lines
     int VGap;
     int VCount;
@@ -216,7 +216,7 @@ public:
     int BMCount;
     EBookmark *BMarks;
 #endif
-    
+
 #ifdef CONFIG_OBJ_ROUTINE
     RoutineList rlst;
     RoutineView *Routines;
@@ -224,7 +224,7 @@ public:
 
     int MinRedraw, MaxRedraw;
     int RedrawToEos;
-    
+
 #ifdef CONFIG_WORD_HILIT
     char **WordList;
     int WordCount;
@@ -233,24 +233,24 @@ public:
     SyntaxProc HilitProc;
     int StartHilit, EndHilit;
 #endif
-    
+
     // constructors
     EBuffer(int createFlags, EModel **ARoot, const char *AName);
     virtual ~EBuffer();
     virtual void DeleteRelated();
-    
+
     virtual EViewPort *CreateViewPort(EView *V);
     EEditPort *GetViewVPort(EView *V);
     EEditPort *GetVPort();
     virtual int CanQuit();
     virtual int ConfQuit(GxView *V, int multiFile = 0);
-    
+
     virtual int GetContext();
     virtual EEventMap *GetEventMap();
     virtual int BeginMacro();
-    virtual int ExecCommand(int Command, ExState &State);
+    virtual int ExecCommand(ExCommands Command, ExState &State);
     virtual void HandleEvent(TEvent &Event);
-    
+
     virtual void GetName(char *AName, size_t MaxLen);
     virtual void GetPath(char *APath, size_t MaxLen);
     virtual void GetInfo(char *AInfo, size_t MaxLen);
@@ -323,38 +323,38 @@ public:
 #endif
         return No + Vis(No);
     }
-    
+
     int RToV(int No);
     int RToVN(int No);
-    
-    // allocation  
+
+    // allocation
     int Allocate(int ACount);
     int MoveRGap(int RPos);
     int AllocVis(int ACount);
     int MoveVGap(int VPos);
-    
+
     int Modify();
     int Clear();
 
 #ifdef CONFIG_UNDOREDO
     int FreeUndo();
 #endif
-    // internal primitives  
+    // internal primitives
     int ValidPos(EPoint W);
     int RValidPos(EPoint W);
     int LoadRegion(EPoint *A, int FH, int StripChar, int LineChar);
     int SaveRegion(EPoint *A, EPoint *Z, int FH, int AddCR, int AddLF, int Mode);
-    
+
     int AssertLine(int Line);
     int InsertLine(EPoint Pos, size_t ACount, const char *AChars);
-    
+
     int UpdateMarker(int Type, int Line, int Col, int Lines, int Cols);
     int UpdateMark(EPoint &M, int Type, int Line, int Col, int Lines, int Cols);
     void UpdateVis(EPoint &M, int Row, int Delta);
     void UpdateVisible(int Row, int Delta);
     int LoadFrom(const char *AFileName);
     int SaveTo(const char *AFileName);
-    
+
     int IsBlockStart();
     int IsBlockEnd();
     int BlockType(int Mode);
@@ -364,13 +364,13 @@ public:
     int BlockRedraw();
     int SetBB(EPoint M);
     int SetBE(EPoint M);
-    
+
     int Load();
     int Save();
     int Reload();
     int FilePrint();
     int SetFileName(const char *AFileName, const char *AMode);
-    
+
     int SetPos(int Col, int Row, int tabMode = tmNone);
     int SetPosR(int Col, int Row, int tabMode = tmNone);
     int CenterPos(int Col, int Row, int tabMode = tmNone);
@@ -385,7 +385,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 // Undo/Redo Routines
 /////////////////////////////////////////////////////////////////////////////
-    
+
     int NextCommand();
 #ifdef CONFIG_UNDOREDO
     int PushUData(const void *data, size_t len);
@@ -421,14 +421,14 @@ public:
     int JoinLine(int Row, int Col);
     int CanUnfold(int Row);
     int PadLine(int Row, size_t Length);
-    
+
     int ShowRow(int Row);
     int HideRow(int Row);
     int ExposeRow(int Row); // make row visible (open all folds containing)
 
-/////////////////////////////////////////////////////////////////////////////    
+/////////////////////////////////////////////////////////////////////////////
 // Redraw/Windowing Routines
-/////////////////////////////////////////////////////////////////////////////    
+/////////////////////////////////////////////////////////////////////////////
 
     void Draw(int Line0, int LineE);
     void DrawLine(TDrawBuffer B, int L, int C, int W, int &HilitX);
@@ -436,12 +436,12 @@ public:
     void Rehilit(int ToRow);
     void Redraw();
     void FullRedraw();
-    int  GetHilitWord(size_t len, const char *str, ChColor &clr, int IgnCase = 0);
-    
-/////////////////////////////////////////////////////////////////////////////   
+    int  GetHilitWord(ChColor &clr, const char *str, size_t len, int IgnCase = 0);
+
+/////////////////////////////////////////////////////////////////////////////
 // Utility Routines
 /////////////////////////////////////////////////////////////////////////////
-    
+
     int LineIndented(int Row, const char *indentchars = 0);
     int LineIndentedCharCount(ELine *l, const char *indentchars);
     int IndentLine(int Row, int Indent);
@@ -454,7 +454,7 @@ public:
     int Find(SearchReplaceOptions &opt);
     int IsLineBlank(int Row);
     int TrimLine(int Row);
-    
+
 #ifdef CONFIG_OBJ_ROUTINE
     int ScanForRoutines();
 #endif
@@ -462,7 +462,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 // Bookmark Routines
 /////////////////////////////////////////////////////////////////////////////
-    
+
 #ifdef CONFIG_BOOKMARKS
     int PlaceBookmark(const char *Name, EPoint P);
     int RemoveBookmark(const char *Name);
@@ -470,11 +470,11 @@ public:
     int GotoBookmark(const char *Name);
     int GetBookmarkForLine(int searchFrom, int searchForLine, char *&Name, EPoint &P);
 #endif
-    
+
 /////////////////////////////////////////////////////////////////////////////
 // Editing Routines
 /////////////////////////////////////////////////////////////////////////////
-    
+
     int     MoveLeft();
     int     MoveRight();
     int     MoveUp();
@@ -541,7 +541,7 @@ public:
     int     MoveBeginOrNonWhite();
     int     MoveBeginLinePageFile();
     int     MoveEndLinePageFile();
-    
+
     int     KillLine();
     int     KillChar();
     int     KillCharPrev();
@@ -561,7 +561,7 @@ public:
 #define ccUp       0
 #define ccDown     1
 #define ccToggle   2
-    
+
     int     CharTrans(TransTable tab);
     int     CharCaseUp();
     int     CharCaseDown();
@@ -581,7 +581,7 @@ public:
     int     LineTrans(ExState &State);
     int     BlockTrans(ExState &State);
     int     GetTrans(ExState &State, TransTable tab);
-    
+
     int     LineInsert();
     int     LineAdd();
     int     LineSplit();
@@ -597,7 +597,7 @@ public:
     int     CanUndo();
     int     CanRedo();
 #endif
-    
+
     int     LineLen();
     int     LineCount();
     int     CLine();
@@ -617,11 +617,11 @@ public:
     int     InsPrevLineChar();
     int     InsPrevLineToEol();
     int     LineDuplicate();
-    
+
     int     GetMatchBrace(EPoint &M, int MinLine, int MaxLine, int show);
     int     MatchBracket();
     int     HilitMatchBracket();
-    
+
     int     BlockBegin();
     int     BlockEnd();
     int     BlockUnmark();
@@ -675,7 +675,7 @@ public:
     int     ToggleMakeBackups();
     int     SetLeftMargin();
     int     SetRightMargin();
-    
+
     int     ShowPosition();
 
     int     Search(ExState &State, const char *aString, int Options, int CanResume = 0);
@@ -689,7 +689,7 @@ public:
     int     SearchReplace(ExState &State);
     int     SearchReplaceB(ExState &State);
     int     SearchReplaceRx(ExState &State);
-    
+
 #ifdef CONFIG_WORD_HILIT
     int     HilitAddWord(const char *Word);
     int     HilitFindWord(const char *Word);
@@ -714,7 +714,7 @@ public:
     int     FoldCloseAll();
     int     FoldToggleOpenClose();
 #endif
-    
+
     int     ChangeMode(const char *Mode);
     int     ChangeKeys(const char *Mode);
     int     ChangeFlags(const char *Mode);
@@ -723,9 +723,9 @@ public:
     int ScrollRight(ExState &State);
     int ScrollDown(ExState &State);
     int ScrollUp(ExState &State);
-    
+
     /* editor functions with user interface */
-    
+
     int MoveToColumn(ExState &State);
     int MoveToLine(ExState &State);
     int FoldCreateByRegexp(ExState &State);
@@ -764,7 +764,7 @@ public:
     int ChangeTabSize(ExState &State);
     int ChangeRightMargin(ExState &State);
     int ChangeLeftMargin(ExState &State);
-    
+
 #ifdef CONFIG_I_ASCII
     int ASCIITable(ExState &State);
 #endif

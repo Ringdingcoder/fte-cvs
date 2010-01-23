@@ -127,31 +127,18 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
             case '(': ++Count[2]; break; \
         } \
 \
-        while (len > 0)        \
-        {                      \
-            switch (*p) {      \
-            case '{':          \
-                ++Count[0];    \
-                break;         \
-            case '}':          \
-                --Count[0];    \
-                break;         \
-            case '[':          \
-                ++Count[1];    \
-                break;         \
-            case ']':          \
-                --Count[1];    \
-                break;         \
-            case '(':          \
-                ++Count[2];    \
-                break;         \
-            case ')':          \
-                --Count[2];    \
-                break;         \
-            }                  \
-            cmd;               \
-            if (TEST_ZERO)     \
-                break;         \
+        while (len > 0) {                \
+            switch (*p) {                \
+            case '{': ++Count[0]; break; \
+            case '}': --Count[0]; break; \
+            case '[': ++Count[1]; break; \
+            case ']': --Count[1]; break; \
+            case '(': ++Count[2]; break; \
+            case ')': --Count[2]; break; \
+            }                            \
+            cmd;                         \
+            if (TEST_ZERO)               \
+                break;                   \
         } \
     } while (0)
 
@@ -224,7 +211,7 @@ struct HState {
     int nextKwdNoCharState;
     
     void InitState();
-    int GetHilitWord(int len, char *str, ChColor &clr);
+    int GetHilitWord(ChColor &clr, const char *str, size_t len);
 };
 
 class HMachine {

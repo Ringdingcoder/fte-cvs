@@ -379,7 +379,7 @@ int EBuffer::BeginMacro() {
     return NextCommand();
 }
 
-int EBuffer::ExecCommand(int Command, ExState &State) {
+int EBuffer::ExecCommand(ExCommands Command, ExState &State) {
     switch (Command) {
     case ExMoveUp:                return MoveUp();
     case ExMoveDown:              return MoveDown();
@@ -666,6 +666,8 @@ int EBuffer::ExecCommand(int Command, ExState &State) {
     case ExInsertDate:          return InsertDate(State);
     case ExInsertUid:           return InsertUid();
     case ExShowHelpWord:        return ShowHelpWord(State);
+    default:
+        ;
     }
     return EModel::ExecCommand(Command, State);
 }

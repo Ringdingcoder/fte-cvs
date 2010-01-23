@@ -94,7 +94,7 @@ EModel *BufferView::GetBufferById(int No) {
     return 0;
 }
     
-int BufferView::ExecCommand(int Command, ExState &State) {
+int BufferView::ExecCommand(ExCommands Command, ExState &State) {
 
     switch (Command) {
     case ExCloseActivate:
@@ -166,8 +166,9 @@ int BufferView::ExecCommand(int Command, ExState &State) {
             Row = SearchPos[SearchLen] = i;
         }
         return ErOK;
+    default:
+        ;
     }
-
     return EList::ExecCommand(Command, State);
 }
 
@@ -210,9 +211,8 @@ void BufferView::HandleEvent(TEvent &Event) {
                     break;
             }
     }
-    if (resetSearch) {
+    if (resetSearch)
         SearchLen = 0;
-    }
 }
 
 /**

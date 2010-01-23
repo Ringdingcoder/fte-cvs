@@ -36,7 +36,7 @@ EEventMap *ExModelView::GetEventMap() {
     return View->GetEventMap();
 }
 
-int ExModelView::ExecCommand(int Command, ExState &State) {
+int ExModelView::ExecCommand(ExCommands Command, ExState &State) {
     return View->ExecCommand(Command, State);
 }
 

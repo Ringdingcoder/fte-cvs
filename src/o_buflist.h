@@ -26,7 +26,7 @@ public:
     virtual char* FormatLine(int Line);
     virtual void UpdateList();
     EModel *GetBufferById(int No);
-    virtual int ExecCommand(int Command, ExState &State);
+    virtual int ExecCommand(ExCommands Command, ExState &State);
     virtual void HandleEvent(TEvent &Event);
     int getMatchingLine (int start, int direction);
     virtual int Activate(int No);

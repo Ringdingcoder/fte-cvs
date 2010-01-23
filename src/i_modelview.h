@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __EXEDIT_H
-#define __EXEDIT_H
+#ifndef I_MODELVIEW_H
+#define I_MODELVIEW_H
 
 class EView;
 
@@ -21,10 +21,10 @@ public:
     ExModelView(EView *AView);
     virtual ~ExModelView();
     virtual void Activate(int gotfocus);
-    
+
     virtual EEventMap *GetEventMap();
-    virtual int ExecCommand(int Command, ExState &State);
-    
+    virtual int ExecCommand(ExCommands Command, ExState &State);
+
     virtual int GetContext();
     virtual int BeginMacro();
     virtual void HandleEvent(TEvent &Event);
@@ -37,4 +37,4 @@ public:
     virtual int IsModelView() { return 1; }
 };
 
-#endif
+#endif // I_MODELVIEW_H

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __COLOR_H
-#define __COLOR_H
+#ifndef C_COLOR_H
+#define C_COLOR_H
 
 #include "c_mode.h"
 
@@ -64,4 +64,4 @@ extern ChColor MsgColor[3];
 
 int SetColor(const char *ChColor, const char *Value);
 
-#endif
+#endif // C_COLOR_H

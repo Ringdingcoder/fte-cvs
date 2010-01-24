@@ -33,11 +33,11 @@ public:
 
 static int GetHOfsItem(int id, int cur) {
     int pos = 2;
-    int i;
+    unsigned i;
     size_t len;
     
     for (i = 0; i < Menus[id].Count; i++) {
-        if (i == cur) return pos;
+        if ((int)i == cur) return pos;
         if (Menus[id].Items[i].Name) {
             len = CStrLen(Menus[id].Items[i].Name);
             pos += (int)len + 2;
@@ -49,7 +49,7 @@ static int GetHOfsItem(int id, int cur) {
 
 static int GetHPosItem(int id, int X) {
     int pos = 1;
-    int i;
+    unsigned i;
     size_t len;
     
     for (i = 0; i < Menus[id].Count; i++) {
@@ -66,7 +66,7 @@ static int GetHPosItem(int id, int X) {
 static int DrawHMenu(int x, int y, int id, int active) {
     int pos = 1;
     TDrawBuffer B;
-    int i;
+    unsigned i;
     size_t len;
     TAttr color1, color2;
     int Cols, Rows;
@@ -76,7 +76,7 @@ static int DrawHMenu(int x, int y, int id, int active) {
     MoveChar(B, 0, Cols, ' ', hcMenu_Background, Cols);
     if (id != -1) {
         for (i = 0; i < Menus[id].Count; i++) {
-            if (i == active) {
+            if ((int)i == active) {
                 color1 = hcMenu_ActiveItem;
                 color2 = hcMenu_ActiveChar;
             } else {
@@ -100,7 +100,7 @@ static int DrawHMenu(int x, int y, int id, int active) {
 }
 
 static int GetVPosItem(int id, int w, int X, int Y) {
-    if (Y <= 0 || Y > Menus[id].Count) return -1;
+    if (Y <= 0 || Y > (int)Menus[id].Count) return -1;
     if (Menus[id].Items[Y - 1].Name == 0) return -1;
     if (X <= 0 || X >= w - 1) return -1;
     return Y - 1;
@@ -125,7 +125,7 @@ static int GetVSize(int id, int &X, int &Y) {
 
 static int DrawVMenu(int x, int y, int id, int active) {
     TDrawBuffer B;
-    int i;
+    unsigned i;
     size_t len;
     TAttr color1, color2;
     int w, h;
@@ -141,7 +141,7 @@ static int DrawVMenu(int x, int y, int id, int active) {
     MoveCh(B + w - 1, ConGetDrawChar(DCH_C2), hcMenu_Background, 1);
     ConPutBox(x, y, w, 1, B);
     for (i = 0; i < Menus[id].Count; i++) {
-        if (i == active) {
+        if ((int)i == active) {
             color1 = hcMenu_ActiveItem;
             color2 = hcMenu_ActiveChar;
         } else {

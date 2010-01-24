@@ -175,7 +175,7 @@ void EBuffer::DrawLine(TDrawBuffer B, int VRow, int C, int W, int &HilitX) {
 
             f = FindFold(Row);
             if (f != -1) {
-                int foldColor;
+                ChColor foldColor;
                 if (FF[f].level<5) foldColor=hcPlain_Folds[FF[f].level];
                 else foldColor=hcPlain_Folds[4];
                 if (FF[f].open == 1) {
@@ -577,7 +577,7 @@ int EBuffer::GetHilitWord(ChColor &clr, const char *str, size_t len, int IgnCase
         memcpy(s, str, len);
         s[len] = 0;
         if (HilitFindWord(s)) {
-	    clr = COUNT_CLR + hcPlain_HilitWord;
+	    clr = ChColor(COUNT_CLR + hcPlain_HilitWord);
             return 1;
         }
     }
@@ -587,7 +587,7 @@ int EBuffer::GetHilitWord(ChColor &clr, const char *str, size_t len, int IgnCase
     if (IgnCase) {
         while (p && *p) {
             if (strnicmp(p, str, len) == 0) {
-		clr = COUNT_CLR + ((unsigned char*)p)[len];
+		clr = ChColor(COUNT_CLR + ((unsigned char*)p)[len]);
                 return 1;
             }
             p += len + 1;
@@ -595,7 +595,7 @@ int EBuffer::GetHilitWord(ChColor &clr, const char *str, size_t len, int IgnCase
     } else {
         while (p && *p) {
             if (memcmp(p, str, len) == 0) {
-                clr = COUNT_CLR + ((unsigned char*)p)[len];
+                clr = ChColor(COUNT_CLR + ((unsigned char*)p)[len]);
                 //printf("PLEN %d  %d\n", p[len], COUNT_CLR);
 		return 1;
             }

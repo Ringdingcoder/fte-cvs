@@ -122,7 +122,7 @@ int ParseSearchReplace(EBuffer *B, const char *str, int replace, SearchReplaceOp
     return 1;
 }
 
-int EBuffer::FindStr(const char *Data, size_t Len, int Options) {
+int EBuffer::FindStr(const char *Data, int Len, int Options) {
     SearchReplaceOptions opt;
 
     opt.Options = Options;
@@ -130,7 +130,7 @@ int EBuffer::FindStr(const char *Data, size_t Len, int Options) {
     return FindStr(Data, Len, opt);
 }
 
-int EBuffer::FindStr(const char *Data, size_t Len, SearchReplaceOptions &opt) {
+int EBuffer::FindStr(const char *Data, int Len, SearchReplaceOptions &opt) {
     int Options = opt.Options;
     int LLen, Start, End;
     int C, L;
@@ -139,7 +139,7 @@ int EBuffer::FindStr(const char *Data, size_t Len, SearchReplaceOptions &opt) {
 
     if (Options & SEARCH_RE)
         return 0;
-    if (!Len)
+    if (Len <= 0)
         return 0;
 
     if (Options & SEARCH_NOPOS) {

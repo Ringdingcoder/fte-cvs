@@ -448,8 +448,8 @@ public:
 #ifdef CONFIG_SYNTAX_HILIT
     int GetMap(int Row, int *StateLen, hsState **StateMap);
 #endif
-    int FindStr(const char *Data, size_t Len, int Options);
-    int FindStr(const char *Data, size_t Len, SearchReplaceOptions &opt);
+    int FindStr(const char *Data, int Len, int Options);
+    int FindStr(const char *Data, int Len, SearchReplaceOptions &opt);
     int FindRx(RxNode *Rx, SearchReplaceOptions &opt);
     int Find(SearchReplaceOptions &opt);
     int IsLineBlank(int Row);

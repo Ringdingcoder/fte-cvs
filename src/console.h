@@ -104,8 +104,7 @@ typedef unsigned char TChar;
 // this is just WILD WILD GUESS....
 class TCell : public PCHAR_INFO {
 public:
-    TCell() : Char.AsciiChar(' '), Attributes(0x07) {}
-    TCell(char c, TAttr a) : Char.AsciiChar(c), Attributes(a) {}
+    TCell(char c = ' ', TAttr a = 0x07) : Char.AsciiChar(c), Attributes(a) {}
     char GetChar() const { return Char.AsciiChar; }
     TAttr GetAttr() const { return Attributes; }
     void SetChar(char c) { Char.AsciiChar = c; }
@@ -125,8 +124,7 @@ class TCell {
     operator unsigned char*();
     operator char*();
 public:
-    TCell() : Char(' '), Attr(0x07) {}
-    TCell(TChar c, TAttr a) : Char(c), Attr(a) {}
+    TCell(TChar c = ' ', TAttr a = 0x07) : Char(c), Attr(a) {}
     TChar GetChar() const { return Char; }
     TAttr GetAttr() const { return Attr; }
     void SetChar(TChar c) { Char = c; }

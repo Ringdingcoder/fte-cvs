@@ -85,19 +85,8 @@ int Indent_REXX(EBuffer *B, int Line, int PosCursor);
 int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
 #endif
 
- /*
-  * NT has 2-byte charcode and attribute... Following is not portable to non-
-  * intel; should be replaced by formal TCell definition' usage instead of
-  * assumed array.. (Jal)
-  */
-#ifdef NTCONSOLE 
-#    define PCLI unsigned short
-#else
-#    define PCLI unsigned char
-#endif
-
 #define HILIT_CLRD() \
-    ((Color < COUNT_CLR) ? Colors[Color] : Color - COUNT_CLR)
+    ChColor(((Color < COUNT_CLR) ? Colors[Color] : Color - COUNT_CLR))
 
 #define ColorChar() \
     do {\
@@ -140,7 +129,6 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
     } while (0)
 
 #define HILIT_VARS(ColorTable, Line) \
-    PCLI *BPtr; \
     int BPos; \
     ChColor *Colors = ColorTable; \
     ChColor Color = CLR_Normal; \

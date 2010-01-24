@@ -23,7 +23,7 @@ public:
     virtual ~ExView();
     
     virtual EEventMap *GetEventMap();
-    virtual int ExecCommand(int Command, ExState &State);
+    virtual int ExecCommand(ExCommands Command, ExState &State);
     
     virtual void Activate(int gotfocus);
     virtual int GetContext() { return CONTEXT_NONE; }

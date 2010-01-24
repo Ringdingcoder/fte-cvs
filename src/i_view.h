@@ -26,7 +26,7 @@ public:
     void NewView(ExView *view);
     
     EEventMap *GetEventMap();
-    int ExecCommand(int Command, ExState &State);
+    int ExecCommand(ExCommands Command, ExState &State);
     
     virtual int GetContext();
     virtual ExView* GetStatusContext() { if (Top) return Top->GetStatusContext(); else return 0; }

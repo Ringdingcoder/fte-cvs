@@ -69,7 +69,7 @@ EEventMap *GxView::GetEventMap() {
     return (Top) ? Top->GetEventMap() : 0;
 }
 
-int GxView::ExecCommand(int Command, ExState &State) {
+int GxView::ExecCommand(ExCommands Command, ExState &State) {
     return (Top) ? Top->ExecCommand(Command, State) : 0;
 }
 

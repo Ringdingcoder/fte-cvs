@@ -184,8 +184,8 @@ int GViewPeer::ConSetCursorPos(int X, int Y) {
     cY = Y;
     if (wState & sfFocus)
         return ::ConSetCursorPos(cX + wX, cY + wY);
-    else
-        return 1;
+
+    return 1;
 }
 
 int GViewPeer::ConQueryCursorPos(int *X, int *Y) {
@@ -198,16 +198,15 @@ int GViewPeer::ConShowCursor() {
     cVisible = 1;
     if (wState & sfFocus)
         return ::ConShowCursor();
-    else
-        return 1;
+    return 1;
 }
 
 int GViewPeer::ConHideCursor() {
     cVisible = 0;
     if (wState & sfFocus)
         return ::ConHideCursor();
-    else
-        return 1;
+
+    return 1;
 }
 
 int GViewPeer::ConCursorVisible() {
@@ -426,11 +425,11 @@ int GView::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 }
 
 int GView::ConSetSize(int X, int Y) {
-    if (Peer->ConSetSize(X, Y))
-        Resize(X, Y);
-    else
-        return 0;
-    return 1;
+    if (Peer->ConSetSize(X, Y)) {
+	Resize(X, Y);
+	return 1;
+    }
+    return 0;
 }
 
 int GView::ConQuerySize(int *X, int *Y) {

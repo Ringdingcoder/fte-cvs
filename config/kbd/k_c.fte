@@ -7,7 +7,7 @@ eventmap C {
     key [\]]    { SelfInsert; MoveLeft; ?HilitMatchBracket; MoveRight }
     key [:]     { SelfInsert; ?LineIndent }
     key [#]     { SelfInsert; ?LineIndent }
-    key [A+\\]  { BlockReIndent; FileTrim; WinRefresh }
+    key [A+\\]  { BlockReIndent; WinRefresh }
     
     # do some smart indents
     key [A+G-Enter]     { LineAdd; LineIndent }

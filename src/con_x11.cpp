@@ -100,28 +100,28 @@ static const unsigned int MouseAutoDelay = 40;
 static const unsigned int MouseAutoRepeat = 200;
 static const long MouseMultiClick = 300;
 
-static int setUserPosition = 0;
-static int initX = 0, initY = 0;
+static int setUserPosition;
+static int initX, initY;
 static int ScreenCols = 80;
 static int ScreenRows = 40;
-static int CursorX = 0;
-static int CursorY = 0;
+static int CursorX;
+static int CursorY;
 static int CursorVisible = 1;
 static int CursorStart, CursorEnd;
 static unsigned long CursorLastTime;
 // Cursor flashing interval, in msecs
 static const unsigned int CursorFlashInterval = 300;
-static TCell *ScreenBuffer = 0;
-static int Refresh = 0;
+static TCell *ScreenBuffer;
+static int Refresh;
 
 // res_name can be set with -name switch
 static char res_name[20] = "fte";
 static char res_class[] = "Fte";
 
-static Display *display = 0;
+static Display *display;
 static Atom wm_protocols;
 static Atom wm_delete_window;
-static Atom XA_CLIPBOARD = 0;
+static Atom XA_CLIPBOARD;
 static Atom proptype_targets;
 static Atom proptype_text;
 static Atom proptype_compound_text;
@@ -132,25 +132,25 @@ static Atom prop_selection;
 static XSizeHints size_hints;
 // program now contains both modes if available
 // some older Xservers don't like XmbDraw...
-static XFontStruct* font_struct = 0;
-static ColorXGC* colorXGC = 0;
+static XFontStruct* font_struct;
+static ColorXGC* colorXGC;
 #ifdef USE_XMB
 static int useXMB = true;
 static XFontSet font_set;
 static int FontCYD;
 #else
-static int useXMB = 0;
+static int useXMB;
 #endif
-static i18n_context_t* i18n_ctx = 0;
+static i18n_context_t* i18n_ctx;
 static int useI18n = true;
 static int FontCX, FontCY;
 static XColor Colors[16];
 static char winTitle[256] = "FTE";
 static char winSTitle[256] = "FTE";
 
-static unsigned char* CurSelectionData[3] = {NULL,NULL,NULL};
-static int CurSelectionLen[3] = {0,0,0};
-static int CurSelectionOwn[3] = {0,0,0};
+static unsigned char* CurSelectionData[3];
+static int CurSelectionLen[3];
+static int CurSelectionOwn[3];
 static Time now;
 
 struct IncrementalSelectionInfo {
@@ -164,8 +164,7 @@ struct IncrementalSelectionInfo {
     time_t lastUse;
 };
 
-static IncrementalSelectionInfo *incrementalSelections = NULL;
-
+static IncrementalSelectionInfo *incrementalSelections;
 static Bool gotXError;
 
 static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned char *data, size_t len, Bool privateData);
@@ -2079,7 +2078,7 @@ char ConGetDrawChar(unsigned int idx) {
     static size_t len = 0;
 
     if (!tab) {
-        tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
+        tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12\x01\x01 \x02\x01\x01");
         len = strlen(tab);
     }
     assert(idx < len);

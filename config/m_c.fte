@@ -33,6 +33,7 @@ colorize C {
 	'inline',
 	'return',
 	'sizeof',
+	'static',
 	'struct',
 	'switch',
 	'typedef',
@@ -88,22 +89,10 @@ colorize C {
 	'double',
 	'float',
 	'int',
-	'int16_t',
-	'int32_t',
-	'int64_t',
-	'int8_t',
 	'long',
 	'register',
 	'short',
 	'signed',
-	'static',
-	'size_t',
-	'ssize_t',
-	'uint',
-	'uint16_t',
-	'uint32_t',
-	'uint64_t',
-	'uint8_t',
 	'unsigned',
 	'void',
 	'volatile',
@@ -138,7 +127,21 @@ colorize C {
 	'__attribute__',
 	'__format__',
 	'__printf__',
+    
+	'int16_t',
+	'int32_t',
+	'int64_t',
+	'int8_t',
+	'intptr_t',
+	'uint16_t',
+	'uint32_t',
+	'uint64_t',
+	'uint8_t',
+	'uintptr_t',
+	'size_t',
+	'ssize_t',
     };
+    
     # show these as numbers
     # True, TRUE, False, FALSE, NULL are commonly defined values
     # but they are not part of C lang
@@ -151,7 +154,6 @@ colorize C {
 	'FALSE',
 	'NULL',
     };
-
 }
 
 mode C: PLAIN {      # C/C++ Mode

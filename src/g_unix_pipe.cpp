@@ -17,9 +17,7 @@ struct GPipe {
     EModel *notify;
 };
 
-static GPipe Pipes[MAX_PIPES] = {
-    {0},
-};
+static GPipe Pipes[MAX_PIPES];
 
 /* If command pipes are open, wait for input on them or
  * external file descriptor if  passed */

@@ -497,15 +497,15 @@ int ConQueryCursorPos(int *X, int *Y) {
     return 0;
 }
 
-int ConShowCursor(void) {
+int ConShowCursor() {
     return 0;
 }
 
-int ConHideCursor(void) {
+int ConHideCursor() {
     return 0;
 }
 
-int ConCursorVisible(void) {
+int ConCursorVisible() {
     return 1;
 }
 
@@ -519,15 +519,15 @@ int ConQueryMousePos(int *X, int *Y) {
     return -1;
 }
 
-int ConShowMouse(void) {
+int ConShowMouse() {
     return -1;
 }
 
-int ConHideMouse(void) {
+int ConHideMouse() {
     return -1;
 }
 
-int ConMouseVisible(void) {
+int ConMouseVisible() {
     return 0;
 }
 
@@ -605,7 +605,7 @@ int ConPutEvent(TEvent Event) {
     return 0;
 }
 
-int ConFlush(void) {return 0;  }
+int ConFlush() {return 0;  }
 int ConGrabEvents(TEventMask /*EventMask*/) { return 0; }
 
 static int shift_state = 0;
@@ -1042,12 +1042,12 @@ GUI::~GUI() {
     gui = 0;
 }
 
-int GUI::ConSuspend(void) {
+int GUI::ConSuspend() {
     RestoreScreen();
     return ::ConSuspend();
 }
 
-int GUI::ConContinue(void) {
+int GUI::ConContinue() {
     SaveScreen();
     return ::ConContinue();
 }

@@ -901,7 +901,7 @@ int GUI::ConPutEvent(TEvent Event) {
     return ::ConPutEvent(Event);
 }
 
-int GUI::ConFlush(void) {
+int GUI::ConFlush() {
     return 0;
 }
 

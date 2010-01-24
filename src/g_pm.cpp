@@ -3433,9 +3433,9 @@ void GUI::DispatchEvent(GFrame *frame, GView *view, TEvent &Event) {
     }
 }
 
-int GUI::ConSuspend(void) { return 0; }
+int GUI::ConSuspend() { return 0; }
 
-int GUI::ConContinue(void) { return 0; }
+int GUI::ConContinue() { return 0; }
 
 int GUI::ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete, GView **view) {
     return ::ConGetEvent(EventMask, Event, WaitTime, Delete, view);
@@ -3446,7 +3446,7 @@ int GUI::ConPutEvent(TEvent Event) {
     return 0;
 }
 
-int GUI::ConFlush(void) {
+int GUI::ConFlush() {
     return 0;
 }
 

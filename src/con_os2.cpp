@@ -802,12 +802,12 @@ GUI::~GUI() {
     gui = 0;
 }
 
-int GUI::ConSuspend(void) {
+int GUI::ConSuspend() {
     RestoreScreen();
     return ::ConSuspend();
 }
 
-int GUI::ConContinue(void) {
+int GUI::ConContinue() {
     SaveScreen();
     return ::ConContinue();
 }

@@ -54,7 +54,7 @@ static void curses_winch_handler(int signum)
 
 /* Routine to allocate/reallocate and zero space for screen buffer,
    represented as a dynamic array of dynamic PCell lines */
-static void SaveScreen(void) {
+static void SaveScreen() {
 	int NewSavedW, NewSavedH;
 
 	ConQuerySize(&NewSavedW, &NewSavedH);
@@ -177,7 +177,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 }
 
 
-int ConDone(void)
+int ConDone()
 {
 	keypad(stdscr,0);
 	endwin();
@@ -185,11 +185,11 @@ int ConDone(void)
 	return 0;
 }
 
-int ConSuspend(void)
+int ConSuspend()
 {
 	return 0;
 }
-int ConContinue(void)
+int ConContinue()
 {
 	return 0;
 }
@@ -490,7 +490,7 @@ static int ConGetMouseEvent(TEvent *Event)
 static TEvent Prev = { evNone };
 
 #if 1
-static int ConGetEscEvent(void)
+static int ConGetEscEvent()
 {
 	int key;
 
@@ -518,7 +518,7 @@ static int ConGetEscEvent(void)
  *
  * Using string table and TTYEscParse
  */
-static int ConGetEscEvent(void)
+static int ConGetEscEvent()
 {
 	int ch;
 	int code = 0;
@@ -866,12 +866,12 @@ GUI::~GUI()
 	gui = 0;
 }
 
-int GUI::ConSuspend(void)
+int GUI::ConSuspend()
 {
 	return ::ConSuspend();
 }
 
-int GUI::ConContinue(void)
+int GUI::ConContinue()
 {
 	return ::ConContinue();
 }

@@ -474,20 +474,20 @@ int ConInit(int /*XSize*/, int /*YSize*/) { /*FOLD00*/
     return 0;
 }
 
-int ConDone(void) { /*FOLD00*/
+int ConDone() { /*FOLD00*/
     ConSuspend();
     CloseHandle(OurConOut);
     return 0;
 }
 
-int ConSuspend(void) { /*FOLD00*/
+int ConSuspend() { /*FOLD00*/
     SetConsoleActiveScreenBuffer(ConOut);
     SetConsoleMode(ConIn, OldConsoleMode);
 
     return 0;
 }
 
-int ConContinue(void) { /*FOLD00*/
+int ConContinue() { /*FOLD00*/
     SetConsoleActiveScreenBuffer(OurConOut);
     GetConsoleMode(ConIn, &OldConsoleMode);
     SetConsoleMode(ConIn, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT);
@@ -498,7 +498,7 @@ int ConContinue(void) { /*FOLD00*/
     return 0;
 }
 
-int ConClear(void) { /*FOLD00*/
+int ConClear() { /*FOLD00*/
     int W, H;
     TDrawBuffer B;
 
@@ -716,13 +716,13 @@ int ConQueryCursorPos(int *X, int *Y) { /*FOLD00*/
     return 0;
 }
 
-int ConShowCursor(void) { /*FOLD00*/
+int ConShowCursor() { /*FOLD00*/
     CursorVisible = 1;
     DrawCursor(1);
     return 0;
 }
 
-int ConHideCursor(void) { /*FOLD00*/
+int ConHideCursor() { /*FOLD00*/
     CursorVisible = 0;
     DrawCursor(0);
     return 0;
@@ -748,13 +748,13 @@ int ConQueryMousePos(int *X, int *Y) { /*FOLD00*/
     return 0;
 }
 
-int ConShowMouse(void) { /*FOLD00*/
+int ConShowMouse() { /*FOLD00*/
     MouseVisible = 1;
     if (!MousePresent) return -1;
     return 0;
 }
 
-int ConHideMouse(void) { /*FOLD00*/
+int ConHideMouse() { /*FOLD00*/
     MouseVisible = 0;
     if (!MousePresent) return -1;
     return 0;
@@ -773,7 +773,7 @@ int ConPutEvent(TEvent Event) { /*FOLD00*/
     return 0;
 }
 
-int ConFlush(void) { /*FOLD00*/
+int ConFlush() { /*FOLD00*/
     return 0;
 }
 
@@ -827,12 +827,12 @@ GUI::~GUI() { /*FOLD00*/
     gui = 0;
 }
 
-int GUI::ConSuspend(void) { /*FOLD00*/
+int GUI::ConSuspend() { /*FOLD00*/
     RestoreScreen();
     return ::ConSuspend();
 }
 
-int GUI::ConContinue(void) { /*FOLD00*/
+int GUI::ConContinue() { /*FOLD00*/
     SaveScreen();
     return ::ConContinue();
 }

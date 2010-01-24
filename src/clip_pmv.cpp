@@ -307,7 +307,7 @@ static struct impentry {
  *    Load PMWIN.DLL and get pointers to all reqd PM functions
  */
 
-static BOOL loadDLL(void) {
+static BOOL loadDLL() {
     static BOOL loaded = FALSE;
     static BOOL loaded_ok = FALSE;
     static HMODULE pmwin;
@@ -351,7 +351,7 @@ static struct {
     BOOL opened;
 } PmInfo;
 
-static void LeavePmClipboard(void) {
+static void LeavePmClipboard() {
 
     if (PmInfo.opened)
         p_WinCloseClipbrd(PmInfo.hab);
@@ -362,7 +362,7 @@ static void LeavePmClipboard(void) {
     PmInfo.ppib->pib_ultype = PmInfo.savedtype;
 }
 
-static BOOL AccessPmClipboard(void) {
+static BOOL AccessPmClipboard() {
     PTIB ptib;
 
     if (loadDLL() == FALSE) {

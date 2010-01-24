@@ -13,14 +13,14 @@
 static int SameDir(char* D1, char* D2)
 {
     if (!D1||!D2) return 0;
-    int l1=strlen (D1);
-    int l2=strlen (D2);
+    size_t l1=strlen (D1);
+    size_t l2=strlen (D2);
     if (l1<l2) return strncmp (D1,D2,l1)==0&&strcmp (D2+l1,SSLASH)==0;
     else if (l1==l2) return !strcmp (D1,D2);
     else return strncmp (D1,D2,l2)==0&&strcmp (D1+l1,SSLASH)==0;
 }
 
-const char *CvsStatusChars="?UPMCAR";
+static const char CvsStatusChars[] = "?UPMCAR";
 ECvs *CvsView=0;
 
 ECvs::ECvs(int createFlags, EModel **ARoot, char* ADir, char* ACommand,
@@ -57,7 +57,7 @@ void ECvs::RemoveLogFile()
 char* ECvs::MarkedAsList()
 {
     int i;
-    int len=0;
+    size_t len=0;
     // First pass - calculate size
     for (i=0;i<LineCount;i++) if (Lines[i]->Status&2) len+=strlen (Lines[i]->File)+1;
     if (len==0) {

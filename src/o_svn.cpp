@@ -19,7 +19,7 @@ static int SameDir (char *D1,char *D2) {
     else return strncmp (D1,D2,l2)==0&&strcmp (D1+l1,SSLASH)==0;
 }
 
-const char *SvnStatusChars="?XUPMCAR";
+static const char SvnStatusChars[] = "?XUPMCAR";
 ESvn *SvnView=0;
 
 ESvn::ESvn (int createFlags,EModel **ARoot,char *ADir,char *ACommand,char *AOnFiles):ESvnBase (createFlags,ARoot,"SVN") {

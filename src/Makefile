@@ -32,7 +32,8 @@ vag:
 
 .PHONY: tags
 tags:
+	$(RM) -f tags
 	find . -name '*.cpp' -o -name '*.h' | xargs ctags -a
 
 clean:
-	rm -f core *.o *~ .depend defcfg.h defcfg.cnf
+	$(RM) -f core *.o *~ cscope.out .depend defcfg.h defcfg.cnf tags

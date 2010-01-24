@@ -680,7 +680,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
     else if (ch == '\t')
 	KEvent->Code |= kbTab;
     else if (ch >= 'A' && ch <= 'Z')
-	KEvent->Code |= kfShift | (ch + 'a' - 'A');
+	KEvent->Code |= kfShift | ch;
     else if (ch < 32)
 	KEvent->Code |=  (kfCtrl | (ch + 'A' - 1)); // +0100
     else if (ch < 256)

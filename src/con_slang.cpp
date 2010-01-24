@@ -538,25 +538,37 @@ int ConGetEvent(TEventMask /*EventMask */ ,
         return 0; // pipe reading
 
     key = getkey(0);
-    if (!key)
-	return -1;
-    else if (key == 27) // Esc
-	key = parseEsc();
-    else if (key == '\n' || key == '\r')
-	key = kbEnter;
-    else if (key == '\t')
-	key = kbTab;
-    else if (key == 8 || key == 127)
-	key = kbBackSp;
-    else if (key >= 'A' && key <= 'Z')
-	key = kfShift | (key + 'a' - 'A');
-    else if (key < 32)
-	key = kfCtrl | (key + 'A' - 1);
+    if (isupper(key))
+	key = kfShift | key;
+    else if (key < 32) {
+	switch (key) {
+	case 0:
+	    Event->What = evNone;
+	    return -1;
+	case 8:
+	    key = kbBackSp;
+	    break;
+	case '\t':
+	    key = kbTab;
+            break;
+	case '\r':
+	case '\n':
+	    key = kbEnter;
+            break;
+	case 27: // Esc
+	    key = parseEsc();
+            break;
+	default:
+	    key = kfCtrl | (key + 'A' - 1);
+	}
+    } else if (key == 127)
+        key = kbBackSp;
     else if (key > 255)
 	key = kbEsc;
 
     Event->What = evKeyDown;
     KEvent->Code = key;
+    //fprintf(stderr, "KEY %x \n", key);
 
     if (!Delete)
 	Prev = *Event;

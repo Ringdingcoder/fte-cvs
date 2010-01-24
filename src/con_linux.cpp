@@ -113,53 +113,53 @@ static unsigned char fromScreen[256];
 int GetKeyEvent(TEvent *Event);
 int GetMouseEvent(TEvent *Event);
 
-static ssize_t conread(int fd, void *p, size_t len) {   // len should be a multiple of 2
-    char *buf = (char *)alloca(len);
-    char *c = (char *)p;
+static ssize_t conread(int fd, TCell *p, size_t len, off_t off) {
+    char *buf = (char *)alloca(len * 2);
     char *s = buf;
 
-    ssize_t rlen = read(fd, buf, len);
+    lseek(fd, off, SEEK_SET);
+    ssize_t rlen = read(fd, buf, len * 2);
     for (unsigned n = 0; n < rlen; n += 2) {
+        TChar ch;
 #ifdef USE_SCRNMAP
 	if (!noCharTrans)
-	    c[BYTE_ORDER == BIG_ENDIAN] = fromScreen[(unsigned char)*s++];
+	    ch = fromScreen[(unsigned char)*s++];
 	else
 #endif
-	    c[BYTE_ORDER == BIG_ENDIAN] = *s++;
-	c[BYTE_ORDER != BIG_ENDIAN] = *s++;
-	c += 2;
+	    ch = *s++;
+	p->Set(ch, *s++);
+        p++;
+
     }
     return rlen;
 }
 
-static ssize_t conwrite(int fd, void *p, size_t len) {  // len should be a multiple of 2
-    char *buf = (char *)alloca(len);
-    char *s = (char *)p;
+static ssize_t conwrite(int fd, TCell *p, size_t len, off_t off) {
+    char *buf = (char *)alloca(len * 2);
     char *c = buf;
 
-    for (unsigned n = 0; n < len; n += 2) {
+    lseek(fd, off, SEEK_SET);
+    for (unsigned n = 0; n < len; ++n) {
 #ifdef USE_SCRNMAP
 	if (!noCharTrans)
-	    c[BYTE_ORDER == BIG_ENDIAN] = toScreen[(unsigned char)*s++];
+	    c[BYTE_ORDER == BIG_ENDIAN] = toScreen[(unsigned char)p[n].GetChar()];
 	else
 #endif
-	    c[BYTE_ORDER == BIG_ENDIAN] = *s++;
-	c[BYTE_ORDER != BIG_ENDIAN] = *s++;
+	    c[BYTE_ORDER == BIG_ENDIAN] = p[n].GetChar();
+	c[BYTE_ORDER != BIG_ENDIAN] = p[n].GetAttr();
 	c += 2;
     }
-    return write(fd, buf, len);
+    return write(fd, buf, c - buf);
 }
 
 static void mouseShow() {
 #ifdef USE_GPM
     if (GpmFd != -1 && VcsFd != -1 && drawPointer && mouseDrawn == 0) {
         int pos = (LastMouseX + LastMouseY * VideoCols) * 2 + 4;
-        lseek(VcsFd, pos, SEEK_SET);
-        conread(VcsFd, &MousePosCell, 2);
+        conread(VcsFd, &MousePosCell, 1, pos);
         TCell newCell(MousePosCell.GetChar(),
                       MousePosCell.GetAttr() ^ 0x77);  // correct ?
-        lseek(VcsFd, pos, SEEK_SET);
-        conwrite(VcsFd, &newCell, 2);
+        conwrite(VcsFd, &newCell, 1, pos);
         mouseDrawn = 1;
     }
 #endif
@@ -169,8 +169,7 @@ static void mouseHide() {
 #ifdef USE_GPM
     if (GpmFd != -1 && VcsFd != -1 && drawPointer && mouseDrawn == 1) {
         int pos = (LastMouseX + LastMouseY * VideoCols) * 2 + 4;
-        lseek(VcsFd, pos, SEEK_SET);
-        conwrite(VcsFd, &MousePosCell, 2);
+        conwrite(VcsFd, &MousePosCell, 1, pos);
         mouseDrawn = 0;
     }
 #endif
@@ -268,10 +267,8 @@ int ConInit(int /*XSize*/, int /*YSize*/) {
         die("could not get screen character mapping!");
 
     {
-        int c;
-        for (c = 0; c < 256; c++)
-            fromScreen[c] = 0;
-        for (c = 0; c < 256; c++)
+        memset(fromScreen, 0, sizeof(fromScreen));
+        for (unsigned c = 0; c < 256; c++)
             fromScreen[toScreen[c]] = c;
     }
 #endif
@@ -408,8 +405,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
 
     for (i = 0; i < H; i++) {
         if (LastMouseY == Y + i) { mouseHide(); hidden = 1; }
-        lseek(VcsFd, 4 + ((Y + i) * VideoCols + X) * 2, SEEK_SET);
-        conwrite(VcsFd, Cell, 2 * W);
+        conwrite(VcsFd, Cell, W, 4 + ((Y + i) * VideoCols + X) * 2);
         Cell += W;
         if (hidden) mouseShow();
     }
@@ -421,8 +417,7 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
 
     for (i = 0; i < H; i++) {
         if (LastMouseY == Y + i) { mouseHide(); hidden = 1; }
-        lseek(VcsFd, 4 + ((Y + i) * VideoCols + X) * 2, SEEK_SET);
-        conread(VcsFd, Cell, 2 * W);
+        conread(VcsFd, Cell, W, 4 + ((Y + i) * VideoCols + X) * 2);
         Cell += W;
         if (hidden) mouseShow();
     }
@@ -434,8 +429,7 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
 
     for (i = 0; i < H; i++) {
         if (LastMouseY == Y + i) { mouseHide(); hidden = 1; }
-        lseek(VcsFd, 4 + ((Y + i) * VideoCols + X) * 2, SEEK_SET);
-        conwrite(VcsFd, Cell, 2 * W);
+        conwrite(VcsFd, Cell, W, 4 + ((Y + i) * VideoCols + X) * 2);
         if (hidden) mouseShow();
     }
     return 0;

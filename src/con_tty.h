@@ -142,7 +142,7 @@ static int TTYCompSeq(const void *a, const void *b)
     int c = strcmp(((const TTYDecodeSeq*)a)->seq,
 		   ((const TTYDecodeSeq*)b)->seq);
     if (c == 0) {
-        tty_seq_size = 0;
+	tty_seq_size = 0;
 	fprintf(stderr, "ERROR: tty_seq_table_c contains duplicate Escape sequence \"%s\"!\n",
 		((const TTYDecodeSeq*)a)->seq);
     }
@@ -180,7 +180,7 @@ static int TTYParseEsc(const char *seq)
     unsigned R = tty_seq_size;
 
     while (L < R) {
-        int c;
+	int c;
 	H = L + (R - L) / 2;
 
 	//if ((c = strcmp(seq, tty_esc_seq[H].seq)) == 0) {
@@ -221,14 +221,14 @@ static int TTYInitTable(void)
 		kfCtrl | kfAlt,
 		kfAlt | kfCtrl | kfShift // '8'
 	    };
+	    char *rep;
 	    tty_esc_seq[tty_seq_size].key = tty_seq_table_c[i].key;
-	    strcpy(tty_esc_seq[tty_seq_size].seq, tty_seq_table_c[i].seq);
-	    char *r = strchr(tty_esc_seq[tty_seq_size].seq, '%');
-	    if (!r) {
+	    if (!(rep = strchr(strcpy(tty_esc_seq[tty_seq_size].seq,
+				      tty_seq_table_c[i].seq), '%'))) {
 		tty_seq_size++;
 		break;
 	    }
-	    *r = (char)j;
+	    rep[0] = (char)j;
 	    tty_esc_seq[tty_seq_size++].key |= kf[j - '2'];
 	}
     }
@@ -244,7 +244,6 @@ static int TTYInitTable(void)
     const char * const test[] = { "[1;2A", "OF", "ODS", "[1;8R", 0 };
     for (unsigned i = 0; test[i]; i++)
         fprintf(stderr, "search %s  %d\n", test[i], TTYParseEsc(test[i]));
-
 
     for (unsigned i = 0; i < tty_seq_size; ++i)
 	fprintf(stderr, "%d %s %x\n", i, tty_esc_seq[i].seq, tty_esc_seq[i].key);

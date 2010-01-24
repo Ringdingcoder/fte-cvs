@@ -249,7 +249,8 @@ int EBuffer::FindStr(const char *Data, size_t Len, SearchReplaceOptions &opt) {
                 C = Start;
         }
 
-        while (((!(Options & SEARCH_BACK)) && (C <= End - Len)) || ((Options & SEARCH_BACK) && (C >= Start))) {
+	while (((!(Options & SEARCH_BACK)) && (C <= End - Len))
+	       || ((Options & SEARCH_BACK) && (C >= Start))) {
             if ((!(Options & SEARCH_WORDBEG)
                  || (C == 0)
                  || (WGETBIT(Flags.WordChars, P[C - 1]) == 0))

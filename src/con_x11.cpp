@@ -381,7 +381,7 @@ static void TryLoadFontset(const char *fs)
 }
 #endif
 
-static int InitXFonts(void)
+static int InitXFonts()
 {
     char *fs = getenv("VIOFONT");
     if (fs == NULL && WindowFont[0] != 0)
@@ -640,21 +640,21 @@ int ConInit(int XSize, int YSize) {
     return 0;
 }
 
-int ConDone(void) {
+int ConDone() {
     delete[] ScreenBuffer;
     ScreenBuffer = 0;
     return 0;
 }
 
-int ConSuspend(void) {
+int ConSuspend() {
     return 0;
 }
 
-int ConContinue(void) {
+int ConContinue() {
     return 0;
 }
 
-int ConClear(void) {
+int ConClear() {
     TDrawBuffer B;
     MoveCh(B, ' ', 0x07, ScreenCols);
     return ConPutLine(0, 0, ScreenCols, ScreenRows, B);
@@ -921,19 +921,19 @@ int ConQueryCursorPos(int *X, int *Y) {
     return 0;
 }
 
-int ConShowCursor(void) {
+int ConShowCursor() {
     CursorVisible = 1;
     DrawCursor(1);
     return 0;
 }
 
-int ConHideCursor(void) {
+int ConHideCursor() {
     DrawCursor(0);
     CursorVisible = 0;
     return 0;
 }
 
-int ConCursorVisible(void) {
+int ConCursorVisible() {
     return CursorVisible;
 }
 int ConSetCursorSize(int Start, int End) {
@@ -955,17 +955,17 @@ int ConQueryMousePos(int *X, int *Y) {
     return 0;
 }
 
-int ConShowMouse(void) {
+int ConShowMouse() {
     printf("Show\n");
     return 0;
 }
 
-int ConHideMouse(void) {
+int ConHideMouse() {
     printf("Hide\n");
     return 0;
 }
 
-int ConMouseVisible(void) {
+int ConMouseVisible() {
     return 1;
 }
 
@@ -1691,7 +1691,7 @@ int ConPutEvent(TEvent Event) {
     return 0;
 }
 
-int ConFlush(void) {
+int ConFlush() {
     XFlush(display);
     return 0;
 }
@@ -2045,11 +2045,11 @@ GUI::~GUI() {
     ::ConDone();
 }
 
-int GUI::ConSuspend(void) {
+int GUI::ConSuspend() {
     return ::ConSuspend();
 }
 
-int GUI::ConContinue(void) {
+int GUI::ConContinue() {
     return ::ConContinue();
 }
 

@@ -159,7 +159,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 
     return 0;
 }
-int ConDone(void)
+int ConDone()
 {
     SLsmg_reset_smg();
     SLang_reset_tty();
@@ -167,14 +167,14 @@ int ConDone(void)
     return 0;
 }
 
-int ConSuspend(void)
+int ConSuspend()
 {
     SLsmg_suspend_smg();
     SLang_reset_tty();
 
     return 0;
 }
-int ConContinue(void)
+int ConContinue()
 {
     SLang_init_tty(-1, 0, 1);
     SLsmg_resume_smg();
@@ -486,7 +486,7 @@ static int getkey(int tsecs)
     return key;
 }
 
-static int parseEsc(void)
+static int parseEsc()
 {
     int key = getkey(0);
     char seq[8] = { (char)key, 0 };
@@ -588,12 +588,12 @@ GUI::~GUI()
     gui = 0;
 }
 
-int GUI::ConSuspend(void)
+int GUI::ConSuspend()
 {
     return::ConSuspend();
 }
 
-int GUI::ConContinue(void)
+int GUI::ConContinue()
 {
     return::ConContinue();
 }

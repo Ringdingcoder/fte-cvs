@@ -34,7 +34,7 @@ I18NOPTIONS = $(XMBFLAG) $(REMAPFLAG) $(SYSTEM_X_LOCALE) $(USE_LOCALE)
 # -DDEFAULT_INTERNAL_CONFIG to use internal config by default
 # -DUSE_XTINIT to use XtInitialize on init
 # -DFTE_NO_LOGGING to completely disable trace logging
-APPOPTIONS = -DDEFAULT_INTERNAL_CONFIG
+APPOPTIONS = -DDEFAULT_INTERNAL_CONFIG -DFTE_NO_LOGGING
 
 # Supply icons in X, requires Xpm library
 USE_XICON = -DUSE_XICON
@@ -76,7 +76,7 @@ UOS      = -DLINUX
 #MINCDIR  = -I/usr/include/Motif1.2
 #MLIBDIR  = -L/usr/lib/Motif1.2
 
-#SINCDIR   = -I/usr/include/slang
+SINCDIR   = -I/usr/include/slang
 
 #######################################################################
 # AIX
@@ -132,11 +132,12 @@ UOS      = -DLINUX
 
 #######################################################################
 
-#QTDIR   = /users/markom/qt
-#QLIBDIR  = -L$(QTDIR)/lib
+QTDIR   = /usr/lib64/qt-3.3
+#/users/markom/qt
+QLIBDIR  = -L$(QTDIR)/lib
 #QINCDIR  = -I$(QTDIR)/include
 #QINCDIR  = -I/usr/include/qt
-QINCDIR =  -I/usr/include/qt3
+QINCDIR =  -I/usr/include/qt3 -I/usr/lib64/qt-3.3/include
 MOC      = moc
 
 LIBDIRS   =
@@ -160,7 +161,7 @@ SRCS = $(OBJS:.o=.cpp)
 
 # Need -lXt below if USE_XTINIT is defined
 XLIBS    = $(XLIBDIR) -lX11 $(SOCKETLIB) $(XPMLIB)
-VLIBS    = -lgpm -lncurses
+VLIBS    = -lgpm
 NLIBS    = -lncurses
 SLIBS    = -lslang
 #QLIBS    = $(QLIBDIR) -lqt
@@ -197,22 +198,22 @@ defcfg.cnf: $(DEFAULT_FTE_CONFIG) cfte
 xfte: .depend $(OBJS) $(XOBJS)
 	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(XOBJS) $(XLIBS)
 
-qfte: g_qt.moc g_qt_dlg.moc $(OBJS) $(QOBJS)
+qfte: .depend g_qt.moc g_qt_dlg.moc $(OBJS) $(QOBJS)
 	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(QOBJS) $(QLIBS) $(XLIBS)
 
-vfte: $(OBJS) $(VOBJS)
+vfte: .depend $(OBJS) $(VOBJS)
 	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(VOBJS) $(VLIBS)
 
-sfte: $(OBJS) $(SOBJS) compkeys
+sfte: .depend $(OBJS) $(SOBJS) compkeys
 	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(SOBJS) $(SLIBS)
 
-nfte: $(OBJS) $(NOBJS) compkeys
+nfte: .depend $(OBJS) $(NOBJS) compkeys
 	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(NOBJS) $(NLIBS)
 
-compkeys: compkeys.o
+compkeys: .depend compkeys.o
 	$(LD) -o $@ $(LDFLAGS) compkeys.o
 
-mfte: $(OBJS) $(MOBJS)
+mfte: .depend $(OBJS) $(MOBJS)
 	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(MOBJS) $(MLIBS) $(XLIBS)
 
 g_qt.obj: g_qt.moc
@@ -220,7 +221,7 @@ g_qt.obj: g_qt.moc
 g_qt_dlg.obj: g_qt_dlg.moc
 
 .depend: defcfg.h
-	$(CC) -MM $(CCFLAGS) $(SRCS) 1>.depend
+	$(CC) -MM -MG $(CCFLAGS) $(SRCS) 1>.depend
 
 # purposefully not part of "all".
 tags: $(SRCS) $(wildcard *.h)

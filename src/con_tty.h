@@ -156,10 +156,10 @@ static int TTYParseEsc(const char *seq)
 	char ch = seq[0];
 	if (ch < 32) {
 	    switch (ch) {
-	    case 0: return kbEsc;
+	    case 0:    return kbEsc;
+	    case 8:    return (kfAlt | kbBackSp);
 	    case '\t': return (kfShift | kbTab);
 	    case '\n': return (kfAlt | kbEnter);
-	    case 8:    return (kfAlt | kbBackSp);
 	    case 27:   return (kfAlt | kbEsc);
 	    default:   return (kfAlt | kfCtrl | (ch + 'A' - 1));
 	    }
@@ -169,6 +169,7 @@ static int TTYParseEsc(const char *seq)
 	    return (kfAlt | (ch + 'A' - 'a'));
 	else if (ch >= 'A' && ch <= 'Z')
 	    return (kfAlt | kfShift | ch);
+	// FIXME: depends on keyboard mapping
 	else if (strchr("`1234567890-=[];'\\,./", ch))
 	    return (kfAlt | ch);
 	else if (strchr("~!@#$%%^&*()_+{}:\"|<>?", ch))

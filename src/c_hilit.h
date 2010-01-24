@@ -103,11 +103,8 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
     do {\
     BPos = C - Pos; \
     if (B) \
-    if (BPos >= 0 && BPos < Width) { \
-    BPtr = (PCLI *) (B + BPos); \
-    BPtr[0] = *p; \
-    BPtr[1] = (unsigned char) HILIT_CLRD(); \
-    } \
+    if (BPos >= 0 && BPos < Width) \
+        B[BPos].Set(*p, HILIT_CLRD()); \
     if (StateMap) StateMap[i] = (hsState)(State & 0xFF); \
     } while (0)
 

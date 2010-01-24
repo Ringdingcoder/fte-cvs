@@ -40,7 +40,7 @@ public:
     EGUI(int &argc, char **argv, int XSize, int YSize);
     virtual ~EGUI();
     
-    virtual int ExecCommand(GxView *view, int Command, ExState &State);
+    virtual int ExecCommand(GxView *view, ExCommands Command, ExState &State);
     virtual int ExecMacro(GxView *view, int Macro);
     virtual int BeginMacro(GxView *view);
 

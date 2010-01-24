@@ -78,7 +78,7 @@ EGUI::EGUI(int &argc, char **argv, int XSize, int YSize)
 EGUI::~EGUI() {
 }
 
-int EGUI::ExecCommand(GxView *view, int Command, ExState &State) {
+int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
     if (Command & CMD_EXT)
         return ExecMacro(view, Command & ~CMD_EXT);
 
@@ -99,6 +99,8 @@ int EGUI::ExecCommand(GxView *view, int Command, ExState &State) {
 #else
             return ErFAIL;
 #endif
+        default:
+            ;
         }
     }
     switch (Command) {
@@ -139,6 +141,8 @@ int EGUI::ExecCommand(GxView *view, int Command, ExState &State) {
             SetOverrideMap(m->KeyMap, m->Name);
             return 1;
         }
+    default:
+        ;
     }
     return view->ExecCommand(Command, State);
 }
@@ -170,10 +174,8 @@ int EGUI::ExecMacro(GxView *view, int Macro) {
 
         for (j = 0; j < m->cmds[i].repeat; j++) {
             State.Pos = i + 1;
-            if (ExecCommand(view, m->cmds[i].u.num, State) == 0 && !m->cmds[i].ign)
-            {
+            if (ExecCommand(view, (ExCommands)m->cmds[i].u.num, State) == 0 && !m->cmds[i].ign)
                 return ErFAIL;
-            }
         }
         State.Pos = i;
     }
@@ -291,7 +293,7 @@ void EGUI::DispatchCommand(GxView *view, TEvent &Event) {
         ExState State;
         State.Macro = 0;
         State.Pos = 0;
-        ExecCommand(view, Event.Msg.Command, State);
+        ExecCommand(view, (ExCommands)Event.Msg.Command, State);
         Event.What = evNone;
     } else if (Event.Msg.Command >= 65536) {
         Event.Msg.Command -= 65536;

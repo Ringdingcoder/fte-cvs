@@ -48,7 +48,7 @@ int IsDirectory(const char *Path);
 const char *ShortFName(const char *Path, size_t len);
 int ChangeDir(char *Dir);
 int JoinDirFile(char *Dest, const char *Dir, const char *Name);
-char *SepRChr(char *Dir);
+char *SepRChr(const char *Dir);
 int RelativePathName(const char *Dir, const char *Path, char *RelPath);
 
 #endif

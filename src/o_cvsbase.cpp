@@ -72,7 +72,7 @@ void ECvsBase::FreeLines () {
     BufLen=BufPos=0;
 }
 
-void ECvsBase::AddLine (char *file,int line,const char* msg,int status) {
+void ECvsBase::AddLine(const char *file, int line, const char *msg, int status) {
     CvsLine *l;
 
     l=(CvsLine *)malloc (sizeof (CvsLine));
@@ -221,7 +221,7 @@ void ECvsBase::NotifyPipe (int APipeId) {
     }
 }
 
-int ECvsBase::RunPipe (char *ADir,char *ACommand,char *AOnFiles) {
+int ECvsBase::RunPipe(const char *ADir, const char *ACommand, const char *AOnFiles) {
     free (Command);
     free (Directory);
     free (OnFiles);

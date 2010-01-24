@@ -58,7 +58,7 @@ public:
     virtual int ExecCommand(ExCommands Command, ExState &State);
 
     void AddError(Error *p);
-    void AddError(char *file, int line, char *msg, const char *text, int hilit=0);
+    void AddError(const char *file, int line, const char *msg, const char *text, int hilit=0);
     
     void FreeErrors();
     int GetLine(char *Line, size_t MaxLen);

@@ -536,14 +536,14 @@ int GetKeyName(char *Key, size_t KeySize, KeySel &ks) {
     return 0;
 }
 
-EKey::EKey(char *aKey) {
+EKey::EKey(const char *aKey) {
     fNext = 0;
     ParseKey(aKey, fKey);
     fKeyMap = 0;
     Cmd = -1;
 }
 
-EKey::EKey(char *aKey, EKeyMap *aKeyMap) {
+EKey::EKey(const char *aKey, EKeyMap *aKeyMap) {
     fNext = 0;
     Cmd = -1;
     ParseKey(aKey, fKey);

@@ -10,7 +10,7 @@
 
 #ifdef CONFIG_OBJ_SVN
 
-static int SameDir (char *D1,char *D2) {
+static int SameDir (const char *D1, const char *D2) {
     if (!D1||!D2) return 0;
     size_t l1=strlen (D1);
     size_t l2=strlen (D2);
@@ -64,7 +64,7 @@ char *ESvn::MarkedAsList () {
     return s;
 }
 
-char ESvn::GetFileStatus (char *file) {
+char ESvn::GetFileStatus (const char *file) {
     // Search backward, file can be present several times (old messages)
     for (int i=LineCount-1;i>=0;i--)
         if (Lines[i]->File&&filecmp (Lines[i]->File,file)==0) return Lines[i]->Msg[0];
@@ -81,7 +81,7 @@ void ESvn::ParseLine (char *line,int len) {
         AddLine(0, -1, line);
 }
 
-int ESvn::RunPipe (char *ADir,char *ACommand,char *AOnFiles) {
+int ESvn::RunPipe (const char *ADir, const char *ACommand, const char *AOnFiles) {
     Commiting=0;
     if (!SameDir (Directory,ADir)) FreeLines ();
     return ESvnBase::RunPipe (ADir,ACommand,AOnFiles);
@@ -96,7 +96,7 @@ void ESvn::ClosePipe () {
     Commiting=0;
 }
 
-int ESvn::RunCommit (char *ADir,char *ACommand,char *AOnFiles) {
+int ESvn::RunCommit (const char *ADir, const char *ACommand, const char *AOnFiles) {
     if (!SameDir (Directory,ADir)) FreeLines ();
 
     free (Command);

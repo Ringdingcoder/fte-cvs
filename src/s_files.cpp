@@ -241,12 +241,9 @@ static int SetDrive(int drive) { // 1 = A, 2 = B, 3 = C, ...
 #endif
 
 #if PATHTYPE == PT_UNIXISH
-int RemoveDots(char *Source, char *Dest) {
-    char *p;
-    char *d;
+int RemoveDots(const char *p, char* Dest) {
+    char *d = Dest;
 
-    p = Source;
-    d = Dest;
     while (*p) {
         // if ((strncmp(p, SSLASH SSLASH, 2) == 0)) {
         if (ISSLASH(p[0]) && ISSLASH(p[1])) {
@@ -482,13 +479,12 @@ int JoinDirFile(char *Dest, const char *Dir, const char *Name) {
     return 0;
 }
 
-char *SepRChr(char *Dir)
+char *SepRChr(const char *Dir)
 {
-    char *p;
     if (Dir && Dir[0]) {
-        for (p = Dir + strlen(Dir); p > Dir; p--)
+        for (const char *p = Dir + strlen(Dir); p > Dir; p--)
             if (ISSEP(p[-1]))
-                return p-1;
+                return const_cast<char*>(p - 1);
     }
     return NULL;
 }

@@ -223,7 +223,7 @@ void EMessages::AddError(Error *p) {
     UpdateList();
 }
 
-void EMessages::AddError(char *file, int line, char *msg, const char *text, int hilit) {
+void EMessages::AddError(const char *file, int line, const char *msg, const char *text, int hilit) {
     Error *pe;
 
     if (!(pe = (Error *) malloc(sizeof(Error))))

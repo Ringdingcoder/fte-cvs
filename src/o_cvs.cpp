@@ -10,7 +10,7 @@
 
 #ifdef CONFIG_OBJ_CVS
 
-static int SameDir(char* D1, char* D2)
+static int SameDir(const char *D1, const char *D2)
 {
     if (!D1||!D2) return 0;
     size_t l1=strlen (D1);
@@ -72,7 +72,7 @@ char* ECvs::MarkedAsList()
     return s;
 }
 
-char ECvs::GetFileStatus(char* file)
+char ECvs::GetFileStatus(const char *file)
 {
     // Search backward, file can be present several times (old messages)
     for (int i=LineCount-1;i>=0;i--)
@@ -87,7 +87,7 @@ void ECvs::ParseLine(char* line, int len)
     } else AddLine (0,-1,line);
 }
 
-int ECvs::RunPipe(char* ADir, char* ACommand, char* AOnFiles)
+int ECvs::RunPipe(const char *ADir, const char *ACommand, const char *AOnFiles)
 {
     Commiting=0;
     if (!SameDir (Directory,ADir)) FreeLines ();
@@ -104,7 +104,7 @@ void ECvs::ClosePipe()
     Commiting=0;
 }
 
-int ECvs::RunCommit(char* ADir, char* ACommand, char* AOnFiles)
+int ECvs::RunCommit(const char *ADir, const char *ACommand, const char *AOnFiles)
 {
     if (!SameDir (Directory,ADir)) FreeLines ();
 

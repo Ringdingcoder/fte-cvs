@@ -46,7 +46,7 @@ static int my_stat(const char *name, struct stat *s)
 #endif
 
 
-FileInfo::FileInfo(char *Name, int Type, off_t Size, time_t MTime) {
+FileInfo::FileInfo(const char *Name, int Type, off_t Size, time_t MTime) {
     name = new char[strlen (Name) + 1];
     if (name)
         strcpy(name, Name);

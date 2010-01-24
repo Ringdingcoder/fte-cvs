@@ -23,7 +23,7 @@ class ESvnDiff:public ESvnBase {
         void ParseFromTo (char *line,int len);
         virtual void ParseLine (char *line,int len);
         // Returns 0 if OK
-        virtual int RunPipe (char *Dir,char *Command,char *Info);
+        virtual int RunPipe (const char *Dir, const char *Command, const char *Info);
 
         virtual int ExecCommand(ExCommands Command, ExState &State);
         int BlockCopy (int Append);

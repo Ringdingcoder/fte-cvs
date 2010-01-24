@@ -112,8 +112,8 @@ public:
     EKeyMap *fKeyMap;
     EKey *fNext;
     
-    EKey(char *aKey);
-    EKey(char *aKey, EKeyMap *aKeyMap);
+    EKey(const char *aKey);
+    EKey(const char *aKey, EKeyMap *aKeyMap);
     ~EKey();
 };
 

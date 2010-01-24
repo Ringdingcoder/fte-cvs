@@ -73,7 +73,7 @@ void ECvsDiff::ParseLine (char *line,int len) {
     } else AddLine (0,-1,line);
 }
 
-int ECvsDiff::RunPipe (char *ADir,char *ACommand,char *AOnFiles) {
+int ECvsDiff::RunPipe(const char *ADir, const char *ACommand, const char *AOnFiles) {
     FreeLines ();
     free (CurrFile);
     CurrLine=ToLine=InToFile=0;

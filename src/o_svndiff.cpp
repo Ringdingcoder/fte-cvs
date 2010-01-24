@@ -127,7 +127,7 @@ ESvnDiff::ParseLine(char *line, int len)
 }
 
 int
-ESvnDiff::RunPipe(char *ADir, char *ACommand, char *AOnFiles)
+ESvnDiff::RunPipe(const char *ADir, const char *ACommand, const char *AOnFiles)
 {
     FreeLines();
     free(CurrFile);

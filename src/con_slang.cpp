@@ -92,7 +92,7 @@ static unsigned char ftesl_get_dch(SLsmg_Char_Type raw)
     return DCH_SLANG_EOL;
 }
 
-static const char *const slang_colors[] =
+static const char slang_colors[][14] =
 {
     "black",
     "blue",

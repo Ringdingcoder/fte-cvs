@@ -1,8 +1,10 @@
 Revision history
 -----------------------------------------------------------------------
 0.50.2b3 -- <fill month here> 201X
+   planning to use std::string & std::vector templates - should
+   save a lot of code
 
-0.50.2b3 -- Janury 2010
+0.50.2b3 -- January 2010
   + Completely new keyboard handling for Slang version - 
     it gets usable - still not as comfortable as X version,
     but good enough especially in gnome-terminal
@@ -17,6 +19,9 @@ Revision history
   ! Fixed portability issue for 'vfte' for bigendian machines
   - slightly modified set of extra character displayed for vfte
   ! Fixed screen resize for both sfte and nfte tty frontends
+  - make usage of TCell class more consistent (across unix targets)
+  - changing some defines to enums and update functions parameters for this
+  ! Remove linking of libncurses for vfte - not needed
 
 0.50.2b2 -- January 2010
   + Applied a few submitted patches from various Inet developers

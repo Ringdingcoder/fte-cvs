@@ -6,7 +6,7 @@
 
 # uncomment for appropriate keybindings and menus
 
-#%define(UI_KB)
+%define(UI_KB)
 %define(UI_FTE)
 #%define(UI_WS)
 #%define(UI_NE)

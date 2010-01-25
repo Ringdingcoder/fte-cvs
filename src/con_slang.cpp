@@ -664,7 +664,7 @@ char ConGetDrawChar(unsigned int idx)
 	DCH_SLANG_M3,
 	DCH_SLANG_M4,
 	DCH_SLANG_X,
-	DCH_SLANG_RPTR,
+	'>', // DCH_SLANG_RPTR
 	DCH_SLANG_EOL,
 	DCH_SLANG_EOF,
 	DCH_SLANG_END,
@@ -688,7 +688,7 @@ char ConGetDrawChar(unsigned int idx)
 	DCH_SLANG_M3,
 	DCH_SLANG_M4,
 	DCH_SLANG_X,
-	' ',
+	'>',
 	'.',
 	DCH_SLANG_EOF,
 	DCH_SLANG_END,
@@ -699,25 +699,27 @@ char ConGetDrawChar(unsigned int idx)
 	DCH_SLANG_ALEFT,
 	DCH_SLANG_ARIGHT
     };
-    //static const char tab_linux1[] = {
-    //    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    //    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k',
-    //    'l', 'm', 'n', 'o', 'p', 'q'
-    //};
-     static const char * use_tab = NULL;
-     static size_t use_tab_size = 0;
+#if 0
+    static const unsigned char tab[] = {
+	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k',
+	'l', 'm', 'n', 'o', 'p', 'q'
+    };
+#endif
+    static const char * use_tab = NULL;
+    static size_t use_tab_size = 0;
 
-     if (use_tab == NULL) {
+    if (use_tab == NULL) {
 	const char *c = getenv("TERM");
 	use_tab = (const char*)
 	    (((c == NULL) || strcmp(c, "linux") != 0) ? tab : tab_linux);
 	use_tab = GetGUICharacters("Slang", use_tab);
 	use_tab_size = strlen(use_tab);
-     }
+    }
 
-     assert(idx < use_tab_size);
+    assert(idx < use_tab_size);
 
-     return use_tab[idx];
+    return use_tab[idx];
 }
 
 #if 0 /*fold00*/
@@ -827,7 +829,7 @@ char ConGetDrawChar(unsigned int idx)
 
     return -1;
 #endif
- /*FOLD00*/
+ /*fold00*/
 #if 0 /*fold00*/
 /*
  * Definitions for keyboard handling under SLang.
@@ -1051,3 +1053,4 @@ static TKeyCode ftesl_process_key(int key, int ctrlhack = 0)
 	}
 }
 #endif
+ /*fold00*/

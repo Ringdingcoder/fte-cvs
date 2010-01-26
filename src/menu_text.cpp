@@ -175,8 +175,9 @@ static int DrawVMenu(int x, int y, int id, int active) {
             }
         } else {
             MoveChar(B, 0, w, ConGetDrawChar(DCH_H), hcMenu_Background, w);
-            MoveCh(B, ConGetDrawChar(DCH_V), hcMenu_Background, 1);
-            MoveCh(B + w - 1, ConGetDrawChar(DCH_V), hcMenu_Background, 1);
+            //for (int i = 0; i <= DCH_ARIGHT; i++) MoveCh(B + i, ConGetDrawChar(i), hcMenu_Background, 1);
+            MoveCh(B, ConGetDrawChar(DCH_M2), hcMenu_Background, 1);
+            MoveCh(B + w - 1, ConGetDrawChar(DCH_M3), hcMenu_Background, 1);
         }
         ConPutBox(x, y + i + 1, w, 1, B);
     }

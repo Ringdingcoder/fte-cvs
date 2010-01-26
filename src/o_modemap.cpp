@@ -41,9 +41,9 @@ void EventMapView::DumpKey(const char *aPrefix, EKey *Key) {
         p = Entry + strlen(Entry);
         if (Macros[id].cmds[i].type == CT_COMMAND) {
             if (Macros[id].cmds[i].repeat > 1)
-                sprintf(p, "%d:%s ", (int)Macros[id].cmds[i].repeat, GetCommandName(Macros[id].cmds[i].u.num));
+                sprintf(p, "%d:%s ", Macros[id].cmds[i].repeat, GetCommandName((int)Macros[id].cmds[i].u.num));
             else
-                sprintf(p, "%s ", GetCommandName(Macros[id].cmds[i].u.num));
+                sprintf(p, "%s ", GetCommandName((int)Macros[id].cmds[i].u.num));
         } else if (Macros[id].cmds[i].type == CT_NUMBER) {
             sprintf(p, "%ld ", Macros[id].cmds[i].u.num);
         } else if (Macros[id].cmds[i].type == CT_STRING) {

@@ -37,11 +37,11 @@ void EventMapView::DumpKey(const char *aPrefix, EKey *Key) {
     GetKeyName(KeyName + strlen(KeyName), sizeof(KeyName)-strlen(KeyName), Key->fKey);
     sprintf(Entry, "%13s   ", KeyName);
     id = Key->Cmd;
-    for (int i = 0; i < Macros[id].Count; i++) {
+    for (unsigned i = 0; i < Macros[id].Count; ++i) {
         p = Entry + strlen(Entry);
         if (Macros[id].cmds[i].type == CT_COMMAND) {
             if (Macros[id].cmds[i].repeat > 1)
-                sprintf(p, "%d:%s ", Macros[id].cmds[i].repeat, GetCommandName(Macros[id].cmds[i].u.num));
+                sprintf(p, "%d:%s ", (int)Macros[id].cmds[i].repeat, GetCommandName(Macros[id].cmds[i].u.num));
             else
                 sprintf(p, "%s ", GetCommandName(Macros[id].cmds[i].u.num));
         } else if (Macros[id].cmds[i].type == CT_NUMBER) {
@@ -54,7 +54,7 @@ void EventMapView::DumpKey(const char *aPrefix, EKey *Key) {
             sprintf(p, "$(%ld) ", Macros[id].cmds[i].u.num);
         }
         if (strlen(Entry) > 70) {
-            if (i != Macros[id].Count - 1) {
+            if ((i + 1) != Macros[id].Count) {
                 // not the last entry
                 AddLine(Entry);
                 sprintf(Entry, "%13s   ", "");

@@ -452,9 +452,9 @@ static int SetupXWindow(int argc, char **argv)
 #endif
     Colormap colormap = DefaultColormap(display, DefaultScreen(display));
 
-    XSetWindowAttributes setWindowAttributes;
-    setWindowAttributes.bit_gravity =
-        size_hints.win_gravity = NorthWestGravity;
+    XSetWindowAttributes wattr;
+    wattr.backing_store = Always;//NotUseful;
+    wattr.background_pixel = BlackPixel(display, DefaultScreen(display));
 
     // this is correct behavior
     if (initX < 0)
@@ -469,7 +469,7 @@ static int SetupXWindow(int argc, char **argv)
                         // but we need to open a window - so pick up 1 x 1
                         1, 1, 0,
                         CopyFromParent, InputOutput, CopyFromParent,
-                        CWBitGravity, &setWindowAttributes);
+                        CWBackingStore | CWBackPixel, &wattr);
 
     unsigned long mask = 0;
     i18n_ctx = (useI18n) ? i18n_open(display, win, &mask) : 0;
@@ -504,6 +504,7 @@ static int SetupXWindow(int argc, char **argv)
     assert(proptype_incr != None);
 
     size_hints.flags = PResizeInc | PMinSize | PBaseSize | PWinGravity;
+    size_hints.win_gravity = NorthWestGravity;
     size_hints.width_inc = FontCX;
     size_hints.height_inc = FontCY;
     size_hints.min_width = MIN_SCRWIDTH * FontCX;
@@ -526,8 +527,9 @@ static int SetupXWindow(int argc, char **argv)
     colorXGC = new ColorXGC();
 
     XWMHints wm_hints;
-    wm_hints.flags = InputHint;
+    wm_hints.flags = InputHint | StateHint;
     wm_hints.input = True;
+    wm_hints.initial_state = NormalState;
 
 #ifdef USE_XICON
     // Set icons using _NET_WM_ICON property
@@ -670,8 +672,7 @@ int ConSetTitle(const char *Title, const char *STitle) {
     snprintf(winTitle, sizeof(winTitle), "FTE - %s%s%s",
              buf, buf[0] ? " - " : "", Title);
 
-    strncpy(winSTitle, STitle, sizeof(winSTitle) - 1);
-    winSTitle[sizeof(winSTitle) - 1] = 0;
+    strlcpy(winSTitle, STitle, sizeof(winSTitle));
     XSetStandardProperties(display, win, winTitle, winSTitle, 0, NULL, 0, NULL);
     return 0;
 }

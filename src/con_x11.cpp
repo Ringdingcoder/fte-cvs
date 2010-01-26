@@ -453,7 +453,10 @@ static int SetupXWindow(int argc, char **argv)
     Colormap colormap = DefaultColormap(display, DefaultScreen(display));
 
     XSetWindowAttributes wattr;
-    wattr.backing_store = Always;//NotUseful;
+    wattr.win_gravity = NorthWestGravity;
+    wattr.bit_gravity = NorthWestGravity;
+    wattr.save_under = False;
+    wattr.backing_store = NotUseful;
     wattr.background_pixel = BlackPixel(display, DefaultScreen(display));
 
     // this is correct behavior
@@ -469,7 +472,9 @@ static int SetupXWindow(int argc, char **argv)
                         // but we need to open a window - so pick up 1 x 1
                         1, 1, 0,
                         CopyFromParent, InputOutput, CopyFromParent,
-                        CWBackingStore | CWBackPixel, &wattr);
+			CWBackingStore | CWBackPixel | CWSaveUnder |
+			CWBitGravity | CWWinGravity,
+			&wattr);
 
     unsigned long mask = 0;
     i18n_ctx = (useI18n) ? i18n_open(display, win, &mask) : 0;
@@ -503,8 +508,7 @@ static int SetupXWindow(int argc, char **argv)
     proptype_incr = XInternAtom(display, "INCR", False);
     assert(proptype_incr != None);
 
-    size_hints.flags = PResizeInc | PMinSize | PBaseSize | PWinGravity;
-    size_hints.win_gravity = NorthWestGravity;
+    size_hints.flags = PResizeInc | PMinSize | PBaseSize;
     size_hints.width_inc = FontCX;
     size_hints.height_inc = FontCY;
     size_hints.min_width = MIN_SCRWIDTH * FontCX;
@@ -513,14 +517,13 @@ static int SetupXWindow(int argc, char **argv)
     size_hints.base_height = 0;
     if (setUserPosition)
         size_hints.flags |= USPosition;
+    XSetStandardProperties(display, win, winTitle, winTitle, 0, NULL, 0, &size_hints);
 
     XClassHint class_hints;
     class_hints.res_name = res_name;
     class_hints.res_class = res_class;
     XSetClassHint(display, win, &class_hints);
 
-    XSetStandardProperties(display, win, winTitle, winTitle, 0, NULL, 0, 0);
-    XSetWMNormalHints(display, win, &size_hints);
     XSetWMProtocols(display, win, &wm_delete_window, 1);
 
     if (InitXColors(colormap) != 0) return -1;

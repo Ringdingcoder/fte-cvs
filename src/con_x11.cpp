@@ -2078,7 +2078,7 @@ char ConGetDrawChar(unsigned int idx) {
     static size_t len = 0;
 
     if (!tab) {
-        tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12\x01\x01 \x02\x01\x01");
+        tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19\x18\x15\x16\x17\x0f>\x1F\x01\x12\x01\x01 \x02\x01\x01");
         len = strlen(tab);
     }
     assert(idx < len);

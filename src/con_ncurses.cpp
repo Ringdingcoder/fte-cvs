@@ -222,18 +222,18 @@ static chtype GetDch(int idx)
 	case DCH_C4: return ACS_LRCORNER;
 	case DCH_H: return ACS_HLINE;
 	case DCH_V: return ACS_VLINE;
-	case DCH_M1: return ACS_HLINE;
+	case DCH_M1: return ACS_TTEE;
 	case DCH_M2: return ACS_LTEE;
 	case DCH_M3: return ACS_RTEE;
-	case DCH_M4 : return '.';
-	case DCH_X: return  'X';
+	case DCH_M4 : return ACS_BTEE;
+	case DCH_X: return ACS_PLUS;
 	case DCH_RPTR: return ACS_RARROW;
 	case DCH_EOL: return ACS_BULLET;
 	case DCH_EOF: return ACS_DIAMOND;
 	case DCH_END: return ACS_HLINE;
 	case DCH_AUP: return ACS_UARROW;
 	case DCH_ADOWN: return ACS_DARROW;
-	case DCH_HFORE: return ACS_BLOCK;
+	case DCH_HFORE: return ' ';// return ACS_BLOCK;
 	case DCH_HBACK: return ACS_CKBOARD;
 	case DCH_ALEFT: return ACS_LARROW;
 	case DCH_ARIGHT: return ACS_RARROW;
@@ -241,32 +241,27 @@ static chtype GetDch(int idx)
 	}
 }
 
-static int last_attr = A_NORMAL;
-
 int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 {
+	int last_attr = ~0;
 	int CurX, CurY;
-	getyx(stdscr, CurY, CurX);
-	int yy = Y;
+	ConQueryCursorPos(&CurX, &CurY);
 	//static int x = 0;
 	//fprintf(stderr, "%5d: refresh done  %d  %d   %d x %d   L:%d C:%d\n", x++, X, Y, W, H, LINES, COLS);
 
 	if (Y + H > LINES)
 		H = LINES - Y;
 
-	for (int j =0 ; j < H; j++)
-	{
+	for (int j = 0; j < H; j++) {
 		memcpy(SavedScreen[Y + j] + X, Cell, W * sizeof(TCell)); // copy outputed line to saved screen
-		move(yy++, X);
-		for (int i = 0; i < W; i++)
-		{
+		move(Y + j, X);
+		for (int i = 0; i < W; ++i) {
 			unsigned char ch = Cell->GetChar();
 			int attr = fte_curses_attr[Cell->GetAttr()];
 			if (attr != last_attr) {
-				wattrset(stdscr,attr);
+				wattrset(stdscr, attr);
 				last_attr = attr;
-			} else
-			    attr = 0;
+			}
 
 			if (ch < 32)
 				waddch(stdscr, (ch <= 20) ? GetDch(ch) : '.');
@@ -282,10 +277,8 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 			Cell++;
 		}
 	}
-	move(CurY, CurX);
-	refresh();
 
-	return 0;
+	return ConSetCursorPos(CurX, CurY);
 }
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell)
@@ -296,7 +289,6 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 	}
 
 	return 0;
-
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell)
@@ -314,7 +306,7 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 
 	for (i = 0; i < W; i++)
 		line[i] = Cell;
-	ConPutLine(X, Y++, W, H, line);
+	ConPutLine(X, Y, W, H, line);
 	free(line);
 	return 0;
 }
@@ -323,19 +315,17 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 {
-	PCell box;
-
-	box = new TCell[W * H];
-
-	TCell fill(' ', Fill);
+	TCell* box = new TCell[W * H];
 	ConGetBox(X, Y, W, H, box);
+
+	//TCell fill(' ', Fill);
 
 	if (Way == csUp) {
 		ConPutBox(X, Y, W, H - Count, box + W * Count);
-		ConSetBox(X, Y + H - Count, W, Count, fill);
+		//ConSetBox(X, Y + H - Count, W, Count, fill);
 	} else {
 		ConPutBox(X, Y + Count, W, H - Count, box);
-		ConSetBox(X, Y, W, Count, fill);
+		//ConSetBox(X, Y, W, Count, fill);
 	}
 
 	delete[] box;
@@ -381,6 +371,7 @@ int ConHideCursor()
 {
 	CurVis = 0;
 	curs_set(0);
+	refresh();
 	return 0;
 }
 int ConCursorVisible()
@@ -485,7 +476,7 @@ static int ConGetMouseEvent(TEvent *Event)
 
 	return 0;
 }
-#endif
+#endif // CONFIG_MOUSE
 
 static TEvent Prev = { evNone };
 

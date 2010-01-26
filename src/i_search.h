@@ -7,14 +7,14 @@
  *
  */
 
-#ifndef __ISEARCH_H
-#define __ISEARCH_H
+#ifndef I_SEARCH_H
+#define I_SEARCH_H
 
 #define MAXISEARCH 256
 
 class ExISearch: public ExView {
 public:
-    typedef enum { IOk, INoMatch, INoPrev, INoNext } IState;
+    enum IState { IOk, INoMatch, INoPrev, INoNext };
     
     char ISearchStr[MAXISEARCH + 1];
     EPoint Orig;
@@ -40,4 +40,4 @@ public:
     void SetState(IState state);
 };
 
-#endif
+#endif // I_SEARCH_H

@@ -1,5 +1,5 @@
-#ifndef __TOOLBAR_H
-#define __TOOLBAR_H
+#ifndef PM_TOOL_H
+#define PM_TOOL_H
 
 #define tiBITMAP     1
 #define tiSEPARATOR  2
@@ -9,20 +9,20 @@
 
 #define WC_MTOOLBAR  "MToolBar"
 
-typedef struct {
+struct ToolBarItem {
     ULONG ulType;
     ULONG ulId;
     ULONG ulCommand;
     ULONG ulFlags;
     HBITMAP hBitmap;
-} ToolBarItem;
+};
 
-typedef struct {
+struct ToolBarData {
     USHORT cb;
     LONG ulCount;
     ToolBarItem *pItems;
     LONG ulDepressed;
-} ToolBarData;
+};
 
 MRESULT EXPENTRY ToolBarProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 void RegisterToolBarClass(HAB hab);
@@ -32,4 +32,4 @@ HWND CreateToolBar(HWND parent,
                    ULONG count,
                    ToolBarItem *items);
 
-#endif
+#endif // PM_TOOL_H

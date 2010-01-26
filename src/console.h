@@ -15,27 +15,27 @@
 
 /* don't change these, used as index */
 enum {
-    DCH_C1,
-    DCH_C2,
-    DCH_C3,
-    DCH_C4,
-    DCH_H,
-    DCH_V,
-    DCH_M1,
-    DCH_M2,
-    DCH_M3,
-    DCH_M4,
-    DCH_X, // 10
-    DCH_RPTR,
-    DCH_EOL,
-    DCH_EOF,
-    DCH_END,
-    DCH_AUP,
-    DCH_ADOWN,
-    DCH_HFORE,
-    DCH_HBACK,
-    DCH_ALEFT,
-    DCH_ARIGHT
+    DCH_C1,	/// upper left corner
+    DCH_C2,	/// upper right corner
+    DCH_C3,	/// lower left corner
+    DCH_C4,	/// lower right corner
+    DCH_H,	/// horizontal line
+    DCH_V,	/// vertical line
+    DCH_M1,	/// tee pointing down
+    DCH_M2,	/// tee pointing right
+    DCH_M3,	/// tee pointing left
+    DCH_M4,	/// tee pointing up
+    DCH_X,	/// crossover  10
+    DCH_RPTR,	/// arrow pointing right
+    DCH_EOL,	/// usually print as bullet
+    DCH_EOF,	/// usually print as diamond
+    DCH_END,	///
+    DCH_AUP,	/// arrow pointing up
+    DCH_ADOWN,	/// arrow pointing down
+    DCH_HFORE,	/// full square block
+    DCH_HBACK,	/// checker board (stipple)
+    DCH_ALEFT,	/// arrow pointing left
+    DCH_ARIGHT	/// arrow pointing right
 };
 
 #define ConMaxCols 256

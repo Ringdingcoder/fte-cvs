@@ -58,6 +58,9 @@
 #define DCH_SLANG_ALEFT      147
 #define DCH_SLANG_ARIGHT     148
 
+// i  VT
+// }  pound
+// {  PI
 static const char slang_dchs[] =
 {
     'l',
@@ -158,7 +161,9 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 
     SLsmg_set_char_set(0);
 
+#ifdef CONFIG_MOUSE
     SLtt_set_mouse_mode(1, 0);
+#endif
     SLtt_flush_output();
     //use_esc_hack = (getenv("FTESL_ESC_HACK") != NULL);
 
@@ -497,42 +502,54 @@ static int parseEsc(TEvent *Event)
     char seq[8] = { (char)key, 0 };
     unsigned seqpos = 1;
 
-    if ((key && key < 'a') || key > 'z')
-
-    /* read whole Esc sequence */
-    while (seqpos < 7 && (seq[seqpos] = (char)getkey(0))) {
-	if (seq[seqpos] < ' ') {
-	    SLang_ungetkey(seq[seqpos]);
-	    break;
+    if ((key < 'a' && key) || key > 'z') {
+	/* read whole Esc sequence */
+	while (seqpos < 7 && (seq[seqpos] = (char)getkey(0))) {
+	    if (seq[seqpos] < ' ') {
+		SLang_ungetkey(seq[seqpos]);
+		break;
+	    }
+	    seqpos++;
 	}
-	seqpos++;
+	seq[seqpos] = 0;
     }
-    seq[seqpos] = 0;
 
     if (seqpos == 5 && seq[0] == '[' && seq[1] == 'M') {
-	static int64_t tprev;
+#ifdef CONFIG_MOUSE
+	// FIXME: hardcoded timeouts
+	static const int64_t timeout[] = {
+	    300000,// 300ms  double
+	    500000 // 500ms  tripple
+	};
+	static int64_t time_prev[2];
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	int64_t tnew = tv.tv_sec * 1000000 + tv.tv_usec;
+	int64_t time_new = tv.tv_sec * 1000000 + tv.tv_usec;
 
 	Event->Mouse.What = evMouseDown;
 	Event->Mouse.X = (unsigned char)seq[3] - 33;
 	Event->Mouse.Y = (unsigned char)seq[4] - 33;
 	Event->Mouse.Buttons = (seq[2] == 32) ? 1 : (seq[2] == 33) ? 4 : 2;
 
-	// double clicks
-	Event->Mouse.Count = (tnew - tprev < 200000) ? 2 : 1; // 200ms
+	// detect triple/double mouse click
+	if (time_new - time_prev[1] < timeout[1]) // 500ms
+	    Event->Mouse.Count = 3;
+	else
+	    Event->Mouse.Count = (time_new - time_prev[0] < timeout[0]) ? 2 : 1;
 	//fprintf(stderr, "B:%2d  X:%3d  Y:%3d  Time %"PRId64 "  %"PRId64 " \n",
 	//	Event->Mouse.Buttons, Event->Mouse.X, Event->Mouse.Y, tnew, tprev);
-	tprev = tnew;
+	time_prev[1] = time_prev[0];
+	time_prev[0] = time_new;
 	if (seq[2] & 0x40) {
 	    Event->What = evCommand;
 	    Event->Msg.Param1 = 10;
 	    Event->Msg.Command = (seq[2] & 1) ? cmVScrollDown : cmVScrollUp;
 	} else {
+	    /* FIXME: hack - this should be 'next' */
 	    Prev = *Event;
 	    Prev.Mouse.What = evMouseUp;
 	}
+#endif // CONFIG_MOUSE
 	return 0;
     }
 

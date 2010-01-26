@@ -7,6 +7,9 @@
  *
  */
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "sysdep.h"
 #include "c_config.h"
 #include "console.h"
@@ -63,12 +66,12 @@ static const char slang_dchs[] =
     'j',
     'q',
     'x',
+    'w',
+    't',
+    'u',
     'f',
-    'f',
-    'f',
-    'f',
-    'f',
-    '+',
+    'v',
+    'n',
     '~',
     '`',
     'q',
@@ -155,6 +158,8 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 
     SLsmg_set_char_set(0);
 
+    SLtt_set_mouse_mode(1, 0);
+    SLtt_flush_output();
     //use_esc_hack = (getenv("FTESL_ESC_HACK") != NULL);
 
     return 0;
@@ -486,7 +491,7 @@ static int getkey(int tsecs)
     return key;
 }
 
-static int parseEsc()
+static int parseEsc(TEvent *Event)
 {
     int key = getkey(0);
     char seq[8] = { (char)key, 0 };
@@ -496,13 +501,40 @@ static int parseEsc()
 
     /* read whole Esc sequence */
     while (seqpos < 7 && (seq[seqpos] = (char)getkey(0))) {
-	if (seq[seqpos] <= ' ') {
+	if (seq[seqpos] < ' ') {
 	    SLang_ungetkey(seq[seqpos]);
 	    break;
 	}
 	seqpos++;
     }
     seq[seqpos] = 0;
+
+    if (seqpos == 5 && seq[0] == '[' && seq[1] == 'M') {
+	static int64_t tprev;
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	int64_t tnew = tv.tv_sec * 1000000 + tv.tv_usec;
+
+	Event->Mouse.What = evMouseDown;
+	Event->Mouse.X = (unsigned char)seq[3] - 33;
+	Event->Mouse.Y = (unsigned char)seq[4] - 33;
+	Event->Mouse.Buttons = (seq[2] == 32) ? 1 : (seq[2] == 33) ? 4 : 2;
+
+	// double clicks
+	Event->Mouse.Count = (tnew - tprev < 200000) ? 2 : 1; // 200ms
+	//fprintf(stderr, "B:%2d  X:%3d  Y:%3d  Time %"PRId64 "  %"PRId64 " \n",
+	//	Event->Mouse.Buttons, Event->Mouse.X, Event->Mouse.Y, tnew, tprev);
+	tprev = tnew;
+	if (seq[2] & 0x40) {
+	    Event->What = evCommand;
+	    Event->Msg.Param1 = 10;
+	    Event->Msg.Command = (seq[2] & 1) ? cmVScrollDown : cmVScrollUp;
+	} else {
+	    Prev = *Event;
+	    Prev.Mouse.What = evMouseUp;
+	}
+	return 0;
+    }
 
     return TTYParseEsc(seq);
 }
@@ -537,6 +569,8 @@ int ConGetEvent(TEventMask /*EventMask */ ,
     if (Event->What == evNotify)
         return 0; // pipe reading
 
+    Event->What = evKeyDown;
+
     key = getkey(0);
     if (isupper(key))
 	key = kfShift | key;
@@ -550,28 +584,29 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	    break;
 	case '\t':
 	    key = kbTab;
-            break;
+	    break;
 	case '\r':
 	case '\n':
 	    key = kbEnter;
-            break;
+	    break;
 	case 27: // Esc
-	    key = parseEsc();
-            break;
+	    key = parseEsc(Event);
+	    break;
 	default:
 	    key = kfCtrl | (key + 'A' - 1);
 	}
     } else if (key == 127)
-        key = kbBackSp;
+	key = kbBackSp;
     else if (key > 255)
 	key = kbEsc;
 
-    Event->What = evKeyDown;
-    KEvent->Code = key;
+    if (Event->What == evKeyDown) {
+	KEvent->Code = key;
     //fprintf(stderr, "KEY %x \n", key);
 
-    if (!Delete)
-	Prev = *Event;
+	if (!Delete)
+	    Prev = *Event;
+    }
 
     return 1;
 }
@@ -706,8 +741,8 @@ char ConGetDrawChar(unsigned int idx)
 	'l', 'm', 'n', 'o', 'p', 'q'
     };
 #endif
-    static const char * use_tab = NULL;
-    static size_t use_tab_size = 0;
+    static const char *use_tab;
+    static size_t use_tab_size;
 
     if (use_tab == NULL) {
 	const char *c = getenv("TERM");

@@ -38,7 +38,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#define DEBUGX(x) //printf x
+#define DEBUGX(x)
+//#define DEBUGX(x) printf x
 
 #define EDIT_BORDER 2
 #define SCROLLBAR_SIZE 16
@@ -69,9 +70,9 @@ public:
     QEText(GViewPeer *peer, QWidget *parent = 0, const char *name = 0);
     virtual ~QEText();
 
-    virtual void handleKeyPressEvent(QKeyEvent *qe);
-    void ActiveEvent(TEvent &Event);
 protected:
+    void handleKeyPressEvent(QKeyEvent *qe);
+    void ActiveEvent(TEvent &Event);
     void handleMouse(QMouseEvent *qe);
         
     virtual void resizeEvent(QResizeEvent *qe);
@@ -223,7 +224,7 @@ struct qEvent {
 };
 
 TEvent NextEvent = { evNone };
-static QColor colors[16] = {
+static const QColor colors[16] = {
     Qt::black,
     Qt::darkBlue,
     Qt::darkGreen,
@@ -413,7 +414,7 @@ void QEView::sbVmoveTo(int pos) {
 QEText::QEText(GViewPeer *peer, QWidget *parent, const char *name): QWidget(parent, name) {
     view = peer;
 
-//    setAcceptFocus(TRUE);
+    setFocusPolicy(QWidget::StrongFocus);
     setMinimumSize(100, 80);
     DEBUGX(("QEText %p\n", this));
 }
@@ -630,13 +631,11 @@ void QEText::keyPressEvent(QKeyEvent *qe) {
 //}
 
 void QEText::focusInEvent(QFocusEvent *qe) {
-    //repaint(FALSE);
-    DEBUGX(("got focus\n"));
+    repaint(FALSE);
 }
 
 void QEText::focusOutEvent(QFocusEvent *qe) {
-    //repaint(FALSE);
-    DEBUGX(("lost focus\n"));
+    repaint(FALSE);
 }
 
 QEFrame::QEFrame(GFramePeer *peer, QWidget *parent, const char *name): QFrame(parent, name)
@@ -1750,7 +1749,7 @@ QPopupMenu *QEFrame::CreatePopup(QWidget *parent, int Id, int do_connect) {
     CHECK_PTR(menu);
 
     //menu->setFont(QFont("Helvetica", 12, QFont::Bold));
-    for (int i = 0; i < Menus[Id].Count; i++) {
+    for (unsigned i = 0; i < Menus[Id].Count; ++i) {
         if (Menus[Id].Items[i].Name) {
             //puts(Menus[Id].Items[i].Name);
             if (Menus[Id].Items[i].SubMenu != -1) {
@@ -1779,7 +1778,7 @@ QMenuBar *QEFrame::CreateMenuBar(QWidget *parent, int Id) {
     CHECK_PTR(menu);
 
     //menu->setFont(QFont("Helvetica", 12, QFont::Bold));
-    for (int i = 0; i < Menus[Id].Count; i++) {
+    for (unsigned i = 0; i < Menus[Id].Count; ++i) {
         if (Menus[Id].Items[i].Name) {
             //puts(Menus[Id].Items[i].Name);
 
@@ -2059,10 +2058,10 @@ ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
         return -1;
     if (Pipes[id].used == 0)
         return -1;
-    DEBUGX(("Pipe Read: Get %d %d\n", id, len));
+    DEBUGX(("Pipe Read: Get %d %d\n", id, (int)len));
     
     rc = read(Pipes[id].fd, buffer, len);
-    DEBUGX(("Pipe Read: Got %d %d\n", id, len));
+    DEBUGX(("Pipe Read: Got %d %d\n", id, (int)len));
     if (rc == 0) {
         //if (Pipes[id].input != 0) {
             //XtRemoveInput(Pipes[id].input);

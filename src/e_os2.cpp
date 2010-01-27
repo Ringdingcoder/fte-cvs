@@ -15,25 +15,24 @@ int EView::SysShowHelp(ExState &State, const char *word) {
     char file[MAXPATH] = "";
     char cmd[1024];
 
-    if (State.GetStrParam(this, file, sizeof(file) - 1) == 0)
-        if (MView->Win->GetStr("Help file",
-                               sizeof(file) - 1, file, HIST_DEFAULT) == 0)
+    if (State.GetStrParam(this, file, sizeof(file)) == 0)
+	if (MView->Win->GetStr("Help file",
+			       sizeof(file), file, HIST_DEFAULT) == 0)
             return 0;
 
     char wordAsk[64] = "";
     if (word == 0) {
-        if (State.GetStrParam(this, wordAsk, sizeof(wordAsk) - 1) == 0)
+        if (State.GetStrParam(this, wordAsk, sizeof(wordAsk)) == 0)
             if (MView->Win->GetStr("Keyword",
-                                   sizeof(wordAsk) - 1, wordAsk, HIST_DEFAULT) == 0)
+                                   sizeof(wordAsk), wordAsk, HIST_DEFAULT) == 0)
                 return 0;
         word = wordAsk;
     }
 
-    sprintf(cmd, "%s %s %s", HelpCommand, file, word);
+    int i = snprintf(cmd, sizeof(cmd), "%s %s %s", HelpCommand, file, word);
+    if (i > 0 &&  i < sizeof(cmd) && system(cmd) == 0)
+        return 1;
 
-    if (system(cmd) != 0) {
-        Msg(S_ERROR, "Failed to start view.exe!");
-        return 0;
-    }
-    return 1;
+    Msg(S_ERROR, "Failed to start view.exe!");
+    return 0;
 }

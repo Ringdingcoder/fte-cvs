@@ -1479,8 +1479,8 @@ int GFramePeer::ConSetTitle(const char *Title, const char *STitle) {
 }
 
 int GFramePeer::ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
-    strncpy(Title, qFrame->caption(), MaxLen);
-    strncpy(STitle, qFrame->iconText(), SMaxLen);
+    strlcpy(Title, qFrame->caption(), MaxLen);
+    strlcpy(STitle, qFrame->iconText(), SMaxLen);
     return 1;
 }
 
@@ -1963,17 +1963,17 @@ int GUI::ShowEntryScreen() {
 }
 
 int GUI::RunProgram(int mode, char *Command) {
-    char Cmd[1024];
+    char Cmd[1024] = {0};
 
     //strncpy(Cmd, XShellCommand, sizeof(Cmd));
 
     if (*Command == 0)  // empty string = shell
-        strncat(Cmd, " -ls &", sizeof(Cmd));
+        strlcat(Cmd, " -ls &", sizeof(Cmd));
     else {
-        strncat(Cmd, " -e ", sizeof(Cmd));
-	strncat(Cmd, Command, sizeof(Cmd));
+        strlcat(Cmd, " -e ", sizeof(Cmd));
+	strlcat(Cmd, Command, sizeof(Cmd));
 	if (mode == RUN_ASYNC)
-            strncat(Cmd, " &", sizeof(Cmd));
+            strlcat(Cmd, " &", sizeof(Cmd));
     }
 
     return system(Cmd);

@@ -1981,10 +1981,8 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
 
     for (int c = 1; c < argc; c++) {
         if (strcmp(argv[c], "-font") == 0) {
-            if (c + 1 < argc) {
-                strncpy(WindowFont, argv[++c], 63);// ugly
-                WindowFont[63] = '\0'; // ensure termination
-            }
+            if (c + 1 < argc)
+                strlcpy(WindowFont, argv[++c], 63);// ugly
         } else if (strcmp(argv[c], "-geometry") == 0) {
             if (c + 1 < argc) {
 
@@ -2008,10 +2006,8 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
                  || (strcmp(argv[c], "--noi18n") == 0))
             useI18n = 0;
         else if (strcmp(argv[c], "-name") == 0) {
-            if (c + 1 < argc) {
-                strncpy(res_name, argv [++c], sizeof(res_name));
-                res_name[sizeof(res_name) - 1] = '\0'; // ensure termination
-            }
+            if (c + 1 < argc)
+                strlcpy(res_name, argv [++c], sizeof(res_name));
         } else
             argv[o++] = argv[c];
     }

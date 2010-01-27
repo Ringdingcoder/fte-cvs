@@ -518,8 +518,7 @@ int DLGGetFile(GView *View, const char *Prompt, unsigned int BufLen, char *FileN
         return 0;
     
     if (dlg.lReturn == DID_OK) {
-        strncpy(FileName, dlg.szFullFile, BufLen);
-        FileName[BufLen - 1] = 0;
+        strlcpy(FileName, dlg.szFullFile, BufLen);
         AddInputHistory(HIST_PATH, FileName);
         return 1;
     }
@@ -596,9 +595,8 @@ static int DoChoice(HWND hwndFrame, ChoiceInfo *choice) {
     
     fmt = va_arg(choice->ap, char *);
     vsprintf(msg, fmt, choice->ap);
-    strncpy((PCHAR)Prompt, msg, sizeof(Prompt));
-    Prompt[sizeof(Prompt) - 1] = 0;
-    
+    strlcpy((PCHAR)Prompt, msg, sizeof(Prompt));
+
     hwndStatic = WinCreateWindow(hwndDlg,
                                  WC_STATIC,
                                  Prompt,

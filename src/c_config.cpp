@@ -144,7 +144,7 @@ static void AppendGUICharacters(const char *string) {
         g = new GUICharactersEntry;
         assert(g != NULL);
 
-        // allocate memory for name
+        // allocate memory for name  +1 for strncat
         g->name = (char *)malloc((s-string) + 1);
         assert(g->name != NULL);
 

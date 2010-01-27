@@ -1381,11 +1381,10 @@ void EBuffer::GetInfo(char *AInfo, size_t /*MaxLen*/) {
 
     if (buf[0] != 0) // if there is a file/dir name, stick it in here.
     {
-        strncat(winTitle, buf, sizeof(winTitle) - 1 - strlen(winTitle));
-        strncat(winTitle, " - ", sizeof(winTitle) - 1 - strlen(winTitle));
+        strlcat(winTitle, buf, sizeof(winTitle));
+        strlcat(winTitle, " - ", sizeof(winTitle));
     }
-    strncat(winTitle, FileName, sizeof(winTitle) - 1 - strlen(winTitle));
-    winTitle[sizeof(winTitle) - 1] = 0;
+    strlcat(winTitle, FileName, sizeof(winTitle));
 
     sprintf(AInfo,
             "%2d %04d:%03d%c%-150s ",

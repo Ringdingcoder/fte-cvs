@@ -7,19 +7,10 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <assert.h>
-#include <stdarg.h>
-#include <fcntl.h>
-#include <sys/wait.h>
-
 #include "sysdep.h"
 #include "console.h"
 #include "gui.h"
-
+#include "s_string.h"
 
 #include <qwidget.h>
 #include <qframe.h>
@@ -37,6 +28,15 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <assert.h>
+#include <stdarg.h>
+#include <fcntl.h>
+#include <sys/wait.h>
 
 #define DEBUGX(x)
 //#define DEBUGX(x) printf x
@@ -285,15 +285,15 @@ static void qGetEvent(TEvent &Event) {
     delete q;
 }
 
-QEView::QEView(GViewPeer *peer, QWidget *parent, const char *name): QFrame(parent, name)
+QEView::QEView(GViewPeer *peer, QWidget *parent, const char *name) :
+    QFrame(parent, name),
+    view(peer),
+    text(new QEText(peer, this)),
+    horz(new QScrollBar(QScrollBar::Horizontal, parent, 0)),
+    vert(new QScrollBar(QScrollBar::Vertical, parent, 0))
 {
-    view = peer;
-
-    text = new QEText(peer, this);
     CHECK_PTR(text);
-    horz = new QScrollBar(QScrollBar::Horizontal, parent, 0);
     CHECK_PTR(horz);
-    vert = new QScrollBar(QScrollBar::Vertical, parent, 0);
     CHECK_PTR(vert);
     horz->show();
     vert->show();

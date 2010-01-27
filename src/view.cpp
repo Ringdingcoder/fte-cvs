@@ -559,7 +559,7 @@ int EView::DirOpen(ExState &State) {
     return OpenDir(Path);
 }
 
-int EView::OpenDir(char *Path) {
+int EView::OpenDir(const char *Path) {
     char XPath[MAXPATH];
     EDirectory *dir = 0;
 

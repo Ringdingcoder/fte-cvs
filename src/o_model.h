@@ -180,7 +180,7 @@ public:
 #endif
 #ifdef CONFIG_OBJ_DIRECTORY
     int DirOpen(ExState &State);
-    int OpenDir(char *Directory);
+    int OpenDir(const char *Directory);
 #endif
     int ShowVersion();
     int ViewModeMap(ExState &State);

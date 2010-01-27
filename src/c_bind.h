@@ -83,14 +83,16 @@ public:
 #endif
 };
 
-#define CT_COMMAND  0
-#define CT_NUMBER   1
-#define CT_STRING   2
-#define CT_VARIABLE 3
-#define CT_CONCAT   4 /* concatenate strings */
+enum CommandType_e {
+    CT_COMMAND,
+    CT_NUMBER,
+    CT_STRING,
+    CT_VARIABLE,
+    CT_CONCAT /* concatenate strings */
+};
 
 struct CommandType {
-    int type;
+    CommandType_e type;
     short repeat;
     short ign;
     union {

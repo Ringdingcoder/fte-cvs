@@ -613,7 +613,7 @@ void EMessages::NotifyPipe(int APipeId) {
 }
 
 void EMessages::GetName(char *AName, size_t MaxLen) {
-    strncpy(AName, "Messages", MaxLen);
+    strlcpy(AName, "Messages", MaxLen);
 }
 
 void EMessages::GetInfo(char *AInfo, size_t /*MaxLen*/) {
@@ -626,17 +626,13 @@ void EMessages::GetInfo(char *AInfo, size_t /*MaxLen*/) {
 }
 
 void EMessages::GetPath(char *APath, size_t MaxLen) {
-    strncpy(APath, Directory, MaxLen);
-    if (MaxLen > 0)
-        APath[MaxLen - 1] = 0;
+    strlcpy(APath, Directory, MaxLen);
     Slash(APath, 0);
 }
 
-void EMessages::GetTitle(char *ATitle, size_t /*MaxLen*/, char *ASTitle, size_t SMaxLen) {
-    sprintf(ATitle, "Messages: %s", Command);
-    strncpy(ASTitle, "Messages", SMaxLen);
-    if (SMaxLen > 0)
-        ASTitle[SMaxLen - 1] = 0;
+void EMessages::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
+    snprintf(ATitle, MaxLen, "Messages: %s", Command);
+    strlcpy(ASTitle, "Messages", SMaxLen);
 }
 
 // get row length for specified row, used in MoveLineEnd to get actual row length

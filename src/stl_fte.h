@@ -76,6 +76,7 @@ public:
     string operator+(const char* s) const { return string(str) += s; }
     string operator+(const string& s) const { return string(str) += s; }
     string substr(size_type from = 0, size_type to = npos) const { return string(str + from, to); };
+    bool empty() const { return str[0] == 0; }
     size_type find(const string& s, size_type startpos = 0) const;
     size_type find(char c) const;
     size_type rfind(char c) const;

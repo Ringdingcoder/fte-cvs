@@ -383,10 +383,22 @@ int EGUI::FileCloseX(EView *View, int CreateNew, int XClose) {
             return 0;
         }
 #endif
+        if (ActiveView) {
+            /*
+             * FIXME: hack - fixing problem when closing window
+             * i.e.: F1 - Split - Close
+             * was leaving cursor in wrong window
+             * so going to next view and back for now
+             * fixes problem
+             */
+            ActiveView->MView->Win->Parent->SelectNext(0);
+            ActiveView->MView->Win->Parent->SelectNext(1);
+        }
 
         if (ActiveModel == 0) {
             StopLoop();
-        }
+        } 
+
         return 1;
     }
     return 0;

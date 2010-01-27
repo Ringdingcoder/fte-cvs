@@ -52,17 +52,21 @@ size_t UnEscStr(char *dest, size_t maxlen, const char *source, size_t slen) {
 }
 
 #if !defined(HAVE_STRLCPY)
+/* returns size of src */
 size_t strlcpy(char *dst, const char *src, size_t size)
 {
-    size_t ret = strlen(src);
+    size_t sz = 0;
 
-    if (size) {
-        size_t len = (ret >= size) ? size - 1 : ret;
-        memcpy(dst, src, len);
-        dst[len] = '\0';
-    }
+    while (sz < size && (dst[sz] = src[sz]))
+	sz++;
 
-    return ret;
+    if (sz && (sz == size))
+	dst[sz - 1] = 0;
+
+    while (src[sz])
+	sz++;
+
+    return sz;
 }
 #endif // !HAVE_STRLCPY
 

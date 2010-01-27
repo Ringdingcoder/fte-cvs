@@ -32,14 +32,16 @@ static int CmpStr(const void *p1, const void *p2) {
 /**
  * Create Sorted list of possible word extensions
  */
-ExComplete::ExComplete(EBuffer *B): ExView()
+ExComplete::ExComplete(EBuffer *B) :
+    ExView(),
+    Orig(B->CP),
+    Buffer(B),
+    WordsLast(0),
+    Words(new char *[MAXCOMPLETEWORDS + 2]),
+    WordBegin(NULL),
+    WordPos(0),
+    WordFixed(0)
 {
-    Buffer = B;
-    Orig = Buffer->CP;
-    WordBegin = NULL;
-    WordFixed = WordPos = WordsLast = 0;
-    Words = new char *[MAXCOMPLETEWORDS + 2];
-    if (Words != NULL)
 	RefreshComplete();
 }
 

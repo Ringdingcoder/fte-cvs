@@ -9,23 +9,25 @@
 
 #include "fte.h"
 
-ExChoice::ExChoice(const char *ATitle, int NSel, va_list ap): ExView() {
+ExChoice::ExChoice(const char *ATitle, int NSel, va_list ap) :
+    ExView(),
+    Title(strdup(ATitle)),
+    NOpt(NSel),
+    Cur(0),
+    lChoice(0),
+    MouseCaptured(0)
+{
     char msg[1024];
     int i;
     char *fmt;
-    
-    Cur = 0;
-    MouseCaptured = 0;
-    
-    Title = strdup(ATitle);
+
     lTitle = strlen(Title);
-    NOpt = NSel;
-    lChoice = 0;
-    
+
     for (i = 0; i < NSel; i++) {
         SOpt[i] = strdup(va_arg(ap, char *));
         lChoice += CStrLen(SOpt[i]) + 1;
     }
+
     fmt = va_arg(ap, char *);
     vsprintf(msg, fmt, ap);
     strncpy(Prompt, msg, sizeof(Prompt));

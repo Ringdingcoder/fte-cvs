@@ -10,11 +10,13 @@
 #include "fte.h"
 
 #ifdef CONFIG_OBJ_ROUTINE
-RoutineView::RoutineView(int createFlags, EModel **ARoot, EBuffer *AB): EList(createFlags, ARoot, "Routines") {
-    Buffer = AB;
+RoutineView::RoutineView(int createFlags, EModel **ARoot, EBuffer *AB) :
+    EList(createFlags, ARoot, "Routines"),
+    Buffer(AB)
+{
     if (Buffer->rlst.Count == 0)
         Buffer->ScanForRoutines();
-    Row = 0;
+
     int Row = Buffer->VToR(Buffer->CP.Row);
     for (int i = Buffer->rlst.Count - 1; i >= 0; --i)
         if (Row >= Buffer->rlst.Lines[i]) {

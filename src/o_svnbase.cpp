@@ -31,17 +31,19 @@ void FreeSvnIgnoreRegexp () {
     }
 }
 
-ESvnBase::ESvnBase (int createFlags,EModel **ARoot,const char *title):EList (createFlags,ARoot,title) {
-    LineCount=0;
-    Lines=0;
-    Running=0;
-    BufLen=0;
-    BufPos=0;
-    Command=0;
-    Directory=0;
-    OnFiles=0;
-    ReturnCode=-1;
-    PipeId=-1;
+ESvnBase::ESvnBase (int createFlags, EModel **ARoot, const char *title) :
+    EList (createFlags, ARoot, title),
+    Command(0),
+    Directory(0),
+    OnFiles(0),
+    LineCount(0),
+    Lines(0),
+    Running(0),
+    BufLen(0),
+    BufPos(0),
+    PipeId(-1),
+    ReturnCode(-1)
+{
 }
 
 ESvnBase::~ESvnBase () {

@@ -22,7 +22,8 @@
 
 unsigned long HaveGUIDialogs = GUIDLG_FILE | GUIDLG_CHOICE;
 
-int DLGGetFile(GView *v, const char *Prompt, unsigned int BufLen, char *FileName, int Flags) {
+int DLGGetFile(GView *v, const char *Prompt, unsigned int BufLen,
+	       char *FileName, int Flags) {
     QString fn;
     char filter[MAXPATH] = "*";
     char directory[MAXPATH];
@@ -91,17 +92,16 @@ private:
 };
 
 
-QChoiceBox::QChoiceBox(QWidget *parent, const char *name)
-    : QDialog(parent, name, TRUE)
+QChoiceBox::QChoiceBox(QWidget *parent, const char *name) :
+    QDialog(parent, name, TRUE),
+    buttonSelected(-1),
+    buttonCount(0),
+    buttonActivated(-1),
+    buttonArmed(-1),
+    label(new QLabel(this, "text"))
 {
     //initMetaObject();
 
-    buttonSelected = -1;
-    buttonCount = 0;
-    buttonActivated = -1;
-    buttonArmed = -1;
-    
-    label = new QLabel(this, "text");
     CHECK_PTR(label);
     label->setAlignment(AlignLeft);
     QFont font("Helvetica", 12, QFont::Bold);
@@ -222,4 +222,3 @@ int DLGGetStr(GView *View, char *Prompt, unsigned int BufLen, char *Str, int His
     assert(1 == 0);
     return 0;
 }
-

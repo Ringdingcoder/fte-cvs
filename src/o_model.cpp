@@ -34,9 +34,10 @@ int GetNewModelID(EModel *B) {
     return lastid;
 }
 
-EModel::EModel(int createFlags, EModel **ARoot) {
-    Root = ARoot;
-
+EModel::EModel(int createFlags, EModel **ARoot) :
+    Root(ARoot),
+    View(0)
+{
     if (Root) {
         if (*Root) {
             if (createFlags & cfAppend) {
@@ -55,8 +56,7 @@ EModel::EModel(int createFlags, EModel **ARoot) {
             *Root = this;
     } else
         Prev = Next = this;
-    View = 0;
-    ModelNo = -1;
+
     ModelNo = GetNewModelID(this);
 }
 

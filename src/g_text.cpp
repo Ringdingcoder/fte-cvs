@@ -113,25 +113,27 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////
 
-GViewPeer::GViewPeer(GView *view, int XSize, int YSize) {
-    View = view;
-    wX = 0;
-    wY = 0;
-    wW = XSize;
-    wH = YSize;
-    sbVtotal = 0;
-    sbVstart = 0;
-    sbVamount = 0;
-    sbVupdate = 1;
-    sbHtotal = 0;
-    sbHstart = 0;
-    sbHamount = 0;
-    sbHupdate = 1;
-    wState = 0;
-    cVisible = 1;
-    cStart = 0; // %
-    cEnd = 100;
-    cX = cY = 0;
+GViewPeer::GViewPeer(GView *view, int XSize, int YSize) :
+    View(view),
+    wX(0),
+    wY(0),
+    wW(XSize),
+    wH(YSize),
+    wState(0),
+    cX(0),
+    cY(0),
+    cVisible(1),
+    cStart(0), // %
+    cEnd(100),
+    sbVstart(0),
+    sbVamount(0),
+    sbVtotal(0),
+    sbVupdate(1),
+    sbHstart(0),
+    sbHamount(0),
+    sbHtotal(0),
+    sbHupdate(1)
+{
 }
 
 GViewPeer::~GViewPeer() {

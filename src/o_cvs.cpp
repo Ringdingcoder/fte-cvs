@@ -24,20 +24,20 @@ static const char CvsStatusChars[] = "?UPMCAR";
 ECvs *CvsView=0;
 
 ECvs::ECvs(int createFlags, EModel **ARoot, char* ADir, char* ACommand,
-	   char* AOnFiles)
-    : ECvsBase(createFlags, ARoot, "CVS")
+	   char* AOnFiles) :
+    ECvsBase(createFlags, ARoot, "CVS"),
+    LogFile(0),
+    Commiting(0)
 {
     CvsView=this;
-    LogFile=0;
-    Commiting=0;
     RunPipe (ADir, ACommand, AOnFiles);
 }
 
-ECvs::ECvs (int createFlags,EModel **ARoot)
-:ECvsBase (createFlags,ARoot,"CVS")
+ECvs::ECvs (int createFlags,EModel **ARoot) :
+    ECvsBase (createFlags, ARoot, "CVS"),
+    LogFile(0)
 {
     CvsView=this;
-    LogFile=0;
 }
 
 ECvs::~ECvs () {

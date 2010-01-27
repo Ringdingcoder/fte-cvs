@@ -13,14 +13,15 @@
 
 static char PrevISearch[MAXISEARCH] = "";
 
-ExISearch::ExISearch(EBuffer *B) {
-    Buffer = B;
+ExISearch::ExISearch(EBuffer *B) :
+    Orig(B->CP), // ?
+    len(0),
+    stacklen(0),
+    Buffer(B),
+    state(INoMatch),
+    Direction(0)
+{
     strcpy(ISearchStr, "");
-    len = 0;
-    stacklen = 0;
-    Orig = Buffer->CP; // ?
-    Direction = 0;
-    state = INoMatch;
 }
 
 ExISearch::~ExISearch() {

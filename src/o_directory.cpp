@@ -16,12 +16,14 @@
 #include "c_history.h"
 
 #ifdef CONFIG_OBJ_DIRECTORY
-EDirectory::EDirectory(int createFlags, EModel **ARoot, char *aPath): EList(createFlags, ARoot, aPath) {
+EDirectory::EDirectory(int createFlags, EModel **ARoot, char *aPath) :
+    EList(createFlags, ARoot, aPath),
+    Files(0),
+    FCount(0),
+    SearchLen(0)
+{
     char XPath[MAXPATH];
 
-    Files = 0;
-    FCount = 0;
-    SearchLen = 0;
     ExpandPath(aPath, XPath, sizeof(XPath));
     Slash(XPath, 1);
     Path = strdup(XPath);

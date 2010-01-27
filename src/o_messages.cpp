@@ -42,19 +42,20 @@ void FreeCRegexp()
         RxFree(CRegexp[NCRegexp].rx);
 }
 
-EMessages::EMessages(int createFlags, EModel **ARoot, char *ADir, char *ACommand): EList(createFlags, ARoot, "Messages") {
+EMessages::EMessages(int createFlags, EModel **ARoot, char *ADir, char *ACommand) :
+    EList(createFlags, ARoot, "Messages"),
+    ErrCount(0),
+    ErrList(0),
+    Command(0),
+    Directory(0),
+    Running(1),
+    BufLen(0),
+    BufPos(0),
+    ReturnCode(-1),
+    MatchCount(0),
+    curr_dir(0)
+{
     CompilerMsgs = this;
-    ErrCount = 0;
-    ErrList = 0;
-    Running = 0;
-    BufLen = 0;
-    BufPos = 0;
-    Command = 0;
-    Directory = 0;
-    MatchCount = 0;
-    ReturnCode = -1;
-    Running = 1;
-    curr_dir = 0;
     RunPipe(ADir, ACommand);
 }
 

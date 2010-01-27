@@ -9,11 +9,13 @@
 
 #include "fte.h"
 
-ExModelView::ExModelView(EView *AView): ExView() {
-    View = AView;
+ExModelView::ExModelView(EView *AView) :
+    ExView(),
+    View(AView),
+    MouseCaptured(0),
+    MouseMoved(0)
+{
     View->MView = this;
-    MouseCaptured = 0;
-    MouseMoved = 0;
 }
 
 ExModelView::~ExModelView() {

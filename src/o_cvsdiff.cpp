@@ -13,12 +13,14 @@
 
 ECvsDiff *CvsDiffView=0;
 
-ECvsDiff::ECvsDiff (int createFlags,EModel **ARoot,char *ADir,char *ACommand,char *AOnFiles):ECvsBase (createFlags,ARoot,"CVS diff") {
+ECvsDiff::ECvsDiff (int createFlags, EModel **ARoot, char *ADir, char *ACommand, char *AOnFiles) :
+    ECvsBase (createFlags, ARoot, "CVS diff"),
+    CurrLine(0),
+    ToLine(0),
+    InToFile(0),
+    CurrFile(0)
+{
     CvsDiffView=this;
-    CurrFile=0;
-    CurrLine=0;
-    ToLine=0;
-    InToFile=0;
     RunPipe (ADir,ACommand,AOnFiles);
 }
 

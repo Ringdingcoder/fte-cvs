@@ -11,11 +11,13 @@
 
 BufferView *BufferList = 0;
 
-BufferView::BufferView(int createFlags, EModel **ARoot): EList(createFlags, ARoot, "Buffers") {
+BufferView::BufferView(int createFlags, EModel **ARoot) :
+    EList(createFlags, ARoot, "Buffers"),
+    BList(0),
+    BCount(0),
+    SearchLen(0)
+{
     ModelNo = 0; // trick
-    BList = 0;
-    BCount = 0;
-    SearchLen = 0;
 }
 
 BufferView::~BufferView() {

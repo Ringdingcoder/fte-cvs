@@ -11,9 +11,11 @@
 
 int LastEventChar = -1;
 
-EFrame::EFrame(int XSize, int YSize): GFrame(XSize, YSize) {
-    CMap = 0;
-    CModel = 0;
+EFrame::EFrame(int XSize, int YSize) :
+    GFrame(XSize, YSize),
+    CMap(0),
+    CModel(0)
+{
 }
 
 EFrame::~EFrame() {

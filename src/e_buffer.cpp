@@ -14,26 +14,44 @@ EBuffer *SSBuffer = 0; // scrap buffer (clipboard)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EBuffer::EBuffer(int createFlags, EModel **ARoot, const char * /*AName*/)
-    :EModel(createFlags, ARoot), TP(0,0), CP(0,0), BB(-1,-1), BE(-1,-1),
-     PrevPos(-1, -1), SavedPos(-1, -1), Match(-1, -1)
+EBuffer::EBuffer(int createFlags, EModel **ARoot, const char * /*AName*/) :
+    EModel(createFlags, ARoot),
+    FileName(0),
+    Modified(0),
+    TP(0,0),
+    CP(0,0),
+    BB(-1,-1),
+    BE(-1,-1),
+    PrevPos(-1, -1),
+    SavedPos(-1, -1),
+    BlockMode(bmStream),
+    ExtendGrab(0),
+    AutoExtend(0),
+    Loaded(0),
+    Loading(0),
+    RAllocated(0),
+    RGap(0),
+    RCount(0),
+    LL(0),
+    VAllocated(0),
+    VGap(0),
+    VCount(0),
+    VV(0),
+#ifdef CONFIG_FOLDS
+    FCount(0),
+    FF(0),
+#endif
+    Match(-1, -1),
+    MatchLen(0),
+    MatchCount(0),
+#ifdef CONFIG_BOOKMARKS
+    BMCount(0),
+    BMarks(0),
+#endif
+    MinRedraw(-1),
+    MaxRedraw(-1),
+    RedrawToEos(0)
 {
-    Modified = 0;
-    Loaded = 0;
-    Loading = 0;
-
-    FileName = 0;
-    LL = 0;
-    VV = 0;
-    FF = 0;
-    RGap = RCount = RAllocated = 0;
-    VGap = VCount = VAllocated = 0;
-    FCount = 0;
-    Modified = 0;
-    BlockMode = bmStream;
-    ExtendGrab = 0;
-    AutoExtend = 0;
-    MatchLen = MatchCount = 0;
 #ifdef CONFIG_UNDOREDO
     US.Num = 0;
     US.Data = 0;
@@ -42,10 +60,6 @@ EBuffer::EBuffer(int createFlags, EModel **ARoot, const char * /*AName*/)
     US.NextCmd = 1;
     US.Record = 1;
     US.Undo = 0;
-#endif
-#ifdef CONFIG_BOOKMARKS
-    BMCount = 0;
-    BMarks = 0;
 #endif
 #ifdef CONFIG_OBJ_ROUTINE
     rlst.Count = 0;
@@ -63,10 +77,6 @@ EBuffer::EBuffer(int createFlags, EModel **ARoot, const char * /*AName*/)
     Flags = (Mode->Flags);
     BFI(this, BFI_Undo) = 0;
     BFI(this, BFI_ReadOnly) = 0;
-    Modified = 0;
-    MinRedraw = -1;
-    MaxRedraw = -1;
-    RedrawToEos = 0;
 #ifdef CONFIG_SYNTAX_HILIT
     StartHilit = 0;
     EndHilit = -1;

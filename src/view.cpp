@@ -14,7 +14,13 @@ EView *ActiveView = 0;
 
 extern BufferView *BufferList;
 
-EView::EView(EModel *AModel) {
+EView::EView(EModel *AModel) :
+    MView(0),
+    Model(AModel),
+    NextView(0),
+    Port(0),
+    CurMsg(0)
+{
     if (ActiveView) {
         Prev = ActiveView;
         Next = ActiveView->Next;
@@ -22,12 +28,9 @@ EView::EView(EModel *AModel) {
         Next->Prev = this;
     } else
         Prev = Next = this;
+
     ActiveView = this;
-    Model = AModel;
-    NextView = 0;
-    Port = 0;
-    MView = 0;
-    CurMsg = 0;
+
     if (Model)
         Model->CreateViewPort(this);
 }

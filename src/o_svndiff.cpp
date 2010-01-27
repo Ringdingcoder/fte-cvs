@@ -14,14 +14,14 @@
 ESvnDiff       *SvnDiffView = 0;
 
 ESvnDiff::ESvnDiff(int createFlags, EModel ** ARoot, char *ADir, char *ACommand,
-                   char *AOnFiles):
-ESvnBase(createFlags, ARoot, "SVN diff")
+                   char *AOnFiles) :
+    ESvnBase(createFlags, ARoot, "SVN diff"),
+    CurrLine(0),
+    ToLine(0),
+    InToFile(0),
+    CurrFile(0)
 {
     SvnDiffView = this;
-    CurrFile = 0;
-    CurrLine = 0;
-    ToLine = 0;
-    InToFile = 0;
     RunPipe(ADir, ACommand, AOnFiles);
 }
 

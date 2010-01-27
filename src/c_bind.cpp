@@ -215,11 +215,12 @@ void SetWordChars(char *w, const char *s) {
     }
 }
 
-EMode::EMode(EMode *aMode, EEventMap *Map, const char *aName) {
-    fNext = 0;
-    fName = strdup(aName);
-    fEventMap = Map;
-    fParent = aMode;
+EMode::EMode(EMode *aMode, EEventMap *Map, const char *aName) :
+    fNext(0),
+    fName(strdup(aName)),
+    fEventMap(Map),
+    fParent(aMode)
+{
     InitWordChars();
     if (aMode) {
 #ifdef CONFIG_SYNTAX_HILIT
@@ -278,9 +279,10 @@ EMode::~EMode() {
         free(Flags.str[i]);
 }
 
-EKeyMap::EKeyMap() {
-    fKeys = NULL;
-    fParent = NULL;
+EKeyMap::EKeyMap() :
+    fParent(NULL),
+    fKeys(NULL)
+{
 }
 
 EKeyMap::~EKeyMap() {

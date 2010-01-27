@@ -22,16 +22,19 @@ static int SameDir (const char *D1, const char *D2) {
 static const char SvnStatusChars[] = "?XUPMCAR";
 ESvn *SvnView=0;
 
-ESvn::ESvn (int createFlags,EModel **ARoot,char *ADir,char *ACommand,char *AOnFiles):ESvnBase (createFlags,ARoot,"SVN") {
+ESvn::ESvn (int createFlags, EModel **ARoot, char *ADir, char *ACommand, char *AOnFiles) :
+    ESvnBase (createFlags, ARoot, "SVN"),
+    LogFile(0),
+    Commiting(0)
+{
     SvnView=this;
-    LogFile=0;
-    Commiting=0;
     RunPipe (ADir,ACommand,AOnFiles);
 }
 
-ESvn::ESvn (int createFlags,EModel **ARoot):ESvnBase (createFlags,ARoot,"SVN") {
+ESvn::ESvn (int createFlags, EModel **ARoot) : ESvnBase (createFlags, ARoot, "SVN"),
+    LogFile(0)
+{
     SvnView=this;
-    LogFile=0;
 }
 
 ESvn::~ESvn () {

@@ -103,9 +103,11 @@ void EventMapView::DumpEventMap(EEventMap *aEventMap) {
     }
 }
 
-EventMapView::EventMapView(int createFlags, EModel **ARoot, EEventMap *Map): EList(createFlags, ARoot, "Event Map") {
-    BCount = 0;
-    BList = 0;
+EventMapView::EventMapView(int createFlags, EModel **ARoot, EEventMap *Map) :
+    EList(createFlags, ARoot, "Event Map"),
+    BList(0),
+    BCount(0)
+{
     DumpEventMap(EMap = Map);
     TheEventMapView = this;
 }

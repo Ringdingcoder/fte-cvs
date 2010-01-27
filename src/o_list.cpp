@@ -9,9 +9,14 @@
 
 #include "fte.h"
 
-EListPort::EListPort(EList *L, EView *V): EViewPort(V) {
-    List = L;
-    OldTopRow = OldLeftCol = OldRow = OldCount = -1;
+EListPort::EListPort(EList *L, EView *V) :
+    EViewPort(V),
+    List(L),
+    OldRow(-1),
+    OldTopRow(-1),
+    OldLeftCol(-1),
+    OldCount(-1)
+{
     GetPos();
 }
 

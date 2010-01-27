@@ -51,14 +51,15 @@ EViewPort *EBuffer::CreateViewPort(EView *V) {
     return V->Port;
 }
 
-EEditPort::EEditPort(EBuffer *B, EView *V): EViewPort(V) {
-    Buffer = B;
-    Rows = Cols = 0;
-    OldTP.Row = -1;
-    OldTP.Col = -1;
+EEditPort::EEditPort(EBuffer *B, EView *V) :
+    EViewPort(V),
+    Buffer(B),
+    OldTP(-1, -1),
+    Rows(0),
+    Cols(0)
+{
     GetPos();
-    TP = B->TP;
-    CP = B->CP;
+
     if (V && V->MView && V->MView->Win) {
         V->MView->ConQuerySize(&Cols, &Rows);
         Rows--;

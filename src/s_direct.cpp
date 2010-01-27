@@ -46,33 +46,34 @@ static int my_stat(const char *name, struct stat *s)
 #endif
 
 
-FileInfo::FileInfo(const char *Name, int Type, off_t Size, time_t MTime) {
-    name = new char[strlen (Name) + 1];
-    if (name)
-        strcpy(name, Name);
-    size = Size;
-    type = Type;
-    mtime = MTime;
+FileInfo::FileInfo(const char *Name, int Type, off_t Size, time_t MTime) :
+    name(new char[strlen(Name) + 1]),
+    size(Size),
+    mtime(MTime),
+    type(Type)
+{
+    strcpy(name, Name);
 }
 
 FileInfo::~FileInfo() {
     delete [] name;
 }
 
-FileFind::FileFind(const char *aDirectory, const char *aPattern, int aFlags) {
-    Directory = new char[strlen(aDirectory) + 1];
-    if (Directory) {
-        strcpy(Directory, aDirectory);
-        Slash(Directory, 0);
-    }
+FileFind::FileFind(const char *aDirectory, const char *aPattern, int aFlags) :
+    Directory(new char[strlen(aDirectory) + 1]),
+    Flags(aFlags)
+{
+    strcpy(Directory, aDirectory);
+    Slash(Directory, 0);
+
     if (aPattern) {
         Pattern = new char[strlen(aPattern) + 1];
-        if (Pattern)
-            strcpy(Pattern, aPattern);
+
+        strcpy(Pattern, aPattern);
     } else {
         Pattern = 0;
     }
-    Flags = aFlags;
+
 #if defined(USE_DIRENT)
     //#if defined(UNIX) || defined(DOSP32) || defined(NT)
     dir = 0;

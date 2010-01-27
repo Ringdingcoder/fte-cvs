@@ -602,31 +602,30 @@ void HorzValueChanged(Widget w, GViewPeer *Peer, XmScrollBarCallbackStruct *Call
 
 ///////////////////////////////////////////////////////////////////////////
 
-GViewPeer::GViewPeer(GView *view, int XSize, int YSize) {
-
-    View = view;
-    Visibility = VisibilityFullyObscured;
-
-    //    wX = 0;
-    //    wY = 0;
-    wW = XSize;
-    wH = YSize;
-    sbVtotal = 0;
-    sbVstart = 0;
-    sbVamount = 0;
-    sbHtotal = 0;
-    sbHstart = 0;
-    sbHamount = 0;
-    wState = 0;
-    cVisible = 1;
-    cStart = 0; // %
-    cEnd = 100;
-    wRefresh = 0;
-    ScreenBuffer = 0;
-    cX = -1;
-    cY = -1;
-    VertPos = HorzPos = -1;
-
+GViewPeer::GViewPeer(GView *view, int XSize, int YSize) :
+    View(view),
+    Visibility(VisibilityFullyObscured),
+    //    wX(0),
+    //    wY(0),
+    wW(XSize),
+    wH(YSize),
+    sbVtotal(0),
+    sbVstart(0),
+    sbVamount(0),
+    sbHtotal(0),
+    sbHstart(0),
+    sbHamount(0),
+    wState(0),
+    cVisible(1),
+    cStart(0), // %
+    cEnd(100),
+    wRefresh(0),
+    ScreenBuffer(0),
+    cX(-1),
+    cY(-1),
+    VertPos(-1),
+    HorzPos(-1)
+{
     for (int jj = 0; jj < 256; jj++)
         gc[jj] = 0;
 

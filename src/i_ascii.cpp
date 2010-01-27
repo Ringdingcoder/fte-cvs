@@ -14,9 +14,11 @@
 static int SPos = 0;
 static int SLPos = 0;
 
-ExASCII::ExASCII(): ExView() {
-    Pos = SPos;
-    LPos = SLPos;
+ExASCII::ExASCII() :
+    ExView(),
+    Pos(SPos),
+    LPos(SLPos)
+{
 }
 
 ExASCII::~ExASCII() {

@@ -3,13 +3,13 @@
 
 EMarkIndex markIndex;
 
-EMark::EMark(const char *aName, const char *aFileName, EPoint aPoint, EBuffer *aBuffer) {
-    Name = new char[strlen(aName) + 1];
-    FileName = new char[strlen(aFileName) + 1];
-    Buffer = 0;
-    Point = aPoint;
-    assert(Name != 0);
-    assert(FileName != 0);
+EMark::EMark(const char *aName, const char *aFileName,
+	     EPoint aPoint, EBuffer *aBuffer) :
+    Name(new char[strlen(aName) + 1]),
+    FileName(new char[strlen(aFileName) + 1]),
+    Buffer(0),
+    Point(aPoint)
+{
     strcpy(Name, aName);
     strcpy(FileName, aFileName);
     if (aBuffer == 0)

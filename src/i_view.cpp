@@ -9,9 +9,12 @@
 
 #include "fte.h"
 
-GxView::GxView(GFrame *Parent): GView(Parent, -1, -1) {
-    Top = Bottom = 0;
-    MouseCaptured = 0;
+GxView::GxView(GFrame *Parent) :
+    GView(Parent, -1, -1),
+    Top(0),
+    Bottom(0),
+    MouseCaptured(0)
+{
 }
 
 GxView::~GxView() {

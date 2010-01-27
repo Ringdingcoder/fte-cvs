@@ -169,7 +169,7 @@ void GxView::UpdateTitle(const char *Title, const char *STitle) {
     }
 }
 
-int GxView::GetStr(const char *Prompt, unsigned int BufLen, char *Str, int HistId) {
+int GxView::GetStr(const char *Prompt, size_t BufLen, char *Str, int HistId) {
     if ((HaveGUIDialogs & GUIDLG_PROMPT) && GUIDialogs) {
         return DLGGetStr(this, Prompt, BufLen, Str, HistId, 0);
     } else {
@@ -177,14 +177,14 @@ int GxView::GetStr(const char *Prompt, unsigned int BufLen, char *Str, int HistI
     }
 }
 
-int GxView::GetFile(const char *Prompt, unsigned int BufLen, char *Str, int HistId, int Flags) {
+int GxView::GetFile(const char *Prompt, size_t BufLen, char *Str, int HistId, int Flags) {
     if ((HaveGUIDialogs & GUIDLG_FILE) && GUIDialogs)
         return DLGGetFile(this, Prompt, BufLen, Str, Flags);
     else
         return ReadStr(Prompt, BufLen, Str, CompletePath, SelectPathname, HistId);
 }
 
-int GxView::ReadStr(const char *Prompt, unsigned int BufLen, char *Str, Completer Comp, int Select, int HistId) {
+int GxView::ReadStr(const char *Prompt, size_t BufLen, char *Str, Completer Comp, int Select, int HistId) {
     int rc;
     ExInput *input;
 

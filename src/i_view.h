@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __I_VIEW_H__
-#define __I_VIEW_H__
+#ifndef I_VIEW_H
+#define I_VIEW_H
 
 class EView;
 
@@ -40,7 +40,7 @@ public:
 
     void UpdateTitle(const char *Title, const char *STitle);
 
-    int ReadStr(const char *Prompt, unsigned int BufLen, char *Str, Completer Comp, int Select, int HistId);
+    int ReadStr(const char *Prompt, size_t BufLen, char *Str, Completer Comp, int Select, int HistId);
     int Choice(unsigned long Flags, const char *Title, int NSel, ... /* choices, format, args */);
     TKeyCode GetChar(const char *Prompt);
 #ifdef CONFIG_I_SEARCH
@@ -53,10 +53,10 @@ public:
     int ICompleteWord(EView *View);
 #endif
 
-    int GetStr(const char *Prompt, unsigned int BufLen, char *Str, int HistId);
-    int GetFile(const char *Prompt, unsigned int BufLen, char *Str, int HistId, int Flags);
+    int GetStr(const char *Prompt, size_t BufLen, char *Str, int HistId);
+    int GetFile(const char *Prompt, size_t BufLen, char *Str, int HistId, int Flags);
     
     int IsModelView() { return Top ? Top->IsModelView() : 0; }
 };
 
-#endif
+#endif // I_VIEW_H

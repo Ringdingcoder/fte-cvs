@@ -7,6 +7,17 @@
  *
  */
 
+#include "feature.h"
+#include "ftever.h"
+#include "sysdep.h"
+#include "c_fconfig.h"
+#include "s_files.h"
+#include "s_string.h"
+#include "c_mode.h"
+#include "console.h"
+#include "c_hilit.h"
+
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -17,15 +28,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "feature.h"
-#include "ftever.h"
-#include "sysdep.h"
-#include "c_fconfig.h"
-#include "s_files.h"
-#include "s_string.h"
-#include "c_mode.h"
-#include "console.h"
-#include "c_hilit.h"
 
 #define slen(s) ((s) ? (strlen(s) + 1) : 0)
 

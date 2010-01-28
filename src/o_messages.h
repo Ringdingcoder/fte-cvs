@@ -29,8 +29,12 @@ struct Error {
 
 struct aDir
 {
-    aDir* next;
     fte::string name;
+    aDir* next;
+
+    aDir(const char *n, aDir* l) :
+	name(n), next(l)
+    {}
 };
 
 class EMessages: public EList {

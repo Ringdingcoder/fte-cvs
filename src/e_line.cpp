@@ -10,8 +10,8 @@
 #include "fte.h"
 
 ELine::ELine(size_t ACount, const char *AChars) :
-    Chars(NULL),
-    Count(ACount)
+    Count(ACount),
+    Chars(NULL)
 {
     Allocate(Count); 
 #ifdef CONFIG_SYNTAX_HILIT
@@ -24,8 +24,8 @@ ELine::ELine(size_t ACount, const char *AChars) :
 }
 
 ELine::ELine(char *AChars, size_t ACount) :
-    Chars(AChars),
-    Count(ACount)
+    Count(ACount),
+    Chars(AChars)
 {
 #ifdef CONFIG_SYNTAX_HILIT
     StateE = 0;

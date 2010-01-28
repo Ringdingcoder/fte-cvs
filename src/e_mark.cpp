@@ -6,9 +6,9 @@ EMarkIndex markIndex;
 EMark::EMark(const char *aName, const char *aFileName,
 	     EPoint aPoint, EBuffer *aBuffer) :
     Name(new char[strlen(aName) + 1]),
+    Point(aPoint),
     FileName(new char[strlen(aFileName) + 1]),
-    Buffer(0),
-    Point(aPoint)
+    Buffer(0)
 {
     strcpy(Name, aName);
     strcpy(FileName, aFileName);

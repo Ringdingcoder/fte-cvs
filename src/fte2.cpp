@@ -15,7 +15,7 @@
 #define UNIX_RCPATHS 3
 
 /* Actual locations */
-char *Unix_RCPaths[UNIX_RCPATHS]={
+static const char * const Unix_RCPaths[UNIX_RCPATHS]={
     "/usr/local/etc/fte/system.fterc",
     "/etc/fte/system.fterc",
     "/usr/X11R6/lib/X11/xfte/system.fterc",

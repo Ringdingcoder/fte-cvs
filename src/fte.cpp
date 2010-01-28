@@ -16,7 +16,7 @@
 
 #if defined(UNIX)
 /* default locations for the configuration files */
-const char *Unix_RCPaths[] = {
+static const char * const Unix_RCPaths[] = {
     "/usr/local/etc/fte/system.fterc",
     "/etc/fte/system.fterc",
     "/usr/X11R6/lib/X11/fte/system.fterc",

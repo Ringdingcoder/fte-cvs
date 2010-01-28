@@ -7,28 +7,33 @@
  *
  */
 
-#ifndef __IOVIEW_H
-#define __IOVIEW_H
+#ifndef I_OVIEW_H
+#define I_OVIEW_H
+
+#include "console.h"
+#include "c_commands.h"
 
 class GxView;
 class EBuffer;
 class EWindow;
+class EEventMap;
+class ExState;
 
 class ExView {
 public:
     GxView *Win;
     ExView *Next;
-    
+
     ExView();
     virtual ~ExView();
-    
+
     virtual EEventMap *GetEventMap();
     virtual int ExecCommand(ExCommands Command, ExState &State);
-    
+
     virtual void Activate(int gotfocus);
-    virtual int GetContext() { return CONTEXT_NONE; }
-    virtual ExView *GetViewContext() { return this; }
-    virtual ExView *GetStatusContext() { return this; }
+    virtual int GetContext();
+    virtual ExView *GetViewContext();
+    virtual ExView *GetStatusContext();
     virtual int BeginMacro();
     virtual void HandleEvent(TEvent &Event);
     virtual void UpdateView();
@@ -38,10 +43,10 @@ public:
     virtual void Resize(int width, int height);
     virtual void EndExec(int NewResult);
     int IsActive();
-    
+
     void Repaint() { RepaintStatus(); RepaintView(); }
     void Update() { UpdateStatus(); UpdateView(); }
-    
+
     int ConPutBox(int X, int Y, int W, int H, PCell Cell);
     int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count);
     int ConQuerySize(int *X, int *Y);
@@ -49,9 +54,9 @@ public:
     int ConShowCursor();
     int ConHideCursor();
     int ConSetCursorSize(int Start, int End);
-    
+
     virtual int IsModelView() { return 0; }
     virtual void WnSwitchBuffer(EModel *M) { Next->WnSwitchBuffer(M); }
 };
 
-#endif
+#endif // I_OVIEW_H

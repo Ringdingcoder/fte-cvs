@@ -7,8 +7,11 @@
  *
  */
 
-#ifndef __MAPVIEW_H__
-#define __MAPVIEW_H__
+#ifndef O_MODEMAP_H
+#define O_MODEMAP_H
+
+#include "o_list.h"
+#include "c_bind.h"
 
 class EventMapView: public EList {
 public:
@@ -42,4 +45,4 @@ public:
 
 extern EventMapView *TheEventMapView;
 
-#endif
+#endif // O_MODEMAP_H

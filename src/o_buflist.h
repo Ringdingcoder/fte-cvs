@@ -7,8 +7,11 @@
  *
  */
 
-#ifndef __BUFLIST_H
-#define __BUFLIST_H
+#ifndef O_BUFLIST_H
+#define O_BUFLIST_H
+
+#include "o_list.h"
+#include "i_search.h"
 
 class BufferView: public EList {
 public:
@@ -35,4 +38,4 @@ public:
     virtual void GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen);
 };
 
-#endif
+#endif // O_BUFLIST_H

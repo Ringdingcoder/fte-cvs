@@ -10,7 +10,14 @@
 #ifndef I_VIEW_H
 #define I_VIEW_H
 
+#include "gui.h"
+#include "c_commands.h"
+#include "c_bind.h"
+#include "i_input.h"
+
 class EView;
+class ExView;
+class EEventMap;
 
 class GxView: public GView {
 public:

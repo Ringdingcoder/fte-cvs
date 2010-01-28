@@ -11,6 +11,8 @@
 #define O_LIST_H
 
 #include "c_commands.h"
+#include "o_model.h"
+#include "c_mode.h"
 
 class EList;
 

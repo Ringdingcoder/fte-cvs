@@ -10,6 +10,9 @@
 #ifndef I_SEARCH_H
 #define I_SEARCH_H
 
+#include "i_oview.h"
+#include "e_buffer.h"
+
 #define MAXISEARCH 256
 
 class ExISearch: public ExView {

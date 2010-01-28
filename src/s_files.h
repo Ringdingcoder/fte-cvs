@@ -7,10 +7,12 @@
  *
  */
 
-#ifndef __FILESYS_H__
-#define __FILESYS_H__
+#ifndef S_FILES_H
+#define S_FILES_H
 
-#define SDOT   "."    
+#include <sys/types.h>
+
+#define SDOT   "."
 
 #ifdef UNIX
 #define SLASH  '/'
@@ -51,4 +53,4 @@ int JoinDirFile(char *Dest, const char *Dir, const char *Name);
 char *SepRChr(const char *Dir);
 int RelativePathName(const char *Dir, const char *Path, char *RelPath);
 
-#endif
+#endif // S_FILES_H

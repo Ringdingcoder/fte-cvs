@@ -10,11 +10,15 @@
 #ifndef SYSDEP_H
 #define SYSDEP_H
 
+#include "features.h"
+
+#if 1
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdarg.h>
+
 #if defined(AIX) || defined(SCO) || defined(NCR)
 #include <strings.h>
 #endif
@@ -23,6 +27,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
+
+#endif // 0
 
 #ifdef DBMALLOC
 #include <malloc.h>

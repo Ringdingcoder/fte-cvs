@@ -10,6 +10,8 @@
 #ifndef S_UTIL_H
 #define S_UTIL_H
 
+#include <sys/types.h>
+
 #define USE_CtrlEnter    1
 
 enum {

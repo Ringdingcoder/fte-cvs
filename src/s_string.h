@@ -1,5 +1,7 @@
-#ifndef __S_STRING_H__
-#define __S_STRING_H__
+#ifndef S_STRING_H
+#define S_STRING_H
+
+#include <sys/types.h>
 
 size_t UnTabStr(char *dest, size_t maxlen, const char *source, size_t slen);
 size_t UnEscStr(char *dest, size_t maxlen, const char *source, size_t slen);
@@ -12,4 +14,4 @@ size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);
 #endif // !HAVE_STRLCAT
 
-#endif
+#endif // S_STRING_H

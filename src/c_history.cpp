@@ -46,32 +46,40 @@ void ClearHistory() { /*FOLD00*/
 int SaveHistory(const char *FileName) { /*FOLD00*/
     FILE *fp;
     
-    fp = fopen(FileName, "w");
-    if (fp == 0)
-        return 0;
-    setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer));
-    fprintf(fp, HISTORY_VER);
+    if (!(fp = fopen(FileName, "w")))
+	return 0;
+
+    if (setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer)) != 0)
+        goto err;
+    if (fprintf(fp, HISTORY_VER)  < 0)
+	goto err;
+
     if (FPHistory) { // file position history
-        int i,j;
-        for (i = 0; i < FPHistoryCount; i++) {
-            fprintf(fp, "F|%d|%d|%s\n",
-                    FPHistory[i]->Row,
-                    FPHistory[i]->Col,
-                    FPHistory[i]->FileName);
+	int i,j;
+	for (i = 0; i < FPHistoryCount; i++) {
+	    if (fprintf(fp, "F|%d|%d|%s\n",
+			FPHistory[i]->Row,
+			FPHistory[i]->Col,
+			FPHistory[i]->FileName) < 0)
+		goto err;
             for (j=0;j<FPHistory[i]->BookCount;j++)
-                fprintf (fp,"B|%d|%d|%s\n",
-                         FPHistory[i]->Books[j]->Row,
-                         FPHistory[i]->Books[j]->Col,
-                         FPHistory[i]->Books[j]->Name);
-        }
+                if (fprintf (fp,"B|%d|%d|%s\n",
+			     FPHistory[i]->Books[j]->Row,
+			     FPHistory[i]->Books[j]->Col,
+			     FPHistory[i]->Books[j]->Name) < 0)
+		    goto err;
+	}
     }
-    { // input history, store in reverse order to preserve order when loading
-        for (int i = inputHistory.Count - 1; i >= 0; i--) {
-            fprintf(fp, "I|%d|%s\n", inputHistory.Id[i], inputHistory.Line[i]);
-        }
-    }
+    // input history, store in reverse order to preserve order when loading
+    for (int i = inputHistory.Count - 1; i >= 0; i--)
+	if (fprintf(fp, "I|%d|%s\n", inputHistory.Id[i], inputHistory.Line[i]) < 0)
+            goto err;
+
     fclose(fp);
-    return 1;
+    return ErOK;
+err:
+    fclose(fp);
+    return ErFAIL;
 }
 
 int LoadHistory(const char *FileName) { /*FOLD00*/

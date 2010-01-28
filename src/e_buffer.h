@@ -102,8 +102,7 @@ public:
     int Col;
 
 //    EPoint(EPoint &M) { Row = M.Row; Col = M.Col; }
-    EPoint(int aRow = 0, int aCol = 0) { Row = aRow; Col = aCol; }
-    ~EPoint() {}
+    EPoint(int aRow = 0, int aCol = 0) : Row(aRow), Col(aCol) {}
 };
 
 struct UndoStack {

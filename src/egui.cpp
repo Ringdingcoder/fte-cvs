@@ -127,7 +127,7 @@ int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
     case ExDesktopSave:
         if (DesktopFileName[0] != 0)
             return SaveDesktop(DesktopFileName);
-        return 0;
+        return ErOK;
     case ExChangeKeys:
         {
             char kmaps[64] = "";

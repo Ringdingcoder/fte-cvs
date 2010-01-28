@@ -108,7 +108,7 @@ EMode *GetModeForName(const char *FileName) {
 
     fd = open(FileName, O_RDONLY);
     if (fd != -1) {
-        l = read(fd, buf, 80);
+        l = read(fd, buf, sizeof(buf));
         close(fd);
         if (l > 0) {
             buf[l] = 0;

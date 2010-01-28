@@ -8,7 +8,7 @@
  */
 
 #include "fte.h"
-
+#include "c_commands.h"
 #ifdef CONFIG_DESKTOP
 
 #define DESKTOP_VER "FTE Desktop 2\n"
@@ -20,13 +20,14 @@ int SaveDesktop(const char *FileName) {
     FILE *fp;
     EModel *M;
 
-    fp = fopen(FileName, "w");
-    if (fp == 0)
-        return 0;
+    if (!(fp = fopen(FileName, "w")))
+        return ErFAIL;
 
-    setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer));
+    if (setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer) != 0))
+        goto err;
 
-    fprintf(fp, DESKTOP_VER);
+    if (fprintf(fp, DESKTOP_VER) < 0)
+        goto err;
 
     M = ActiveModel;
     while (M) {
@@ -38,14 +39,16 @@ int SaveDesktop(const char *FileName) {
             {
 #endif
                 EBuffer *B = (EBuffer *)M;
-                fprintf(fp, "F|%d|%s\n", B->ModelNo, B->FileName);
+                if (fprintf(fp, "F|%d|%s\n", B->ModelNo, B->FileName) < 0)
+                    goto err;
             }
             break;
 #ifdef CONFIG_OBJ_DIRECTORY
         case CONTEXT_DIRECTORY:
             {
                 EDirectory *D = (EDirectory *)M;
-                fprintf(fp, "D|%d|%s\n", D->ModelNo, D->Path);
+                if (fprintf(fp, "D|%d|%s\n", D->ModelNo, D->Path) < 0)
+                    goto err;
             }
             break;
 #endif
@@ -59,7 +62,10 @@ int SaveDesktop(const char *FileName) {
 #endif
     markIndex.saveToDesktop(fp);
     fclose(fp);
-    return 1;
+    return ErOK;
+err:
+    fclose(fp);
+    return ErFAIL;
 }
 
 int LoadDesktop(const char *FileName) {

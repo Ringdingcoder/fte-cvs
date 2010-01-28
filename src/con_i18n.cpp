@@ -11,6 +11,7 @@
 
 
 #include "feature.h"
+#include "con_i18n.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -20,7 +21,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "con_i18n.h"
 
 #define KEYMASK 0xff
 #define KEYBYTEMAX 0xf00
@@ -214,6 +214,11 @@ i18n_context_t* i18n_open(Display* display, Window win, unsigned long* mask) /*F
     int found = False;
 
     i18n_context_t* ctx = (i18n_context_t*) malloc(sizeof(i18n_context_t));
+    if (!ctx) {
+	fprintf(stderr, "I18N warning: Allocation of I18N context failed\n");
+	return 0;
+    }
+
     memset(ctx, 0, sizeof(i18n_context_t));
 
     /* Locale setting taken from XtSetLanguageProc */

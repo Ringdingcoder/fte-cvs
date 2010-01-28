@@ -232,8 +232,10 @@ int TagsAdd(const char *FileName) { /*FOLD00*/
 
 int TagsSave(FILE *fp) { /*FOLD00*/
     for (int i = 0; i < TagFileCount; i++)
-        fprintf(fp, "T|%s\n", TagMem + TagFiles[i]);
-    return 1;
+        if (fprintf(fp, "T|%s\n", TagMem + TagFiles[i]) < 0)
+            return ErFAIL;
+
+    return ErOK;
 }
 
 static void ClearTagStack() { /*FOLD00*/

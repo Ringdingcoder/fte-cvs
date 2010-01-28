@@ -211,12 +211,13 @@ int EMarkIndex::saveToDesktop(FILE *fp) {
 
         // ??? file of buffer or of mark? (different if file renamed) ???
         // perhaps marks should be duplicated?
-        fprintf(fp, "M|%d|%d|%s|%s\n",
-                p.Row, p.Col,
-                marks[n]->getName(),
-                marks[n]->getFileName());
+        if (fprintf(fp, "M|%d|%d|%s|%s\n",
+		    p.Row, p.Col,
+		    marks[n]->getName(),
+		    marks[n]->getFileName()) < 0)
+	    return ErFAIL;
     }
-    return 1;
+    return ErOK;
 }
 
 // needs performance fixes (perhaps a redesign ?)

@@ -48,7 +48,8 @@ EMessages::EMessages(int createFlags, EModel **ARoot, char *ADir, char *ACommand
     BufLen(0),
     BufPos(0),
     ReturnCode(-1),
-    MatchCount(0)
+    MatchCount(0),
+    curr_dir(0)
 {
     CompilerMsgs = this;
     RunPipe(ADir, ACommand);
@@ -63,8 +64,7 @@ EMessages::~EMessages() {
 
 void EMessages::freeDirStack()
 {
-    while(curr_dir != 0)
-    {
+    while (curr_dir) {
         aDir *a = curr_dir;
         curr_dir = curr_dir->next;
         delete a;

@@ -36,7 +36,8 @@ int GetNewModelID(EModel *B) {
 
 EModel::EModel(int createFlags, EModel **ARoot) :
     Root(ARoot),
-    View(0)
+    View(0),
+    ModelNo(-1)
 {
     if (Root) {
         if (*Root) {

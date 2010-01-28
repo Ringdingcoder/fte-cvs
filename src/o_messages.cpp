@@ -44,16 +44,11 @@ void FreeCRegexp()
 
 EMessages::EMessages(int createFlags, EModel **ARoot, char *ADir, char *ACommand) :
     EList(createFlags, ARoot, "Messages"),
-    ErrCount(0),
-    ErrList(0),
-    Command(0),
-    Directory(0),
     Running(1),
     BufLen(0),
     BufPos(0),
     ReturnCode(-1),
-    MatchCount(0),
-    curr_dir(0)
+    MatchCount(0)
 {
     CompilerMsgs = this;
     RunPipe(ADir, ACommand);
@@ -62,8 +57,6 @@ EMessages::EMessages(int createFlags, EModel **ARoot, char *ADir, char *ACommand
 EMessages::~EMessages() {
     gui->ClosePipe(PipeId);
     FreeErrors();
-    free(Command);
-    free(Directory);
     CompilerMsgs = 0;
     freeDirStack();
 }
@@ -74,40 +67,42 @@ void EMessages::freeDirStack()
     {
         aDir *a = curr_dir;
         curr_dir = curr_dir->next;
-        free(a->name);
         delete a;
     }
 }
 
 void EMessages::NotifyDelete(EModel *Deleting) {
-    for (int i = 0; i < ErrCount; i++) {
-        if (ErrList[i]->Buf == Deleting) {
+    vector_iterate(Error*, ErrList, it) {
+        if ((*it)->Buf == Deleting) {
             /* NOT NEEDED!
              char bk[16];
              sprintf(bk, "_MSG.%d", i);
              ((EBuffer *)Deleting)->RemoveBookmark(bk);
              */
-            ErrList[i]->Buf = 0;
+            (*it)->Buf = 0;
         }
     }
 }
 
 void EMessages::FindErrorFiles() {
-    for (int i = 0; i < ErrCount; i++)
-        if (ErrList[i]->Buf == 0 && ErrList[i]->file != 0)
-            FindErrorFile(i);
+    unsigned i = 0;
+    vector_iterate(Error*, ErrList, it) {
+        if ((*it)->Buf == 0 && (*it)->file.empty())
+	    FindErrorFile(i);
+        ++i;
+    }
 }
 
-void EMessages::FindErrorFile(int err) {
-    assert(err >= 0 && err < ErrCount);
-    if (ErrList[err]->file == 0)
-        return ;
+void EMessages::FindErrorFile(unsigned err) {
+    assert(err < ErrList.size());
+    if (ErrList[err]->file.empty())
+        return;
     
     EBuffer *B;
 
     ErrList[err]->Buf = 0;
     
-    B = FindFile(ErrList[err]->file);
+    B = FindFile(ErrList[err]->file.c_str());
     if (B == 0)
         return ;
 
@@ -117,16 +112,15 @@ void EMessages::FindErrorFile(int err) {
     AddFileError(B, err);
 }
 
-void EMessages::AddFileError(EBuffer *B, int err) {
+void EMessages::AddFileError(EBuffer *B, unsigned err) {
     char bk[16];
     EPoint P;
 
-    assert(err >= 0 && err < ErrCount);
+    assert(err < ErrList.size());
 
     sprintf(bk, "_MSG.%d", err);
     P.Col = 0;
     P.Row = ErrList[err]->line - 1; // offset 0
-
 
     if (P.Row >= B->RCount)
         P.Row = B->RCount - 1;
@@ -138,45 +132,44 @@ void EMessages::AddFileError(EBuffer *B, int err) {
 }
 
 void EMessages::FindFileErrors(EBuffer *B) {
-    for (int i = 0; i < ErrCount; i++)
-        if (ErrList[i]->Buf == 0 && ErrList[i]->file != 0) {
-            if (filecmp(B->FileName, ErrList[i]->file) == 0) {
+    unsigned i = 0;
+    vector_iterate(Error*, ErrList, it) {
+        if ((*it)->Buf == 0 && !(*it)->file.empty()) {
+            if (filecmp(B->FileName, (*it)->file.c_str()) == 0)
                 AddFileError(B, i);
-            }
-        }
+	}
+	++i;
+    }
 }
 
 int EMessages::RunPipe(char *ADir, char *ACommand) {
     if (!KeepMessages)
         FreeErrors();
     
-    free(Command);
-    free(Directory);
-        
-    Command = strdup(ACommand);
-    Directory = strdup(ADir);
+    Command = ACommand;
+    Directory = ADir;
     
     MatchCount = 0;
     ReturnCode = -1;
     Running = 1;
     BufLen = BufPos = 0;
-    Row = ErrCount - 1;
+    Row = ErrList.size() - 1;
 
     {
         char s[2 * MAXPATH * 4];
 
-        sprintf(s, "[running '%s' in '%s']", Command, Directory);
+        sprintf(s, "[running '%s' in '%s']", ACommand, ADir);
         AddError(0, -1, 0, s);
     }
 
     {
         char s[MAXPATH * 2];
-        sprintf(s, "Messages [%s]: %s", Directory, Command);
+        sprintf(s, "Messages [%s]: %s", ADir, ACommand);
         SetTitle(s);
     }
     
-    ChangeDir(Directory);
-    PipeId = gui->OpenPipe(Command, this);
+    ChangeDir(ADir);
+    PipeId = gui->OpenPipe(ACommand, this);
     return 0;
 }
 
@@ -209,53 +202,34 @@ int EMessages::ExecCommand(ExCommands Command, ExState &State) {
 }
 
 void EMessages::AddError(Error *p) {
-    ErrCount++;
-    ErrList = (Error **) realloc(ErrList, sizeof(void *) * ErrCount);
-    ErrList[ErrCount - 1] = p;
-    ErrList[ErrCount - 1]->Buf = 0;
-    FindErrorFile(ErrCount - 1);
+    ErrList.push_back(p);
+    FindErrorFile((unsigned)ErrList.size() - 1);
 
-    if (ErrCount > Count)
+    if (ErrList.size() > Count)
         if (Row >= Count - 1) {
             //if (ErrCount > 1 && !ErrList[TopRow]->file)
-                Row = ErrCount - 1;
+	    Row = ErrList.size() - 1;
         }
 
     UpdateList();
 }
 
 void EMessages::AddError(const char *file, int line, const char *msg, const char *text, int hilit) {
-    Error *pe;
-
-    if (!(pe = (Error *) malloc(sizeof(Error))))
-	return;
-
-    pe->file = file ? strdup(file) : 0;
-    pe->line = line;
-    pe->msg = msg ? strdup(msg) : 0;
-    pe->text = text ? strdup(text) : 0;
-    pe->hilit = hilit;
-
-    AddError(pe);
+    AddError(new Error(file, line, msg, text, hilit));
 }
 
 void EMessages::FreeErrors() {
-    if (ErrList) {
-        for (int i = 0; i < ErrCount; i++) {
-            if (ErrList[i]->Buf != 0) {
-                char bk[16];
-                sprintf(bk, "_MSG.%d", i);
-                ((EBuffer *)(ErrList[i]->Buf))->RemoveBookmark(bk);
-            }
-            free(ErrList[i]->msg);
-            free(ErrList[i]->text);
-            free(ErrList[i]->file);
-            free(ErrList[i]);
-        }
-        free(ErrList);
+    unsigned i = 0;
+    vector_iterate(Error*, ErrList, it) {
+	if ((*it)->Buf != 0) {
+	    char bk[16];
+	    sprintf(bk, "_MSG.%d", i);
+	    (*it)->Buf->RemoveBookmark(bk);
+	}
+	delete *it;
+        i++;
     }
-    ErrCount = 0;
-    ErrList = 0;
+    ErrList.clear();
     BufLen = BufPos = 0;
 }
 
@@ -394,9 +368,9 @@ void EMessages::GetErrors() {
                     file = fn;
                 else {
                     if (curr_dir == 0)
-                        strcpy(fn1, Directory);
+                        strcpy(fn1, Directory.c_str());
                     else
-                        strcpy(fn1, curr_dir->name);
+                        strcpy(fn1, curr_dir->name.c_str());
                     Slash(fn1, 1);
                     strcat(fn1, fn);
                     if (ExpandPath(fn1, fn2, sizeof(fn2)) == 0)
@@ -454,9 +428,8 @@ void EMessages::GetErrors() {
                     a = curr_dir;
                     if (a != 0)
                         curr_dir = curr_dir->next;       // Remove from stack,
-                    if (a != 0 && stricmp(a->name, fn) == 0) {
+                    if (a != 0 && stricmp(a->name.c_str(), fn) == 0) {
                         //** Pop this item.
-                        free(a->name);
                         delete a;
                     } else {
                         //** Mismatch filenames -> error, and revoke stack.
@@ -466,7 +439,6 @@ void EMessages::GetErrors() {
                         //** In this case we totally die the stack..
                         while(a != 0)
                         {
-                            free(a->name);
                             delete a;
 			    a = curr_dir;
                             if (a != 0)
@@ -489,11 +461,11 @@ void EMessages::GetErrors() {
 }
 
 int EMessages::CompilePrevError(EView *V) {
-    if (ErrCount > 0) {
+    if (ErrList.size() > 0) {
         bad:
         if (Row > 0) {
             Row--;
-            if (ErrList[Row]->line == -1 || !ErrList[Row]->file) goto bad;
+            if (ErrList[Row]->line == -1 || ErrList[Row]->file.empty()) goto bad;
             ShowError(V, Row);
         } else {
             V->Msg(S_INFO, "No previous error.");
@@ -507,11 +479,11 @@ int EMessages::CompilePrevError(EView *V) {
 }
 
 int EMessages::CompileNextError(EView *V) {
-    if (ErrCount > 0) {
+    if (ErrList.size() > 0) {
         bad:        
-        if (Row < ErrCount - 1) {
+        if (Row < ErrList.size() - 1) {
             Row++;
-            if (ErrList[Row]->line == -1 || !ErrList[Row]->file) goto bad;
+            if (ErrList[Row]->line == -1 || ErrList[Row]->file.empty()) goto bad;
             ShowError(V, Row);
         } else {
             if (Running)
@@ -534,12 +506,12 @@ int EMessages::Compile(char * /*Command*/) {
     return 0;
 }
 
-void EMessages::ShowError(EView *V, int err) {
-    if (err >= 0 && err < ErrCount) {
-        if (ErrList[err]->file) {
+void EMessages::ShowError(EView *V, unsigned err) {
+    if (err < ErrList.size()) {
+        if (!ErrList[err]->file.empty()) {
             // should check if relative path
             // possibly scan for (gnumake) directory info in output
-            if (ErrList[err]->Buf != 0) {
+            if (ErrList[err]->Buf) {
                 char bk[16];
 
                 V->SwitchToModel(ErrList[err]->Buf);
@@ -547,28 +519,28 @@ void EMessages::ShowError(EView *V, int err) {
                 sprintf(bk, "_MSG.%d", err);
                 ErrList[err]->Buf->GotoBookmark(bk);
             } else {
-                if (FileLoad(0, ErrList[err]->file, 0, V) == 1) {
+                if (FileLoad(0, ErrList[err]->file.c_str(), 0, V) == 1) {
                     V->SwitchToModel(ActiveModel);
                     ((EBuffer *)ActiveModel)->CenterNearPosR(0, ErrList[err]->line - 1);
                 }
             }
             if (ErrList[err]->msg != 0)
-                V->Msg(S_INFO, "%s", ErrList[err]->msg);
+                V->Msg(S_INFO, "%s", ErrList[err]->msg.c_str());
             else
-                V->Msg(S_INFO, "%s", ErrList[err]->text);
+                V->Msg(S_INFO, "%s", ErrList[err]->text.c_str());
         }
     }
 }
 
 void EMessages::DrawLine(PCell B, int Line, int Col, ChColor color, int Width) {
-    if (Line < ErrCount)
-        if (Col < int(strlen(ErrList[Line]->text))) {
+    if (Line < ErrList.size())
+        if (Col < int(ErrList[Line]->text.size())) {
             char str[1024];
             int len;
 
             len = UnTabStr(str, sizeof(str),
-                           ErrList[Line]->text,
-                           strlen(ErrList[Line]->text));
+                           ErrList[Line]->text.c_str(),
+			   ErrList[Line]->text.size());
 
             if (len > Col)
                 MoveStr(B, 0, Width, str + Col, color, Width);
@@ -577,19 +549,19 @@ void EMessages::DrawLine(PCell B, int Line, int Col, ChColor color, int Width) {
 
 char* EMessages::FormatLine(int Line) {
     char *p;
-    if (Line < ErrCount)
-        p = strdup(ErrList[Line]->text);
+    if (Line < ErrList.size())
+        p = strdup(ErrList[Line]->text.c_str());
     else
         p = 0;
     return p;
 }
 
 int EMessages::IsHilited(int Line) {
-    return (Line >= 0 && Line < ErrCount) ? ErrList[Line]->hilit : 0;
+    return (Line >= 0 && Line < ErrList.size()) ? ErrList[Line]->hilit : 0;
 }
 
 void EMessages::UpdateList() {
-    Count = ErrCount;
+    Count = ErrList.size();
     EList::UpdateList();
 }
 
@@ -602,8 +574,8 @@ int EMessages::Activate(int /*No*/) {
 
 int EMessages::CanActivate(int Line) {
     int ok = 0;
-    if (Line < ErrCount)
-        if (ErrList[Line]->file || ErrList[Line]->line != -1) ok = 1;
+    if (Line < ErrList.size())
+        if (!ErrList[Line]->file.empty() || ErrList[Line]->line != -1) ok = 1;
     return ok;
 }
     
@@ -618,29 +590,28 @@ void EMessages::GetName(char *AName, size_t MaxLen) {
 }
 
 void EMessages::GetInfo(char *AInfo, size_t /*MaxLen*/) {
-    sprintf(AInfo, 
-            "%2d %04d/%03d Messages: %d (%s) ",
+    sprintf(AInfo, "%2d %04d/%03d Messages: %d (%s) ",
             ModelNo,
             Row, Count,
             MatchCount,
-            Command);
+            Command.c_str());
 }
 
 void EMessages::GetPath(char *APath, size_t MaxLen) {
-    strlcpy(APath, Directory, MaxLen);
+    strlcpy(APath, Directory.c_str(), MaxLen);
     Slash(APath, 0);
 }
 
 void EMessages::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
-    snprintf(ATitle, MaxLen, "Messages: %s", Command);
+    snprintf(ATitle, MaxLen, "Messages: %s", Command.c_str());
     strlcpy(ASTitle, "Messages", SMaxLen);
 }
 
 // get row length for specified row, used in MoveLineEnd to get actual row length
 size_t EMessages::GetRowLength(int ARow)
 {
-    if ((ARow >= 0) && (ARow < ErrCount))
-        return strlen(ErrList[ARow]->text);
+    if ((ARow >= 0) && (ARow < ErrList.size()))
+        return strlen(ErrList[ARow]->text.c_str());
 
     return 0;
 }

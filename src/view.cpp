@@ -643,7 +643,7 @@ int EView::Compile(char *Command) {
     EMessages *msgs;
     
     if (CompilerMsgs != 0) {
-        strcpy(Dir, CompilerMsgs->Directory);
+        strcpy(Dir, CompilerMsgs->GetDirectory());
         CompilerMsgs->RunPipe(Dir, Command);
         msgs = CompilerMsgs;
     } else {

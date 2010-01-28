@@ -11,28 +11,35 @@
 #define O_MESSAGES_H
 
 #ifdef CONFIG_OBJ_MESSAGES
+
+#include "stl_fte.h"
+
 struct Error {
-    char *file;
+    fte::string file;
     int line;
-    char *msg;
-    char *text;
+    fte::string msg;
+    fte::string text;
     int hilit;
     EBuffer *Buf;
+
+    Error(const char *_file, int _line, const char *_msg, const char *_text, int _hilit) :
+	file(_file), line(_line), msg(_msg), text(_text), hilit(_hilit), Buf(0)
+    {}
 };
 
 struct aDir
 {
     aDir* next;
-    char* name;
+    fte::string name;
 };
 
 class EMessages: public EList {
+    fte::string Command;
+    fte::string Directory;
+    fte::vector<Error*> ErrList;
+
 public:
-    char *Command;
-    char *Directory;
-    
-    int ErrCount;
-    Error **ErrList;
+
     int Running;
 
     int BufLen;
@@ -49,8 +56,8 @@ public:
 
     virtual void NotifyDelete(EModel *Deleting);
     void FindErrorFiles();
-    void FindErrorFile(int err);
-    void AddFileError(EBuffer *B, int err);
+    void FindErrorFile(unsigned err);
+    void AddFileError(EBuffer *B, unsigned err);
     void FindFileErrors(EBuffer *B);
     
     virtual int GetContext() { return CONTEXT_MESSAGES; }
@@ -64,7 +71,7 @@ public:
     int GetLine(char *Line, size_t MaxLen);
     void GetErrors();
     int Compile(char *Command);
-    void ShowError(EView *V, int err);
+    void ShowError(EView *V, unsigned err);
     void DrawLine(PCell B, int Line, int Col, ChColor color, int Width);
     char* FormatLine(int Line);
     int IsHilited(int Line);
@@ -72,6 +79,7 @@ public:
     int Activate(int No);
     int CanActivate(int Line);
     void NotifyPipe(int APipeId);
+    const char* GetDirectory() { return Directory.c_str(); }
     virtual void GetName(char *AName, size_t MaxLen);
     virtual void GetInfo(char *AInfo, size_t MaxLen);
     virtual void GetPath(char *APath, size_t MaxLen);

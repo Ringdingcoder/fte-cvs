@@ -113,14 +113,12 @@ void EMessages::FindErrorFile(unsigned err) {
 }
 
 void EMessages::AddFileError(EBuffer *B, unsigned err) {
-    char bk[16];
-    EPoint P;
 
     assert(err < ErrList.size());
 
+    char bk[16];
     sprintf(bk, "_MSG.%d", err);
-    P.Col = 0;
-    P.Row = ErrList[err]->line - 1; // offset 0
+    EPoint P(ErrList[err]->line - 1, 0);
 
     if (P.Row >= B->RCount)
         P.Row = B->RCount - 1;
@@ -191,6 +189,9 @@ int EMessages::ExecCommand(ExCommands Command, ExState &State) {
         return ErOK;
     case ExActivateInOtherWindow:
         ShowError(View->Next, Row);
+        return ErOK;
+    case ExFind:
+        fprintf(stderr, "FIND\n");
         return ErOK;
     default:
         ;
@@ -336,7 +337,7 @@ void EMessages::GetErrors() {
     char fn[256];
     
     //fprintf(stderr, "Reading pipe\n");
-    while (GetLine((char *)line, sizeof(line))) {
+    while (GetLine(line, sizeof(line))) {
         if (strlen(line) > 0 && line[strlen(line)-1] == '\n')
             line[strlen(line)-1] = 0;
         didmatch = 0;

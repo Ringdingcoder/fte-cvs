@@ -7,8 +7,10 @@
  *
  */
 
-#ifndef __CLIPLIB_H
-#define __CLIPLIB_H
+#ifndef CLIP_H
+#define CLIP_H
+
+#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,4 +27,5 @@ int PutClipText(ClipData *cd);
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif // CLIP_H

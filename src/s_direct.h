@@ -11,6 +11,7 @@
 #define __SDIRECT_H
 
 // error handling needs some work
+#include <sys/types.h>
 
 #define fiUNKNOWN   0
 #define fiFILE      1

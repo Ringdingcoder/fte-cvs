@@ -10,6 +10,8 @@
 #ifndef I_MODELVIEW_H
 #define I_MODELVIEW_H
 
+#include "i_oview.h"
+
 class EView;
 
 class ExModelView: public ExView {

@@ -7,8 +7,12 @@
  *
  */
 
-#ifndef __EXCHOICE_H
-#define __EXCHOICE_H
+#ifndef I_CHOICE_H
+#define I_CHOICE_H
+
+#include "i_oview.h"
+
+#include <stdarg.h>
 
 class ExChoice: public ExView {
 public:
@@ -35,4 +39,4 @@ public:
     virtual void RepaintStatus();
 };
 
-#endif
+#endif // I_CHOICE_H

@@ -1,3 +1,5 @@
+#ifndef CON_TTY_H
+#define CON_TTY_H
 
 /*
  * Handling escape sequencies is quite complex
@@ -6,9 +8,14 @@
  * though there are some obviously visible bitmasks
  */
 
+
 #include "conkbd.h"
+
+#include <ctype.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h> // fprintf
+
 
 static const struct TTYDecodeSeq {
     char seq[8];
@@ -150,7 +157,7 @@ static int TTYCompSeq(const void *a, const void *b)
     return c;
 }
 
-static int TTYParseEsc(const char *seq)
+static inline int TTYParseEsc(const char *seq)
 {
     if (seq[1] == 0) {
 	char ch = seq[0];
@@ -209,7 +216,7 @@ static int TTYParseEsc(const char *seq)
  * Create table from template and replace '%' with character numbers
  * from '2' to '8' with appropriate Alt, Ctrl, Shift modifiers
  */
-static int TTYInitTable(void)
+static inline int TTYInitTable(void)
 {
     for (unsigned i = 0; i < sizeof(tty_seq_table_c)/sizeof(tty_seq_table_c[0]); ++i) {
 	for (unsigned j = '2'; j <= '8'; ++j) {
@@ -252,3 +259,5 @@ static int TTYInitTable(void)
     return 1;
 #endif
 }
+
+#endif // CON_TTY_H

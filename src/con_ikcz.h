@@ -1,5 +1,5 @@
-#ifndef  __CON_IKCS_H
-#define  __CON_IKCS_H
+#ifndef  CON_IKCS_H
+#define  CON_IKCS_H
 
 #include "con_i18n.h"
 #include <X11/keysym.h>
@@ -10,7 +10,7 @@ struct remapKey {
 };
 
 struct keyboardRec {
-    struct remapKey *tab;
+    const struct remapKey *tab;
     KeySym deadkey;
     short next;
 };
@@ -353,7 +353,7 @@ static struct remapKey keyboardFifth[] =
     F22_DEAD_KEYS
 
 
-static struct keyboardRec kbdStdRec[] =
+static const struct keyboardRec kbdStdRec[] =
 {
     { keyboardStd, 0, 0 },        /*  0 */
 
@@ -364,7 +364,7 @@ static struct keyboardRec kbdStdRec[] =
     { NULL }
 };
 
-static struct keyboardRec kbdHalfCzRec[] =
+static const struct keyboardRec kbdHalfCzRec[] =
 {
     { keyboardHalfCz, 0, 0 },     /*  0 */
 
@@ -375,7 +375,7 @@ static struct keyboardRec kbdHalfCzRec[] =
     { NULL }
 };
 
-static struct keyboardRec kbdFullCzRec[] =
+static const struct keyboardRec kbdFullCzRec[] =
 {
     { keyboardFullCz, 0, 0 },     /*  0 */
 
@@ -401,4 +401,4 @@ static const struct keyboardRec* nationalKey[] =
     NULL
 };
 
-#endif
+#endif // CON_IKCS_H

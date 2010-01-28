@@ -10,6 +10,9 @@
 #ifndef __EXINPUT_H
 #define __EXINPUT_H
 
+#include "i_oview.h"
+#include "console.h"
+
 typedef int (*Completer)(const char *Name, char *Completed, int Num);
 
 class ExInput: public ExView {

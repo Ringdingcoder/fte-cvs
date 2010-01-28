@@ -7,8 +7,11 @@
  *
  */
 
-#ifndef __EXCOMPLETE_H
-#define __EXCOMPLETE_H
+#ifndef I_COMPLETE_H
+#define I_COMPLETE_H
+
+#include "i_oview.h"
+#include "e_buffer.h"
 
 #include <ctype.h>
 
@@ -49,4 +52,5 @@ public:
     virtual bool IsSimpleCase();
     virtual int DoCompleteWord();
 };
-#endif
+
+#endif // I_COMPLETE_H

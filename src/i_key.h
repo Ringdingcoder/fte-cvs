@@ -7,8 +7,10 @@
  *
  */
 
-#ifndef __EXKEY_H
-#define __EXKEY_H
+#ifndef I_KEY_H
+#define I_KEY_H
+
+#include "i_oview.h"
 
 class ExKey: public ExView {
 public:
@@ -29,4 +31,4 @@ public:
     virtual void RepaintStatus();
 };
 
-#endif
+#endif // I_KEY_H

@@ -10,15 +10,18 @@
 #ifndef I_ASCII_H
 #define I_ASCII_H
 
+#include "console.h"
+#include "i_oview.h"
+
 class ExASCII: public ExView {
 public:
     int Pos, LPos;
-    
+
     ExASCII();
     virtual ~ExASCII();
     virtual void Activate(int gotfocus);
-    
-    virtual ExView* GetViewContext() { return Next; }
+
+    virtual ExView* GetViewContext();
     virtual int BeginMacro();
     virtual void HandleEvent(TEvent &Event);
     virtual void UpdateView();

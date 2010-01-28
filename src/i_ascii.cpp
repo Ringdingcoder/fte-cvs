@@ -34,6 +34,11 @@ int ExASCII::BeginMacro() {
     return 1;
 }
 
+ExView* ExASCII::GetViewContext()
+{
+    return Next;
+}
+
 void ExASCII::HandleEvent(TEvent &Event) {
     int W, H;
     

@@ -12,36 +12,13 @@
 #include "sysdep.h"
 #include "c_config.h"
 #include "console.h"
-#include "gui.h"
-
-#include "con_i18n.h"
 #include "s_files.h"
 #include "s_util.h"
 #include "s_string.h"
+#include "gui.h"
 
-#include <string.h>
-#include <assert.h>
-#include <stdarg.h>
-#ifdef WINNT
-#include <winsock.h>
-#define NO_PIPES
-#define NO_SIGNALS
-#else
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/time.h>
-#endif
+#include "con_i18n.h"
 
-#include <time.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <signal.h>
-#if defined(AIX)
-#include <strings.h>
-#include <sys/select.h>
-#endif
 #include <X11/Xproto.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -83,6 +60,31 @@
 #include "icons/fte48x48.xpm"
 #include "icons/fte64x64.xpm"
 #endif // USE_XICON
+
+#include <assert.h>
+#include <stdarg.h>
+#include <string.h>
+
+#ifdef WINNT
+#include <winsock.h>
+#define NO_PIPES
+#define NO_SIGNALS
+#else
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#endif
+
+#include <fcntl.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <time.h>
+#if defined(AIX)
+#include <strings.h>
+#endif
+
+#include <stdio.h>
 
 #define MAX_SCRWIDTH 255
 #define MAX_SCRHEIGHT 255
@@ -312,8 +314,19 @@ class ColorXGC {
     XGCValues gcv;
     GC GCs[256];
     Region reg;
+
+    void clear()
+    {
+        if (reg)
+            XDestroyRegion(reg);
+        for (unsigned i = 0; i < 256; ++i)
+            if (GCs[i])
+                XFreeGC(display, GCs[i]);
+    }
+
 public:
-    ColorXGC() : mask(GCForeground | GCBackground), reg(0) {
+    ColorXGC() : mask(GCForeground | GCBackground), reg(0)
+    {
         if (!useXMB) {
             gcv.font = font_struct->fid;
             mask |= GCFont;
@@ -321,11 +334,13 @@ public:
         memset(&GCs, 0, sizeof(GCs));
     }
 
-    ~ColorXGC() {
+    ~ColorXGC()
+    {
         clear();
     }
 
-    GC& GetGC(unsigned i) {
+    GC& GetGC(unsigned i)
+    {
         i &= 0xff;
         if (!GCs[i]) {
             gcv.foreground = Colors[i % 16].pixel;
@@ -337,18 +352,11 @@ public:
         return GCs[i];
     }
 
-    void SetRegion(Region r) {
+    void SetRegion(Region r)
+    {
         clear();
         memset(&GCs, 0, sizeof(GCs));
         reg = r;
-    }
-
-    void clear() {
-        if (reg)
-            XDestroyRegion(reg);
-        for (unsigned i = 0; i < 256; ++i)
-            if (GCs[i])
-                XFreeGC(display, GCs[i]);
     }
 };
 
@@ -379,7 +387,7 @@ static void TryLoadFontset(const char *fs)
     if (nMiss)
         XFreeStringList(miss);
 }
-#endif
+#endif // USE_XMB
 
 static int InitXFonts()
 {
@@ -425,7 +433,7 @@ static int InitXFonts()
         FontCYD = -(xE->max_logical_extent.y);
         // printf("Font X:%d\tY:%d\tD:%d\n", FontCX, FontCY, FontCYD);
     }
-#endif
+#endif // USE_XMB
     return 0;
 }
 
@@ -464,8 +472,8 @@ static int SetupXWindow(int argc, char **argv)
         initX = DisplayWidth(display, DefaultScreen(display)) + initX;
     if (initY < 0)
         initY = DisplayHeight(display, DefaultScreen(display)) + initY;
-    win = XCreateWindow(display,
-                        DefaultRootWindow(display),
+
+    win = XCreateWindow(display, DefaultRootWindow(display),
                         initX, initY,
                         // ScreenCols * FontCX, ScreenRows * FontCY, 0,
                         // at this moment we don't know the exact size
@@ -2078,7 +2086,7 @@ char ConGetDrawChar(unsigned int idx) {
     static size_t len = 0;
 
     if (!tab) {
-        tab = GetGUICharacters ("X11","\x0D\x0C\x0E\x0B\x12\x19\x18\x15\x16\x17\x0f>\x1F\x01\x12\x01\x01 \x02\x01\x01");
+        tab = GetGUICharacters("X11","\x0D\x0C\x0E\x0B\x12\x19\x18\x15\x16\x17\x0f>\x1F\x01\x12\x01\x01 \x02\x01\x01");
         len = strlen(tab);
     }
     assert(idx < len);

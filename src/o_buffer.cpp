@@ -7,6 +7,8 @@
  *
  */
 
+#include "o_cvsdiff.h"
+#include "o_svndiff.h"
 #include "fte.h"
 #include "ftever.h"
 

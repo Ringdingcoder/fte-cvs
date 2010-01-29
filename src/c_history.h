@@ -17,26 +17,6 @@
 #define HISTORY_NAME "fte.his"
 #endif
 
-struct HBookmark {
-    char *Name;
-    int Row,Col;
-};
-
-struct FPosHistory {
-    char *FileName;
-    int Row, Col;
-    HBookmark **Books;
-    int BookCount;
-};
-
-#define MAX_INPUT_HIST 128
-
-struct InputHistory {
-    unsigned Count;
-    char **Line;
-    int *Id;
-};
-
 extern char HistoryFileName[256];
 
 void ClearHistory();

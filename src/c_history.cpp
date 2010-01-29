@@ -12,13 +12,32 @@
 #ifdef CONFIG_HISTORY
 
 #define HISTORY_VER "FTE History 1\n"
+#define MAX_INPUT_HIST 128
 
 char HistoryFileName[256] = "";
 
-static FPosHistory **FPHistory = 0;
-static int FPHistoryCount = 0;
+struct HBookmark {
+    char *Name;
+    int Row,Col;
+};
 
-static InputHistory inputHistory = { 0, 0, 0 };
+struct FPosHistory {
+    char *FileName;
+    int Row, Col;
+    HBookmark **Books;
+    int BookCount;
+};
+
+struct InputHistory {
+    unsigned Count;
+    char **Line;
+    int *Id;
+};
+
+
+static FPosHistory **FPHistory;
+static int FPHistoryCount;
+static InputHistory inputHistory;
 
 void ClearHistory() { /*FOLD00*/
 
@@ -33,14 +52,11 @@ void ClearHistory() { /*FOLD00*/
     free(FPHistory);
 
     // free input history
-    {
-        while(inputHistory.Count--)
-        {
-            free(inputHistory.Line[inputHistory.Count]);
-        }
-        free(inputHistory.Line);
-        free(inputHistory.Id);
-    }
+    while(inputHistory.Count--)
+	free(inputHistory.Line[inputHistory.Count]);
+
+    free(inputHistory.Line);
+    free(inputHistory.Id);
 }
 
 int SaveHistory(const char *FileName) { /*FOLD00*/
@@ -75,8 +91,7 @@ int SaveHistory(const char *FileName) { /*FOLD00*/
 	if (fprintf(fp, "I|%d|%s\n", inputHistory.Id[i], inputHistory.Line[i]) < 0)
             goto err;
 
-    fclose(fp);
-    return ErOK;
+    return fclose(fp) == 0 ? ErOK : ErFAIL;
 err:
     fclose(fp);
     return ErFAIL;
@@ -89,18 +104,15 @@ int LoadHistory(const char *FileName) { /*FOLD00*/
     FPosHistory *last=NULL;
     HBookmark **nb;
     
-    fp = fopen(FileName, "r");
-    if (fp == 0)
-        return 0;
+    if (!(fp = fopen(FileName, "r")))
+        return ErFAIL;
 
-    setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer));
+    if (setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer)) != 0)
+        goto err;
 
-    if (fgets(line, sizeof(line), fp) == 0 ||
-        strcmp(line, HISTORY_VER) != 0)
-    {
-        fclose(fp);
-        return 0;
-    }
+    if (!fgets(line, sizeof(line), fp) || strcmp(line, HISTORY_VER) != 0)
+        goto err;
+
     while (fgets(line, sizeof(line), fp) != 0) {
         if (line[0] == 'F' && line[1] == '|') { // file position history
             int r, c, L, R, M, cmp;
@@ -192,8 +204,10 @@ int LoadHistory(const char *FileName) { /*FOLD00*/
             AddInputHistory(i, p);
         }
     }
+    return fclose(fp) == 0 ? ErOK : ErFAIL;
+err:
     fclose(fp);
-    return 1;
+    return ErFAIL;
 }
 
 int UpdateFPos(const char *FileName, int Row, int Col) { /*FOLD00*/

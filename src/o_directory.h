@@ -10,11 +10,12 @@
 #define O_DIRECTORY_H
 
 #include "feature.h"
+
+#ifdef CONFIG_OBJ_DIRECTORY
+
 #include "i_search.h"
 #include "o_list.h"
 #include "s_direct.h"
-
-#ifdef CONFIG_OBJ_DIRECTORY
 
 class EDirectory: public EList {
 public:
@@ -55,6 +56,6 @@ public:
     int ChangeDir(ExState &State);
     int RescanDir();
 };
-#endif
+#endif // CONFIG_OBJ_DIRECTORY
 
 #endif // O_DIRECTORY_H

@@ -10,9 +10,15 @@
 #ifndef O_CVSBASE_H
 #define O_CVSBASE_H
 
+#include "feature.h"
+
 #ifdef CONFIG_OBJ_CVS
 
-typedef struct {
+#include "o_list.h"
+
+class EBuffer;
+
+struct CvsLine {
     char *File; // Relative to view's directory
     int Line;
     char *Msg;
@@ -21,7 +27,7 @@ typedef struct {
     // bit 0 - hilited
     // bit 1 - marked
     // bit 2 - markable
-} CvsLine;
+};
 
 class ECvsBase:public EList {
     public:

@@ -7,11 +7,13 @@
  *
  */
 
-#ifndef __SDIRECT_H
-#define __SDIRECT_H
+#ifndef S_DIRECT_H
+#define S_DIRECT_H
+
+#include "feature.h"
+#include <sys/types.h>
 
 // error handling needs some work
-#include <sys/types.h>
 
 #define fiUNKNOWN   0
 #define fiFILE      1
@@ -60,4 +62,4 @@ public:
     int FindNext(FileInfo **fi);
 };
 
-#endif
+#endif // S_DIRECT_H

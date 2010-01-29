@@ -6,8 +6,10 @@
  * Class providing access to most of SVN commands.
  */
 
-#ifndef __SVN_H__
-#define __SVN_H__
+#ifndef O_SVN_H
+#define O_SVN_H
+
+#include "o_svnbase.h"
 
 #ifdef CONFIG_OBJ_SVN
 
@@ -45,6 +47,6 @@ class ESvn:public ESvnBase {
 
 extern ESvn *SvnView;
 
-#endif
+#endif // CONFIG_OBJ_SVN
 
-#endif
+#endif // O_SVN_H

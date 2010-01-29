@@ -7,12 +7,18 @@
  * - starts SVN and shows its messages in list view.
  */
 
-#ifndef __SVNBASE_H__
-#define __SVNBASE_H__
+#ifndef O_SVNBASE_H
+#define O_SVNBASE_H
+
+#include "feature.h"
 
 #ifdef CONFIG_OBJ_SVN
 
-typedef struct {
+#include "o_list.h"
+
+class EBuffer;
+
+struct SvnLine {
     char *File; // Relative to view's directory
     int Line;
     char *Msg;
@@ -21,7 +27,7 @@ typedef struct {
     // bit 0 - hilited
     // bit 1 - marked
     // bit 2 - markable
-} SvnLine;
+};
 
 class ESvnBase:public EList {
     public:
@@ -84,6 +90,6 @@ class ESvnBase:public EList {
 int AddSvnIgnoreRegexp (const char *);
 void FreeSvnIgnoreRegexp ();
 
-#endif
+#endif // CONFIG_OBJ_SVN
 
-#endif
+#endif // O_SVNBASE_H

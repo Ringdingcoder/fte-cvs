@@ -10,6 +10,8 @@
 #ifndef C_DESKTOP_H
 #define C_DESKTOP_H
 
+#include "feature.h"
+
 #ifdef CONFIG_DESKTOP
 
 #ifdef UNIX

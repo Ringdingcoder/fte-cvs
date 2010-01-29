@@ -7,8 +7,10 @@
  * to clipboard and allows to jump to lines in real sources.
  */
 
-#ifndef __CVSDIFF_H__
-#define __CVSDIFF_H__
+#ifndef O_CVSDIFF_H
+#define O_CVSDIFF_H
+
+#include "o_cvsbase.h"
 
 #ifdef CONFIG_OBJ_CVS
 
@@ -36,4 +38,4 @@ extern ECvsDiff *CvsDiffView;
 
 #endif
 
-#endif
+#endif // O_CVSDIFF_H

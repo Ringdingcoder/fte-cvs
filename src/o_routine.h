@@ -7,10 +7,16 @@
  *
  */
 
-#ifndef __ROUTINE_H__
-#define __ROUTINE_H__
+#ifndef O_ROUTINE_H
+#define O_ROUTINE_H
+
+#include "feature.h"
 
 #ifdef CONFIG_OBJ_ROUTINE
+
+#include "o_list.h"
+
+class EBuffer;
 
 class RoutineView: public EList {
 public:
@@ -32,4 +38,4 @@ public:
 };
 #endif
 
-#endif
+#endif // O_ROUTINE_H

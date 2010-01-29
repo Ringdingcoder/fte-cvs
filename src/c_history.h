@@ -9,6 +9,8 @@
 #ifndef C_HISTORY_H
 #define C_HISTORY_H
 
+#include "feature.h"
+
 #ifdef CONFIG_HISTORY
 
 #ifdef UNIX

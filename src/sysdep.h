@@ -10,7 +10,7 @@
 #ifndef SYSDEP_H
 #define SYSDEP_H
 
-#include "features.h"
+#include "feature.h"
 
 #if 1
 #include <assert.h>

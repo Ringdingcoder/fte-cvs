@@ -1,6 +1,6 @@
 /* M$VC++ !!! */
-#ifndef __NAMEMAPS_H__
-#define __NAMEMAPS_H__
+#ifndef NAMEMAPS_H
+#define NAMEMAPS_H
 
 #define access     _access
 #define chmod      _chmod
@@ -24,4 +24,4 @@
 #define unlink     _unlink
 #define write      _write
 
-#endif
+#endif // NAMEMAPS_H

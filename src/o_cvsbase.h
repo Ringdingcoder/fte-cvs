@@ -7,8 +7,8 @@
  * - starts CVS and shows its messages in list view.
  */
 
-#ifndef CVSBASE_H
-#define CVSBASE_H
+#ifndef O_CVSBASE_H
+#define O_CVSBASE_H
 
 #ifdef CONFIG_OBJ_CVS
 
@@ -86,4 +86,4 @@ void FreeCvsIgnoreRegexp ();
 
 #endif // CONFIG_OBJ_CVS
 
-#endif // CVSBASE_H
+#endif // O_CVSBASE_H

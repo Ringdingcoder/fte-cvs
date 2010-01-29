@@ -6,8 +6,8 @@
  * Class providing access to most of CVS commands.
  */
 
-#ifndef __CVS_H__
-#define __CVS_H__
+#ifndef O_CVS_H
+#define O_CVS_H
 
 #ifdef CONFIG_OBJ_CVS
 
@@ -47,4 +47,4 @@ extern ECvs *CvsView;
 
 #endif
 
-#endif
+#endif // O_CVS_H

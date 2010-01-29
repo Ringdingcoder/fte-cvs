@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __EGUI_H__
-#define __EGUI_H__
+#ifndef EGUI_H
+#define EGUI_H
 
 #include "gui.h"
 #include "c_bind.h"  // KeySel
@@ -97,4 +97,4 @@ public:
     virtual void Stop();
 };
 
-#endif
+#endif // EGUI_H

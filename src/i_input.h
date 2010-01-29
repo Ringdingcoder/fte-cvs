@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __EXINPUT_H
-#define __EXINPUT_H
+#ifndef I_INPUT_H
+#define I_INPUT_H
 
 #include "i_oview.h"
 #include "console.h"
@@ -44,4 +44,4 @@ public:
     virtual void RepaintStatus();
 };
 
-#endif
+#endif // I_INPUT_H

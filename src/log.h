@@ -78,8 +78,8 @@ ENDFUNCAS_SAFE(HANDLE, unsigned long, GetNextHandle());
 */
 
 
-#ifndef __LOGGING_HPP
-#define __LOGGING_HPP
+#ifndef LOGGING_HPP
+#define LOGGING_HPP
 
 #if defined(NO_NEW_CPP_FEATURES)
 #include <fstream.h>
@@ -286,4 +286,4 @@ void Log__BinaryData(FunctionLog&, void* bin_data, size_t len, unsigned long lin
 
 #endif // FTE_NO_LOGGING
 
-#endif // __LOGGING_HPP
+#endif // LOGGING_HPP

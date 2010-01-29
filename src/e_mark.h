@@ -1,5 +1,5 @@
-#ifndef __EMARK_H
-#define __EMARK_H
+#ifndef E_MARK_H
+#define E_MARK_H
 
 #include "e_buffer.h"
 
@@ -58,4 +58,4 @@ private:
 
 extern EMarkIndex markIndex;
 
-#endif
+#endif // E_MARK_H

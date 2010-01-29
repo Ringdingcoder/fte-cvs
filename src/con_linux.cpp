@@ -28,6 +28,11 @@
 // ... some more comments below
 
 #include "feature.h"
+#include "fte.h"
+#include "sysdep.h"
+#include "c_config.h"
+#include "console.h"
+#include "gui.h"
 
 #include <signal.h>
 #include <assert.h>
@@ -57,11 +62,6 @@ extern "C" {
 #include <gpm.h>
 }
 #endif
-
-#include "sysdep.h"
-#include "c_config.h"
-#include "console.h"
-#include "gui.h"
 
 #define MAX_PIPES 4
 //#define PIPE_BUFLEN 4096
@@ -787,12 +787,13 @@ int GetKeyEvent(TEvent *Event) {
     if (key == 14 && keysym == K(KT_LATIN,127)) {
         // we are running on a system with broken backspace key
         KeyCode = kbBackSp;
-    } else for(unsigned int i = 0; i < sizeof(KeyTrans) / sizeof(KeyTrans[0]); i++) {
-        if (KeyTrans[i].KeySym == keysym) {
-            KeyCode = KeyTrans[i].KeyCode;
-            break;
-        }
-    }
+    } else
+        for(size_t i = 0; i < FTE_ARRAY_SIZE(KeyTrans); ++i)
+            if (KeyTrans[i].KeySym == keysym) {
+                KeyCode = KeyTrans[i].KeyCode;
+                break;
+            }
+
     if (KeyCode == 0) {
         switch (KTYP(keysym)) {
         case KT_CONS:
@@ -844,23 +845,22 @@ int GetKeyEvent(TEvent *Event) {
                 KeyCode = toupper(KeyCode);
 
             if (KTYP(keysym) == KT_DEAD) {
-                for (unsigned i = 0; i < sizeof(DeadTrans) / sizeof(DeadTrans[0]); i++) {
+                for (size_t i = 0; i < FTE_ARRAY_SIZE(DeadTrans); ++i)
                     if (DeadTrans[i].KeySym == keysym) {
                         dead_key = DeadTrans[i].Diacr;
                         return -1;
                     }
-                }
+
                 dead_key = 0;
                 return -1;
             }
             if (! (ShiftFlags & (kfAlt | kfCtrl)) && dead_key) {
-                for (int i = 0; (unsigned) i < diacr_table.kb_cnt; i++) {
+                for (unsigned i = 0; i < diacr_table.kb_cnt; ++i)
                     if (diacr_table.kbdiacr[i].base == KeyCode &&
                         diacr_table.kbdiacr[i].diacr == dead_key) {
                         KeyCode=diacr_table.kbdiacr[i].result;
                         break;
                     }
-                }
             }
             dead_key = 0;
 

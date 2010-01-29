@@ -1157,7 +1157,7 @@ static void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char *
         Event->Key.Code = key | myState;
         return;
     } else {
-        for (unsigned i = 0; i < (sizeof(key_table) / sizeof(key_table[0])); i++) {
+        for (size_t i = 0; i < FTE_ARRAY_SIZE(key_table); ++i) {
             long k;
 
             if ((int) key1 == key_table[i].keysym) {
@@ -1530,7 +1530,8 @@ static void ProcessXEvents(TEvent *Event) {
                                     event.xselectionrequest.property,
                                     XA_ATOM,
                                     32, PropModeReplace,
-                                    (unsigned char *)&type_list, sizeof(type_list) / sizeof(*type_list));
+				    (unsigned char *)&type_list,
+				    FTE_ARRAY_SIZE(type_list));
                     notify.xselection.property = event.xselectionrequest.property;
 #ifdef USE_XMB
                 } else if (event.xselectionrequest.target == XA_STRING) {

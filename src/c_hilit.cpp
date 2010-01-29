@@ -76,21 +76,21 @@ static const struct {
 EColorize *Colorizers = 0;
 
 int GetIndentMode(const char *Str) {
-    for (unsigned int i = 0; i < sizeof(IndentModes) / sizeof(IndentModes[0]); i++)
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(IndentModes); ++i)
         if (strcmp(Str, IndentModes[i].Name) == 0)
             return IndentModes[i].Num;
     return 0;
 }
 
 int GetHilitMode(const char *Str) {
-    for (unsigned int i = 0; i < sizeof(HilitModes) / sizeof(HilitModes[0]); i++)
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(HilitModes); ++i)
         if (strcmp(Str, HilitModes[i].Name) == 0)
             return HilitModes[i].Num;
     return HILIT_PLAIN;
 }
 
 SyntaxProc GetHilitProc(int id) {
-    for (unsigned int i = 0; i < sizeof(HilitModes) / sizeof(HilitModes[0]); i++)
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(HilitModes); ++i)
         if (id == HilitModes[i].Num)
             return HilitModes[i].Proc;
     return 0;

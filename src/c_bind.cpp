@@ -34,19 +34,17 @@ const char *GetCommandName(int Command) {
         else
             return "?NONE?";
     }
-    for (unsigned i = 0; i < (sizeof(Command_Table) / sizeof(Command_Table[0])); i++)
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(Command_Table); ++i)
         if (Command_Table[i].CmdId == Command)
             return Command_Table[i].Name;
     return "?invalid?";
 }
 
 int CmdNum(const char *Cmd) {
-    unsigned i;
-
-    for (i = 0; i < sizeof(Command_Table) / sizeof(Command_Table[0]); i++)
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(Command_Table); ++i)
         if (strcmp(Cmd, Command_Table[i].Name) == 0)
             return Command_Table[i].CmdId;
-    for (i = 0; i < CMacros; i++)
+    for (int i = 0; i < CMacros; i++)
         if (Macros[i].Name && (strcmp(Cmd, Macros[i].Name)) == 0)
             return i | CMD_EXT;
     return 0; // Nop
@@ -484,11 +482,13 @@ int ParseKey(const char *Key, KeySel &ks) {
         }
         p += 2;
     }
-    for (unsigned i = 0; i < sizeof(KeyList)/sizeof(KeyList[0]); i++)
+
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(KeyList); ++i)
         if (strcmp((const char *)p, KeyList[i].Name) == 0) {
             ks.Key = KeyList[i].Key;
             break;
         }
+
     if (ks.Key == 0)
         ks.Key = *p;
     if ((KeyFlags & kfCtrl) && !(KeyFlags & kfSpecial)) {
@@ -529,7 +529,7 @@ int GetKeyName(char *Key, size_t KeySize, KeySel &ks) {
         else
             strlcat(Key, c, KeySize);
     } else {
-        for (unsigned i = 0; i < sizeof(KeyList)/sizeof(KeyList[0]); ++i)
+        for (size_t i = 0; i < FTE_ARRAY_SIZE(KeyList); ++i)
             if (KeyList[i].Key == keyCode(ks.Key)) {
                 strlcat(Key, KeyList[i].Name, KeySize);
                 break;

@@ -164,12 +164,11 @@ static int GetConfigFileName(int /*argc*/, char **argv, char *ConfigFileName) {
         return 1;
 
 #if defined(UNIX)
-    for (unsigned int i = 0; i < sizeof(Unix_RCPaths)/sizeof(Unix_RCPaths[0]); i++) {
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(Unix_RCPaths); ++i)
         if (access(Unix_RCPaths[i], 0) == 0) {
             strlcpy(ConfigFileName, Unix_RCPaths[i], MAXPATH);
             return 1;
         }
-    }
 #endif
     return 0;
 }

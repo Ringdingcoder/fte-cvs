@@ -141,7 +141,7 @@ int SetColor(const char *ColorV, const char *Value) {
         return 0;
 
     ChColor C = ChColor(ColFg | (ColBg << 4));
-    for (unsigned i = 0; i < sizeof(Colors)/sizeof(Colors[0]); i++) {
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(Colors); ++i) {
         if (strcmp(ColorV, Colors[i].Name) == 0) {
             *Colors[i].C = C;
             return 1;

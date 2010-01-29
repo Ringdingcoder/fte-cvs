@@ -315,7 +315,7 @@ static struct {
 
 void ConvertKeyToEvent(KeySym key, KeySym key1, char *keyname, int etype, int state, TEvent *Event) {
     unsigned int myState = 0;
-    int i,k;
+    int k;
 
 
     DEBUG(("key: \n"));
@@ -349,7 +349,7 @@ void ConvertKeyToEvent(KeySym key, KeySym key1, char *keyname, int etype, int st
         Event->Key.Code = key | myState;
         return;
     } else {
-        for (i = 0; i < (sizeof(key_table) / sizeof(key_table[0])); i++) {
+        for (size_t i = 0; i < FTE_ARRAY_SIZE(key_table); ++i) {
             if (key1 == key_table[i].keysym) {
                 k = key_table[i].keycode;
                 if (k < 256)

@@ -596,12 +596,12 @@ void QEText::handleKeyPressEvent(QKeyEvent *qe) {
         keyFlags |= kfAlt;
 
     keyCode = 0;
-    for (unsigned i = 0; i < (sizeof(key_table)/sizeof(key_table[0])); i++) {
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(key_table); ++i)
         if (key == key_table[i].q_code) {
             keyCode = key_table[i].keyCode;
             break;
         }
-    }
+
     if (keyCode == 0 && ascii != 0) {
         if (keyFlags & (kfCtrl | kfAlt)) {
             keyCode = toupper(ascii);

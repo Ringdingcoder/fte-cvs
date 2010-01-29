@@ -96,6 +96,9 @@ colorize C {
 	'unsigned',
 	'void',
 	'volatile',
+	'_Bool',
+	'_Complex',
+	'complex',
 
 	# types C++
 	'mutable',
@@ -133,6 +136,7 @@ colorize C {
 	'int64_t',
 	'int8_t',
 	'intptr_t',
+	'ptrdiff_t',
 	'uint16_t',
 	'uint32_t',
 	'uint64_t',
@@ -140,6 +144,10 @@ colorize C {
 	'uintptr_t',
 	'size_t',
 	'ssize_t',
+        
+	# math.h
+	'float_t',
+	'double_t',
     };
     
     # show these as numbers

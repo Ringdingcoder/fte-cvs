@@ -562,13 +562,13 @@ int EBuffer::SaveTo(const char *AFileName) {
             OldCount = ByteCount;
         }
     }
-    if (fclose(fp) != 0) goto fail;
+    if (fclose(fp) != 0) goto failclose;
     Modified = 0;
     FileOk = 1;
     if (stat(FileName, &FileStatus) == -1) {
         memset(&FileStatus, 0, sizeof(FileStatus));
         FileOk = 0;
-        goto fail;
+        goto failclose;
     }
     Msg(S_INFO, "Wrote %s.", AFileName);
 
@@ -587,17 +587,18 @@ int EBuffer::SaveTo(const char *AFileName) {
             unlink(ABackupName);
         }
     }
-    return 1;
+    return ErOK;
 fail:
     fclose(fp);
+failclose:
     unlink(AFileName);
     if (rename(ABackupName, AFileName) == -1) {
         View->MView->Win->Choice(GPC_ERROR, "Error", 1, "O&K", "Error renaming backup file to original!");
     } else {
         View->MView->Win->Choice(GPC_ERROR, "Error", 1, "O&K", "Error writing file, backup restored.");
     }
-    return 0;
+    return ErFAIL;
 erroropen:
     View->MView->Win->Choice(GPC_ERROR, "Error", 1, "O&K", "Error writing %s (errno=%d).", AFileName, errno);
-    return 0;
+    return ErFAIL;
 }

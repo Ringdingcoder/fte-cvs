@@ -37,7 +37,7 @@ struct ExMacroCFTE {
     char *Name;
 };
 
-static unsigned int CMacrosCFTE = 0;
+static unsigned CMacrosCFTE = 0;
 static ExMacroCFTE *MacrosCFTE = 0;
 
 static FILE *output = 0;
@@ -849,7 +849,7 @@ static int CmdNumCFTE(const char *Cmd) {
     for (size_t i = 0; i < FTE_ARRAY_SIZE(Command_Table); ++i)
         if (strcmp(Cmd, Command_Table[i].Name) == 0)
             return Command_Table[i].CmdId;
-    for (int i = 0; i < CMacrosCFTE; i++)
+    for (unsigned i = 0; i < CMacrosCFTE; i++)
         if (MacrosCFTE[i].Name && (strcmp(Cmd, MacrosCFTE[i].Name)) == 0)
             return i | CMD_EXT;
     return 0; // Nop

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __CONFIG_H
-#define __CONFIG_H
+#ifndef C_CONFIG_H
+#define C_CONFIG_H
 
 #include "sysdep.h"
 
@@ -58,4 +58,4 @@ int UseDefaultConfig();
 int AddCRegexp(int file, int line, int msg, const char *regexp);
 int LoadFile(char *WhereName, char *CfgName);
 
-#endif
+#endif // C_CONFIG_H

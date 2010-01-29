@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __FCONFIG_H__
-#define __FCONFIG_H__
+#ifndef C_FCONFIG_H
+#define C_FCONFIG_H
 
 #define CF_STRING   1
 #define CF_INT      2
@@ -47,4 +47,4 @@
 
 #define CONFIG_ID   0x1A1D70E1
 
-#endif
+#endif // C_FCONFIG_H

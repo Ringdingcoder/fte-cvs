@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __DESKTOP_H__
-#define __DESKTOP_H__
+#ifndef C_DESKTOP_H
+#define C_DESKTOP_H
 
 #ifdef CONFIG_DESKTOP
 
@@ -25,4 +25,4 @@ int LoadDesktop(const char *FileName);
 
 #endif
 
-#endif
+#endif // C_DESKTOP_H

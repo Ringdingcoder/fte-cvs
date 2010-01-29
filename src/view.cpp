@@ -7,6 +7,12 @@
  *
  */
 
+#include "e_cvslog.h"
+#include "o_cvs.h"
+#include "o_cvsdiff.h"
+#include "e_svnlog.h"
+#include "o_svn.h"
+#include "o_svndiff.h"
 #include "fte.h"
 #include "ftever.h"
 

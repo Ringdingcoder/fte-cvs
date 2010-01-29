@@ -9,7 +9,11 @@
 #ifndef O_CVS_H
 #define O_CVS_H
 
+#include "feature.h"
+
 #ifdef CONFIG_OBJ_CVS
+
+#include "o_cvsbase.h"
 
 class ECvs:public ECvsBase {
     public:

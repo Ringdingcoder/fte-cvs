@@ -10,7 +10,11 @@
 #ifndef O_SVNDIFF_H
 #define O_SVNDIFF_H
 
+#include "feature.h"
+
 #ifdef CONFIG_OBJ_SVN
+
+#include "o_svnbase.h"
 
 class ESvnDiff:public ESvnBase {
     public:

@@ -11,6 +11,7 @@
 #ifndef _CVSLOG_H_
 #define _CVSLOG_H_
 
+#include "c_config.h"
 #include "e_buffer.h"
 
 #ifdef CONFIG_OBJ_CVS

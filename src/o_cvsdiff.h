@@ -10,11 +10,13 @@
 #ifndef O_CVSDIFF_H
 #define O_CVSDIFF_H
 
-#include "o_cvsbase.h"
+#include "feature.h"
 
 #ifdef CONFIG_OBJ_CVS
 
-class ECvsDiff:public ECvsBase {
+#include "o_cvsbase.h"
+
+class ECvsDiff: public ECvsBase {
     public:
         int CurrLine,ToLine,InToFile;
         char *CurrFile;

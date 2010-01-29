@@ -17,6 +17,8 @@
 #include "console.h"
 #include "c_hilit.h"
 
+#include "fte.h"
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,12 +33,12 @@
 
 #define slen(s) ((s) ? (strlen(s) + 1) : 0)
 
-struct ExMacro {
+struct ExMacroCFTE {
     char *Name;
 };
 
-static unsigned int CMacros = 0;
-static ExMacro *Macros = 0;
+static unsigned int CMacrosCFTE = 0;
+static ExMacroCFTE *MacrosCFTE = 0;
 
 static FILE *output = 0;
 static int lntotal = 0;
@@ -842,27 +844,24 @@ static int GetNumber(CurPos &cp) {
     return neg ? -value : value;
 }
 
-static int CmdNum(const char *Cmd) {
-    unsigned int i;
+static int CmdNumCFTE(const char *Cmd) {
 
-    for (i = 0;
-         i < sizeof(Command_Table) / sizeof(Command_Table[0]);
-         i++)
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(Command_Table); ++i)
         if (strcmp(Cmd, Command_Table[i].Name) == 0)
             return Command_Table[i].CmdId;
-    for (i = 0; i < CMacros; i++)
-        if (Macros[i].Name && (strcmp(Cmd, Macros[i].Name)) == 0)
+    for (int i = 0; i < CMacrosCFTE; i++)
+        if (MacrosCFTE[i].Name && (strcmp(Cmd, MacrosCFTE[i].Name)) == 0)
             return i | CMD_EXT;
     return 0; // Nop
 }
 
-static int NewCommand(const char *Name) {
+static int NewCommandCFTE(const char *Name) {
     if (Name == 0)
         Name = "";
-    Macros = (ExMacro *) realloc(Macros, sizeof(ExMacro) * (1 + CMacros));
-    Macros[CMacros].Name = strdup(Name);
-    CMacros++;
-    return CMacros - 1;
+    MacrosCFTE = (ExMacroCFTE *) realloc(MacrosCFTE, sizeof(ExMacroCFTE) * (1 + CMacrosCFTE));
+    MacrosCFTE[CMacrosCFTE].Name = strdup(Name);
+    CMacrosCFTE++;
+    return CMacrosCFTE - 1;
 }
 
 static int ParseCommands(CurPos &cp, char *Name) {
@@ -870,7 +869,7 @@ static int ParseCommands(CurPos &cp, char *Name) {
     //    return 0;
     Word cmd;
     int p;
-    long Cmd = NewCommand(Name) | CMD_EXT;
+    long Cmd = NewCommandCFTE(Name) | CMD_EXT;
 
     long cnt;
     long ign = 0;
@@ -898,7 +897,7 @@ static int ParseCommands(CurPos &cp, char *Name) {
             long Command;
 
             if (GetWord(cp, cmd) == -1) Fail(cp, "Syntax error");
-            Command = CmdNum(cmd);
+            Command = CmdNumCFTE(cmd);
             if (Command == 0)
                 Fail(cp, "Unrecognised command: %s", cmd);
             PutNumber(cp, CF_COMMAND, Command);

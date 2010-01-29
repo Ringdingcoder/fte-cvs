@@ -6,9 +6,13 @@
  *    License or the Artistic License, as specified in the README file.
  *
  */
+#ifndef O_DIRECTORY_H
+#define O_DIRECTORY_H
 
-#ifndef __ODIRECTORY_H
-#define __ODIRECTORY_H
+#include "feature.h"
+#include "i_search.h"
+#include "o_list.h"
+#include "s_direct.h"
 
 #ifdef CONFIG_OBJ_DIRECTORY
 
@@ -53,4 +57,4 @@ public:
 };
 #endif
 
-#endif
+#endif // O_DIRECTORY_H

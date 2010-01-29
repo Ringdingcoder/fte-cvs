@@ -7,12 +7,11 @@
  *
  */
 
-#ifndef __FTE_H
-#define __FTE_H
+#ifndef FTE_H
+#define FTE_H
 
 #include "feature.h"
 #include "sysdep.h"
-
 #if 1
 /* slowly remove this global header file */
 #include "console.h"
@@ -70,4 +69,6 @@
 
 #endif //_DEBUG && MSVC && MSVCDEBUG
 
-#endif // __FTE_H
+#define FTE_ARRAY_SIZE(a) (sizeof (a) / sizeof ((a)[0]))
+
+#endif // FTE_H

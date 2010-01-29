@@ -1438,7 +1438,7 @@ static void ProcessXEvents(TEvent *Event) {
             if (!i18n_ctx || event.type == KeyRelease) {
                 XLookupString(&event.xkey, keyName, sizeof(keyName), &key, 0);
             } else {
-                i18n_lookup_sym(&event.xkey, keyName, sizeof(keyName), &key, i18n_ctx->xic);
+                i18n_lookup_sym(i18n_ctx, &event.xkey, keyName, sizeof(keyName), &key);
                 if (!key)
                     break;
             }

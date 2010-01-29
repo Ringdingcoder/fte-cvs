@@ -1,31 +1,19 @@
-#ifndef __CONI18N_H__
-#define __CONI18N_H__
+#ifndef CON_I18N_H
+#define CON_I18N_H
 
 #include <X11/Xlib.h>
-#include <X11/Xlocale.h>
 
-/*
- * For now the only supported input style is root !!!
- * in future this should be read from resources
- */
-#define XIM_INPUT_STYLE "Root"
-
-struct i18n_context_t {
-    XIC xic;
-#if XlibSpecificationRelease >= 6
-    XIM xim;
-    XIMStyles* xim_styles;
-    XIMStyle input_style;
-#endif
-};
+struct i18n_context_t;
 
 /*
  * prototypes for I18N functions
+ *
+ * C code - need typedef
  */
 void i18n_focus_out(i18n_context_t*);
 void i18n_focus_in(i18n_context_t*);
-int i18n_lookup_sym(XKeyEvent *, char *, int, KeySym *, XIC);
+int i18n_lookup_sym(i18n_context_t*, XKeyEvent *, char *, int, KeySym *);
 i18n_context_t* i18n_open(Display *, Window, unsigned long *);
 void i18n_destroy(i18n_context_t**);
 
-#endif
+#endif // CON_I18N_H

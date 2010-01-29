@@ -13,17 +13,32 @@
 #include "feature.h"
 #include "con_i18n.h"
 
-#include <X11/Xlib.h>
+#include <X11/Xlocale.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/*
+ * For now the only supported input style is root !!!
+ * in future this should be read from resources
+ */
+#define XIM_INPUT_STYLE "Root"
 
 #define KEYMASK 0xff
 #define KEYBYTEMAX 0xf00
+
+struct i18n_context_t {
+    XIC xic;
+#if XlibSpecificationRelease >= 6
+    XIM xim;
+    XIMStyles* xim_styles;
+    XIMStyle input_style;
+#endif
+};
 
 #ifdef USE_HARD_REMAP
 /*
@@ -372,24 +387,24 @@ void i18n_focus_out(i18n_context_t* ctx) /*FOLD00*/
 /*
  * Lookup correct keysymbol from keymap event
  */
-int i18n_lookup_sym(XKeyEvent * keyEvent, char *keyName, int keySize, /*FOLD00*/
-		     KeySym * key, XIC xic)
+int i18n_lookup_sym(i18n_context_t* ctx, XKeyEvent * keyEvent, /*FOLD00*/
+		    char *keyName, int keySize, KeySym * key)
 {
     static int showKeys = 0;
     int nbytes = 0;
 
 #if XlibSpecificationRelease >= 6
-    if (xic != NULL) {
+    if (ctx && ctx->xic != NULL) {
 	if (keyEvent->type == KeyPress) {
             Status status_return;
 
             /* No KeyRelease events here ! */
 #if 1
-	    nbytes = XmbLookupString(xic, keyEvent, keyName, keySize,
+	    nbytes = XmbLookupString(ctx->xic, keyEvent, keyName, keySize,
                                      key, &status_return);
 #else
             wchar_t wk;
-            nbytes = XwcLookupString(xic, keyEvent, &wk, 1, key, &status_return);
+            nbytes = XwcLookupString(ctx->xic, keyEvent, &wk, 1, key, &status_return);
             printf("code=%0X\n", wk);
             keySize = 1;
             keyName[0] = wk & 0xFF;

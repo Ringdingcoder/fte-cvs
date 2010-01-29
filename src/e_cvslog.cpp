@@ -8,9 +8,13 @@
  * discard on view close.
  */
 
-#include "fte.h"
+#include "e_cvslog.h"
 
 #ifdef CONFIG_OBJ_CVS
+
+#include "o_cvs.h"
+#include "fte.h"
+#include "sysdep.h"
 
 ECvsLog *CvsLogView;
 

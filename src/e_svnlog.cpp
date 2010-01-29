@@ -8,13 +8,23 @@
  * discard on view close.
  */
 
-#include "fte.h"
+#include "e_svnlog.h"
 
 #ifdef CONFIG_OBJ_SVN
 
+#include "c_config.h"
+#include "o_svn.h"
+#include "i_view.h"
+#include "sysdep.h"
+#include "s_string.h"
+
+#include <stdio.h>
+
 ESvnLog *SvnLogView;
 
-ESvnLog::ESvnLog (int createFlags,EModel **ARoot,char *Directory,char *OnFiles):EBuffer (createFlags,ARoot,NULL) {
+ESvnLog::ESvnLog (int createFlags,EModel **ARoot,char *Directory,char *OnFiles) :
+    EBuffer (createFlags,ARoot,NULL)
+{
     int i,j,p;
     char msgFile[MAXPATH];
 

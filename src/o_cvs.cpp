@@ -6,9 +6,18 @@
  * Class providing access to most of CVS commands.
  */
 
-#include "fte.h"
+#include "o_cvs.h"
 
 #ifdef CONFIG_OBJ_CVS
+
+#include "i_view.h"
+#include "e_cvslog.h"
+#include "o_buflist.h"
+#include "s_files.h"
+#include "sysdep.h"
+
+#include <string.h>
+#include <stdio.h>
 
 static int SameDir(const char *D1, const char *D2)
 {

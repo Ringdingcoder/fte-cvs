@@ -7,9 +7,15 @@
  * to clipboard and allows to jump to lines in real sources.
  */
 
-#include "fte.h"
+#include "o_svndiff.h"
 
 #ifdef CONFIG_OBJ_SVN
+
+#include "c_bind.h"
+#include "c_config.h"
+#include "e_buffer.h"
+#include "s_util.h"
+#include "sysdep.h"
 
 ESvnDiff       *SvnDiffView = 0;
 

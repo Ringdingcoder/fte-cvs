@@ -6,9 +6,18 @@
  * Class providing access to most of SVN commands.
  */
 
-#include "fte.h"
+#include "o_svn.h"
 
 #ifdef CONFIG_OBJ_SVN
+
+#include "i_view.h"
+#include "e_svnlog.h"
+#include "o_buflist.h"
+#include "s_files.h"
+#include "sysdep.h"
+
+#include <string.h>
+#include <stdio.h>
 
 static int SameDir (const char *D1, const char *D2) {
     if (!D1||!D2) return 0;

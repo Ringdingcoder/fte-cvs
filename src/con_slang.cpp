@@ -559,7 +559,7 @@ static int parseEsc(TEvent *Event)
 int ConGetEvent(TEventMask /*EventMask */ ,
 		TEvent * Event, int WaitTime, int Delete)
 {
-    TKeyEvent *KEvent = &(Event->Key);
+    TKeyEvent& KEvent = Event->Key;
     int key, rc;
 
     if (ScreenSizeChanged) {
@@ -618,7 +618,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	key = kbEsc;
 
     if (Event->What == evKeyDown) {
-	KEvent->Code = key;
+	KEvent.Code = key;
     //fprintf(stderr, "KEY %x \n", key);
 
 	if (!Delete)

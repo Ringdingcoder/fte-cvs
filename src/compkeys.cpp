@@ -7,14 +7,16 @@
  *    License or the Artistic License, as specified in the README file.
  *
  */
-                                                                       
+
+#include "fte.h"
+#include "console.h"
+#include "conkbd.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "console.h"
-#include "conkbd.h"
 
 #define FTESL_KBDCTRL(x)    (x - 'a' +  1)
 
@@ -240,12 +242,11 @@ static TKeyCode ftesl_getkeycode(const char* key)
                 return kcode;
         }
         
-        for(unsigned i=0; i<sizeof(speckeymap)/sizeof(keymapper); i++) {
+        for (size_t i = 0; i < FTE_ARRAY_SIZE(speckeymap); ++i)
                 if (!strcmp(key, speckeymap[i].kname)) {
                         kcode|=speckeymap[i].kcode;
                         return kcode;
                 }
-        }
 
         if ( *key == 'F' ) {
                 key++;

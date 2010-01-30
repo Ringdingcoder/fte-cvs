@@ -43,7 +43,7 @@ string::string(const char* s, size_type len)
 
 string::string(const string& s, size_type len)
 {
-    if (len == 0 || len > s.size())
+    if (len > s.size())
 	len = s.size();
 
     str = new char[len + 1];
@@ -144,13 +144,12 @@ void string::insert(size_type pos, const string& s)
 
     memcpy(p, str, pos);
     memcpy(p + pos, s.str, l);
-    memcpy(p + pos + l, str + pos, k - pos);
+    memcpy(p + pos + l, str + pos, k - pos + 1);
 
     if (str != empty_string)
 	delete[] str;
 
     str = p;
-    str[k + l] = 0;
 }
 
 string::size_type string::find(const string& s, size_type startpos) const

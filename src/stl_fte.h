@@ -57,8 +57,8 @@ public:
     static const size_type npos = ~0U;
     string();
     string(char s);
-    string(const char* s, size_type len = 0);
-    string(const string& s, size_type len = 0);
+    string(const char* s, size_type len = npos);
+    string(const string& s, size_type len = npos);
     ~string();
     size_type size() const { size_type i = 0; while (str[i]) i++; return i; }
     char operator[](size_type i) const { return str[i]; }

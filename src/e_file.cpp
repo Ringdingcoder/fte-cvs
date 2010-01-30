@@ -7,7 +7,11 @@
  *
  */
 
-#include "fte.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_buflist.h"
+#include "s_direct.h"
+#include "s_files.h"
 
 EBuffer *FindFile(const char *FileName) {
     EModel *M;

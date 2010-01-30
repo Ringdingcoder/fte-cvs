@@ -7,7 +7,9 @@
  *
  */
 
-#include "fte.h"
+#include "e_undo.h"
+#include "o_buflist.h"
+#include "sysdep.h"
 
 int EBuffer::FindFold(int Line) { // optimize /*FOLD00*/
     int f = FindNearFold(Line);

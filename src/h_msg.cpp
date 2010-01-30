@@ -11,6 +11,11 @@
 
 #ifdef CONFIG_HILIT_MSG
 
+#include "c_bind.h"
+#include "o_buflist.h"
+
+#include <ctype.h>
+
 #define hsMSG_Normal  0
 #define hsMSG_Header  1
 #define hsMSG_Quote   2

@@ -7,19 +7,14 @@
  *
  */
 
-#include "feature.h"
+#include "gui.h"
+#include "sysdep.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <signal.h>
 #include <stdarg.h>
-#if defined(MSVC)
-#include <malloc.h>
-#endif
-#include "console.h"
-#include "gui.h"
 
 int MenuCount = 0;
 mMenu *Menus = 0;

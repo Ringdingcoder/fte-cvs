@@ -8,6 +8,10 @@
  */
 
 #include "fte.h"
+#include "c_bind.h"
+#include "o_buflist.h"
+
+#include <ctype.h>
 
 #define hsPLAIN_Normal 0
 

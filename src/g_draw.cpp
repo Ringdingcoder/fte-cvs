@@ -7,8 +7,8 @@
  *
  */
 
-#include "feature.h"
 #include "console.h"
+
 #include <stdlib.h>
 #ifdef  NTCONSOLE
 #   define  WIN32_LEAN_AND_MEAN 1

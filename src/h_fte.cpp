@@ -11,6 +11,11 @@
 
 #ifdef CONFIG_HILIT_FTE
 
+#include "c_bind.h"
+#include "o_buflist.h"
+
+#include <ctype.h>
+
 // These states should match those in h_c.cpp to let autoindentation work
 #define hsFTE_Normal       0
 #define hsFTE_Comment      1

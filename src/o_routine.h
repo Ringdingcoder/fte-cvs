@@ -10,7 +10,7 @@
 #ifndef O_ROUTINE_H
 #define O_ROUTINE_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_OBJ_ROUTINE
 

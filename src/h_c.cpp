@@ -11,6 +11,11 @@
 
 #ifdef CONFIG_HILIT_C
 
+#include "c_bind.h"
+#include "o_buflist.h"
+#include "sysdep.h"
+
+#include <ctype.h>
 
 #define PRINTF(x) //printf x
 

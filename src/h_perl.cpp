@@ -22,6 +22,11 @@
 
 #ifdef CONFIG_HILIT_PERL
 
+#include "c_bind.h"
+#include "o_buflist.h"
+
+#include <ctype.h>
+
 #define X_BIT     0x80     /* set if last was number, var, */
 #define X_MASK    0x7F
 #define X_NOT(state) (!((state) & X_BIT))

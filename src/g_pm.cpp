@@ -26,27 +26,25 @@
 #define INCL_DOS
 #define INCL_DOSERRORS
 
-#include <os2.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <process.h>
-#include <assert.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include "ftever.h"
-#include "sysdep.h"
-#include "feature.h"
-#include "console.h"
-#include "gui.h"
-#include "c_history.h"
+#include "c_color.h"
 #include "c_commands.h"
 #include "c_config.h"
+#include "c_history.h"
 #include "c_mode.h"
-#include "c_color.h"
+#include "ftever.h"
+#include "gui.h"
+#include "log.h"
 #include "s_files.h"
 #include "s_string.h"
-#include "log.h"
+#include "sysdep.h"
+
+#include <assert.h>
+#include <ctype.h>
+#include <os2.h>
+#include <process.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 
 #define PM_STACK_SIZE (96 * 1024)
 

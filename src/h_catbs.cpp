@@ -11,6 +11,9 @@
 
 #ifdef CONFIG_HILIT_CATBS
 
+#include "c_bind.h"
+#include "o_buflist.h"
+
 #define hsBS_Normal 1
 
 // this is for viewing only, do not try to edit or anything.

@@ -11,6 +11,10 @@
 
 #ifdef CONFIG_HILIT_ADA
 
+#include "c_bind.h"
+#include "o_buflist.h"
+#include <ctype.h>
+
 #define hsAda_Normal       0
 #define hsAda_Comment      1
 #define hsAda_CommentL     2

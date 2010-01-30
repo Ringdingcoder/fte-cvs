@@ -11,9 +11,25 @@
 
 #ifdef CONFIG_HILIT_SH
 
-enum { hsSH_Normal, hsSH_SQuote, hsSH_DQuote, hsSH_BQuote,
-hsSH_DBQuote, hsSH_Control, hsSH_Keyword, hsSH_Comment,
-hsSH_Variable, hsSH_EOF, hsSH_InOpt };
+#include "c_bind.h"
+#include "o_buflist.h"
+#include "sysdep.h"
+
+#include <ctype.h>
+
+enum {
+    hsSH_Normal,
+    hsSH_SQuote,
+    hsSH_DQuote,
+    hsSH_BQuote,
+    hsSH_DBQuote,
+    hsSH_Control,
+    hsSH_Keyword,
+    hsSH_Comment,
+    hsSH_Variable,
+    hsSH_EOF,
+    hsSH_InOpt
+};
 
 #define MAXSEOF 100
 static char seof[MAXSEOF];

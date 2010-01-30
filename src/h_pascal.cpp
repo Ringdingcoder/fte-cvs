@@ -11,6 +11,11 @@
 
 #ifdef CONFIG_HILIT_PASCAL
 
+#include "c_bind.h"
+#include "o_buflist.h"
+
+#include <ctype.h>
+
 #define hsPas_Normal       0
 #define hsPas_Comment1     1
 #define hsPas_Comment2     2

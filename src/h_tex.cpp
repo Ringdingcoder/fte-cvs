@@ -11,6 +11,11 @@
 
 #ifdef CONFIG_HILIT_TEX
 
+#include "c_bind.h"
+#include "o_buflist.h"
+
+#include <ctype.h>
+
 #define hsTEX_Normal  0
 #define hsTEX_Tag     1
 #define hsTEX_Comment 2

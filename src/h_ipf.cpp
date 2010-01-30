@@ -11,6 +11,11 @@
 
 #ifdef CONFIG_HILIT_IPF
 
+#include "c_bind.h"
+#include "o_buflist.h"
+
+#include <ctype.h>
+
 #define hsIPF_Normal  0
 #define hsIPF_Symbol  1
 #define hsIPF_Tag     2

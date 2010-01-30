@@ -11,6 +11,9 @@
 
 #ifdef CONFIG_HILIT_MAKE
 
+#include "c_bind.h"
+#include "o_buflist.h"
+
 #define hsMAKE_Normal  0
 #define hsMAKE_Comment 1
 #define hsMAKE_DotCmd  2

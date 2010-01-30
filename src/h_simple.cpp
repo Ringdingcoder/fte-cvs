@@ -11,6 +11,11 @@
 
 #ifdef CONFIG_HILIT_SIMPLE
 
+#include "c_bind.h"
+#include "o_buflist.h"
+#include "s_util.h"
+#include "sysdep.h"
+
 int Hilit_SIMPLE(EBuffer *BF, int LN, PCell B, int Pos, int Width, ELine *Line, hlState &State, hsState *StateMap, int *ECol) {
     EColorize *col = BF->Mode->fColorize;
     HMachine *hm = col->hm;

@@ -7,9 +7,17 @@
  *
  */
 
-#include "fte.h"
+#include "o_routine.h"
 
 #ifdef CONFIG_OBJ_ROUTINE
+
+#include "i_view.h"
+#include "o_buflist.h"
+#include "s_string.h"
+#include "sysdep.h"
+
+#include <stdio.h>
+
 RoutineView::RoutineView(int createFlags, EModel **ARoot, EBuffer *AB) :
     EList(createFlags, ARoot, "Routines"),
     Buffer(AB)

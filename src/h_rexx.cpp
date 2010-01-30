@@ -11,6 +11,12 @@
 
 #ifdef CONFIG_HILIT_REXX
 
+#include "c_bind.h"
+#include "o_buflist.h"
+#include "sysdep.h"
+
+#include <ctype.h>
+
 #define hsREXX_Normal    0
 #define hsREXX_Comment   1
 #define hsREXX_String1   3

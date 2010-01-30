@@ -7,7 +7,12 @@
  *
  */
 
-#include "fte.h"
+#include "c_bind.h"
+#include "s_string.h"
+#include "sysdep.h"
+
+#include <ctype.h>
+#include <string.h>
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -358,6 +363,7 @@ EEventMap::~EEventMap() {
     for (int i = 0; i < EM_MENUS; i++)
 	free(Menu[i]);
 
+#ifdef CONFIG_ABBREV
     // free Abbrev's
     EAbbrev *ab;
 
@@ -367,7 +373,7 @@ EEventMap::~EEventMap() {
 	    abbrev[i] = abbrev[i]->next;
 	    delete ab;
 	}
-
+#endif
     // free keymap's
     delete KeyMap;
 }

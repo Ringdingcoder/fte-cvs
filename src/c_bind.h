@@ -10,10 +10,10 @@
 #ifndef C_BIND_H
 #define C_BIND_H
 
-#include "console.h"
-#include "o_model.h"
 #include "c_mode.h" // EM_MENUS
+#include "console.h"
 #include "e_regex.h"
+#include "o_model.h"
 
 #define ABBREV_HASH      16
 
@@ -48,7 +48,9 @@ public:
     
     EMode(EMode *aMode, EEventMap *Map, const char *aName);
     ~EMode();
+#ifdef CONFIG_ABBREV
     EAbbrev *FindAbbrev(const char *string);
+#endif
 };
 
 class EKeyMap {

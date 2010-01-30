@@ -25,6 +25,30 @@
 
 EMessages *CompilerMsgs = 0;
 
+struct Error {
+    EBuffer *Buf;
+    fte::string file;
+    fte::string msg;
+    fte::string text;
+    int line;
+    int hilit;
+
+    Error(const char *_file, int _line, const char *_msg, const char *_text, int _hilit) :
+	Buf(0), file(_file), msg(_msg), text(_text), line(_line), hilit(_hilit)
+    {}
+};
+
+struct aDir
+{
+    fte::string name;
+    aDir* next;
+
+    aDir(const char *n, aDir* l) :
+	name(n), next(l)
+    {}
+};
+
+
 static int NCRegexp = 0;
 static struct {
     int RefFile;
@@ -34,6 +58,7 @@ static struct {
 } CRegexp[MAXREGEXP];
 
 int AddCRegexp(int file, int line, int msg, const char *regexp) {
+    //fprintf(stderr, "ADD EXP %s   %d %d %d\n", regexp, file, line, msg);
     if (NCRegexp >= MAXREGEXP) return 0;
     CRegexp[NCRegexp].RefFile = file;
     CRegexp[NCRegexp].RefLine = line;
@@ -51,7 +76,7 @@ void FreeCRegexp()
         RxFree(CRegexp[NCRegexp].rx);
 }
 
-EMessages::EMessages(int createFlags, EModel **ARoot, char *ADir, char *ACommand) :
+EMessages::EMessages(int createFlags, EModel **ARoot, const char *ADir, const char *ACommand) :
     EList(createFlags, ARoot, "Messages"),
     Running(1),
     BufLen(0),
@@ -149,7 +174,7 @@ void EMessages::FindFileErrors(EBuffer *B) {
     }
 }
 
-int EMessages::RunPipe(char *ADir, char *ACommand) {
+int EMessages::RunPipe(const char *ADir, const char *ACommand) {
     if (!KeepMessages)
         FreeErrors();
     
@@ -208,8 +233,8 @@ int EMessages::ExecCommand(ExCommands Command, ExState &State) {
     return EList::ExecCommand(Command, State);
 }
 
-void EMessages::AddError(Error *p) {
-    ErrList.push_back(p);
+void EMessages::AddError(const char *file, int line, const char *msg, const char *text, int hilit) {
+    ErrList.push_back(new Error(file, line, msg, text, hilit));
     FindErrorFile((unsigned)ErrList.size() - 1);
 
     if ((int)ErrList.size() > Count)
@@ -219,10 +244,6 @@ void EMessages::AddError(Error *p) {
         }
 
     UpdateList();
-}
-
-void EMessages::AddError(const char *file, int line, const char *msg, const char *text, int hilit) {
-    AddError(new Error(file, line, msg, text, hilit));
 }
 
 void EMessages::FreeErrors() {
@@ -241,7 +262,7 @@ void EMessages::FreeErrors() {
 }
 
 int EMessages::GetLine(char *Line, size_t maxim) {
-    int rc;
+    ssize_t rc;
     char *p;
     int l;
     
@@ -347,46 +368,54 @@ void EMessages::GetErrors() {
     
     //fprintf(stderr, "Reading pipe\n");
     while (GetLine(line, sizeof(line))) {
-        if (strlen(line) > 0 && line[strlen(line)-1] == '\n')
-            line[strlen(line)-1] = 0;
+        size_t len = strlen(line);
+        if (len > 0 && line[len - 1] == '\n')
+	    line[--len] = 0;
         didmatch = 0;
         for (i = 0; i < NCRegexp; i++) {
-            if (RxExec(CRegexp[i].rx, line, strlen(line), line, &RM) == 1) {
-                char ln[256] = "";
-                char msg[256] = "";
-                char fn1[256] = "";
-                char fn2[256] = "";
-                char *file = 0;
-                *fn = 0;
-                
-                memset(fn, 0, 256);
-                memset(ln, 0, 256);
-                memset(msg, 0, 256);
-                n = CRegexp[i].RefFile;
-                if (RM.Close[n] - RM.Open[n] < 256)
-                    memcpy(fn, line + RM.Open[n], RM.Close[n] - RM.Open[n]);
-                n = CRegexp[i].RefLine;
-                if (RM.Close[n] - RM.Open[n] < 256) 
-                    memcpy(ln, line + RM.Open[n], RM.Close[n] - RM.Open[n]);
-                n = CRegexp[i].RefMsg;
-                if (RM.Close[n] - RM.Open[n] < 256)
-                    memcpy(msg, line + RM.Open[n], RM.Close[n] - RM.Open[n]);
+            if (RxExec(CRegexp[i].rx, line, len, line, &RM) == 1) {
+                char ln[256];
+                char msg[256];
+                char fn1[256];
+                char fn2[256];
+                char *file;
+
+		n = CRegexp[i].RefFile;
+                unsigned s = RM.Close[n] - RM.Open[n];
+		if (s < sizeof(fn) - 1)
+		    memcpy(fn, line + RM.Open[n], s++);
+		else
+                    s = 0;
+		fn[s] = 0;
+
+		n = CRegexp[i].RefLine;
+                s = RM.Close[n] - RM.Open[n];
+                if (s < sizeof(ln) - 1)
+		    memcpy(ln, line + RM.Open[n], s++);
+		else
+		    s = 0;
+		ln[s] = 0;
+
+		n = CRegexp[i].RefMsg;
+                s = RM.Close[n] - RM.Open[n];
+                if (s < sizeof(msg) - 1)
+		    memcpy(msg, line + RM.Open[n], s++);
+		else
+		    s = 0;
+                msg[s] = 0;
 
                 if (IsFullPath(fn))
                     file = fn;
                 else {
-                    if (curr_dir == 0)
-                        strcpy(fn1, Directory.c_str());
-                    else
-                        strcpy(fn1, curr_dir->name.c_str());
+		    strlcpy(fn1, curr_dir ? curr_dir->name.c_str() : Directory.c_str(), sizeof(fn1));
                     Slash(fn1, 1);
-                    strcat(fn1, fn);
+                    strlcat(fn1, fn, sizeof(fn1));
                     if (ExpandPath(fn1, fn2, sizeof(fn2)) == 0)
                         file = fn2;
                     else
                         file = fn1;
                 }
-                AddError(file, atoi(ln), msg[0] ? msg : 0, line, 1);
+                AddError(file, atoi(ln), msg, line, 1);
                 didmatch = 1;
                 MatchCount++;
                 break;
@@ -563,6 +592,7 @@ int EMessages::Activate(int /*No*/) {
 }
 
 int EMessages::CanActivate(int Line) {
+    //return (Line < (int)ErrList.size());
     return (Line < (int)ErrList.size()
             && (!ErrList[Line]->file.empty()
                 || ErrList[Line]->line != -1)) ? 1 : 0;
@@ -602,4 +632,4 @@ size_t EMessages::GetRowLength(int ARow)
     return 0;
 }
 
-#endif
+#endif // CONFIG_OBJ_MESSAGES

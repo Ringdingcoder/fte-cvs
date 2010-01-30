@@ -614,7 +614,7 @@ int EView::Compile(ExState &State) {
     static char Cmd[256] = "";
     char Command[256] = "";
 
-    if (CompilerMsgs != 0 && CompilerMsgs->Running) {
+    if (CompilerMsgs != 0 && CompilerMsgs->IsRunning()) {
         Msg(S_INFO, "Already running...");
         return 0;
     }
@@ -640,7 +640,7 @@ int EView::Compile(ExState &State) {
 int EView::RunCompiler(ExState &State) {
     char Command[256] = "";
 
-    if (CompilerMsgs != 0 && CompilerMsgs->Running) {
+    if (CompilerMsgs != 0 && CompilerMsgs->IsRunning()) {
         Msg(S_INFO, "Already running...");
         return 0;
     }
@@ -714,11 +714,11 @@ int EView::ViewModeMap(ExState &/*State*/) {
 }
 
 int EView::ClearMessages() {
-    if (CompilerMsgs != 0 && CompilerMsgs->Running) {
-        Msg(S_INFO, "Running...");
-        return 0;
-    }
-    if (CompilerMsgs != 0) {
+    if (CompilerMsgs) {
+        if (CompilerMsgs->IsRunning()) {
+            Msg(S_INFO, "Running...");
+            return 0;
+        }
         CompilerMsgs->FreeErrors();
         CompilerMsgs->UpdateList();
     }

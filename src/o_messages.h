@@ -17,40 +17,15 @@
 #include "o_list.h"
 #include "stl_fte.h"
 
+struct Error;
+struct aDir;
 class EBuffer;
-
-struct Error {
-    fte::string file;
-    int line;
-    fte::string msg;
-    fte::string text;
-    int hilit;
-    EBuffer *Buf;
-
-    Error(const char *_file, int _line, const char *_msg, const char *_text, int _hilit) :
-	file(_file), line(_line), msg(_msg), text(_text), hilit(_hilit), Buf(0)
-    {}
-};
-
-struct aDir
-{
-    fte::string name;
-    aDir* next;
-
-    aDir(const char *n, aDir* l) :
-	name(n), next(l)
-    {}
-};
 
 class EMessages: public EList {
     fte::string Command;
     fte::string Directory;
     fte::vector<Error*> ErrList;
-
-public:
-
     int Running;
-
     int BufLen;
     int BufPos;
     int PipeId;
@@ -58,8 +33,9 @@ public:
     int MatchCount;
     char MsgBuf[4096];
     aDir*   curr_dir;                       // top of dir stack.
-    
-    EMessages(int createFlags, EModel **ARoot, char *Dir, char *ACommand);
+public:
+
+    EMessages(int createFlags, EModel **ARoot, const char *Dir, const char *ACommand);
     ~EMessages();
     void freeDirStack();
 
@@ -68,14 +44,13 @@ public:
     void FindErrorFile(unsigned err);
     void AddFileError(EBuffer *B, unsigned err);
     void FindFileErrors(EBuffer *B);
-    
+
     virtual int GetContext() { return CONTEXT_MESSAGES; }
     virtual EEventMap *GetEventMap();
     virtual int ExecCommand(ExCommands Command, ExState &State);
 
-    void AddError(Error *p);
     void AddError(const char *file, int line, const char *msg, const char *text, int hilit=0);
-    
+
     void FreeErrors();
     int GetLine(char *Line, size_t MaxLen);
     void GetErrors();
@@ -84,6 +59,7 @@ public:
     void DrawLine(PCell B, int Line, int Col, ChColor color, int Width);
     char* FormatLine(int Line);
     int IsHilited(int Line);
+    int IsRunning() const { return Running; }
     void UpdateList();
     int Activate(int No);
     int CanActivate(int Line);
@@ -95,9 +71,8 @@ public:
     virtual void GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen);
     virtual size_t GetRowLength(int ARow);
 
+    int RunPipe(const char *Dir, const char *Command);
 
-    int RunPipe(char *Dir, char *Command);
-    
     int CompilePrevError(EView *V);
     int CompileNextError(EView *V);
 };

@@ -12,6 +12,10 @@
 #ifndef FEATURE_H
 #define FEATURE_H
 
+#ifndef FTE_H
+#warning Use header file fte.h
+#endif
+
 #undef CONFIG_EMULATE_VI // todo
 
 #define CONFIG_CONFIGURABLE

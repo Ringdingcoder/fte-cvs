@@ -36,4 +36,4 @@ tags:
 	find . -name '*.cpp' -o -name '*.h' | xargs ctags -a
 
 clean:
-	$(RM) -f core *.o *~ cscope.out .depend defcfg.h defcfg.cnf tags
+	$(RM) -f core *.o *~ *.gch cscope.out .depend defcfg.h defcfg.cnf tags

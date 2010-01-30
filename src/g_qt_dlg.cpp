@@ -94,11 +94,11 @@ private:
 
 QChoiceBox::QChoiceBox(QWidget *parent, const char *name) :
     QDialog(parent, name, TRUE),
-    buttonSelected(-1),
+    label(new QLabel(this, "text")),
     buttonCount(0),
-    buttonActivated(-1),
     buttonArmed(-1),
-    label(new QLabel(this, "text"))
+    buttonSelected(-1),
+    buttonActivated(-1)
 {
     //initMetaObject();
 

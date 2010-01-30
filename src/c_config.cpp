@@ -7,11 +7,20 @@
  *
  */
 
-#include "fte.h"
+#include "c_config.h"
+
+#include "c_bind.h"
+#include "c_color.h"
+#include "c_fconfig.h"
 #include "ftever.h"
+#include "log.h"
+#include "o_buflist.h"
 #include "o_cvsbase.h"
 #include "o_svnbase.h"
-#include "log.h"
+#include "s_string.h"
+
+//#include <sys/stat.h>
+#include <fcntl.h>
 
 struct GUICharactersEntry {
     struct GUICharactersEntry *next;
@@ -573,16 +582,19 @@ static int ReadColors(CurPos &cp, const char *ObjName) {
         switch (obj) {
         case CF_STRING:
             {
-                char cl[30];
                 const char *sname = GetCharStr(cp, len);
                 const char *svalue;
                 if (sname == 0) return -1;
                 if ((obj = GetObj(cp, len)) != CF_STRING) return -1;
                 if ((svalue = GetCharStr(cp, len)) == 0) return -1;
-                strcpy(cl, ObjName);
-                strcat(cl, ".");
-                strcat(cl, sname);
-                if (SetColor(cl, svalue) == 0) return -1;
+
+                fte::string cl(ObjName);
+
+                cl += '.';
+                cl += sname;
+
+                if (SetColor(cl.c_str(), svalue) == 0)
+                   return -1;
             }
             break;
         case CF_END:
@@ -1143,7 +1155,7 @@ static int ReadConfigFile(CurPos &cp) {
                 if (ReadEventMap(cp, EventMap, MapName) == -1) return -1;
             }
             break;
-
+#ifdef CONFIG_SYNTAX_HILIT
         case CF_COLORIZE:
             {
                 EColorize *Mode = 0;
@@ -1165,7 +1177,7 @@ static int ReadConfigFile(CurPos &cp) {
                     return -1;
             }
             break;
-
+#endif
         case CF_MODE:
             {
                 EMode *Mode = 0;

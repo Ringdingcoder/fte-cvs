@@ -8,13 +8,14 @@
  * discard on view close.
  */
 
-#ifndef _CVSLOG_H_
-#define _CVSLOG_H_
+#ifndef E_CVSLOG_H
+#define E_CVSLOG_H
 
-#include "c_config.h"
 #include "e_buffer.h"
 
 #ifdef CONFIG_OBJ_CVS
+
+#include "c_config.h"
 
 class ECvsLog:public EBuffer {
     public:
@@ -47,6 +48,6 @@ class ECvsLog:public EBuffer {
 
 extern ECvsLog *CvsLogView;
 
-#endif
+#endif // CONFIG_OBJ_CVS
 
-#endif
+#endif // E_CVSLOG_H

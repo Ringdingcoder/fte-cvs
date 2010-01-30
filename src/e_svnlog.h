@@ -11,11 +11,9 @@
 #ifndef E_SVNLOG_H
 #define E_SVNLOG_H
 
-#include "fte.h"
+#include "e_buffer.h"
 
 #ifdef CONFIG_OBJ_SVN
-
-#include "e_buffer.h"
 
 class ESvnLog:public EBuffer {
     public:

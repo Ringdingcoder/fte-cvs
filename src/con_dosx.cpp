@@ -1018,7 +1018,7 @@ int GUI::ShowEntryScreen() {
 static void PipeThread(void *p) {
 }
 
-int GUI::OpenPipe(char *Command, EModel *notify) {
+int GUI::OpenPipe(const char *Command, EModel *notify) {
 #ifdef DJGPP
     int i;
 

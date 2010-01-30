@@ -1495,7 +1495,7 @@ int GPipe::getEvent(TEvent* event) /*FOLD00*/
  *
  *
  */
-int GUI::OpenPipe(char *Command, EModel *notify) /*FOLD00*/
+int GUI::OpenPipe(const char *Command, EModel *notify) /*FOLD00*/
 {
     GPipe*  gp;
 
@@ -1738,7 +1738,7 @@ static DWORD __stdcall PipeThread(void *p) {
     return 0;
 }
 
-int GUI::OpenPipe(char *Command, EModel *notify) {
+int GUI::OpenPipe(const char *Command, EModel *notify) {
     int i;
 
     for (i = 0; i < MAX_PIPES; i++) {

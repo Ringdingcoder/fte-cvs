@@ -991,7 +991,7 @@ static void _LNK_CONV PipeThread(void *p) {
     return;
 }
 
-int GUI::OpenPipe(char *Command, EModel *notify) {
+int GUI::OpenPipe(const char *Command, EModel *notify) {
     int i;
 
     for (i = 0; i < MAX_PIPES; i++) {

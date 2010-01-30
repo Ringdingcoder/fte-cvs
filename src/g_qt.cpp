@@ -1987,7 +1987,7 @@ int GUI::RunProgram(int mode, char *Command) {
         DEBUGX(("Pipe %d\n", *source));
 }
   */
-int GUI::OpenPipe(char *Command, EModel *notify) {
+int GUI::OpenPipe(const char *Command, EModel *notify) {
     int i;
     
     for (i = 0; i < MAX_PIPES; i++) {

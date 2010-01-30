@@ -76,7 +76,7 @@ int WaitFdPipeEvent(TEvent *Event, int fd, int WaitTime)
     return 0;
 }
 
-int GUI::OpenPipe(char *Command, EModel * notify)
+int GUI::OpenPipe(const char *Command, EModel * notify)
 {
     //fprintf(stderr, "PIPE  %s   \n", Command);
 #ifndef NO_PIPES

@@ -1824,7 +1824,7 @@ void PipeCallback(GPipe *pipe, int *source, XtInputId *input) {
     //fprintf(stderr, "Pipe %d\n", *source);
 }
 
-int GUI::OpenPipe(char *Command, EModel *notify) {
+int GUI::OpenPipe(const char *Command, EModel *notify) {
     int i;
 
     for (i = 0; i < MAX_PIPES; i++) {

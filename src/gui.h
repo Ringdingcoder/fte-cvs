@@ -141,7 +141,7 @@ public:
 
     int RunProgram(int mode, char *Command);
     
-    int OpenPipe(char *Command, EModel *notify);
+    int OpenPipe(const char *Command, EModel *notify);
     int SetPipeView(int id, EModel *notify);
     ssize_t ReadPipe(int id, void *buffer, size_t len);
     int ClosePipe(int id);

@@ -10,7 +10,8 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#include "feature.h"
+#include "fte.h"
+
 #include <sys/types.h>
 
 /* don't change these, used as index */

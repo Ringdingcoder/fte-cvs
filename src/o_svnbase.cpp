@@ -7,11 +7,19 @@
  * - starts SVN and shows its messages in list view.
  */
 
-#include "fte.h"
-#include "c_commands.h"
 #include "o_svnbase.h"
 
 #ifdef CONFIG_OBJ_SVN
+
+#include "c_commands.h"
+#include "i_view.h"
+#include "o_buflist.h"
+#include "s_files.h"
+#include "s_string.h"
+#include "s_util.h"
+#include "sysdep.h"
+
+#include <stdio.h>
 
 #define MAXREGEXP 32
 

@@ -7,7 +7,14 @@
  *
  */
 
-#include "fte.h"
+#include "o_model.h"
+
+#include "c_config.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "s_util.h"
+
+#include <stdio.h>
 
 EModel* ActiveModel = 0;
 

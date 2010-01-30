@@ -7,8 +7,12 @@
  *
  */
 
-#include "fte.h"
 #include "o_modemap.h"
+#include "s_string.h"
+#include "sysdep.h"
+
+#include <stdio.h>
+#include <string.h>
 
 EventMapView *TheEventMapView = 0;
 
@@ -86,15 +90,16 @@ void EventMapView::DumpMap(const char *aPrefix, EKeyMap *aKeyMap) {
 }
     
 void EventMapView::DumpEventMap(EEventMap *aEventMap) {
-    char name[256];
-    
     while (aEventMap) {
-        strcpy(name, aEventMap->Name);
+	fte::string name(aEventMap->Name);
+
         if (aEventMap->Parent) {
-            strcat(name, ": ");
-            strcat(name, aEventMap->Parent->Name);
+            name += ": ";
+            name += aEventMap->Parent->Name;
         }
-        AddLine(name);
+
+        AddLine(name.c_str());
+
         if (aEventMap->KeyMap)
             DumpMap(0, aEventMap->KeyMap);
         aEventMap = aEventMap->Parent;

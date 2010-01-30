@@ -48,7 +48,7 @@ int FileExists(const char *Path);
 int IsFullPath(const char *Path);
 int IsDirectory(const char *Path);
 const char *ShortFName(const char *Path, size_t len);
-int ChangeDir(char *Dir);
+int ChangeDir(const char *Dir);
 int JoinDirFile(char *Dest, const char *Dir, const char *Name);
 char *SepRChr(const char *Dir);
 int RelativePathName(const char *Dir, const char *Path, char *RelPath);

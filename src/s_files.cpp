@@ -460,16 +460,17 @@ const char *ShortFName(const char *Path, size_t len) {
 }
 
 
-int ChangeDir(char *Dir) {
-    Slash(Dir, 0); // remove last \ except in case of ?:
+int ChangeDir(const char *Dir) {
+    char dir[strlen(Dir) + 10];
+
+    strcpy(dir, Dir);
+    Slash(dir, 0); // remove last \ except in case of ?:
 #if PATHTYPE == PT_DOSISH
-    if (Dir[0] && Dir[1] == ':')
-        if (SetDrive(toupper(Dir[0]) - 'A' + 1) == -1)
+    if (dir[0] && dir[1] == ':')
+        if (SetDrive(toupper(dir[0]) - 'A' + 1) == -1)
             return -1;
 #endif
-    if (chdir(Dir) == -1)
-        return -1;
-    return 0;
+    return (chdir(dir) == 0) ? 0 : -1;
 }
 
 int JoinDirFile(char *Dest, const char *Dir, const char *Name) {

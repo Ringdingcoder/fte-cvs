@@ -7,7 +7,15 @@
  *
  */
 
-#include "fte.h"
+#include "c_config.h"
+#include "e_undo.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_buflist.h"
+#include "s_files.h"
+#include "s_util.h"
+
+#include <stdio.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Block Commands                                                            //

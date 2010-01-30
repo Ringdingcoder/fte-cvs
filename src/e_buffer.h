@@ -7,15 +7,14 @@
  *
  */
 
-#ifndef _BUFFER_H_
-#define _BUFFER_H_
-
-#include "gui.h"
-#include "o_model.h"
-#include "c_mode.h"
-#include "e_regex.h"
+#ifndef E_BUFFER_H
+#define E_BUFFER_H
 
 #include "c_hilit.h" // hlState
+#include "c_mode.h"
+#include "e_regex.h"
+#include "gui.h"
+#include "o_model.h"
 
 #include <sys/stat.h>
 
@@ -808,4 +807,4 @@ int ParseSearchOption(int replace, char c, unsigned long &opt);
 int ParseSearchOptions(int replace, const char *str, unsigned long &Options);
 int ParseSearchReplace(EBuffer *B, const char *str, int replace, SearchReplaceOptions &opt);
 
-#endif
+#endif // E_BUFFER_H

@@ -7,9 +7,15 @@
  *
  */
 
-#include "fte.h"
+
+#include "c_history.h"
 
 #ifdef CONFIG_HISTORY
+
+#include "o_buflist.h"
+#include "sysdep.h"
+
+#include <stdio.h>
 
 #define HISTORY_VER "FTE History 1\n"
 #define MAX_INPUT_HIST 128
@@ -453,10 +459,8 @@ int StoreBookmarks(EBuffer *buffer) { /*FOLD00*/
         }
     }
     // Should not get here
-    return 0;
-#else
-    return 0
 #endif
+    return 0;
 }
 
 #endif

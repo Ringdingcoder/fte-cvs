@@ -7,9 +7,14 @@
  *
  */
 
-#include "fte.h"
+#include "o_buflist.h"
 
 #ifdef CONFIG_SYNTAX_HILIT
+
+#include "sysdep.h"
+
+#include <stdio.h>
+
 static const struct {
     const char Name[8];
     int Num;

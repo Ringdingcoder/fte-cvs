@@ -7,7 +7,11 @@
  *
  */
 
-#include "fte.h"
+#include "c_bind.h"
+#include "c_config.h"
+
+#include <fcntl.h>
+#include <string.h>
 
 EBufferFlags DefaultBufferFlags = {
     {

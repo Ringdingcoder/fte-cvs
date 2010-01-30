@@ -7,7 +7,10 @@
  *
  */
 
-#include "fte.h"
+#include "egui.h"
+#include "i_modelview.h"
+#include "o_buflist.h"
+#include "s_util.h"
 
 int EBuffer::MoveLeft() {
     if (CP.Col == 0) return 0;
@@ -1276,7 +1279,12 @@ int EBuffer::ToggleAutoIndent() { TOGGLE(AutoIndent); }
 int EBuffer::ToggleInsert() { TOGGLE(Insert); }
 int EBuffer::ToggleExpandTabs() { TOGGLE_R(ExpandTabs); }
 int EBuffer::ToggleShowTabs() { TOGGLE_R(ShowTabs); }
-int EBuffer::ToggleUndo() { FreeUndo(); TOGGLE(Undo); }
+int EBuffer::ToggleUndo() {
+#ifdef CONFIG_UNDOREDO
+    FreeUndo();
+    TOGGLE(Undo);
+#endif
+}
 int EBuffer::ToggleReadOnly() { TOGGLE(ReadOnly); }
 int EBuffer::ToggleKeepBackups() { TOGGLE(KeepBackups); }
 int EBuffer::ToggleMatchCase() { TOGGLE(MatchCase); }
@@ -1316,10 +1324,12 @@ int EBuffer::ChangeMode(const char *AMode) {
     if (FindMode(AMode) != 0) {
         Mode = FindMode(AMode);
         Flags = Mode->Flags;
-        HilitProc = 0;
+#ifdef CONFIG_SYNTAX_HILIT
+	HilitProc = 0;
         if (Mode && Mode->fColorize)
             HilitProc = GetHilitProc(Mode->fColorize->SyntaxParser);
-        FullRedraw();
+#endif
+	FullRedraw();
         return 1;
     }
     Msg(S_ERROR, "Mode '%s' not found.", AMode);
@@ -1329,10 +1339,12 @@ int EBuffer::ChangeMode(const char *AMode) {
 int EBuffer::ChangeKeys(const char *AMode) {
     if (FindMode(AMode) != 0) {
         Mode = FindMode(AMode);
+#ifdef CONFIG_SYNTAX_HILIT
         HilitProc = 0;
         if (Mode && Mode->fColorize)
             HilitProc = GetHilitProc(Mode->fColorize->SyntaxParser);
-        FullRedraw();
+#endif
+	FullRedraw();
         return 1;
     }
     Msg(S_ERROR, "Mode '%s' not found.", AMode);
@@ -1344,10 +1356,12 @@ int EBuffer::ChangeFlags(const char *AMode) {
         EMode *XMode;
         XMode = FindMode(AMode);
         Flags = XMode->Flags;
+#ifdef CONFIG_SYNTAX_HILIT
         HilitProc = 0;
         if (Mode && Mode->fColorize)
             HilitProc = GetHilitProc(Mode->fColorize->SyntaxParser);
-        FullRedraw();
+#endif
+	FullRedraw();
         return 1;
     }
     Msg(S_ERROR, "Mode '%s' not found.", AMode);

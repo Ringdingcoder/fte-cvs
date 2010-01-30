@@ -7,7 +7,15 @@
  *
  */
 
-#include "fte.h"
+#include "i_view.h"
+
+#include "c_config.h"
+#include "i_ascii.h"
+#include "i_choice.h"
+#include "i_complete.h"
+#include "i_key.h"
+#include "o_buflist.h"
+#include "s_files.h"
 
 GxView::GxView(GFrame *Parent) :
     GView(Parent, -1, -1),

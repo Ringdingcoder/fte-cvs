@@ -10,7 +10,7 @@
 #ifndef S_DIRECT_H
 #define S_DIRECT_H
 
-#include "feature.h"
+#include "sysdep.h"
 #include <sys/types.h>
 
 // error handling needs some work

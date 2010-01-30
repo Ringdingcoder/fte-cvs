@@ -8,7 +8,11 @@
  *
  */
 
-#include "fte.h"
+#include "s_util.h"
+
+#include "o_buflist.h"
+#include "s_direct.h"
+#include "s_files.h"
 
 #define BUF_SZ (sizeof(FileBuffer))
 

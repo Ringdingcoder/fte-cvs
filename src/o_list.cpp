@@ -7,7 +7,15 @@
  *
  */
 
-#include "fte.h"
+#include "o_list.h"
+
+#include "c_color.h"
+#include "c_config.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_buflist.h"
+
+#include <stdio.h>
 
 EListPort::EListPort(EList *L, EView *V) :
     EViewPort(V),

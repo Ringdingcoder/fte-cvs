@@ -7,7 +7,7 @@
  *
  */
 
-#include "fte.h"
+#include "i_view.h"
 
 ExView::ExView() {
 }

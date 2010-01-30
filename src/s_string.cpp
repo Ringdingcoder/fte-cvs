@@ -1,4 +1,5 @@
-#include "fte.h"
+#include "s_string.h"
+
 #include <string.h>
 
 size_t UnTabStr(char *dest, size_t maxlen, const char *source, size_t slen) {

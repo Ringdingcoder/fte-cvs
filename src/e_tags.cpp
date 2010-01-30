@@ -6,9 +6,17 @@
  *
  */
 
-#include "fte.h"
+#include "e_tags.h"
 
 #ifdef CONFIG_TAGS
+
+#include "o_buflist.h"
+#include "s_files.h"
+#include "s_util.h"
+#include "sysdep.h"
+
+#include <fcntl.h>
+
 struct TagData {
     int Tag;        // tag name pos
     int FileName;

@@ -7,10 +7,24 @@
  *
  */
 
-#include "o_cvsdiff.h"
-#include "o_svndiff.h"
-#include "fte.h"
+#include "c_color.h"
+#include "c_config.h"
+#include "c_history.h"
+#include "e_mark.h"
+#include "e_tags.h"
+#include "e_undo.h"
 #include "ftever.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_cvsdiff.h"
+#include "o_messages.h"
+#include "o_svndiff.h"
+#include "s_files.h"
+#include "s_string.h"
+#include "s_util.h"
+
+#include <ctype.h>
+#include <time.h>
 
 SearchReplaceOptions LSearch;
 int suspendLoads = 0;

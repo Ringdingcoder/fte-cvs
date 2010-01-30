@@ -9,7 +9,14 @@
 
 // TODO: on OS/2 choose between UNIX and OS/2 style patterns (now OS/2 only)
 // TODO: on OS/2 fetch multiple entries at once and cache them for speed
-#include "fte.h"
+
+#include "s_direct.h"
+
+#include "s_files.h"
+
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #ifdef OS2
 #define INCL_BASE

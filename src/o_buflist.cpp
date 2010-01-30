@@ -7,7 +7,16 @@
  *
  */
 
-#include "fte.h"
+
+#include "o_buflist.h"
+
+#include "i_modelview.h"
+#include "i_view.h"
+#include "s_string.h"
+#include "s_util.h"
+#include "sysdep.h"
+
+#include <stdio.h>
 
 BufferView *BufferList = 0;
 

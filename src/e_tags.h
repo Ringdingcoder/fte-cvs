@@ -10,7 +10,7 @@
 #ifndef E_TAGS_H
 #define E_TAGS_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_TAGS
 

@@ -7,8 +7,17 @@
  *
  */
 
-#include "fte.h"
+#include "e_buffer.h"
+
+#include "c_bind.h"
+#include "c_config.h"
 #include "c_history.h"
+#include "e_mark.h"
+#include "e_undo.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_routine.h"
+#include "s_util.h"
 
 EBuffer *SSBuffer = 0; // scrap buffer (clipboard)
 
@@ -173,11 +182,15 @@ int EBuffer::Clear() {
 #ifdef CONFIG_UNDOREDO
     FreeUndo();
 #endif
+
+#ifdef CONFIG_FOLDS
     if (FCount != 0) {
         free(FF);
         FCount = 0;
         FF = 0;
     }
+#endif
+
     return 0;
 }
 
@@ -398,7 +411,7 @@ int EBuffer::UpdateMarker(int Type, int Row, int Col, int Rows, int Cols) {
         rlst.Lines[i] = M.Row;
     }
 #endif
-    
+#ifdef CONFIG_FOLDS
     for (int f = 0; f < FCount; f++) {
         EPoint M;
         
@@ -407,7 +420,7 @@ int EBuffer::UpdateMarker(int Type, int Row, int Col, int Rows, int Cols) {
         UpdateMark(M, Type, Row, Col, Rows, Cols);
         FF[f].line = M.Row;
     }
-    
+#endif
 #ifdef CONFIG_BOOKMARKS
     for (int b = 0; b < BMCount; b++)
         UpdateMark(BMarks[b].BM, Type, Row, Col, Rows, Cols);
@@ -603,11 +616,13 @@ int EBuffer::DelLine(int Row, int DoMark) {
         if (ExposeRow(Row) == 0) return 0;
     VLine = RToV(Row);
     assert(VLine != -1);
-    
+
+#ifdef CONFIG_FOLDS
     if (FindFold(Row) != -1) {
         if (FoldDestroy(Row) == 0) return 0;
     }
-    
+#endif
+
     VLine = RToV(Row);
     assert(VLine != -1);
     
@@ -978,7 +993,9 @@ int EBuffer::SplitLine(int Row, int Col) {
     } else {
         UpdateMarker(umSplitLine, Row, Col, 0, 0);
         if (InsLine(Row, 1, 0) == 0) return 0;
-        RLine(Row)->StateE = short((Row > 0) ? RLine(Row - 1)->StateE : 0);
+#ifdef CONFIG_SYNTAX_HILIT
+	RLine(Row)->StateE = short((Row > 0) ? RLine(Row - 1)->StateE : 0);
+#endif
         if (Col < LineLen(Row)) {
             int P, L;
             //if (RLine(Row)->ExpandTabs(Col, -2, &Flags) == 0) return 0;

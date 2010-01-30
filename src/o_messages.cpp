@@ -7,11 +7,20 @@
  *
  */
 
-#include "fte.h"
-#include "s_files.h"
-#include "c_commands.h"
+#include "o_messages.h"
 
 #ifdef CONFIG_OBJ_MESSAGES
+
+#include "c_commands.h"
+#include "c_config.h"
+#include "i_view.h"
+#include "o_buflist.h"
+#include "s_files.h"
+#include "s_string.h"
+#include "s_util.h"
+
+#include <stdio.h>
+
 #define MAXREGEXP  32
 
 EMessages *CompilerMsgs = 0;

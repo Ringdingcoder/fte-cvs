@@ -1,14 +1,10 @@
 
-#include "feature.h"
+#include "gui.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <assert.h>
 #include <stdarg.h>
-
-#include "console.h"
-#include "gui.h"
 
 int GFrame::isLastFrame() {
     if (this == Next && frames == this)

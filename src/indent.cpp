@@ -7,7 +7,6 @@
  *
  */
 
-#include "fte.h"
 #include "e_buffer.h"
 
 #ifdef CONFIG_INDENT_SIMPLE

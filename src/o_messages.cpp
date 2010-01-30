@@ -235,13 +235,12 @@ int EMessages::ExecCommand(ExCommands Command, ExState &State) {
 
 void EMessages::AddError(const char *file, int line, const char *msg, const char *text, int hilit) {
     ErrList.push_back(new Error(file, line, msg, text, hilit));
+    //fprintf(stderr, "Error %s %d %s %s\n", file, line, msg, text);
     FindErrorFile((unsigned)ErrList.size() - 1);
 
     if ((int)ErrList.size() > Count)
-        if (Row >= Count - 1) {
-            //if (ErrCount > 1 && !ErrList[TopRow]->file)
+        if (Row >= Count - 1)
 	    Row = (int)ErrList.size() - 1;
-        }
 
     UpdateList();
 }
@@ -374,39 +373,39 @@ void EMessages::GetErrors() {
         didmatch = 0;
         for (i = 0; i < NCRegexp; i++) {
             if (RxExec(CRegexp[i].rx, line, len, line, &RM) == 1) {
-                char ln[256];
-                char msg[256];
-                char fn1[256];
-                char fn2[256];
-                char *file;
+		char ln[256];
+		char msg[256];
+		char fn1[256];
+		char fn2[256];
+		char *file;
 
 		n = CRegexp[i].RefFile;
-                unsigned s = RM.Close[n] - RM.Open[n];
-		if (s < sizeof(fn) - 1)
-		    memcpy(fn, line + RM.Open[n], s++);
+		unsigned s = RM.Close[n] - RM.Open[n];
+		if (s < sizeof(fn))
+		    memcpy(fn, line + RM.Open[n], s);
 		else
-                    s = 0;
+		    s = 0;
 		fn[s] = 0;
 
 		n = CRegexp[i].RefLine;
-                s = RM.Close[n] - RM.Open[n];
-                if (s < sizeof(ln) - 1)
-		    memcpy(ln, line + RM.Open[n], s++);
+		s = RM.Close[n] - RM.Open[n];
+		if (s < sizeof(ln))
+		    memcpy(ln, line + RM.Open[n], s);
 		else
 		    s = 0;
 		ln[s] = 0;
 
 		n = CRegexp[i].RefMsg;
-                s = RM.Close[n] - RM.Open[n];
-                if (s < sizeof(msg) - 1)
-		    memcpy(msg, line + RM.Open[n], s++);
+		s = RM.Close[n] - RM.Open[n];
+		if (s < sizeof(msg))
+		    memcpy(msg, line + RM.Open[n], s);
 		else
 		    s = 0;
-                msg[s] = 0;
+		msg[s] = 0;
 
-                if (IsFullPath(fn))
-                    file = fn;
-                else {
+		if (IsFullPath(fn))
+		    file = fn;
+		else {
 		    strlcpy(fn1, curr_dir ? curr_dir->name.c_str() : Directory.c_str(), sizeof(fn1));
                     Slash(fn1, 1);
                     strlcat(fn1, fn, sizeof(fn1));
@@ -447,7 +446,7 @@ void EMessages::GetErrors() {
                     //dbg("entering %s", fn);
                     
                     if (*fn)
-                        //** Indeedy entering directory! Link in list,
+                        //** Indeed entering directory! Link in list,
                         curr_dir = new aDir(fn, curr_dir);
                 } else if (strnicmp(pin, t2, sizeof(t2)-1) == 0) {  // Leaving?
                     pin += sizeof(t2)-1;

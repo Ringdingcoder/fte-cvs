@@ -10,7 +10,7 @@
 #ifndef C_DESKTOP_H
 #define C_DESKTOP_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_DESKTOP
 

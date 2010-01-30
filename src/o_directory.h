@@ -9,7 +9,7 @@
 #ifndef O_DIRECTORY_H
 #define O_DIRECTORY_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_OBJ_DIRECTORY
 

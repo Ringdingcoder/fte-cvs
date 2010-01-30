@@ -10,29 +10,7 @@
 #ifndef SYSDEP_H
 #define SYSDEP_H
 
-#include "feature.h"
-
-#if 1
-#include <assert.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#if defined(AIX) || defined(SCO) || defined(NCR)
-#include <strings.h>
-#endif
-#include <fcntl.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <time.h>
-
-#endif // 0
-
-#ifdef DBMALLOC
-#include <malloc.h>
-#endif
+#include "fte.h"
 
 #if !defined(OS2) && \
     !defined(NT) && \
@@ -45,6 +23,17 @@
     !defined(SUNOS) && \
     !defined(NCR)
 #    error Target not supported.
+#endif
+
+
+#include <stdlib.h>
+
+#if defined(AIX) || defined(SCO) || defined(NCR)
+#include <strings.h>
+#endif
+
+#ifdef DBMALLOC
+#include <malloc.h>
 #endif
 
 #if defined(UNIX) || defined(DJGPP)

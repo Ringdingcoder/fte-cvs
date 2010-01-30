@@ -9,7 +9,7 @@
 #ifndef C_HISTORY_H
 #define C_HISTORY_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_HISTORY
 

@@ -10,8 +10,8 @@
 #ifndef C_HILIT_H
 #define C_HILIT_H
 
-#include "console.h"
 #include "c_mode.h"
+#include "console.h"
 #include "e_regex.h"
 
 #include <sys/types.h>
@@ -21,6 +21,8 @@ class ELine;
 
 typedef unsigned short hlState;
 typedef unsigned char hsState;
+
+#define CK_MAXLEN 64
 
 #define HILIT_P(proc) \
     int proc(EBuffer *BF, int LN, PCell B, int Pos, int Width, ELine *Line, hlState &State, hsState *StateMap, int *ECol)
@@ -154,8 +156,6 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
     continue;\
     }
 
-#define CK_MAXLEN 64
-
 static inline bool isZeroArray(int* Count, size_t len)
 {
     for (unsigned i = 0; i < len; ++i)
@@ -240,6 +240,6 @@ int LookAt(EBuffer *B, int Row, unsigned int Pos, const char *What, hsState Stat
 inline int LookAtNoCase(EBuffer *B, int Row, unsigned int Pos, const char *What, hsState State, int NoWord = 1)
 { return LookAt(B, Row, Pos, What, State, NoWord, 1); }
 
-#endif
+#endif // CONFIG_SYNTAX_HILIT
 
 #endif // C_HILIT_H

@@ -7,14 +7,27 @@
  *
  */
 
+#include "c_color.h"
+#include "c_history.h"
 #include "e_cvslog.h"
+#include "e_mark.h"
+#include "e_svnlog.h"
+#include "e_tags.h"
+#include "ftever.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_buflist.h"
 #include "o_cvs.h"
 #include "o_cvsdiff.h"
-#include "e_svnlog.h"
+#include "o_directory.h"
+#include "o_messages.h"
+#include "o_modemap.h"
+#include "o_routine.h"
 #include "o_svn.h"
 #include "o_svndiff.h"
-#include "fte.h"
-#include "ftever.h"
+#include "s_files.h"
+#include "s_string.h"
+#include "s_util.h"
 
 EView *ActiveView = 0;
 

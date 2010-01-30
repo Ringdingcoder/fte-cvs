@@ -11,12 +11,10 @@
 #define GUI_H
 
 #include "console.h"
+
 #include <stdarg.h>
 #include <sys/types.h>
 #include <string.h>
-
-#define RUN_WAIT 0
-#define RUN_ASYNC 1
 
 class GFramePeer;
 class GViewPeer;
@@ -116,6 +114,11 @@ public:
 
 class GUI {
 public:
+    enum {
+	RUN_WAIT,
+	RUN_ASYNC
+    };
+
     GUI(int &argc, char **argv, int XSize, int YSize);
     virtual ~GUI();
     

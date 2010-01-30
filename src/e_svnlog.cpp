@@ -13,10 +13,10 @@
 #ifdef CONFIG_OBJ_SVN
 
 #include "c_config.h"
-#include "o_svn.h"
 #include "i_view.h"
-#include "sysdep.h"
+#include "o_svn.h"
 #include "s_string.h"
+#include "sysdep.h"
 
 #include <stdio.h>
 

@@ -7,7 +7,11 @@
  *
  */
 
-#include "fte.h"
+#include "c_mode.h"
+#include "o_routine.h"
+
+#include <string.h>
+#include <stdio.h>
 
 ChColor MsgColor[3] = { 0x07, 0x0B, 0x04 };
 

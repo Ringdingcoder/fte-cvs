@@ -11,7 +11,7 @@
 #ifndef E_SVNLOG_H
 #define E_SVNLOG_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_OBJ_SVN
 

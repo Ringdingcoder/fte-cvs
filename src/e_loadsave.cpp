@@ -7,7 +7,16 @@
  *
  */
 
-#include "fte.h"
+#include "e_cvslog.h"
+#include "e_svnlog.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "s_util.h"
+
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
 
 int EBuffer::Load() {
     return LoadFrom(FileName);

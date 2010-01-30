@@ -7,7 +7,8 @@
  *
  */
 
-#include "fte.h"
+#include "i_modelview.h"
+#include "o_routine.h"
 
 ExModelView::ExModelView(EView *AView) :
     ExView(),

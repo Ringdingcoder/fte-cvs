@@ -7,7 +7,14 @@
  *
  */
 
-#include "fte.h"
+#include "c_color.h"
+#include "c_config.h"
+#include "c_history.h"
+#include "i_view.h"
+#include "o_buflist.h"
+#include "s_util.h"
+
+#include <ctype.h>
 
 ExInput::ExInput(const char *APrompt, char *ALine, size_t ABufLen, Completer AComp, int Select, int AHistId): ExView() {
     assert(ABufLen > 0);

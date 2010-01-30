@@ -7,7 +7,14 @@
  *
  */
 
-#include "fte.h"
+#include "i_choice.h"
+
+#include "c_color.h"
+#include "i_view.h"
+#include "sysdep.h"
+
+#include <ctype.h>
+#include <stdio.h>
 
 ExChoice::ExChoice(const char *ATitle, int NSel, va_list ap) :
     ExView(),

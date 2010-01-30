@@ -7,9 +7,11 @@
  *
  */
 
-#include "fte.h"
+#include "i_ascii.h"
 
 #ifdef CONFIG_I_ASCII
+
+#include "c_color.h"
 
 static int SPos = 0;
 static int SLPos = 0;

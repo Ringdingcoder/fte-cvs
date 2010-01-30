@@ -7,9 +7,14 @@
  *
  */
 
-#include "fte.h"
+#include "i_complete.h"
 
 #ifdef CONFIG_I_COMPLETE
+
+#include "e_tags.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #define STRCOMPLETE "Complete Word: ["
 #define STRNOCOMPLETE "No word for completition..."

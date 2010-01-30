@@ -1,9 +1,10 @@
 #include "stl_fte.h"
-#include <string.h>
+
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
+#include <string.h>
 
 FTE_BEGIN_NAMESPACE;
 

@@ -6,10 +6,16 @@
  *    License or the Artistic License, as specified in the README file.
  *
  */
-#include "fte.h"
+
+#include "c_config.h"
+#include "c_desktop.h"
+#include "c_history.h"
+#include "egui.h"
 #include "ftever.h"
 #include "log.h"
-#include "c_history.h"
+#include "s_files.h"
+#include "s_string.h"
+
 #ifdef USE_LOCALE
 #include <locale.h>
 #endif

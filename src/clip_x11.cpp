@@ -7,7 +7,8 @@
  *
  */
 
-#include "fte.h"
+#include "o_buflist.h"
+#include "sysdep.h"
 
 int GetXSelection(int *len, char **data, int clipboard);
 int SetXSelection(int len, char *data, int clipboard);

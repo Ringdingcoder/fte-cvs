@@ -12,9 +12,12 @@
 
 #ifdef CONFIG_OBJ_CVS
 
+#include "i_view.h"
 #include "o_cvs.h"
-#include "fte.h"
+#include "s_string.h"
 #include "sysdep.h"
+
+#include <stdio.h>
 
 ECvsLog *CvsLogView;
 

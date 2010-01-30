@@ -7,7 +7,8 @@
  *
  */
 
-#include "fte.h"
+#include "o_buflist.h"
+#include "sysdep.h"
 
 ELine::ELine(size_t ACount, const char *AChars) :
     Count(ACount),

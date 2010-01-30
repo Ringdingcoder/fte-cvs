@@ -1,5 +1,8 @@
-#include "fte.h"
 #include "e_mark.h"
+#include "s_util.h"
+#include "sysdep.h"
+
+#include <ctype.h>
 
 EMarkIndex markIndex;
 

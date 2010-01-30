@@ -9,7 +9,9 @@
 
 // Win32 (NT) specific routines
 
-#include "fte.h"
+#include "c_bind.h"
+#include "o_model.h"
+#include "sysdep.h"
 
 int EView::SysShowHelp(ExState &State, const char *word) {
     char file[MAXPATH] = "";

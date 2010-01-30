@@ -7,7 +7,13 @@
  *
  */
 
-#include "fte.h"
+#include "e_undo.h"
+
+#include "o_buflist.h"
+#include "s_util.h"
+#include "sysdep.h"
+
+#include <stdio.h>
 
 int EBuffer::NextCommand() {
     if (Match.Row != -1) {

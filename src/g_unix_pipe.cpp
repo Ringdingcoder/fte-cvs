@@ -3,6 +3,8 @@
 #include "console.h"
 #include "gui.h"
 
+#include <assert.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <sys/wait.h>
 #include <stdio.h>

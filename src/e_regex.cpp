@@ -7,17 +7,15 @@
  *
  */
 
-#include "feature.h"
+#include "e_regex.h"
+
+#include "sysdep.h"
 
 #include <assert.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#if defined(MSVC)
-#include <malloc.h>
-#endif
-#include "e_regex.h"
 
 //#define DEBUG
 

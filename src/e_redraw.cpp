@@ -7,7 +7,13 @@
  *
  */
 
-#include "fte.h"
+#include "c_bind.h"
+#include "c_color.h"
+#include "c_config.h"
+#include "e_tags.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_buflist.h"
 
 int EBuffer::GetMap(int Row, int *StateLen, hsState **StateMap) {
     hlState State = 0;

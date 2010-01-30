@@ -7,29 +7,16 @@
  *
  */
 
-#include "feature.h"
-#include "console.h"
-#include "gui.h"
-#include "c_mode.h"
 #include "c_color.h"
+#include "c_mode.h"
+#include "gui.h"
+#include "sysdep.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <assert.h>
 #include <signal.h>
 #include <stdarg.h>
-#if defined(MSVC)
-#include <malloc.h>
-#endif
-
-
-#if defined(_DEBUG) && defined(MSVC) && defined(MSVCDEBUG)
-#include <crtdbg.h>
-
-#define new new( _CLIENT_BLOCK, __FILE__, __LINE__)
-
-#endif //_DEBUG && MSVC && MSVCDEBUG
+#include <stdio.h>
+#include <string.h>
 
 
 int ShowVScroll = 1;

@@ -7,7 +7,12 @@
  *
  */
 
-#include "fte.h"
+#include "c_history.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_buflist.h"
+#include "s_util.h"
+
 #include <ctype.h>
 
 // FLAW: NULL characters can not be translated, need escaping

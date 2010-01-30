@@ -7,7 +7,15 @@
  *
  */
 
-#include "fte.h"
+#include "c_history.h"
+#include "e_tags.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_buflist.h"
+#include "s_util.h"
+#include "sysdep.h"
+
+#include <ctype.h>
 
 int ParseSearchOption(int replace, char c, unsigned long &opt) {
     switch (tolower(c)) {

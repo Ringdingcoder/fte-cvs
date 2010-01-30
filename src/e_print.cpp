@@ -7,7 +7,11 @@
  *
  */
 
-#include "fte.h"
+#include "c_config.h"
+#include "o_buflist.h"
+#include "s_util.h"
+
+#include <stdio.h>
 
 int EBuffer::BlockPrint() {
     const char cr = 13;

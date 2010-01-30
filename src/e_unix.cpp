@@ -9,14 +9,23 @@
 
 // UNIX specific routines
 
-#include "fte.h"
+#include "c_bind.h"
+#include "c_config.h"
+#include "c_history.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_buflist.h"
+#include "s_util.h"
 
 #ifdef WINNT
 #include "e_win32.cpp"
 #else
 
-#include <sys/wait.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
+#include <stdio.h>
+#include <sys/wait.h>
 
 int EView::SysShowHelp(ExState &State, const char *word) {
     char options[128] = "";

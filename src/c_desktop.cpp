@@ -7,9 +7,18 @@
  *
  */
 
-#include "fte.h"
-#include "c_commands.h"
+#include "c_desktop.h"
+
 #ifdef CONFIG_DESKTOP
+
+#include "c_commands.h"
+#include "e_cvslog.h"
+#include "e_mark.h"
+#include "e_tags.h"
+#include "o_directory.h"
+#include "s_util.h"
+
+#include <ctype.h>
 
 #define DESKTOP_VER "FTE Desktop 2\n"
 #define DESKTOP_VER1 "FTE Desktop 1\n"
@@ -129,12 +138,13 @@ int LoadDesktop(const char *FileName) {
                     suspendLoads  = 0;
                 }
             }
-        } else {
+        } else
 #ifdef CONFIG_TAGS
-            if (line[0] == 'T' && line[1] == '|') { // tag file
+            if (line[0] == 'T' && line[1] == '|') // tag file
                 TagsAdd(line + 2);
+            else
 #endif
-            } else if (line[0] == 'M' && line[1] == '|') { // mark
+                if (line[0] == 'M' && line[1] == '|') { // mark
                 char *name;
                 char *file;
                 EPoint P;
@@ -160,7 +170,6 @@ int LoadDesktop(const char *FileName) {
                 file = p;
 
                 markIndex.insert(name, file, P);
-            }
         }
     }
     return (fclose(fp) == 0) ? ErOK : ErFAIL;

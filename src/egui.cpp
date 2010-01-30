@@ -7,7 +7,25 @@
  *
  */
 
-#include "fte.h"
+#include "egui.h"
+
+#include "c_bind.h"
+#include "c_config.h"
+#include "c_desktop.h"
+#include "c_history.h"
+#include "e_buffer.h"
+#include "e_tags.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "o_cvsbase.h"
+#include "o_directory.h"
+#include "o_messages.h"
+#include "o_svnbase.h"
+#include "s_files.h"
+#include "s_string.h"
+#include "s_util.h"
+
+#include <stdio.h>
 
 int LastEventChar = -1;
 
@@ -185,15 +203,21 @@ int EGUI::ExecMacro(GxView *view, int Macro) {
 }
 
 void EGUI::SetMsg(const char *Msg) {
-    char CharMap[128] = "";
+    char *CharMap;
+    size_t len = Msg ? strlen(Msg) + 3 : 1;
 
-    if (Msg) {
-        strcat(CharMap, "[");
-        strcat(CharMap, Msg);
-        strcat(CharMap, "]");
+    if ((CharMap = (char*)alloca(len))) {
+        if (Msg) {
+            CharMap[0] = '[';
+            memcpy(CharMap + 1, Msg, len);
+            CharMap[len + 1] = ']';
+            CharMap[len + 2] = 0;
+        } else
+            CharMap[0] = 0;
+
+        if (ActiveModel)
+            ActiveModel->Msg(S_INFO, CharMap);
     }
-    if (ActiveModel)
-	ActiveModel->Msg(S_INFO, CharMap);
 }
 
 void EGUI::SetOverrideMap(EKeyMap *aMap, const char *ModeName) {
@@ -848,20 +872,24 @@ int EGUI::CmdLoadFiles(int &argc, char **argv) {
                     strcpy(Mode, argv[Arg] + 2);
 		}
                 break;
+#ifdef CONFIG_TAGS
 	    case 'T': TagsAdd(argv[Arg] + 2); break;
 	    case 't': TagGoto(ActiveView, argv[Arg] + 2); break;
+#endif
 	    default:
 		DieError(2, "Invalid command line option %s", argv[Arg]);
                 return 0;
 	    }
         } else {
-            char Path[MAXPATH];
-
             QuoteNext = 0;
+#ifdef CONFIG_OBJ_DIRECTORY
+            char Path[MAXPATH];
             if (ExpandPath(argv[Arg], Path, sizeof(Path)) == 0 && IsDirectory(Path)) {
                 EModel *m = new EDirectory(cfAppend, &ActiveModel, Path);
                 assert(ActiveModel != 0 && m != 0);
-            } else {
+            } else
+#endif
+            {
                 if (LCount != 0)
                     suspendLoads = 1;
                 if (MultiFileLoad(cfAppend, argv[Arg],
@@ -935,7 +963,7 @@ int EGUI::Start(int &argc, char **argv) {
         assert(ActiveModel != 0 && m != 0);
         ActiveView->SwitchToModel(ActiveModel);
 #else
-        Usage();
+        // FIXME Usage();
         return 1;
 #endif
     }
@@ -1007,11 +1035,13 @@ void EGUI::Stop() {
         Macros = 0;
     }
 
+#ifdef CONFIG_SYNTAX_HILIT
     // free colorizers
     while (EColorize *p = Colorizers) {
 	Colorizers = Colorizers->Next;
 	delete p;
     }
+#endif
 
     // free event maps
     while (EEventMap *em = EventMaps) {
@@ -1054,8 +1084,11 @@ void EGUI::Stop() {
     extern RxNode *CompletionFilter;
     RxFree(CompletionFilter);
 
+#ifdef CONFIG_OBJ_MESSAGES
     // free CRegexp array from o_messages.cpp
     FreeCRegexp();
+#endif
+
 #ifdef CONFIG_OBJ_CVS
     // free CvsIgnoreRegexp array from o_messages.cpp
     FreeCvsIgnoreRegexp();

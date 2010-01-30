@@ -10,7 +10,7 @@
  */
 
 
-#include "feature.h"
+#include "fte.h"
 #include "con_i18n.h"
 
 #include <X11/Xlocale.h>

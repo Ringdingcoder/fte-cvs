@@ -7,36 +7,32 @@
  *
  */
 
-#include "sysdep.h"
-#include "console.h"
 #include "gui.h"
 #include "s_string.h"
+#include "sysdep.h"
 
-#include <qwidget.h>
-#include <qframe.h>
 #include <qapp.h>
+#include <qclipbrd.h>
+#include <qframe.h>
+#include <qkeycode.h>
 #include <qmenubar.h>
+#include <qpainter.h>
 #include <qscrbar.h>
 #include <qtimer.h>
-#include <qpainter.h>
-#include <qkeycode.h>
-#include <qclipbrd.h>
+#include <qwidget.h>
 //#include <qfiledlg.h> // conflicts with <Xlib.h> above
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <assert.h>
-#include <stdarg.h>
 #include <fcntl.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #define DEBUGX(x)
 //#define DEBUGX(x) printf x

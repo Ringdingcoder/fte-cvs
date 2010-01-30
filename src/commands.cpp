@@ -7,8 +7,9 @@
  *
  */
 
-#include "fte.h"
 #include "o_model.h"
+#include "s_files.h"
+#include "sysdep.h"
 
 int GetDefaultDirectory(EModel *M, char *Path, size_t MaxLen) {
     if (M) 

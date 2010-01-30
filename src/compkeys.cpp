@@ -8,9 +8,8 @@
  *
  */
 
-#include "fte.h"
-#include "console.h"
 #include "conkbd.h"
+#include "console.h"
 
 #include <stdio.h>
 #include <stdlib.h>

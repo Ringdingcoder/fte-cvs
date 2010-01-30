@@ -10,7 +10,7 @@
 #ifndef O_SVNBASE_H
 #define O_SVNBASE_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_OBJ_SVN
 

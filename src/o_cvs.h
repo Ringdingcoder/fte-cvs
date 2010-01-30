@@ -9,7 +9,7 @@
 #ifndef O_CVS_H
 #define O_CVS_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_OBJ_CVS
 

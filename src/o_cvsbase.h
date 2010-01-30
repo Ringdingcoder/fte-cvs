@@ -10,7 +10,7 @@
 #ifndef O_CVSBASE_H
 #define O_CVSBASE_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_OBJ_CVS
 

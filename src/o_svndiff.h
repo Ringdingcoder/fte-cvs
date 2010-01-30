@@ -10,7 +10,7 @@
 #ifndef O_SVNDIFF_H
 #define O_SVNDIFF_H
 
-#include "feature.h"
+#include "fte.h"
 
 #ifdef CONFIG_OBJ_SVN
 

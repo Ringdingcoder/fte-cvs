@@ -7,13 +7,16 @@
  *
  */
 
-#include "fte.h"
-#include "log.h"
-#include "s_files.h"
-#include "s_util.h"
 #include "o_directory.h"
+
 #include "c_commands.h"
 #include "c_history.h"
+#include "i_modelview.h"
+#include "i_view.h"
+#include "log.h"
+#include "s_files.h"
+#include "s_string.h"
+#include "s_util.h"
 
 #ifdef CONFIG_OBJ_DIRECTORY
 EDirectory::EDirectory(int createFlags, EModel **ARoot, char *aPath) :

@@ -10,9 +10,14 @@
 #ifndef O_MESSAGES_H
 #define O_MESSAGES_H
 
+#include "fte.h"
+
 #ifdef CONFIG_OBJ_MESSAGES
 
+#include "o_list.h"
 #include "stl_fte.h"
+
+class EBuffer;
 
 struct Error {
     fte::string file;

@@ -7,17 +7,17 @@
  *
  */
 
-#include "feature.h"
-#include "ftever.h"
-#include "sysdep.h"
 #include "c_fconfig.h"
-#include "s_files.h"
-#include "s_string.h"
+#include "c_hilit.h"
 #include "c_mode.h"
 #include "console.h"
-#include "c_hilit.h"
+#include "ftever.h"
+#include "s_files.h"
+#include "s_string.h"
+#include "sysdep.h"
 
-#include "fte.h"
+#include "c_commands.h"
+#include "c_cmdtab.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -48,8 +48,6 @@ static char XTarget[MAXPATH] = "";
 static char StartDir[MAXPATH] = "";
 static bool preprocess_only = false;
 
-#include "c_commands.h"
-#include "c_cmdtab.h"
 
 struct CurPos {
     off_t sz;

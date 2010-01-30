@@ -413,33 +413,32 @@ EEventMap *ECvsBase::GetEventMap () {
 }
 
 // Shown in "Closing xxx..." message when closing model
-void ECvsBase::GetName (char *AName, size_t MaxLen) {
-    strncpy (AName,Title,MaxLen);
+void ECvsBase::GetName(char *AName, size_t MaxLen) {
+    strlcpy(AName, Title, MaxLen);
 }
 
 // Shown in buffer list
 void ECvsBase::GetInfo (char *AInfo, size_t MaxLen) {
     char format[128];
 
-    sprintf (format,"%2d %04d/%03d %s (%%.%is) ",ModelNo,Row,Count,Title,(int)(MaxLen-24-strlen (Title)));
-    sprintf (AInfo,format,Command);
+    sprintf(format, "%2d %04d/%03d %s (%%.%is) ",
+	    ModelNo, Row, Count, Title, (int)(MaxLen - 24 - strlen(Title)));
+    snprintf(AInfo, MaxLen, format, Command);
 }
 
 // Used to get default directory of model
-void ECvsBase::GetPath (char *APath, size_t MaxLen) {
-    strncpy (APath,Directory,MaxLen);
-    APath[MaxLen-1]=0;
-    Slash (APath,0);
+void ECvsBase::GetPath(char *APath, size_t MaxLen) {
+    strlcpy(APath, Directory, MaxLen);
+    Slash(APath, 0);
 }
 
 // Normal and short title (normal for window, short for icon in X)
 void ECvsBase::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
     char format[128];
 
-    sprintf (format,"%s: %%.%is",Title,(int)(MaxLen-4-strlen (Title)));
-    sprintf (ATitle,format,Command);
-    strncpy (ASTitle,Title,SMaxLen);
-    ASTitle[SMaxLen-1]=0;
+    sprintf(format,"%s: %%.%is", Title, (int)(MaxLen - 4 - strlen(Title)));
+    sprintf(ATitle, format, Command);
+    strlcpy(ASTitle, Title, SMaxLen);
 }
 
 #endif

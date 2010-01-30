@@ -157,7 +157,15 @@ LDFLAGS  = $(OPTIMIZE) $(LIBDIRS)
 OEXT     = o
 include objs.inc
 
-SRCS = $(OBJS:.o=.cpp)
+COBJS = cfte.o s_files.o s_string.o
+
+SRCS = $(OBJS:.o=.cpp)\
+ $(COBJS:.o=.cpp)\
+ $(QOBJS:.o=.cpp)\
+ $(NOBJS:.o=.cpp)\
+ $(SOBJS:.o=.cpp)\
+ $(VOBJS:.o=.cpp)\
+ $(XOBJS:.o=.cpp)
 
 # Need -lXt below if USE_XTINIT is defined
 XLIBS    = $(XLIBDIR) -lX11 $(SOCKETLIB) $(XPMLIB)
@@ -179,8 +187,8 @@ QLIBS    = $(QLIBDIR) -lqt-mt
 
 all:    cfte $(TARGETS)
 
-cfte: cfte.o s_files.o s_string.o
-	$(LD) -o $@ $(LDFLAGS) cfte.o s_files.o s_string.o
+cfte:   $(COBJS)
+	$(LD) -o $@ $(LDFLAGS) $(COBJS)
 
 c_config.o: defcfg.h
 

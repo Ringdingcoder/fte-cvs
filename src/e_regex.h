@@ -34,10 +34,14 @@
  * \x##         Match character with ASCII code ## (hex)
  * \N###        Match ascii code ### (dec)
  * \o###        Match ascii code
- * \a           Match \a              \r           Match 0x13 (cr)
- * \b           Match \b              \t           Match 0x09 (tab)
- * \f           Match \f              \v           Match \v
- * \n           Match 0x10 (lf)       \e           Match escape (^E)
+ * \a           Match \a
+ * \b           Match \b
+ * \f           Match \f
+ * \n           Match 0x0a (lf)
+ * \r           Match 0x0d (cr)
+ * \t           Match 0x09 (tab)
+ * \v           Match \v
+ * \e           Match escape (^E)
  * \s           Match whitespace (cr/lf/tab/space)
  * \S           Match nonwhitespace (!\S)
  * \w           Match word character

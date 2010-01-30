@@ -6,16 +6,14 @@
  *    License or the Artistic License, as specified in the README file.
  *
  */
-#include "feature.h"
 
-#include "sysdep.h"
 #include "c_config.h"
-#include "console.h"
-#include "gui.h"
 #include "con_tty.h"
-#include "s_string.h"
+#include "gui.h"
 #include "o_model.h"  // Msg
+#include "s_string.h"
 #include "s_util.h"  // S_ERROR
+#include "sysdep.h"
 
 #include <ncurses.h>
 //#include <unistd.h>

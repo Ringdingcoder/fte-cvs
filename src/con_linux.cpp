@@ -27,31 +27,30 @@
 
 // ... some more comments below
 
-#include "feature.h"
-#include "fte.h"
-#include "sysdep.h"
 #include "c_config.h"
 #include "console.h"
 #include "gui.h"
+#include "sysdep.h"
 
-#include <signal.h>
 #include <assert.h>
-#include <termios.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/vt.h>
-#include <sys/kd.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
 #include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/kd.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/vt.h>
+#include <sys/wait.h>
+#include <termios.h>
+#include <unistd.h>
+
 #include <linux/tty.h>
 #include <linux/major.h>
 #include <linux/kdev_t.h>

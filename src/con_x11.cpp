@@ -8,16 +8,13 @@
  *    I18N & XMB support added by kabi@users.sf.net
  */
 
-#include "fte.h"
-#include "sysdep.h"
 #include "c_config.h"
-#include "console.h"
-#include "s_files.h"
-#include "s_util.h"
-#include "s_string.h"
-#include "gui.h"
-
 #include "con_i18n.h"
+#include "gui.h"
+#include "s_files.h"
+#include "s_string.h"
+#include "s_util.h"
+#include "sysdep.h"
 
 #include <X11/Xproto.h>
 #include <X11/Xatom.h>

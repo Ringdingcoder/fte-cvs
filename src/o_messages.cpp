@@ -58,7 +58,7 @@ static struct {
 } CRegexp[MAXREGEXP];
 
 int AddCRegexp(int file, int line, int msg, const char *regexp) {
-    //fprintf(stderr, "ADD EXP %s   %d %d %d\n", regexp, file, line, msg);
+    //fprintf(stderr, "ADD EXP %d: %s   %d %d %d\n", NCRegexp, regexp, file, line, msg);
     if (NCRegexp >= MAXREGEXP) return 0;
     CRegexp[NCRegexp].RefFile = file;
     CRegexp[NCRegexp].RefLine = line;
@@ -402,7 +402,7 @@ void EMessages::GetErrors() {
 		else
 		    s = 0;
 		msg[s] = 0;
-
+		//fprintf(stderr, "File:%s msg:%s rex:%d c:%d o:%d>%s<8\nTXT:%s\n", fn, ln, i, RM.Close[n], RM.Open[n], msg, line);
 		if (IsFullPath(fn))
 		    file = fn;
 		else {

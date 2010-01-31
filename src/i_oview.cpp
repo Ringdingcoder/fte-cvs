@@ -9,7 +9,10 @@
 
 #include "i_view.h"
 
-ExView::ExView() {
+ExView::ExView() :
+    Win(0),
+    Next(0)
+{
 }
 
 ExView::~ExView() {

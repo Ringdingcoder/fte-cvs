@@ -124,7 +124,6 @@ static volatile int ScreenSizeChanged;
 static void sigwinch_handler(int sig)
 {
     ScreenSizeChanged = 1;
-    SLsignal(SIGWINCH, sigwinch_handler);
 }
 
 int ConInit(int /*XSize */ , int /*YSize */ )
@@ -138,7 +137,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 	return -1;
     }
 
-    SLsignal(SIGWINCH, sigwinch_handler);
+    SLsignal_intr(SIGWINCH, sigwinch_handler);
     if (SLsmg_init_smg() == -1) {
 	SLang_reset_tty();
 	return -1;
@@ -147,7 +146,8 @@ int ConInit(int /*XSize */ , int /*YSize */ )
     SLang_set_abort_signal(NULL);
     SLtty_set_suspend_state(0);
 
-    for (unsigned i = 0; i < 128; ++i)
+    /* skip modification of color 0 and 0x7f */
+    for (unsigned i = 1; i < 127; ++i)
 	SLtt_set_color(i, NULL, const_cast<char *>(slang_colors[i & 0x0f]),
 		       const_cast<char *>(slang_colors[(i >> 4) & 0x07]));
 
@@ -158,7 +158,6 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 
     SLsmg_gotorc(0, 0);
     SLsmg_read_raw(raw_dchs, sizeof(slang_dchs));
-
     SLsmg_set_char_set(0);
 
 #ifdef CONFIG_MOUSE
@@ -253,9 +252,6 @@ static void fte_write_color_chars(PCell Cell, int W)
 	    chsetprev = chset;
 	}
     }
-    if (chsetprev)
-	SLsmg_set_char_set(0);
-    //SLsmg_normal_video();
 }
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell)
@@ -345,7 +341,6 @@ static int ConGetBoxRaw(int X, int Y, int W, int H, SLsmg_Char_Type *box)
     ConSetCursorPos(CurX, CurY);
 
     return 0;
-
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell)
@@ -410,7 +405,6 @@ int ConQuerySize(int *X, int *Y)
 
 int ConSetCursorPos(int X, int Y)
 {
-    //SLsmg_write_string("X");
     SLsmg_gotorc(Y, X);
     SLsmg_refresh();
     return 0;

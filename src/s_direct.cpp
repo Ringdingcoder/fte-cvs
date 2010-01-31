@@ -136,10 +136,7 @@ int FileFind::FindFirst(FileInfo **fi) {
     if (Flags & ffHIDDEN)
         attr |= FILE_HIDDEN | FILE_SYSTEM; // separate ?
 
-    if (Pattern)
-        JoinDirFile(fullpattern, Directory, Pattern);
-    else
-        JoinDirFile(fullpattern, Directory, "*");
+    JoinDirFile(fullpattern, Directory, (Pattern) ? Pattern : "*");
 
     if ((rc = DosFindFirst(fullpattern,
                            &hdir,
@@ -159,7 +156,7 @@ int FileFind::FindFirst(FileInfo **fi) {
         JoinDirFile(fullpath, Directory, name);
         name = fullpath;
     }
-    memset((void *)&t, 0, sizeof(t));
+    memset(&t, 0, sizeof(t));
     t.tm_year = find.fdateLastWrite.year + 80; // ugh!
     t.tm_mon = find.fdateLastWrite.month - 1;
     t.tm_mday = find.fdateLastWrite.day;
@@ -234,10 +231,7 @@ int FileFind::FindFirst(FileInfo **fi) {
      if (Flags & ffHIDDEN)
      attr |= FILE_HIDDEN | FILE_SYSTEM; // separate ?
      */
-    if (Pattern)
-        JoinDirFile(fullpattern, Directory, Pattern);
-    else
-        JoinDirFile(fullpattern, Directory, "*");
+    JoinDirFile(fullpattern, Directory, (Pattern) ? Pattern : "*");
 
     if ((rc = (int) FindFirstFile(fullpattern, &find)) < 0)
     {

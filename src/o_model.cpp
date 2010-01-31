@@ -172,8 +172,8 @@ void EViewPort::StorePos() { }
 void EViewPort::Resize(int /*Width*/, int /*Height*/) {}
 
 void EModel::UpdateTitle() {
-    char Title[256] = "";
-    char STitle[256] = "";
+    char Title[256];
+    char STitle[256];
     EView *V;
 
     GetTitle(Title, sizeof(Title), STitle, sizeof(STitle));

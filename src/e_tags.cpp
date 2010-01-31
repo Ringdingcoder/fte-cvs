@@ -134,12 +134,12 @@ int TagsLoad(int id) { /*FOLD00*/
     if (fstat(fd, &sb) == -1)
         return -1;
 
-    if ((tags = (char *)malloc(sb.st_size)) == 0) {
+    if ((tags = (char *)malloc((size_t)sb.st_size)) == 0) {
         close(fd);
         return -1;
     }
 
-    size = read(fd, tags, sb.st_size);
+    size = read(fd, tags, (size_t)sb.st_size);
     close(fd);
     if (size != sb.st_size)
         return -1;
@@ -147,7 +147,7 @@ int TagsLoad(int id) { /*FOLD00*/
     if (TagMem == 0) { // preallocate (useful when big file)
         char *NM;
 
-        NM = (char *)realloc((void *)TagMem, TagLen + sb.st_size);
+        NM = (char *)realloc((void *)TagMem, TagLen + (size_t)sb.st_size);
         if (NM != 0) {
             TagMem = NM;
             ATagMem = TagLen + sb.st_size;

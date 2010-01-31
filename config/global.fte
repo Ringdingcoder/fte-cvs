@@ -80,10 +80,13 @@ object GLOBAL {
     REXX_Indent         = 4;
 #    REXX_Do_Offset      = 0;
 
+# GCC - must be first before grep -n
+#   filename:#ln:2: error:....
+    CompileRx = { 1, 2, 3, /^([\w:._\-\+\/\\]+):(\d+):\d:\s({warning}|{error}:.*)$/ };
+#   filename:#ln: error:....
+    CompileRx = { 1, 2, 3, /^([\w:._\-\+\/\\]+):(\d+):\s({warning}|{error}:.*)$/ };
 # grep -n
-    CompileRx = { 1, 2, 3, /^([\w:._\-\+\/\\]#):(\d+):/ };
-# GCC
-    CompileRx = { 1, 2, 3, /^([\w:._\-\+\/\\]+):(\d+):\s(.*)$/ };
+    CompileRx = { 1, 2, 3, /^([\w:._\-\+\/\\]#):(\d+):(.*)$/ };
 # Borland C++
     CompileRx = { 1, 2, 3, /^{Error}|{Warning}\s(\S+)\s(\d+):\s(.*)$/ };
 # Borland C++ 5.5 command line <wirawan0>

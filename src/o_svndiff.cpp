@@ -174,8 +174,8 @@ ESvnDiff::BlockCopy(int Append)
     BFI(SSBuffer, BFI_ExpandTabs) = 0;
     BFI(SSBuffer, BFI_Undo) = 0;
     // Go through list of marked lines
-    int             last = -1,
-        tl = 0;
+    int last = -1;
+    int tl = 0;
     for(int i = 0; i < LineCount; i++)
     {
         if(Lines[i]->Status & 2)
@@ -197,8 +197,7 @@ ESvnDiff::BlockCopy(int Append)
 }
 
 // Event map - this name is used in config files when defining eventmap
-EEventMap      *
-ESvnDiff::GetEventMap()
+EEventMap* ESvnDiff::GetEventMap()
 {
     return FindEventMap("SVNDIFF");
 }

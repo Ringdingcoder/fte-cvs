@@ -18,6 +18,10 @@
 #include "s_string.h"
 #include "s_util.h"
 
+#ifndef _FILE_OFFSET_BITS
+#error NE
+#endif
+
 #ifdef CONFIG_OBJ_DIRECTORY
 EDirectory::EDirectory(int createFlags, EModel **ARoot, char *aPath) :
     EList(createFlags, ARoot, aPath),
@@ -29,7 +33,7 @@ EDirectory::EDirectory(int createFlags, EModel **ARoot, char *aPath) :
 
     ExpandPath(aPath, XPath, sizeof(XPath));
     Slash(XPath, 1);
-    Path = strdup(XPath);
+    Path = XPath;
     RescanList();
 }
 
@@ -39,7 +43,6 @@ EDirectory::~EDirectory() {
             delete Files[i];
         free(Files);
     }
-    free(Path);
 }
 
 EEventMap *EDirectory::GetEventMap() {
@@ -76,19 +79,18 @@ void EDirectory::DrawLine(PCell B, int Line, int Col, ChColor color, int Width) 
             if (Size >= 1024 * 1024)
                 sprintf(SizeStr, "%7ldM", (long)(Size / 1024));
             else
-                sprintf(SizeStr, "%7ldK", (long) Size);
+                sprintf(SizeStr, "%7ldK", (long)Size);
         } else
             sprintf(SizeStr, "%8ld", (long) Size);
 
-        sprintf(s, " %04d/%02d/%02d %02d:%02d:%02d %s ",
-                Year, Mon, Day, Hour, Min, Sec, SizeStr);
+	int l = snprintf(s, sizeof(s),
+			 "%04d/%02d/%02d %02d:%02d:%02d %s %s%c",
+			 Year, Mon, Day, Hour, Min, Sec, SizeStr,
+			 Files[Line]->Name(),
+			 (Files[Line]->Type() == fiDIRECTORY) ? SLASH : ' ');
 
-        strcat(s, Files[Line]->Name());
-        s[strlen(s) + 1] = '\0';
-        s[strlen(s)] = (Files[Line]->Type() == fiDIRECTORY)? SLASH : ' ';
-
-        if (Col < int(strlen(s)))
-            MoveStr(B, 0, Width, s + Col, color, Width);
+        if (l > 0 && Col < l)
+	    MoveStr(B, 0, Width, s + Col, color, Width);
     }
 }
 
@@ -123,8 +125,8 @@ void EDirectory::RescanList() {
 
     Count = 0;
     FCount = 0;
-    if (JustDirectory(Path, Dir, sizeof(Dir)) != 0) return;
-    JustFileName(Path, Name, sizeof(Name));
+    if (JustDirectory(Path.c_str(), Dir, sizeof(Dir)) != 0) return;
+    JustFileName(Path.c_str(), Name, sizeof(Name));
 
     // we don't want any special information about symbolic links, just to browse files
     ff = new FileFind(Dir, "*", ffDIRECTORY | ffHIDDEN | ffLINK);
@@ -181,11 +183,11 @@ void EDirectory::FreeList() {
 }
 
 int EDirectory::isDir(int No) {
-    char FilePath[256];
+    char FilePath[MAXPATH];
 
-    JustDirectory(Path, FilePath, sizeof(FilePath));
+    JustDirectory(Path.c_str(), FilePath, sizeof(FilePath));
     Slash(FilePath, 1);
-    strcat(FilePath, Files[No]->Name());
+    strlcat(FilePath, Files[No]->Name(), sizeof(FilePath));
     return IsDirectory(FilePath);
 }
 
@@ -373,19 +375,19 @@ int EDirectory::FmChDir(const char *Name) {
     char CName[256] = "";
 
     if (strcmp(Name, SSLASH) == 0) {
-        JustRoot(Path, Dir, sizeof(Dir));
+        JustRoot(Path.c_str(), Dir, sizeof(Dir));
     } else if (strcmp(Name, SDOT SDOT) == 0) {
-        Slash(Path, 0);
-        JustFileName(Path, CName, sizeof(CName));
-        JustDirectory(Path, Dir, sizeof(Dir));
+        Slash(&Path[0], 0);
+        JustFileName(Path.c_str(), CName, sizeof(CName));
+        JustDirectory(Path.c_str(), Dir, sizeof(Dir));
     } else {
-        JustDirectory(Path, Dir, sizeof(Dir));
+        JustDirectory(Path.c_str(), Dir, sizeof(Dir));
         Slash(Dir, 1);
         strlcat(Dir, Name, sizeof(Dir));
     }
     Slash(Dir, 1);
-    free(Path);
-    Path = strdup(Dir);
+
+    Path = Dir;
     Row = 0;
     RescanList();
     if (CName[0] != 0) {
@@ -403,10 +405,10 @@ int EDirectory::FmChDir(const char *Name) {
 
 int EDirectory::FmRmDir(char const* Name)
 {
-    char FilePath[256];
-    strcpy(FilePath, Path);
+    char FilePath[MAXPATH];
+    strlcpy(FilePath, Path.c_str(), sizeof(FilePath) - 2);
     Slash(FilePath, 1);
-    strcat(FilePath, Name);
+    strlcat(FilePath, Name, sizeof(FilePath));
 
     int choice = View->MView->Win->Choice(GPC_CONFIRM, "Remove File",
 					  2, "O&K", "&Cancel",
@@ -431,42 +433,38 @@ int EDirectory::FmRmDir(char const* Name)
 int EDirectory::FmLoad(const char *Name, EView *XView) {
     char FilePath[256];
 
-    JustDirectory(Path, FilePath, sizeof(FilePath));
+    JustDirectory(Path.c_str(), FilePath, sizeof(FilePath));
     Slash(FilePath, 1);
     strcat(FilePath, Name);
     return FileLoad(0, FilePath, NULL, XView);
 }
 
 void EDirectory::GetName(char *AName, size_t MaxLen) {
-    if (MaxLen > 0) {
-	strncpy(AName, Path, MaxLen);
-	AName[MaxLen - 1] = 0;
+    strlcpy(AName, Path.c_str(), MaxLen);
+    if (MaxLen)
 	Slash(AName, 0);
-    }
 }
 
 void EDirectory::GetPath(char *APath, size_t MaxLen) {
-    if (MaxLen > 0) {
-	strncpy(APath, Path, MaxLen);
-	APath[MaxLen - 1] = 0;
+    strlcpy(APath, Path.c_str(), MaxLen);
+    if (MaxLen)
 	Slash(APath, 0);
-    }
 }
 
 void EDirectory::GetInfo(char *AInfo, size_t /*MaxLen*/) {
     char buf[256] = {0};
     char winTitle[256] = {0};
 
-    JustFileName(Path, buf, sizeof(buf));
+    JustFileName(Path.c_str(), buf, sizeof(buf));
     if (buf[0] == '\0') // if there is no filename, try the directory name.
-        JustLastDirectory(Path, buf, sizeof(buf));
+        JustLastDirectory(Path.c_str(), buf, sizeof(buf));
 
     if (buf[0] != 0) // if there is a file/dir name, stick it in here.
     {
         strlcat(winTitle, buf, sizeof(winTitle));
         strlcat(winTitle, "/ - ", sizeof(winTitle));
     }
-    strlcat(winTitle, Path, sizeof(winTitle));
+    strlcat(winTitle, Path.c_str(), sizeof(winTitle));
 
     sprintf(AInfo,
             "%2d %04d/%03d %-150s",
@@ -485,11 +483,10 @@ void EDirectory::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMa
     if (!MaxLen)
 	return;
 
-    strncpy(ATitle, Path, MaxLen - 1);
-    ATitle[MaxLen] = 0;
+    strlcpy(ATitle, Path.c_str(), MaxLen);
 
     char P[MAXPATH];
-    strlcpy(P, Path, sizeof(P));
+    strlcpy(P, Path.c_str(), sizeof(P));
     Slash(P, 0);
 
     JustDirectory(P, ASTitle, SMaxLen);
@@ -501,7 +498,7 @@ int EDirectory::ChangeDir(ExState &State) {
     char Dir2[MAXPATH];
 
     if (State.GetStrParam(View, Dir, sizeof(Dir)) == 0) {
-        strcpy(Dir, Path);
+        strlcpy(Dir, Path.c_str(), sizeof(Dir));
         if (View->MView->Win->GetStr("Set directory", sizeof(Dir), Dir, HIST_PATH) == 0)
             return 0;
     }
@@ -511,9 +508,7 @@ int EDirectory::ChangeDir(ExState &State) {
     // is this needed for other systems as well ?
     Slash(Dir2, 1);
 #endif
-    if (Path)
-        free(Path);
-    Path = strdup(Dir2);
+    Path = Dir2;
     Row = -1;
     UpdateTitle();
     return RescanDir();

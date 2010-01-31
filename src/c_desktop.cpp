@@ -56,7 +56,7 @@ int SaveDesktop(const char *FileName) {
         case CONTEXT_DIRECTORY:
             {
                 EDirectory *D = (EDirectory *)M;
-                if (fprintf(fp, "D|%d|%s\n", D->ModelNo, D->Path) < 0)
+                if (fprintf(fp, "D|%d|%s\n", D->ModelNo, D->Path.c_str()) < 0)
                     goto err;
             }
             break;

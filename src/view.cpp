@@ -591,7 +591,7 @@ int EView::OpenDir(const char *Path) {
         EModel *x = Model;
         while (x) {
             if (x->GetContext() == CONTEXT_DIRECTORY) {
-                if (filecmp(((EDirectory *)x)->Path, XPath) == 0)
+                if (filecmp(((EDirectory *)x)->Path.c_str(), XPath) == 0)
                 {
                     dir = (EDirectory *)x;
                     break;

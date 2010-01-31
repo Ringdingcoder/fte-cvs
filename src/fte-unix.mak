@@ -11,34 +11,13 @@ TGT_SFTE = sfte
 TGT_VFTE = vfte
 TGT_XFTE = xfte
 
-TARGETS = $(TGT_XFTE) $(TGT_NFTE) $(TGT_QFTE) $(TGT_SFTE) $(TGT_VFTE)
+TARGETS = $(TGT_XFTE) $(TGT_VFTE) $(TGT_NFTE) $(TGT_SFTE) $(TGT_QFTE)
 
-# Comment or uncoment this two flags below if
-# you want to use:
-
-# Keyboard remaping by XFTE
-#REMAPFLAG = -DUSE_HARD_REMAP
-
-# Drawing fonts with locale support
-XMBFLAG = -DUSE_XMB
-
-# System X11R6 is compiled with X_LOCALE
-#SYSTEM_X_LOCALE = -DX_LOCALE
-
-# Enable normal locale support
-USE_LOCALE = -DUSE_LOCALE
-
-I18NOPTIONS = $(XMBFLAG) $(REMAPFLAG) $(SYSTEM_X_LOCALE) $(USE_LOCALE)
-
-# Optionally, you can define:
-# -DDEFAULT_INTERNAL_CONFIG to use internal config by default
-# -DUSE_XTINIT to use XtInitialize on init
-# -DFTE_NO_LOGGING to completely disable trace logging
-APPOPTIONS = -DDEFAULT_INTERNAL_CONFIG -DFTE_NO_LOGGING
-
-# Supply icons in X, requires Xpm library
-USE_XICON = -DUSE_XICON
+# Supply icons in X if CONFIG_X11_XICON is defined, requires Xpm library
 XPMLIB = -lXpm
+
+# Need -lXt if CONFIG_X11_XTINIT is defined
+#XTLIB = -lXt
 
 #gcc/g++
 #CC = g++
@@ -147,8 +126,7 @@ OPTIMIZE = -g # -O -g
 #OPTIMIZE = -O2
 #OPTIMIZE = -O2 -s
 
-CCFLAGS  = $(CPPOPTIONS) $(OPTIMIZE) $(NOEXCEPTION) $(INCDIRS) -DUNIX $(UOS) \
-	$(I18NOPTIONS) $(APPOPTIONS) $(USE_XICON)
+CCFLAGS  = $(CPPOPTIONS) $(OPTIMIZE) $(NOEXCEPTION) $(INCDIRS) -DUNIX $(UOS)
 LDFLAGS  = $(OPTIMIZE) $(LIBDIRS)
 
 
@@ -159,16 +137,16 @@ include objs.inc
 
 COBJS = cfte.o s_files.o s_string.o
 
+#$(QOBJS:.o=.cpp)
+
 SRCS = $(OBJS:.o=.cpp)\
  $(COBJS:.o=.cpp)\
- $(QOBJS:.o=.cpp)\
  $(NOBJS:.o=.cpp)\
  $(SOBJS:.o=.cpp)\
  $(VOBJS:.o=.cpp)\
  $(XOBJS:.o=.cpp)
 
-# Need -lXt below if USE_XTINIT is defined
-XLIBS    = $(XLIBDIR) -lX11 $(SOCKETLIB) $(XPMLIB)
+XLIBS    = $(XLIBDIR) -lX11 $(SOCKETLIB) $(XPMLIB) $(XTLIB)
 VLIBS    = -lgpm
 NLIBS    = -lncurses
 SLIBS    = -lslang

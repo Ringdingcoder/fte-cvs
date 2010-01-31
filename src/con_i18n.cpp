@@ -40,7 +40,7 @@ struct i18n_context_t {
 #endif
 };
 
-#ifdef USE_HARD_REMAP
+#ifdef CONFIG_HARD_REMAP
 /*
  * This part is used when your Xserver doesn't work well with XKB extension
  */

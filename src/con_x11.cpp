@@ -47,8 +47,8 @@
 #include <X11/XlibXtra.h>    /* HCL - HCLXlibInit */
 #endif
 
-//#undef USE_XICON
-#ifdef USE_XICON
+//#undef CONFIG_X11_XICON
+#ifdef CONFIG_X11_XICON
 #include <X11/xpm.h>
 
 #define ICON_COUNT 4
@@ -56,7 +56,7 @@
 #include "icons/fte32x32.xpm"
 #include "icons/fte48x48.xpm"
 #include "icons/fte64x64.xpm"
-#endif // USE_XICON
+#endif // CONFIG_X11_XICON
 
 #include <assert.h>
 #include <stdarg.h>
@@ -133,7 +133,7 @@ static XSizeHints size_hints;
 // some older Xservers don't like XmbDraw...
 static XFontStruct* font_struct;
 static ColorXGC* colorXGC;
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
 static int useXMB = true;
 static XFontSet font_set;
 static int FontCYD;
@@ -357,7 +357,7 @@ public:
     }
 };
 
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
 static void TryLoadFontset(const char *fs)
 {
     char *def = NULL;
@@ -384,7 +384,7 @@ static void TryLoadFontset(const char *fs)
     if (nMiss)
         XFreeStringList(miss);
 }
-#endif // USE_XMB
+#endif // CONFIG_X11_XMB
 
 static int InitXFonts()
 {
@@ -412,7 +412,7 @@ static int InitXFonts()
         FontCX = font_struct->max_bounds.width;
         FontCY = font_struct->max_bounds.ascent + font_struct->max_bounds.descent;
     }
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
     else {
         TryLoadFontset(getenv("VIOFONT"));
         TryLoadFontset(WindowFont);
@@ -430,7 +430,7 @@ static int InitXFonts()
         FontCYD = -(xE->max_logical_extent.y);
         // printf("Font X:%d\tY:%d\tD:%d\n", FontCX, FontCY, FontCYD);
     }
-#endif // USE_XMB
+#endif // CONFIG_X11_XMB
     return 0;
 }
 
@@ -539,7 +539,7 @@ static int SetupXWindow(int argc, char **argv)
     wm_hints.input = True;
     wm_hints.initial_state = NormalState;
 
-#ifdef USE_XICON
+#ifdef CONFIG_X11_XICON
     // Set icons using _NET_WM_ICON property
     XpmAttributes attributes;
     attributes.valuemask = 0;//XpmColormap | XpmDepth | XpmCloseness;
@@ -629,7 +629,7 @@ static int SetupXWindow(int argc, char **argv)
             XpmFreeXpmImage(xpmImage + i);
         }
     }
-#endif // USE_XICON
+#endif // CONFIG_X11_XICON
     XSetWMHints(display, win, &wm_hints);
     XResizeWindow(display, win, ScreenCols * FontCX, ScreenRows * FontCY);
     XMapRaised(display, win); // -> Expose
@@ -720,7 +720,7 @@ void DrawCursor(int Show) {
                              CursorX * FontCX,
                              font_struct->max_bounds.ascent + CursorY * FontCY,
                              &ch, 1);
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
         else
             XmbDrawImageString(display, win, font_set, colorXGC->GetGC(attr),
                                CursorX * FontCX, FontCYD + CursorY * FontCY,
@@ -786,7 +786,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
                                  x * FontCX, font_struct->max_bounds.ascent +
                                  (Y + i) * FontCY,
                                  temp, l);
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
             else
                 XmbDrawImageString(display, win, font_set,
                                    colorXGC->GetGC(attr),
@@ -1514,7 +1514,7 @@ static void ProcessXEvents(TEvent *Event) {
                     Atom type_list[] = {
                         XA_STRING,
                         proptype_text
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
                         , proptype_compound_text
 #ifdef X_HAVE_UTF8_STRING
                         , proptype_utf8_string
@@ -1530,7 +1530,7 @@ static void ProcessXEvents(TEvent *Event) {
 				    (unsigned char *)&type_list,
 				    FTE_ARRAY_SIZE(type_list));
                     notify.xselection.property = event.xselectionrequest.property;
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
                 } else if (event.xselectionrequest.target == XA_STRING) {
 #else
                 } else if (event.xselectionrequest.target == XA_STRING || event.xselectionrequest.target == proptype_text) {
@@ -1539,7 +1539,7 @@ static void ProcessXEvents(TEvent *Event) {
                     SendSelection(&notify, event.xselectionrequest.property, XA_STRING,
                                   (CurSelectionData[clip] ? CurSelectionData[clip] : empty), CurSelectionLen[clip], False);
                     notifySent = True;
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
                 } else {
                     // Convert to requested type
                     XTextProperty text_property;
@@ -1889,7 +1889,7 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
         *data = (char *)d;
         *len = (int)nitems;
     } else {
-#if USE_XMB
+#ifdef CONFIG_X11_XMB
         // Convert data to char * string
         XTextProperty text;
         char **list;
@@ -1946,7 +1946,7 @@ int GetXSelection(int *len, char **data, int clipboard) {
         Atom clip = GetXClip(clipboard);
         if (XGetSelectionOwner(display, clip) != None) {
             // Get data - try various formats
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
 #ifdef X_HAVE_UTF8_STRING
             if (ConvertSelection(clip, proptype_utf8_string, len, data) == 0) return 0;
 #endif
@@ -2033,7 +2033,7 @@ GUI::~GUI() {
     i18n_destroy(&i18n_ctx);
     delete colorXGC;
     colorXGC = 0;
-#ifdef USE_XMB
+#ifdef CONFIG_X11_XMB
     if (font_set)
         XFreeFontSet(display, font_set);
 #endif

@@ -16,7 +16,7 @@
 #include "s_files.h"
 #include "s_string.h"
 
-#ifdef USE_LOCALE
+#ifdef CONFIG_USE_LOCALE
 #include <locale.h>
 #endif
 
@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
         setegid(getgid());
 #endif
 
-#ifdef USE_LOCALE
+#ifdef CONFIG_USE_LOCALE
     // setup locale from environment
     setlocale(LC_ALL, "");
 #endif

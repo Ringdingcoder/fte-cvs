@@ -398,6 +398,7 @@ int TagGoto(EView *View, const char *Tag) {
             if (GotoTag(M, View) == 0)
                 return 0;
 
+            free(CurrentTag);
             CurrentTag = strdup(Tag);
             TagPosition = M;
             return 1;
@@ -582,23 +583,16 @@ int TagPop(EView *View) { /*FOLD00*/
     if (T) {
         TStack = T->Next;
 
-        if (CurrentTag)
-        {
-            free(CurrentTag);
-            CurrentTag = NULL;
-        }
-        if (T->CurrentTag)
-        {
-            CurrentTag = strdup(T->CurrentTag);
-        }
+        free(CurrentTag);
+
+        CurrentTag = T->CurrentTag;
         TagPosition = T->TagPos;
 
-        if (GotoFilePos(View, T->FileName, T->Line, T->Col) == 0) {
-            free(T);
-            return 0;
-        }
+        int rc = (GotoFilePos(View, T->FileName, T->Line, T->Col) == 0) ? 0 : 1;
+
+        free(T->FileName);
         free(T);
-        return 1;
+        return rc;
     }
     View->Msg(S_INFO, "Tag stack empty.");
     return 0;

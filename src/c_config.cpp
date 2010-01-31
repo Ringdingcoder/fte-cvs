@@ -1256,12 +1256,12 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
         ENDFUNCRC(-1);
     }
 
-    buffer = (char *) malloc(statbuf.st_size);
+    buffer = (char *) malloc((size_t)statbuf.st_size);
     if (buffer == 0) {
         close(fd);
         ENDFUNCRC(-1);
     }
-    if (read(fd, buffer, statbuf.st_size) != statbuf.st_size) {
+    if (read(fd, buffer, (size_t)statbuf.st_size) != statbuf.st_size) {
         close(fd);
         free(buffer);
         ENDFUNCRC(-1);

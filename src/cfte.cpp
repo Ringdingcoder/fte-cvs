@@ -1952,7 +1952,7 @@ static int LoadFile(const char *WhereName, const char *CfgName, int Level) {
         fprintf(stderr, "Cannot stat '%s', errno=%d\n", Cfg, errno);
         return -1;
     }
-    buffer = (char *) malloc(statbuf.st_size+1);
+    buffer = (char *) malloc((size_t)statbuf.st_size+1);
     if (buffer == NULL) {
         close(fd);
         return -1;
@@ -1960,7 +1960,7 @@ static int LoadFile(const char *WhereName, const char *CfgName, int Level) {
 
     buffer[statbuf.st_size] = 0; // add null to end of buffer, NOTE: allocated statbuf.st_size + 1
 
-    if (read(fd, buffer, statbuf.st_size) != statbuf.st_size) {
+    if (read(fd, buffer, (size_t)statbuf.st_size) != statbuf.st_size) {
         close(fd);
         free(buffer);
         return -1;

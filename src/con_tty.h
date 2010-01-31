@@ -96,6 +96,8 @@ static const struct TTYDecodeSeq {
 
     { "[6;%~", kbPgDn },
     { "[6~", kbPgDn },
+    { "[V", kbPgUp },
+    { "[v", kbPgUp },
 
     { "[25~", kfShift | kbF1 },
     { "[26~", kfShift | kbF2 },
@@ -121,6 +123,7 @@ static const struct TTYDecodeSeq {
     { "O%D", kbLeft },
 
     { "OF", kbEnd },
+    { "Ow", kbEnd },
     { "OH", kbHome },
 
     { "O1;%P", kbF1 },
@@ -164,7 +167,7 @@ static inline int TTYParseEsc(const char *seq)
 	if (ch < 32) {
 	    switch (ch) {
 	    case 0:    return kbEsc;
-	    case 8:    return (kfAlt | kbBackSp);
+	    case '\b': return (kfAlt | kbBackSp);
 	    case '\t': return (kfShift | kbTab);
 	    case '\n': return (kfAlt | kbEnter);
 	    case 27:   return (kfAlt | kbEsc);

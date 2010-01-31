@@ -16,6 +16,8 @@
 #warning Use header file fte.h
 #endif
 
+#define DEFAULT_INTERNAL_CONFIG
+
 #undef CONFIG_EMULATE_VI // todo
 
 #define CONFIG_CONFIGURABLE
@@ -94,5 +96,24 @@
 #endif
 
 #define CONFIG_I_COMPLETE
+
+
+#define CONFIG_USE_LOCALE
+
+/* Internal keyboard remapping in xfte - CZ support */
+//#define CONFIG_HARD_REMAP
+
+/* System X11R6 is compiled with X_LOCALE */
+//#define X_LOCALE
+
+/* Use XtInit */
+#define CONFIG_X11_XTINIT
+/* Drawing fonts with locale support */
+#define CONFIG_X11_XMB
+/* Supply icons in X, requires Xpm library */
+#define CONFIG_X11_XICON
+
+/* Dissable  internal logging mechanism */
+#define FTE_NO_LOGGING
 
 #endif // FEATURE_H

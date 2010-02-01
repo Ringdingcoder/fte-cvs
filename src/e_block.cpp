@@ -21,7 +21,7 @@
 // Block Commands                                                            //
 ///////////////////////////////////////////////////////////////////////////////
 
-int EBuffer::SetBB(EPoint M) {
+int EBuffer::SetBB(const EPoint& M) {
     EPoint OldBB = BB;
     int MinL, MaxL;
 
@@ -39,7 +39,7 @@ int EBuffer::SetBB(EPoint M) {
     return 1;
 }
 
-int EBuffer::SetBE(EPoint M) {
+int EBuffer::SetBE(const EPoint& M) {
     EPoint OldBE = BE;
     int MinL, MaxL;
 

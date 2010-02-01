@@ -257,7 +257,7 @@ int EBuffer::LoadRegion(EPoint * /*A*/, int /*FH*/, int /*StripChar*/, int /*Lin
     return 0;
 }
 
-int EBuffer::InsertLine(EPoint Pos, size_t ACount, const char *AChars) {
+int EBuffer::InsertLine(const EPoint& Pos, size_t ACount, const char *AChars) {
     if (InsLine(Pos.Row, 0) == 0) return 0;
     if (InsText(Pos.Row, Pos.Col, ACount, AChars) == 0) return 0;
     return 1;

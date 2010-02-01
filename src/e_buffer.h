@@ -349,7 +349,7 @@ public:
     int SaveRegion(EPoint *A, EPoint *Z, int FH, int AddCR, int AddLF, int Mode);
 
     int AssertLine(int Line);
-    int InsertLine(EPoint Pos, size_t ACount, const char *AChars);
+    int InsertLine(const EPoint& Pos, size_t ACount, const char *AChars);
 
     int UpdateMarker(int Type, int Line, int Col, int Lines, int Cols);
     int UpdateMark(EPoint &M, int Type, int Line, int Col, int Lines, int Cols);
@@ -365,8 +365,8 @@ public:
     int EndExtend();
     int CheckBlock();
     int BlockRedraw();
-    int SetBB(EPoint M);
-    int SetBE(EPoint M);
+    int SetBB(const EPoint& M);
+    int SetBE(const EPoint& M);
 
     int Load();
     int Save();

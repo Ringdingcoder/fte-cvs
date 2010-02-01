@@ -340,7 +340,7 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                         ColorNext();
                     State = hsPerl_Normal | X_BIT;
                     continue;
-                } else if ((*p == '$') && (len > 1) &&
+                } else if ((*p == '$' || *p == '*') && (len > 1) &&
                            (p[1] == '"')) {
                     State = hsPerl_Variable;
                     Color = CLR_Variable;

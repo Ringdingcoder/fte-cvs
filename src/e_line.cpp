@@ -38,7 +38,7 @@ ELine::~ELine() {
 }
 
 int ELine::Allocate(size_t Bytes) {
-    return realloc(Chars, Bytes | CHAR_TRESHOLD) ? 1 : 0;
+    return ((Chars = (char*)realloc(Chars, Bytes | CHAR_TRESHOLD)) != NULL) ? 1 : 0;
 }
 
 int EBuffer::ScreenPos(ELine *L, int Offset) {

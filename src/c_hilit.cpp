@@ -159,26 +159,23 @@ int EBuffer::HilitWord() {
 
 /* ======================================================================= */
 
-EColorize::EColorize(const char *AName, const char *AParent) {
-    Name = strdup(AName);
-    SyntaxParser = HILIT_PLAIN;
-    Next = Colorizers;
-    hm = 0;
+EColorize::EColorize(const char *AName, const char *AParent) :
+    Name(AName),
+    Next(Colorizers),
+    Parent(FindColorizer(AParent)),
+    SyntaxParser(HILIT_PLAIN),
+    hm(0)
+{
     Colorizers = this;
-    Parent = FindColorizer(AParent);
-    memset((void *)&Keywords, 0, sizeof(Keywords));
-    memset((void *)Colors, 0, sizeof(Colors));
+    memset(&Keywords, 0, sizeof(Keywords));
     if (Parent) {
         SyntaxParser = Parent->SyntaxParser;
-        memcpy((void *)Colors, (void *)Parent->Colors, sizeof(Colors));
-    } else {
-        SyntaxParser = HILIT_PLAIN;
-    }
+        memcpy(Colors, Parent->Colors, sizeof(Colors));
+    } else
+	memset(Colors, 0, sizeof(Colors));
 }
 
 EColorize::~EColorize() {
-    free(Name);
-
     for (int i=0; i<CK_MAXLEN; i++)
         free(Keywords.key[i]);
 
@@ -189,7 +186,7 @@ EColorize *FindColorizer(const char *AName) {
     EColorize *p = Colorizers;
 
     while (p) {
-        if (strcmp(AName, p->Name) == 0)
+        if (p->Name == AName)
             return p;
         p = p->Next;
     }
@@ -262,11 +259,12 @@ int HState::GetHilitWord(ChColor &clr, const char *str, size_t len) {
 
 /* ======================================================================= */
 
-HMachine::HMachine() {
-    stateCount = 0;
-    state = 0;
-    transCount = 0;
-    trans = 0;
+HMachine::HMachine() :
+    stateCount(0),
+    transCount(0),
+    state(0),
+    trans(0)
+{
 }
 
 HMachine::~HMachine() {
@@ -274,11 +272,9 @@ HMachine::~HMachine() {
     // free states
     if (state)
     {
-        int i;
-
         while(stateCount--)
         {
-            for (i=0; i<CK_MAXLEN; i++)
+            for (unsigned i = 0; i < CK_MAXLEN; ++i)
                 free(state[stateCount].keywords.key[i]);
 
             free(state[stateCount].wordChars);

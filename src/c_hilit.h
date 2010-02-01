@@ -216,17 +216,17 @@ public:
 
 class EColorize {
 public:
-    char *Name;
+    fte::string Name;
     EColorize *Next;
     EColorize *Parent;
     int SyntaxParser;
     ColorKeywords Keywords; // keywords to highlight
     HMachine *hm;
     ChColor Colors[COUNT_CLR];
-    
+
     EColorize(const char *AName, const char *AParent);
     ~EColorize();
-    
+
     int SetColor(int clr, const char *value);
 };
 

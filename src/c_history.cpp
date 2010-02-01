@@ -404,8 +404,6 @@ int StoreBookmarks(EBuffer *buffer) { /*FOLD00*/
 #ifdef CONFIG_BOOKMARKS
     int L = 0, R = FPHistoryCount, M,i,j;
     int cmp;
-    char *name;
-    EPoint P;
     HBookmark *bmk;
 
     assert (buffer!=NULL);
@@ -426,18 +424,19 @@ int StoreBookmarks(EBuffer *buffer) { /*FOLD00*/
             }
             free (FPHistory[M]->Books);
             FPHistory[M]->Books=NULL;
+	    const EBookmark* b;
             // Now add new bookmarks - first get # of books to store
-            for (i=j=0;(i=buffer->GetUserBookmarkForLine(i,-1,name,P))>=0;j++);
+            for (i=j=0;(i=buffer->GetUserBookmarkForLine(i, -1, b))>=0;j++);
             FPHistory[M]->BookCount=j;
             if (j) {
                 // Something to store
                 FPHistory[M]->Books=(HBookmark **)malloc (sizeof (HBookmark *)*j);
-                if (FPHistory[M]->Books) {
-                    for (i=j=0;(i=buffer->GetUserBookmarkForLine(i,-1,name,P))>=0;j++) {
+		if (FPHistory[M]->Books) {
+                    for (i=j=0;(i=buffer->GetUserBookmarkForLine(i, -1, b))>=0;j++) {
                         bmk=FPHistory[M]->Books[j]=(HBookmark *)malloc (sizeof (HBookmark));
                         if (bmk) {
-                            bmk->Row=P.Row;bmk->Col=P.Col;
-                            bmk->Name=strdup (name);
+                            bmk->Row = b->GetPoint().Row; bmk->Col = b->GetPoint().Col;
+                            bmk->Name = strdup(b->GetName());
                         } else {
                             // Only part set
                             FPHistory[M]->BookCount=j;

@@ -793,18 +793,14 @@ int EBuffer::GotoUserBookmark(const char *n) {
     return GotoBookmark(name);
 }
 
-int EBuffer::GetUserBookmarkForLine(int searchFrom, int searchForLine, char *&Name, EPoint &P) {
-    int i;
+int EBuffer::GetUserBookmarkForLine(int searchFrom, int searchForLine, const EBookmark* &eb) {
+    int i = searchFrom;
 
-    i=searchFrom;
-    while (1) {
-        i=GetBookmarkForLine(i,searchForLine,Name,P);
-        if (i==-1) return -1;
-        if (strncmp (Name,"_BMK",4)==0) {
-            Name+=4;
+    while ((i = GetBookmarkForLine(i, searchForLine, eb) != -1))
+        if (strncmp(eb->GetName(), "_BMK", 4) == 0)
             return i;
-        }
-    }
+
+    return -1;
 }
 
 int EBuffer::PlaceBookmark(ExState &State) {
@@ -855,7 +851,7 @@ int EBuffer::PushGlobalBookmark() {
     P.Row = VToR(P.Row);
     EMark *m = markIndex.pushMark(this, P);
     if (m)
-         Msg(S_INFO, "Placed bookmark %s", m->getName());
+         Msg(S_INFO, "Placed bookmark %s", m->GetName());
     return m ? 1 : 0;
 }
 

@@ -13,11 +13,11 @@
 ELine::ELine(size_t ACount, const char *AChars) :
     Count(ACount),
     Chars(NULL)
+#ifdef CONFIG_SYNTAX_HILIT
+    , StateE(0)
+#endif
 {
     Allocate(Count); 
-#ifdef CONFIG_SYNTAX_HILIT
-    StateE = 0;
-#endif
     if (AChars)
         memcpy(Chars, AChars, Count);
     else
@@ -27,28 +27,18 @@ ELine::ELine(size_t ACount, const char *AChars) :
 ELine::ELine(char *AChars, size_t ACount) :
     Count(ACount),
     Chars(AChars)
-{
 #ifdef CONFIG_SYNTAX_HILIT
-    StateE = 0;
+    , StateE(0)
 #endif
+{
 }
 
 ELine::~ELine() {
-    if (Chars)
-	free(Chars);
+    free(Chars);
 }
 
 int ELine::Allocate(size_t Bytes) {
-    size_t Allocated;
-    
-    Allocated = (Bytes | CHAR_TRESHOLD);
-    if (Chars) 
-        Chars = (char *) realloc(Chars, Allocated); 
-    else
-        Chars = (char *) malloc(Allocated); 
-    if (Chars == NULL) 
-        return 0;
-    return 1;
+    return realloc(Chars, Bytes | CHAR_TRESHOLD) ? 1 : 0;
 }
 
 int EBuffer::ScreenPos(ELine *L, int Offset) {
@@ -195,7 +185,7 @@ int EBuffer::RToV(int No) {
         if (Vis(No) == 0) return No;
 
     while (L < R) {
-        M = (L + R) >> 1;
+        M = (L + R) / 2;
         V = Vis(M) + M;
         if (V == No)
             return M;
@@ -218,7 +208,7 @@ int EBuffer::RToVN(int No) {
         if (Vis(No) == 0) return No;
     
     while (L < R) {
-        M = (L + R) >> 1;
+        M = (L + R) / 2;
         V = Vis(M) + M;
         if (V == No)
             return M;

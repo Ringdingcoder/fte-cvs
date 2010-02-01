@@ -122,9 +122,16 @@ struct RoutineList {
 #endif
 
 #ifdef CONFIG_BOOKMARKS
-struct EBookmark {
-    char *Name;
+class EBookmark {
+    fte::string Name;
     EPoint BM;
+public:
+    EBookmark(const char* n, const EPoint& p) : Name(n), BM(p) {}
+    const char* GetName() const { return Name.c_str(); }
+    const EPoint& GetPoint() const { return BM; }
+    EPoint& GetPoint() { return BM; }
+    bool IsName(const char* n) const { return Name == n; }
+    void SetPoint(const EPoint& p) { BM = p; }
 };
 #endif
 
@@ -165,7 +172,6 @@ public:
 
 class EBuffer: public EModel {
 public:
-    //char *Name;
     char *FileName;
     int Modified;
     EPoint TP;
@@ -211,8 +217,7 @@ public:
     RxMatchRes MatchRes;
 
 #ifdef CONFIG_BOOKMARKS
-    int BMCount;
-    EBookmark *BMarks;
+    fte::vector<EBookmark*> BMarks;
 #endif
 
 #ifdef CONFIG_OBJ_ROUTINE
@@ -224,7 +229,7 @@ public:
     int RedrawToEos;
 
 #ifdef CONFIG_WORD_HILIT
-    char **WordList;
+    fte::vector<char*> WordList;
     int WordCount;
 #endif
 #ifdef CONFIG_SYNTAX_HILIT
@@ -462,11 +467,11 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef CONFIG_BOOKMARKS
-    int PlaceBookmark(const char *Name, EPoint P);
+    int PlaceBookmark(const char *Name, const EPoint &P);
     int RemoveBookmark(const char *Name);
     int GetBookmark(const char *Name, EPoint &P);
     int GotoBookmark(const char *Name);
-    int GetBookmarkForLine(int searchFrom, int searchForLine, char *&Name, EPoint &P);
+    int GetBookmarkForLine(int searchFrom, int searchForLine, const EBookmark* &b);
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
@@ -731,7 +736,7 @@ public:
     int PlaceUserBookmark(const char *n,EPoint P);
     int RemoveUserBookmark(const char *n);
     int GotoUserBookmark(const char *n);
-    int GetUserBookmarkForLine(int searchFrom, int searchForLine, char *&Name, EPoint &P);
+    int GetUserBookmarkForLine(int searchFrom, int searchForLine, const EBookmark* &b);
     int PlaceBookmark(ExState &State);
     int RemoveBookmark(ExState &State);
     int GotoBookmark(ExState &State);

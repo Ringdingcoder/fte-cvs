@@ -976,47 +976,37 @@ int EBuffer::ShowPosition() {
 }
 
 #ifdef CONFIG_BOOKMARKS
-int EBuffer::PlaceBookmark(const char *Name, EPoint P) {
-    int i;
-    EBookmark *p;
-
+int EBuffer::PlaceBookmark(const char *Name, const EPoint &P) {
     assert(P.Row >= 0 && P.Row < RCount && P.Col >= 0);
 
-    for (i = 0; i < BMCount; i++) {
-        if (strcmp(Name, BMarks[i].Name) == 0) {
-            BMarks[i].BM = P;
+    vector_iterate(EBookmark*, BMarks, it)
+        if ((*it)->IsName(Name)) {
+	    (*it)->SetPoint(P);
             return 1;
         }
-    }
-    p = (EBookmark *) realloc(BMarks, sizeof (EBookmark) * (1 + BMCount));
-    if (p == 0) return 0;
-    BMarks = p;
-    BMarks[BMCount].Name = strdup(Name);
-    BMarks[BMCount].BM = P;
-    BMCount++;
+
+    EBookmark* b = new EBookmark(Name, P);
+    BMarks.push_back(b);
+
     return 1;
 }
 
 int EBuffer::RemoveBookmark(const char *Name) {
-    int i;
-
-    for (i = 0; i < BMCount; i++) {
-        if (strcmp(Name, BMarks[i].Name) == 0) {
-            free(BMarks[i].Name);
-            memmove(BMarks + i, BMarks + i + 1, sizeof(EBookmark) * (BMCount - i - 1));
-            BMCount--;
-            BMarks = (EBookmark *) realloc(BMarks, sizeof (EBookmark) * BMCount);
+    vector_iterate(EBookmark*, BMarks, it)
+	if ((*it)->IsName(Name)) {
+	    delete (*it);
+	    BMarks.erase(it);
             return 1;
         }
-    }
+
     View->MView->Win->Choice(GPC_ERROR, "RemoveBookmark", 1, "O&K", "Bookmark %s not found.", Name);
     return 0;
 }
 
 int EBuffer::GetBookmark(const char *Name, EPoint &P) {
-    for (int i = 0; i < BMCount; i++)
-        if (strcmp(Name, BMarks[i].Name) == 0) {
-            P = BMarks[i].BM;
+    vector_iterate(EBookmark*, BMarks, it)
+        if ((*it)->IsName(Name)) {
+            P = (*it)->GetPoint();
             return 1;
         }
     return 0;
@@ -1030,21 +1020,20 @@ int EBuffer::GetBookmark(const char *Name, EPoint &P) {
  * this function returns any next bookmark -> can be used to enumerate
  * bookmarks.
  */
-int EBuffer::GetBookmarkForLine(int searchFrom, int searchForLine, char *&Name, EPoint &P) {
-    for (int i = searchFrom; i < BMCount; i++)
-        if (searchForLine==-1||BMarks[i].BM.Row==searchForLine) {
-            Name = BMarks[i].Name;
-            P = BMarks[i].BM;
-            return i+1;
+int EBuffer::GetBookmarkForLine(int searchFrom, int searchForLine, const EBookmark* &b) {
+    for (int i = searchFrom; i < (int)BMarks.size(); i++)
+	if (searchForLine == -1 || BMarks[i]->GetPoint().Row == searchForLine) {
+            b = BMarks[i];
+            return i + 1;
         }
     return -1;
 }
 
 int EBuffer::GotoBookmark(const char *Name) {
-    for (int i = 0; i < BMCount; i++)
-        if (strcmp(Name, BMarks[i].Name) == 0) {
-            return CenterNearPosR(BMarks[i].BM.Col, BMarks[i].BM.Row);
-        }
+    vector_iterate(EBookmark*, BMarks, it)
+        if ((*it)->IsName(Name))
+            return CenterNearPosR((*it)->GetPoint().Col, (*it)->GetPoint().Row);
+
     View->MView->Win->Choice(GPC_ERROR, "GotoBookmark", 1, "O&K", "Bookmark %s not found.", Name);
     return 0;
 }

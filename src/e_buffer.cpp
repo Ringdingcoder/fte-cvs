@@ -53,10 +53,6 @@ EBuffer::EBuffer(int createFlags, EModel **ARoot, const char * /*AName*/) :
     Match(-1, -1),
     MatchLen(0),
     MatchCount(0),
-#ifdef CONFIG_BOOKMARKS
-    BMCount(0),
-    BMarks(0),
-#endif
     MinRedraw(-1),
     MaxRedraw(-1),
     RedrawToEos(0)
@@ -74,10 +70,6 @@ EBuffer::EBuffer(int createFlags, EModel **ARoot, const char * /*AName*/) :
     rlst.Count = 0;
     rlst.Lines = 0;
     Routines = 0;
-#endif
-#ifdef CONFIG_WORD_HILIT
-    WordList = 0;
-    WordCount = 0;
 #endif
     //Name = strdup(AName);
     Allocate(0);
@@ -117,13 +109,9 @@ EBuffer::~EBuffer() {
     if (FileName)
 	free(FileName);
 #ifdef CONFIG_BOOKMARKS
-    if (BMCount != 0) {
-        for (int i = 0; i < BMCount; i++)
-            free(BMarks[i].Name);
-        free(BMarks);
-        BMarks = 0;
-        BMCount = 0;
-    }
+    vector_iterate(EBookmark*, BMarks, it)
+	delete *it;
+    BMarks.clear();
 #endif
 #ifdef CONFIG_OBJ_ROUTINE
     if (rlst.Lines) {
@@ -148,15 +136,9 @@ int EBuffer::Clear() {
 #ifdef CONFIG_SYNTAX_HILIT
     EndHilit = -1;
     StartHilit = 0;
-
-    while (WordCount--)
-    {
-        free(WordList[WordCount]);
-    }
-    free(WordList);
-
-    WordCount = 0;
-    WordList = 0;
+    vector_iterate(char*, WordList, it)
+        free(*it);
+    WordList.clear();
 #endif
 #ifdef CONFIG_OBJ_ROUTINE
     rlst.Count = 0;
@@ -422,8 +404,8 @@ int EBuffer::UpdateMarker(int Type, int Row, int Col, int Rows, int Cols) {
     }
 #endif
 #ifdef CONFIG_BOOKMARKS
-    for (int b = 0; b < BMCount; b++)
-        UpdateMark(BMarks[b].BM, Type, Row, Col, Rows, Cols);
+    vector_iterate(EBookmark*, BMarks, it)
+        UpdateMark((*it)->GetPoint(), Type, Row, Col, Rows, Cols);
 #endif
     
     if (OldBB.Row != BB.Row) {

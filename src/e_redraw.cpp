@@ -240,10 +240,9 @@ void EBuffer::DrawLine(TDrawBuffer B, int VRow, int C, int W, int &HilitX) {
 #ifdef CONFIG_BOOKMARKS
         if (BFI(this, BFI_ShowBookmarks)) {
             int i = 0;
-            char *Name;
-            EPoint P;
-            while ((i = GetBookmarkForLine(i, Row, Name, P)) != -1) {
-                if (strncmp(Name, "_BMK", 4) == 0) {
+            const EBookmark* eb;
+            while ((i = GetBookmarkForLine(i, Row, eb)) != -1) {
+                if (strncmp(eb->GetName(), "_BMK", 4) == 0) {
                     // User bookmark, hilite line
                     if (BFI(this, BFI_SeeThruSel))
                         MoveBgAttr(B, 0, W, hcPlain_Bookmark, W);

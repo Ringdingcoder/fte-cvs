@@ -105,35 +105,34 @@ SyntaxProc GetHilitProc(int id) {
 int EBuffer::HilitAddWord(const char *Word) {
     if (HilitFindWord(Word) == 1)
 	return 1;
-    WordList = (char **)realloc((void *)WordList, (1 + WordCount) * sizeof(char *));
-    if (WordList == 0) return 0;
-    WordList[WordCount++] = strdup(Word);
+    char *w = strdup(Word);
+    if (!w)
+        return 0;
+    WordList.push_back(w);
     FullRedraw();
     return 1;
 }
 
 int EBuffer::HilitFindWord(const char *Word) {
-    for (int i = 0; i < WordCount; i++) {
+    vector_iterate(char*, WordList, it) {
         if (BFI(this, BFI_MatchCase) == 1) {
-            if (strcmp(Word, WordList[i]) == 0) return 1;
+            if (strcmp(Word, *it) == 0) return 1;
         } else {
-            if (stricmp(Word, WordList[i]) == 0) return 1;
+            if (stricmp(Word, *it) == 0) return 1;
         }
     }
     return 0;
 }
 
 int EBuffer::HilitRemoveWord(const char *Word) {
-    for (int i = 0; i < WordCount; i++) {
+    vector_iterate(char*, WordList, it) {
         if (BFI(this, BFI_MatchCase) == 1) {
-            if (strcmp(Word, WordList[i]) != 0) continue;
+            if (strcmp(Word, *it) != 0) continue;
         } else {
-            if (stricmp(Word, WordList[i]) != 0) continue;
-        }
-        free(WordList[i]);
-        memmove(WordList + i, WordList + i + 1, sizeof(char *) * (WordCount - i - 1));
-        WordCount--;
-        WordList = (char **)realloc((void *)WordList, WordCount * sizeof(char *));
+            if (stricmp(Word, *it) != 0) continue;
+	}
+        free(*it);
+        WordList.erase(it);
         FullRedraw();
         return 1;
     }

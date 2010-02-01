@@ -435,8 +435,7 @@ int EBuffer::SaveTo(const char *AFileName) {
 
     int bindex;
     unsigned int blen = 0;
-    char *bname, book[1024] = "BOOK";
-    EPoint bpos;
+    char book[1024] = "BOOK";
 
     unsigned int len_start = 0, len_end = 0;
 
@@ -510,16 +509,20 @@ int EBuffer::SaveTo(const char *AFileName) {
 
         bindex = 0; blen = 0;
 #ifdef CONFIG_BOOKMARKS
-        if (BFI(this, BFI_SaveBookmarks) == 1 || BFI(this, BFI_SaveBookmarks) == 2) {
+	if (BFI(this, BFI_SaveBookmarks) == 1 || BFI(this, BFI_SaveBookmarks) == 2) {
+            const EBookmark* eb;
             blen = 4;     // Just after "BOOK"
-            while ((bindex = GetUserBookmarkForLine(bindex, l, bname, bpos)) != -1) {
+	    while ((bindex = GetUserBookmarkForLine(bindex, l, eb)) != -1) {
+                size_t l = strlen(eb->GetName());
                 // Skip too long bookmarks
-                if (strlen(bname) > 256 || blen + strlen(bname) + 6 + 6 > sizeof(book)) continue;
-                blen += sprintf(book + blen, "%04x%02x%s", bpos.Col, (int)strlen(bname), bname);
+		if (l > 256 || blen + l + 6 + 6 > sizeof(book))
+		    continue;
+                blen += sprintf(book + blen, "%04x%02x%s", eb->GetPoint().Col, (int)l, eb->GetName());
             }
-            if (blen != 4) {
+            if (blen != 4)
                 blen += sprintf(book + blen, "x%04xb", blen);
-            } else blen = 0;      // Signal, that no bookmarks were saved
+	    else
+		blen = 0;      // Signal, that no bookmarks were saved
         }
 #endif
 

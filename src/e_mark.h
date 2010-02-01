@@ -10,18 +10,18 @@ public:
     EMark(const char *aName, const char *aFileName, EPoint aPoint, EBuffer *aBuffer = 0);
     ~EMark();
 
-    int setBuffer(EBuffer *aBuffer);
-    int removeBuffer(EBuffer *aBuffer);
+    int SetBuffer(EBuffer *aBuffer);
+    int RemoveBuffer(EBuffer *aBuffer);
 
-    char *getName() { return Name; }
-    char *getFileName() { return FileName; }
-    EPoint &getPoint();
-    EBuffer *getBuffer() { return Buffer; }
+    const char *GetName() const { return Name.c_str(); }
+    const char *GetFileName() const { return FileName.c_str(); }
+    EPoint &GetPoint();
+    EBuffer *GetBuffer() { return Buffer; }
 private:
     /* bookmark */
-    char *Name;
+    fte::string Name;
+    fte::string FileName;
     EPoint Point;
-    char *FileName;
 
     /* bookmark in file */
     EBuffer *Buffer;
@@ -52,8 +52,7 @@ public:
     int saveToDesktop(FILE *fp);
 
 private:
-    int markCount;
-    EMark **marks;
+    fte::vector<EMark*> Marks;
 };
 
 extern EMarkIndex markIndex;

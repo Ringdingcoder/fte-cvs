@@ -1,5 +1,5 @@
-#ifndef __port_port_h
-#define __port_port_h
+#ifndef PORT_PORT_H
+#define PORT_PORT_H
 
 #ifdef	__cplusplus
 extern "C" {
@@ -35,9 +35,9 @@ extern "C" {
 /*	STRUCTURES: dosxEreg is a union containing all extended registers..	*/
 /*--------------------------------------------------------------------------*/
 #if defined(__32BIT__)
- #define __FILLER(a) unsigned short a;
+ #define PORT_FILLER(a) unsigned short a;
 #else
- #define __FILLER(a)
+ #define PORT_FILLER(a)
 #endif
 
 struct dosxEreg {
@@ -47,20 +47,20 @@ struct dosxEreg {
 };
 
 struct dosxBreg {
-	unsigned char al, ah;  __FILLER(_1)
-	unsigned char bl, bh;  __FILLER(_2)
-	unsigned char cl, ch;  __FILLER(_3)
-	unsigned char dl, dh;  __FILLER(_4)
+	unsigned char al, ah;	PORT_FILLER(_1)
+	unsigned char bl, bh;	PORT_FILLER(_2)
+	unsigned char cl, ch;	PORT_FILLER(_3)
+	unsigned char dl, dh;	PORT_FILLER(_4)
 };
 
 struct dosxWreg {
-	unsigned short ax;	__FILLER(_1)
-	unsigned short bx;	__FILLER(_2)
-	unsigned short cx;	__FILLER(_3)
-	unsigned short dx;	__FILLER(_4)
-	unsigned short bp;	__FILLER(_5)
-	unsigned short si;	__FILLER(_6)
-	unsigned short di;	__FILLER(_7)
+	unsigned short ax;	PORT_FILLER(_1)
+	unsigned short bx;	PORT_FILLER(_2)
+	unsigned short cx;	PORT_FILLER(_3)
+	unsigned short dx;	PORT_FILLER(_4)
+	unsigned short bp;	PORT_FILLER(_5)
+	unsigned short si;	PORT_FILLER(_6)
+	unsigned short di;	PORT_FILLER(_7)
 	unsigned short ds;
 	unsigned short es;
 	unsigned short fs;
@@ -216,7 +216,7 @@ int plThrdStart(void (*exfn)(void*), unsigned long stksz, void* args);
 int fnmatch(char* pat, char* in, int vv);
 
 
-#ifdef	DOSP32
+#ifdef DOSP32
 
 /*--------------------------------------------------------------------------*/
 /*  ENUM:   ePlScnType defines a screen type.				    */
@@ -278,14 +278,10 @@ struct plKbdInfo
 
 boolean plKbdReadF(struct plKbdInfo* ki);
 
-
-#endif
-
+#endif // DOSP32
 
 #ifdef	__cplusplus
 };
 #endif
 
-
-#endif
-
+#endif // PORT_PORT_H

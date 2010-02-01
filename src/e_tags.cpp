@@ -150,7 +150,7 @@ int TagsLoad(int id) { /*FOLD00*/
         NM = (char *)realloc((void *)TagMem, TagLen + (size_t)sb.st_size);
         if (NM != 0) {
             TagMem = NM;
-            ATagMem = TagLen + sb.st_size;
+            ATagMem = TagLen + (int)sb.st_size;
         }
     }
 

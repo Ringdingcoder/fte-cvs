@@ -68,6 +68,10 @@ public:
     bool operator!=(const char* s) const { return !operator==(s); }
     bool operator!=(const string& s) const { return !operator==(s); }
     bool operator<(const string& s) const;
+    char* begin() { return str; }
+    const char* begin() const { return str; }
+    char* end() { return str + size(); }
+    const char* end() const { return str + size(); }
     const char* c_str() const { return str; }
     string& operator=(const char* s);
     string& operator=(const string& s) { return operator=(s.str); }
@@ -82,6 +86,7 @@ public:
     size_type rfind(char c) const;
     void insert(size_type pos, const string& s);
     string& erase(size_type from = 0, size_type to = npos);
+    /* string extensions */
     int sprintf(const char* fmt, ...) _fte_printf_attr(2, 3); // allocates size
     // it will use just 1024 bytes for non _GNU_SOURCE compilation!!
     string& tolower();
@@ -151,8 +156,9 @@ public:
     reference back() { return *(end() - 1); }
     size_type capacity() const { return m_capacity; }
     void clear();
-    void erase(iterator pos);
-    size_type find(const Type& t) const
+    iterator erase(iterator pos);
+    iterator insert(iterator pos, const Type& t);
+    size_type find(reference t) const
     {
 	for (size_type i = 0; i < m_size; ++i)
 	    if (t == m_type[i])
@@ -164,7 +170,7 @@ public:
 	//printf("vector pop_back %d\n", m_size);
 	assert(m_size > 0);
 	m_size--;
-	if ((m_capacity >= 8) && (m_size < m_capacity / 4))
+	if ((m_capacity >= 2 * min_capacity) && (m_size < m_capacity / 4))
 	    copy(m_type, m_size, m_capacity / 2);
     }
     void pop_front()
@@ -180,7 +186,6 @@ public:
 	    copy(m_type, m_size, m_capacity * 2);
 	m_type[m_size++] = m;
     }
-    void remove(const_reference t);
     void reserve(size_type sz)
     {
 	if (sz > m_capacity)
@@ -193,7 +198,11 @@ public:
     }
     size_type size() const { return m_size; }
 
+    /* vector extensions */
+    void remove(const_reference t);
+
 protected:
+    static const size_type min_capacity = 4;
     Type* m_type;
     size_type m_capacity;
     size_type m_size;
@@ -219,10 +228,10 @@ void vector<Type>::clear()
 }
 
 template <class Type>
-void vector<Type>::copy(const Type* in, size_type sz, size_type alloc)
+void vector<Type>::copy(const_iterator in, size_type sz, size_type alloc)
 {
     Type* tmp = m_type;
-    m_capacity = (alloc < 4) ? 4 : alloc;
+    m_capacity = (alloc < min_capacity) ? min_capacity : alloc;
     //printf("COPY VECT %d  %d\n", sz, alloc);
     assert(sz <= m_capacity);
     m_type = new Type[m_capacity];
@@ -233,37 +242,58 @@ void vector<Type>::copy(const Type* in, size_type sz, size_type alloc)
 }
 
 template <class Type>
-void vector<Type>::erase(iterator pos)
+typename vector<Type>::iterator vector<Type>::erase(iterator pos)
 {
-    assert(m_size > 0);
-    if (m_size > 0)
-    {
-	while ((pos + 1) != end())
-	{
-	    pos[0] = pos[1];
-	    pos++;
-	}
-	pop_back();
-    }
+    assert(m_size > 0 && pos < end());
+    for (iterator p = pos; p + 1 < end(); ++p)
+	p[0] = p[1];
+    m_size--;
+    return pos;
 }
+
 template <class Type>
-void vector<Type>::remove(const Type& t)
+typename vector<Type>::iterator vector<Type>::insert(iterator pos, const Type& t)
 {
-    unsigned d = 0;
-    iterator from = begin();
-    for (iterator it = from; it != end(); it++)
+    const size_type n = pos - begin();
+    Type* tmp = m_type;
+
+    assert(n <= m_size);
+    if (m_size + 1 >= m_capacity)
     {
-	if (t == *it)
-	{
-	    d++;
-	    continue;
-	}
-	if (from != it)
-	    *from++ = *it;
+	m_capacity = (m_capacity < min_capacity) ? min_capacity : 2 * m_capacity;
+	tmp = new Type[m_capacity];
     }
-    while (d-- > 0)
-	pop_back();
-    //printf("REMOVE VECT %d\n", m_size);
+
+    for (size_type i = m_size; i > n; --i)
+	tmp[i] = m_type[i - 1];
+
+    tmp[n] = t;
+
+    if (tmp != m_type)
+    {
+	for (size_type i = 0; i < n; ++i)
+	    tmp[i] = m_type[i];
+	delete[] m_type;
+	m_type = tmp;
+    }
+
+    m_size++;
+
+    return m_type + n;
+}
+
+template <class Type>
+void vector<Type>::remove(const_reference t)
+{
+    iterator from = begin();
+    for (iterator it = from; it != end(); ++it)
+	if (t != *it)
+	{
+	    if (from != it)
+		*from = *it;
+	    ++from;
+	}
+    m_size -= (end() - from);
 }
 
 FTE_END_NAMESPACE;

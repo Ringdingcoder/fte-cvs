@@ -18,7 +18,6 @@
 #include "stl_fte.h"
 
 struct Error;
-struct aDir;
 class EBuffer;
 
 class EMessages: public EList {
@@ -32,12 +31,11 @@ class EMessages: public EList {
     int ReturnCode;
     int MatchCount;
     char MsgBuf[4096];
-    aDir*   curr_dir;                       // top of dir stack.
+    fte::vector<fte::string> DirLevel;                       // top of dir stack.
 public:
 
     EMessages(int createFlags, EModel **ARoot, const char *Dir, const char *ACommand);
     ~EMessages();
-    void freeDirStack();
 
     virtual void NotifyDelete(EModel *Deleting);
     void FindErrorFiles();

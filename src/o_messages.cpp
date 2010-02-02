@@ -33,21 +33,10 @@ struct Error {
     int line;
     int hilit;
 
-    Error(const char *_file, int _line, const char *_msg, const char *_text, int _hilit) :
-	Buf(0), file(_file), msg(_msg), text(_text), line(_line), hilit(_hilit)
+    Error(const char *fn, int ln, const char *mesg, const char *txt, int hlt) :
+	Buf(0), file(fn), msg(mesg), text(txt), line(ln), hilit(hlt)
     {}
 };
-
-struct aDir
-{
-    fte::string name;
-    aDir* next;
-
-    aDir(const char *n, aDir* l) :
-	name(n), next(l)
-    {}
-};
-
 
 static int NCRegexp = 0;
 static struct {
@@ -82,8 +71,7 @@ EMessages::EMessages(int createFlags, EModel **ARoot, const char *ADir, const ch
     BufLen(0),
     BufPos(0),
     ReturnCode(-1),
-    MatchCount(0),
-    curr_dir(0)
+    MatchCount(0)
 {
     CompilerMsgs = this;
     RunPipe(ADir, ACommand);
@@ -93,16 +81,6 @@ EMessages::~EMessages() {
     gui->ClosePipe(PipeId);
     FreeErrors();
     CompilerMsgs = 0;
-    freeDirStack();
-}
-
-void EMessages::freeDirStack()
-{
-    while (curr_dir) {
-        aDir *a = curr_dir;
-        curr_dir = curr_dir->next;
-        delete a;
-    }
 }
 
 void EMessages::NotifyDelete(EModel *Deleting) {
@@ -406,7 +384,13 @@ void EMessages::GetErrors() {
 		if (IsFullPath(fn))
 		    file = fn;
 		else {
-		    strlcpy(fn1, curr_dir ? curr_dir->name.c_str() : Directory.c_str(), sizeof(fn1));
+		    /*
+		     * for now - try only with top most dir
+		     * later we might try to find the file in all stacked dirs
+		     * as with parallel makes it's hard to guess the right directory path
+                     */
+		    strlcpy(fn1, DirLevel.size() ? DirLevel.back().c_str() : Directory.c_str(),
+			    sizeof(fn1));
                     Slash(fn1, 1);
                     strlcat(fn1, fn, sizeof(fn1));
                     if (ExpandPath(fn1, fn2, sizeof(fn2)) == 0)
@@ -434,9 +418,6 @@ void EMessages::GetErrors() {
             {
                 //** It *is* some make line.. Check for 'entering'..
                 pin += 2;
-                
-                //while(*pin != ':' && *pin != 0) pin++;
-                //pin++;
                 while (*pin == ' ')
                     pin++;
                 if (strnicmp(pin, t1, sizeof(t1)-1) == 0) {  // Entering?
@@ -444,32 +425,34 @@ void EMessages::GetErrors() {
                     pin += sizeof(t1)-1;
                     getWord(fn, pin);
                     //dbg("entering %s", fn);
-                    
-                    if (*fn)
+
+		    if (*fn)
                         //** Indeed entering directory! Link in list,
-                        curr_dir = new aDir(fn, curr_dir);
+			DirLevel.push_back(fn);
                 } else if (strnicmp(pin, t2, sizeof(t2)-1) == 0) {  // Leaving?
                     pin += sizeof(t2)-1;
                     getWord(fn, pin);                   // Get dirname,
                     //dbg("leaving %s", fn);
-                    
-                    aDir *a = curr_dir;
-                    if (a != 0)
-                        curr_dir = curr_dir->next;       // Remove from stack,
-                    if (a != 0 && stricmp(a->name.c_str(), fn) == 0) {
-                        //** Pop this item.
-                        delete a;
-                    } else {
+		    int found = 0;
+		    for (unsigned i = DirLevel.size(); i-- > 0;) {
+			/*
+			 * remove leaved director from our list of Dirs
+			 * as many users runs make in parallel mode
+			 * we might get pretty mangled order of dirs
+                         * so remove the last added with the same name
+                         */
+			if (stricmp(DirLevel[i].c_str(), fn) == 0) {
+			    DirLevel.erase(&DirLevel[i]);
+                            found++;
+			    break;
+			}
+		    }
+		    if (!found) {
                         //** Mismatch filenames -> error, and revoke stack.
                         //dbg("mismatch on %s", fn);
                         AddError(0, -1, 0, "fte: mismatch in directory stack!?");
-                        
-                        //** In this case we totally die the stack..
-                        while(a != 0) {
-                            delete a;
-                            if ((a = curr_dir))
-                                curr_dir = curr_dir->next;
-                        }
+			//** In this case we totally die the stack..
+                        DirLevel.clear();
                     }
                 }
             }

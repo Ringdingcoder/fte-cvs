@@ -671,8 +671,8 @@ static char *GetColor(CurPos &cp, char *name) {
         clr[2] = GetColor(cp, c)[2];
         clr[3] = 0;
 
-        memcpy((void *)color, (void *)clr, sizeof(color));
-        name = (char *)color;
+        memcpy(color, clr, sizeof(color));
+        name = color;
     } else {
         char *p = DefinedColor(name);
         if (!p)

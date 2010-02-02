@@ -143,7 +143,7 @@ int EBuffer::LoadFrom(const char *AFileName) {
             m = (char *)realloc((void *)m, (lm + partLen) + CHAR_TRESHOLD);
             if (m == NULL)
                 goto fail;
-            memcpy((void *)(m + lm), p, partLen);
+            memcpy(m + lm, p, partLen);
             lm += partLen;
             numChars += partLen;
 

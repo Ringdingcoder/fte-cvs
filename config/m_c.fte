@@ -165,7 +165,7 @@ colorize C {
 }
 
 mode C: PLAIN {      # C/C++ Mode
-    FileNameRx		= /\.\c{c|h|{cpp}|{cxx}|{hpp}|{cc}|{hh}|{xs}}$/;
+    FileNameRx		= /\.\c{c|h|{cpp}|{cxx}|{hpp}|{cc}|{hh}|{xs}|{tcc}}$/;
     HilitOn		= 1;
     Colorizer		= 'C';
     AutoIndent		= 1;

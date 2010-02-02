@@ -499,15 +499,15 @@ static int parseEsc(TEvent *Event)
     if ((key < 'a' && key) || key > 'z') {
 	/* read whole Esc sequence */
 	while (seqpos < 7 && (seq[seqpos] = (char)getkey(0))) {
-	    if (seq[seqpos] < ' ') {
-		SLang_ungetkey(seq[seqpos]);
+	    if ((unsigned char)seq[seqpos] < ' ') {
+		SLang_ungetkey((unsigned char)seq[seqpos]);
 		break;
 	    }
 	    seqpos++;
 	}
 	seq[seqpos] = 0;
     }
-
+    //if (seqpos > 1) fprintf(stderr, "Seq: %d  %s\n", seqpos, seq);
     if (seqpos == 5 && seq[0] == '[' && seq[1] == 'M') {
 #ifdef CONFIG_MOUSE
 	// FIXME: hardcoded timeouts

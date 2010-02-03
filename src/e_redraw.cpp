@@ -176,7 +176,7 @@ void EBuffer::DrawLine(TDrawBuffer B, int VRow, int C, int W, int &HilitX) {
         if (Row < RCount) {
             int f;
             int Folded = 0;
-            static char fold[20];
+            char fold[20];
             int l;
 
             f = FindFold(Row);
@@ -277,14 +277,14 @@ void EBuffer::Redraw() {
     ChColor SColor;
     int RowA, RowZ;
 
-    {
-        int W1, H1;
-        if (!(View && View->MView))
-            return;
-        View->MView->ConQuerySize(&W1, &H1);
+    int W1, H1;
+    if (!(View && View->MView))
+	return;
+    View->MView->ConQuerySize(&W1, &H1);
 
-        if (H1 < 1 || W1 < 1) return;
-    }
+    if (H1 < 1 || W1 < 1)
+	return;
+
     //    printf("Redraw\n");
     if (CP.Row >= VCount) CP.Row = VCount - 1;
     if (CP.Row < 0) CP.Row = 0;
@@ -578,7 +578,6 @@ int EBuffer::GetHilitWord(ChColor &clr, const char *str, size_t len, int IgnCase
 #ifdef CONFIG_WORD_HILIT
     {
         char s[CK_MAXLEN + 1];
-        s[CK_MAXLEN] = 0;
         memcpy(s, str, len);
         s[len] = 0;
         if (HilitFindWord(s)) {
@@ -613,7 +612,6 @@ int EBuffer::GetHilitWord(ChColor &clr, const char *str, size_t len, int IgnCase
         memcpy(s, str, len);
         s[len] = 0;
         if (BFI(this, BFI_HilitTags)&&TagDefined(s)) {
-	    //clr = 0x0A;
 	    clr = CLR_HexNumber;// Mode->fColorize->Colors[];
             return 1;
         }

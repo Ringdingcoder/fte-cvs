@@ -19,8 +19,8 @@ public:
     EBuffer *GetBuffer() { return Buffer; }
 private:
     /* bookmark */
-    fte::string Name;
-    fte::string FileName;
+    StlString Name;
+    StlString FileName;
     EPoint Point;
 
     /* bookmark in file */
@@ -52,7 +52,7 @@ public:
     int saveToDesktop(FILE *fp);
 
 private:
-    fte::vector<EMark*> Marks;
+    StlVector<EMark*> Marks;
 };
 
 extern EMarkIndex markIndex;

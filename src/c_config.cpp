@@ -588,7 +588,7 @@ static int ReadColors(CurPos &cp, const char *ObjName) {
                 if ((obj = GetObj(cp, len)) != CF_STRING) return -1;
                 if ((svalue = GetCharStr(cp, len)) == 0) return -1;
 
-                fte::string cl(ObjName);
+                StlString cl(ObjName);
 
                 cl += '.';
                 cl += sname;

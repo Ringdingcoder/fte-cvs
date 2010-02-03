@@ -21,9 +21,9 @@ struct Error;
 class EBuffer;
 
 class EMessages: public EList {
-    fte::string Command;
-    fte::string Directory;
-    fte::vector<Error*> ErrList;
+    StlString Command;
+    StlString Directory;
+    StlVector<Error*> ErrList;
     int Running;
     int BufLen;
     int BufPos;
@@ -31,7 +31,7 @@ class EMessages: public EList {
     int ReturnCode;
     int MatchCount;
     char MsgBuf[4096];
-    fte::vector<fte::string> DirLevel;                       // top of dir stack.
+    StlVector<StlString> DirLevel;                       // top of dir stack.
 public:
 
     EMessages(int createFlags, EModel **ARoot, const char *Dir, const char *ACommand);

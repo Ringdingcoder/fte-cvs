@@ -19,7 +19,7 @@
 
 class EDirectory: public EList {
 public:
-    fte::string Path;
+    StlString Path;
     FileInfo **Files;
     int FCount;
     int SearchLen;

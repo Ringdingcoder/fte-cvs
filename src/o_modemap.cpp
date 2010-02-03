@@ -91,7 +91,7 @@ void EventMapView::DumpMap(const char *aPrefix, EKeyMap *aKeyMap) {
     
 void EventMapView::DumpEventMap(EEventMap *aEventMap) {
     while (aEventMap) {
-	fte::string name(aEventMap->Name);
+	StlString name(aEventMap->Name);
 
         if (aEventMap->Parent) {
             name += ": ";

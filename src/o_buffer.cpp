@@ -1376,8 +1376,7 @@ int EBuffer::ConfQuit(GxView *V, int multiFile) {
 }
 
 void EBuffer::GetName(char *AName, size_t MaxLen) {
-    strncpy(AName, FileName, MaxLen);
-    AName[MaxLen - 1] = 0;
+    strlcpy(AName, FileName, MaxLen);
 }
 
 void EBuffer::GetPath(char *APath, size_t MaxLen) {
@@ -1408,22 +1407,10 @@ void EBuffer::GetInfo(char *AInfo, size_t /*MaxLen*/) {
 }
 
 void EBuffer::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SMaxLen) {
-    char *p;
 
-    if (MaxLen > 0) {
-        strncpy(ATitle, FileName, MaxLen - 1);
-        ATitle[MaxLen - 1] = 0;
-        if (SMaxLen > 0) {
-            p = SepRChr(FileName);
-            if (p) {
-                strncpy(ASTitle, p + 1, SMaxLen - 1);
-                ASTitle[SMaxLen - 1] = 0;
-            } else {
-                strncpy(ASTitle, FileName, SMaxLen - 1);
-                ASTitle[SMaxLen - 1] = 0;
-            }
-        }
-    }
+    strlcpy(ATitle, FileName, MaxLen);
+    char *p = SepRChr(FileName);
+    strlcpy(ASTitle, (p) ? p + 1 : FileName, SMaxLen);
 }
 
 #ifdef CONFIG_I_ASCII

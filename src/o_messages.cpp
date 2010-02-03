@@ -27,9 +27,9 @@ EMessages *CompilerMsgs = 0;
 
 struct Error {
     EBuffer *Buf;
-    fte::string file;
-    fte::string msg;
-    fte::string text;
+    StlString file;
+    StlString msg;
+    StlString text;
     int line;
     int hilit;
 
@@ -442,7 +442,7 @@ void EMessages::GetErrors() {
                          * so remove the last added with the same name
                          */
 			if (stricmp(DirLevel[i].c_str(), fn) == 0) {
-			    DirLevel.erase(&DirLevel[i]);
+			    DirLevel.erase(DirLevel.begin() + i);
                             found++;
 			    break;
 			}

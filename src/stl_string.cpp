@@ -1,5 +1,7 @@
 #include "stl_fte.h"
 
+#ifndef CONFIG_FTE_USE_STL
+
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -238,3 +240,5 @@ string& string::toupper()
 }
 
 FTE_END_NAMESPACE;
+
+#endif // CONFIG_FTE_USE_STL

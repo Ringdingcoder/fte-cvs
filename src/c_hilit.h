@@ -216,7 +216,7 @@ public:
 
 class EColorize {
 public:
-    fte::string Name;
+    StlString Name;
     EColorize *Next;
     EColorize *Parent;
     int SyntaxParser;

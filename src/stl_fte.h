@@ -3,11 +3,13 @@
 
 // some basic types for our C++ usage
 // we are replacing overbloated STL
+
+//#define CONFIG_FTE_USE_STL
+
+#ifndef CONFIG_FTE_USE_STL
 #include <inttypes.h>
 #include <sys/types.h>
 #include <assert.h>
-
-//#include <stdio.h>
 
 #define FTE_BEGIN_NAMESPACE namespace fte {
 #define FTE_END_NAMESPACE }
@@ -42,6 +44,15 @@ private:
     T* pointer;
 };
 
+/**
+ * Class to be used instead of line sequence:
+ *   delete p;
+ *   p = 0;
+ */
+//template <class T> inline void destroy(T*& p) { delete p; p = 0; }
+
+
+//#include <stdio.h>
 /**
  * Simple class for storing char*
  *
@@ -86,6 +97,7 @@ public:
     size_type rfind(char c) const;
     void insert(size_type pos, const string& s);
     string& erase(size_type from = 0, size_type to = npos);
+    void swap(string& s) { char *t = s.str; s.str = str; str = t; }
     /* string extensions */
     int sprintf(const char* fmt, ...) _fte_printf_attr(2, 3); // allocates size
     // it will use just 1024 bytes for non _GNU_SOURCE compilation!!
@@ -209,9 +221,6 @@ protected:
     void copy(const_iterator in, size_type size, size_type alloc);
 };
 
-#define vector_const_iterate(type, var, i) for (fte::vector<type>::const_iterator i = var.begin(); i != var.end(); ++i)
-#define vector_iterate(type, var, i) for (fte::vector<type>::iterator i = var.begin(); i != var.end(); ++i)
-
 template <class Type>
 vector<Type>::~vector()
 {
@@ -230,21 +239,22 @@ void vector<Type>::clear()
 template <class Type>
 void vector<Type>::copy(const_iterator in, size_type sz, size_type alloc)
 {
-    Type* tmp = m_type;
-    m_capacity = (alloc < min_capacity) ? min_capacity : alloc;
+    const size_type new_capacity = (alloc < min_capacity) ? min_capacity : alloc;
     //printf("COPY VECT %d  %d\n", sz, alloc);
-    assert(sz <= m_capacity);
-    m_type = new Type[m_capacity];
+    assert(sz <= new_capacity);
+    Type* tmp = new Type[new_capacity];
     for (size_type i = 0; i < sz; ++i)
-	m_type[i] = in[i];
+	tmp[i] = in[i];
+    delete[] m_type;
+    m_capacity = new_capacity;
     m_size = sz;
-    delete[] tmp;
+    m_type = tmp;
 }
 
 template <class Type>
 typename vector<Type>::iterator vector<Type>::erase(iterator pos)
 {
-    assert(m_size > 0 && pos < end());
+    assert(pos < end());
     for (iterator p = pos; p + 1 < end(); ++p)
 	p[0] = p[1];
     m_size--;
@@ -260,8 +270,9 @@ typename vector<Type>::iterator vector<Type>::insert(iterator pos, const Type& t
     assert(n <= m_size);
     if (m_size + 1 >= m_capacity)
     {
-	m_capacity = (m_capacity < min_capacity) ? min_capacity : 2 * m_capacity;
+	const size_type nc = (m_capacity < min_capacity) ? min_capacity : 2 * m_capacity;
 	tmp = new Type[m_capacity];
+        m_capacity = nc;
     }
 
     for (size_type i = m_size; i > n; --i)
@@ -296,6 +307,22 @@ void vector<Type>::remove(const_reference t)
     m_size -= (end() - from);
 }
 
+#define StlString   fte::string
+#define StlVector   fte::vector
+
 FTE_END_NAMESPACE;
+
+#else
+
+#include <string>
+#include <vector>
+
+#define StlString   std::string
+#define StlVector   std::vector
+
+#endif // CONFIG_FTE_USE_STL
+
+#define vector_const_iterate(type, var, i) for (StlVector<type>::const_iterator i = var.begin(); i != var.end(); ++i)
+#define vector_iterate(type, var, i) for (StlVector<type>::iterator i = var.begin(); i != var.end(); ++i)
 
 #endif // FTE_STL_H

@@ -123,7 +123,7 @@ struct RoutineList {
 
 #ifdef CONFIG_BOOKMARKS
 class EBookmark {
-    fte::string Name;
+    StlString Name;
     EPoint BM;
 public:
     EBookmark(const char* n, const EPoint& p) : Name(n), BM(p) {}
@@ -217,7 +217,7 @@ public:
     RxMatchRes MatchRes;
 
 #ifdef CONFIG_BOOKMARKS
-    fte::vector<EBookmark*> BMarks;
+    StlVector<EBookmark*> BMarks;
 #endif
 
 #ifdef CONFIG_OBJ_ROUTINE
@@ -229,7 +229,7 @@ public:
     int RedrawToEos;
 
 #ifdef CONFIG_WORD_HILIT
-    fte::vector<char*> WordList;
+    StlVector<char*> WordList;
     int WordCount;
 #endif
 #ifdef CONFIG_SYNTAX_HILIT

@@ -21,6 +21,10 @@
 
 #include "feature.h"
 
+#include <inttypes.h>
+#include <sys/types.h>
+#include <assert.h>
+
 #if defined(_DEBUG) && defined(MSVC) && defined(MSVCDEBUG)
 #include <crtdbg.h>
 

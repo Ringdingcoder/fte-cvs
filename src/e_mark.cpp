@@ -89,7 +89,7 @@ EMark *EMarkIndex::insert(const char *aName, const char *aFileName, EPoint aPoin
     }
 
     EMark* m = new EMark(aName, aFileName, aPoint, aBuffer);
-    Marks.insert(&Marks[L], m);
+    Marks.insert(Marks.begin() + L, m);
     return m;
 }
 
@@ -131,7 +131,7 @@ int EMarkIndex::remove(const char *aName) {
         cmp = strcmp(aName, Marks[M]->GetName());
         if (cmp == 0) {
             delete Marks[M];
-            Marks.erase(&Marks[M]);
+            Marks.erase(Marks.begin() + M);
             return 1;
         } else if (cmp > 0)
             L = M + 1;

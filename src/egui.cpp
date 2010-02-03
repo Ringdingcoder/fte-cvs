@@ -203,21 +203,19 @@ int EGUI::ExecMacro(GxView *view, int Macro) {
 }
 
 void EGUI::SetMsg(const char *Msg) {
-    char *CharMap;
     size_t len = Msg ? strlen(Msg) + 3 : 1;
+    char CharMap[len];
 
-    if ((CharMap = (char*)alloca(len))) {
-        if (Msg) {
-            CharMap[0] = '[';
-            memcpy(CharMap + 1, Msg, len);
-            CharMap[len + 1] = ']';
-            CharMap[len + 2] = 0;
-        } else
-            CharMap[0] = 0;
+    if (Msg) {
+	CharMap[0] = '[';
+	memcpy(CharMap + 1, Msg, len);
+	CharMap[len + 1] = ']';
+	CharMap[len + 2] = 0;
+    } else
+	CharMap[0] = 0;
 
-        if (ActiveModel)
-            ActiveModel->Msg(S_INFO, CharMap);
-    }
+    if (ActiveModel)
+	ActiveModel->Msg(S_INFO, CharMap);
 }
 
 void EGUI::SetOverrideMap(EKeyMap *aMap, const char *ModeName) {

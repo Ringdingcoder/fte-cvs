@@ -360,7 +360,7 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell)
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 {
-    PCell line = (PCell) alloca(sizeof(TCell) * W);
+    TCell line[W];
 
     for (int i = 0; i < W; i++)
 	line[i] = Cell;

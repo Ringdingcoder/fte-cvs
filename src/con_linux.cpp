@@ -113,7 +113,7 @@ int GetKeyEvent(TEvent *Event);
 int GetMouseEvent(TEvent *Event);
 
 static ssize_t conread(int fd, TCell *p, size_t len, off_t off) {
-    char *buf = (char *)alloca(len * 2);
+    char buf[len * 2];
     char *s = buf;
 
     lseek(fd, off, SEEK_SET);
@@ -134,7 +134,7 @@ static ssize_t conread(int fd, TCell *p, size_t len, off_t off) {
 }
 
 static ssize_t conwrite(int fd, TCell *p, size_t len, off_t off) {
-    char *buf = (char *)alloca(len * 2);
+    char buf[len * 2];
     char *c = buf;
 
     lseek(fd, off, SEEK_SET);

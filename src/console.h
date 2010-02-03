@@ -12,8 +12,6 @@
 
 #include "fte.h"
 
-#include <sys/types.h>
-
 /* don't change these, used as index */
 enum {
     DCH_C1,	/// upper left corner

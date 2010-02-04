@@ -411,6 +411,7 @@ int EBuffer::LoadFrom(const char *AFileName) {
     Msg(S_INFO, "Loaded %s.", AFileName);
     return 1;
 fail:
+    free(m);
     BFI(this, BFI_Undo) = SaveUndo;
     BFI(this, BFI_ReadOnly) = SaveReadOnly;
     close(fd);

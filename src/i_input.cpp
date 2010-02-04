@@ -16,7 +16,8 @@
 
 #include <ctype.h>
 
-ExInput::ExInput(const char *APrompt, char *ALine, size_t ABufLen, Completer AComp, int Select, int AHistId): ExView() {
+ExInput::ExInput(const char *APrompt, char *ALine, size_t ABufLen, Completer AComp, int Select, int AHistId)
+{
     assert(ABufLen > 0);
     MaxLen = ABufLen - 1;
     Comp = AComp;
@@ -80,7 +81,7 @@ void ExInput::HandleEvent(TEvent &Event) {
             break;
         case kbRight | kfCtrl:
             {
-                unsigned int len = strlen(Line);
+                size_t len = strlen(Line);
                 if (Pos < len) {
                     Pos++;
                     while (Pos < len) {

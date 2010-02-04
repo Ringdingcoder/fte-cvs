@@ -281,17 +281,15 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 {
-	for (int j = 0 ; j < H; j++) {
+	for (int j = 0 ; j < H; Cell += W, ++j)
 		memcpy(Cell, SavedScreen[Y+j]+X, W*sizeof(TCell));
-		Cell += W;
-	}
 
 	return 0;
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell)
 {
-	for (int j=0 ; j < H; j++)
+	for (int j = 0 ; j < H; ++j)
 		ConPutBox(X, Y+j, W, 1, Cell);
 
 	return 0;
@@ -299,13 +297,11 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell)
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 {
-	PCell line = (PCell) malloc(sizeof(TCell) * W);
-	int i;
+	TCell line[W];
 
-	for (i = 0; i < W; i++)
+	for (int i = 0; i < W; ++i)
 		line[i] = Cell;
 	ConPutLine(X, Y, W, H, line);
-	free(line);
 	return 0;
 }
 
@@ -313,7 +309,7 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 {
-	TCell* box = new TCell[W * H];
+	TCell box[W * H];
 	ConGetBox(X, Y, W, H, box);
 
 	//TCell fill(' ', Fill);
@@ -325,8 +321,6 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 		ConPutBox(X, Y + Count, W, H - Count, box);
 		//ConSetBox(X, Y, W, Count, fill);
 	}
-
-	delete[] box;
 
 	return 0;
 }

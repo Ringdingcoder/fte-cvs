@@ -30,22 +30,26 @@
 #include "c_config.h"
 #include "console.h"
 #include "gui.h"
+#include "s_string.h"
 #include "sysdep.h"
 
-#include <assert.h>
+#ifdef USE_GPM
+extern "C" {
+#include <gpm.h>
+}
+#endif
+
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/kd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <sys/vt.h>
 #include <sys/wait.h>
 #include <termios.h>
@@ -56,27 +60,21 @@
 #include <linux/kdev_t.h>
 #include <linux/kd.h>
 #include <linux/keyboard.h>
-#ifdef USE_GPM
-extern "C" {
-#include <gpm.h>
-}
-#endif
+
 
 #define MAX_PIPES 4
 //#define PIPE_BUFLEN 4096
 
-typedef struct {
+struct GPipe {
     int used;
     int id;
     int fd;
     int pid;
     int stopped;
     EModel *notify;
-} GPipe;
-
-static GPipe Pipes[MAX_PIPES] = {
-    { 0 }, { 0 }, { 0 }, { 0 }
 };
+
+static GPipe Pipes[MAX_PIPES];
 
 #define die(s) { printf("%s\n", s); exit(1); } while(0);
 
@@ -118,17 +116,16 @@ static ssize_t conread(int fd, TCell *p, size_t len, off_t off) {
 
     lseek(fd, off, SEEK_SET);
     ssize_t rlen = read(fd, buf, len * 2);
-    for (unsigned n = 0; n < rlen; n += 2) {
-        TChar ch;
+    for (unsigned n = 0; n < rlen; ++p, n += 2) {
+        char ch;
 #ifdef USE_SCRNMAP
 	if (!noCharTrans)
-	    ch = fromScreen[(unsigned char)*s++];
+	    ch = fromScreen[(unsigned char)s[n + (BYTE_ORDER == BIG_ENDIAN)]];
 	else
 #endif
-	    ch = *s++;
-	p->Set(ch, *s++);
-        p++;
+	    ch = s[n + (BYTE_ORDER == BIG_ENDIAN)];
 
+	p->Set(ch, s[n + (BYTE_ORDER != BIG_ENDIAN)]);
     }
     return rlen;
 }
@@ -394,43 +391,35 @@ int ConClear() {
 int ConSetTitle(const char */*Title*/, const char */*STitle*/) {
     return 0;
 }
-int ConGetTitle(char *Title, size_t /*MaxLen*/, char */*STitle*/, size_t /*SMaxLen*/) {
-    *Title = 0;
+int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
+    strlcpy(Title, "", MaxLen);
+    strlcpy(STitle, "", SMaxLen);
     return 0;
 }
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
-    int i, hidden = 0;
-
-    for (i = 0; i < H; i++) {
-        if (LastMouseY == Y + i) { mouseHide(); hidden = 1; }
+    for (int i = 0; i < H; Cell += W, ++i) {
+        if (LastMouseY == Y + i) mouseHide();
         conwrite(VcsFd, Cell, W, 4 + ((Y + i) * VideoCols + X) * 2);
-        Cell += W;
-        if (hidden) mouseShow();
+        if (LastMouseY == Y + i) mouseShow();
     }
     return 0;
 }
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
-    int i, hidden = 0;
-
-    for (i = 0; i < H; i++) {
-        if (LastMouseY == Y + i) { mouseHide(); hidden = 1; }
+    for (int i = 0; i < H; Cell += W, ++i) {
+        if (LastMouseY == Y + i) mouseHide();
         conread(VcsFd, Cell, W, 4 + ((Y + i) * VideoCols + X) * 2);
-        Cell += W;
-        if (hidden) mouseShow();
+        if (LastMouseY == Y + i) mouseShow();
     }
     return 0;
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
-    int i, hidden = 0;
 
-    for (i = 0; i < H; i++) {
-        if (LastMouseY == Y + i) { mouseHide(); hidden = 1; }
-        conwrite(VcsFd, Cell, W, 4 + ((Y + i) * VideoCols + X) * 2);
-        if (hidden) mouseShow();
-    }
+    for (int i = 0; i < H; ++i)
+	ConPutBox(X, Y + i, W, 1, Cell);
+
     return 0;
 }
 
@@ -442,13 +431,12 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
 }
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
-    PCell C;
-    TDrawBuffer B;
 
-    if (Count == 0 || Count > H) return 0;
-    C = (PCell)malloc(2 * W * H);
-    if (C == 0)
-        return -1;
+    if (Count == 0 || Count > H)
+	return 0;
+
+    TDrawBuffer B;
+    TCell C[W * H];
 #ifdef USE_SCRNMAP
     noCharTrans = 1;
 #endif
@@ -464,7 +452,6 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
 #ifdef USE_SCRNMAP
     noCharTrans = 0;
 #endif
-    free((void *)C);
     return 0;
 }
 
@@ -998,9 +985,7 @@ static PCell SavedScreen = 0;
 static int SavedX, SavedY, SaveCursorPosX, SaveCursorPosY;
 
 int SaveScreen() {
-    if (SavedScreen)
-        free(SavedScreen);
-
+    free(SavedScreen);
     ConQuerySize(&SavedX, &SavedY);
 
     SavedScreen = (PCell) malloc(SavedX * SavedY * sizeof(PCell));
@@ -1032,12 +1017,8 @@ GUI::~GUI() {
     RestoreScreen();
     ::ConDone();
 
-    if(SavedScreen)
-    {
-        free(SavedScreen);
-        SavedScreen = 0;
-    }
-
+    free(SavedScreen);
+    SavedScreen = 0;
     gui = 0;
 }
 
@@ -1056,7 +1037,9 @@ int GUI::ShowEntryScreen() {
 
     ConHideMouse();
     RestoreScreen();
-    do { gui->ConGetEvent(evKeyDown, &E, -1, 1, 0); } while (E.What != evKeyDown);
+    do {
+	gui->ConGetEvent(evKeyDown, &E, -1, 1, 0);
+    } while (E.What != evKeyDown);
     ConShowMouse();
     if (frames)
         frames->Repaint();

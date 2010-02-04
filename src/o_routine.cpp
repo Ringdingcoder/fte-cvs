@@ -31,14 +31,10 @@ RoutineView::RoutineView(int createFlags, EModel **ARoot, EBuffer *AB) :
             Row = i;
             break;
         }
-    {
-        char CTitle[256];
-    
-        sprintf(CTitle, "Routines %s: %d",
-                Buffer->FileName,
-                Buffer->rlst.Count);
-        SetTitle(CTitle);
-    }
+
+    char CTitle[256];
+    snprintf(CTitle, sizeof(CTitle), "Routines %s: %d", Buffer->FileName, Buffer->rlst.Count);
+    SetTitle(CTitle);
 };
 
 RoutineView::~RoutineView() {
@@ -132,4 +128,5 @@ void RoutineView::GetTitle(char *ATitle, size_t MaxLen, char *ASTitle, size_t SM
     snprintf(ATitle, MaxLen, "Routines: %s", Buffer->FileName);
     strlcpy(ASTitle, "Routines", SMaxLen);
 }
-#endif
+
+#endif // CONFIG_OBJ_ROUTINE

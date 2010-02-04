@@ -103,7 +103,10 @@ int EBuffer::CharOffset(ELine *L, int ScreenPos) {
 
 int EBuffer::Allocate(int ACount) {
     PELine *L;
-    
+
+    if (ACount > 1024 * 1024) // FIXME: - let's crash, before OOOM kills us
+	return 0;
+
     L = (PELine *) realloc(LL, sizeof(PELine) * (ACount + 1));
     if (L == 0 && ACount != 0)
         return 0;

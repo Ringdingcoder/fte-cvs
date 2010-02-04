@@ -318,6 +318,8 @@ public:
     }
 
     int VToR(int No) {
+	if (!VCount)
+            return 0;
 #ifdef DEBUG_EDITOR
         if (!(No < VCount)) {
             printf("Get No = %d\n", No);

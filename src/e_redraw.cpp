@@ -376,11 +376,14 @@ void EBuffer::Redraw() {
                 int B = A + W->Rows;
                 int Delta = 0;
 
+		if (!VCount)
+		    continue;
+
                 if (B > VCount) {
                     Delta += B - VCount;
                     B = VCount;
                 }
-                int LastV = VToR(VCount - 1);
+		int LastV = VToR(VCount - 1);
                 int B1 = (B == VCount) ? RCount : VToR(B);
 
                 if (B1 >= LastV) {
@@ -517,7 +520,7 @@ void EBuffer::Redraw() {
     //        MaxRedraw = MinRedraw = VToR(CP.Row);
 
     //printf("\n\nMinRedraw = %d, MaxRedraw = %d", MinRedraw, MaxRedraw);
-    if (MinRedraw == -1)
+    if (MinRedraw == -1 || !VCount)
         return;
 
     //    printf("Will redraw: %d to %d, to eos = %d\n", MinRedraw, MaxRedraw, RedrawToEos);

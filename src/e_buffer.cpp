@@ -467,6 +467,8 @@ int EBuffer::SetFileName(const char *AFileName, const char *AMode) {
 }
 
 int EBuffer::SetPos(int Col, int Row, int tabMode) {
+    if (!VCount)
+        return 1;
     assert (Col >= 0 && Row >= 0 && Row < VCount);
 
 #ifdef CONFIG_UNDOREDO

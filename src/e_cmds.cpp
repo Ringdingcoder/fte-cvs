@@ -13,12 +13,13 @@
 #include "s_util.h"
 
 int EBuffer::MoveLeft() {
-    if (CP.Col == 0) return 0;
+    if (CP.Col == 0 || !VCount) return 0;
     SetPos(CP.Col - 1, CP.Row, tmLeft);
     return 1;
 }
 
 int EBuffer::MoveRight() {
+    if (!VCount) return 0;
     SetPos(CP.Col + 1, CP.Row, tmRight);
     return 1;
 }
@@ -30,7 +31,7 @@ int EBuffer::MoveUp() {
 }
 
 int EBuffer::MoveDown() {
-    if (CP.Row == VCount - 1) return 0;
+    if (CP.Row + 1 >= VCount) return 0;
     SetPos(CP.Col, CP.Row + 1, tmLeft);
     return 1;
 }
@@ -706,7 +707,7 @@ int EBuffer::Delete() {
     if (BFI(this, BFI_WordWrap) == 2) {
         if (DoWrap(0) == 0) return 0;
         if (CP.Col >= LineLen(Y))
-            if (CP.Row < VCount - 1) {
+            if (CP.Row + 1 < VCount) {
                 if (SetPos(BFI(this, BFI_LeftMargin), CP.Row + 1) == 0) return 0;
             }
     }

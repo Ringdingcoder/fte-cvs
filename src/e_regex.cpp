@@ -21,6 +21,8 @@
 
 static int RegCount = 0;
 
+// *INDENT-OFF*
+
 #ifdef DEBUG
 static void RxDump(int N, RxNode *n);
 #endif
@@ -1129,3 +1131,4 @@ int main() {
 }
 
 #endif
+// *INDENT-ON*

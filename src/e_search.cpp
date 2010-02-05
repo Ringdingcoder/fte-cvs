@@ -17,6 +17,7 @@
 
 #include <ctype.h>
 
+// *INDENT-OFF*
 int ParseSearchOption(int replace, char c, unsigned long &opt) {
     switch (tolower(c)) {
     case 'a': opt |= SEARCH_ALL; break;      // search all occurances
@@ -1192,3 +1193,4 @@ int EBuffer::FindTagWord(ExState &State) {
     }
     return 0;
 }
+// *INDENT-ON*

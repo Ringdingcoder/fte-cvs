@@ -599,77 +599,79 @@ static int lock_state = 0;
 static int slock_state = 0;
 static char dead_key = 0;
 
+// *INDENT-OFF*
 static const struct {
     unsigned int KeySym;
     unsigned int KeyCode;
 } KeyTrans[] = {
-{ K(KT_FN, K_F1),               kbF1 },
-{ K(KT_FN, K_F2),               kbF2 },
-{ K(KT_FN, K_F3),               kbF3 },
-{ K(KT_FN, K_F4),               kbF4 },
-{ K(KT_FN, K_F5),               kbF5 },
-{ K(KT_FN, K_F6),               kbF6 },
-{ K(KT_FN, K_F7),               kbF7 },
-{ K(KT_FN, K_F8),               kbF8 },
-{ K(KT_FN, K_F9),               kbF9 },
-{ K(KT_FN, K_F10),              kbF10 },
-{ K(KT_FN, K_F11),              kbF11 },
-{ K(KT_FN, K_F12),              kbF12 },
-{ K(KT_FN, K_INSERT),           kbIns | kfGray },
-{ K(KT_FN, K_REMOVE),           kbDel | kfGray },
-{ K(KT_FN, K_FIND),             kbHome | kfGray },
-{ K(KT_FN, K_SELECT),           kbEnd | kfGray },
-{ K(KT_FN, K_PGUP),             kbPgUp | kfGray },
-{ K(KT_FN, K_PGDN),             kbPgDn | kfGray },
-{ K(KT_CUR, K_UP),              kbUp | kfGray },
-{ K(KT_CUR, K_DOWN),            kbDown | kfGray },
-{ K(KT_CUR, K_LEFT),            kbLeft | kfGray },
-{ K(KT_CUR, K_RIGHT),           kbRight | kfGray },
-{ K(KT_SPEC, K_ENTER),          kbEnter },
-{ K(KT_PAD, K_PENTER),          kbEnter | kfGray },
-{ K(KT_PAD, K_PPLUS),           '+' | kfGray },
-{ K(KT_PAD, K_PMINUS),          '-' | kfGray },
-{ K(KT_PAD, K_PSTAR),           '*' | kfGray },
-{ K(KT_PAD, K_PSLASH),          '/' | kfGray },
-{ K(KT_PAD, K_P0),              kbIns },
-{ K(KT_PAD, K_PDOT),            kbDel },
-{ K(KT_PAD, K_P1),              kbEnd },
-{ K(KT_PAD, K_P2),              kbDown },
-{ K(KT_PAD, K_P3),              kbPgDn },
-{ K(KT_PAD, K_P4),              kbLeft },
-{ K(KT_PAD, K_P5),              kbCenter },
-{ K(KT_PAD, K_P6),              kbRight },
-{ K(KT_PAD, K_P7),              kbHome },
-{ K(KT_PAD, K_P8),              kbUp },
-{ K(KT_PAD, K_P9),              kbPgUp },
-{ K(KT_FN, K_PAUSE),            kbPause },
-{ K(KT_LATIN, 27),              kbEsc },
-{ K(KT_LATIN, 13),              kbEnter },
-{ K(KT_LATIN, 8),               kbBackSp },
-{ K(KT_LATIN, 127),             kbDel },
-{ K(KT_LATIN, 9),               kbTab },
-{ K(KT_SHIFT, KG_SHIFT),        kbShift | kfSpecial | kfModifier },
-{ K(KT_SHIFT, KG_SHIFTL),       kbShift | kfSpecial | kfModifier },
-{ K(KT_SHIFT, KG_SHIFTR),       kbShift | kfSpecial | kfModifier | kfGray },
-{ K(KT_SHIFT, KG_CTRL),         kbCtrl | kfSpecial | kfModifier },
-{ K(KT_SHIFT, KG_CTRLL),        kbCtrl | kfSpecial | kfModifier },
-{ K(KT_SHIFT, KG_CTRLR),        kbCtrl | kfSpecial | kfModifier | kfGray },
-{ K(KT_SHIFT, KG_ALT),          kbAlt | kfSpecial | kfModifier },
-{ K(KT_SHIFT, KG_ALTGR),        kbAlt | kfSpecial | kfModifier | kfGray },
-{ 0, 0 }
+    { K(KT_FN, K_F1),         kbF1 },                                                 
+    { K(KT_FN, K_F2),         kbF2 },                                                 
+    { K(KT_FN, K_F3),         kbF3 },                                                 
+    { K(KT_FN, K_F4),         kbF4 },                                                 
+    { K(KT_FN, K_F5),         kbF5 },                                                 
+    { K(KT_FN, K_F6),         kbF6 },                                                 
+    { K(KT_FN, K_F7),         kbF7 },                                                 
+    { K(KT_FN, K_F8),         kbF8 },                                                 
+    { K(KT_FN, K_F9),         kbF9 },                                                 
+    { K(KT_FN, K_F10),        kbF10 },                                                
+    { K(KT_FN, K_F11),        kbF11 },                                                
+    { K(KT_FN, K_F12),        kbF12 },                                                
+    { K(KT_FN, K_INSERT),     kbIns | kfGray },                                       
+    { K(KT_FN, K_REMOVE),     kbDel | kfGray },                                       
+    { K(KT_FN, K_FIND),       kbHome | kfGray },                                      
+    { K(KT_FN, K_SELECT),     kbEnd | kfGray },                                       
+    { K(KT_FN, K_PGUP),       kbPgUp | kfGray },                                      
+    { K(KT_FN, K_PGDN),       kbPgDn | kfGray },                                      
+    { K(KT_CUR, K_UP),        kbUp | kfGray },                                        
+    { K(KT_CUR, K_DOWN),      kbDown | kfGray },                                      
+    { K(KT_CUR, K_LEFT),      kbLeft | kfGray },                                      
+    { K(KT_CUR, K_RIGHT),     kbRight | kfGray },                                     
+    { K(KT_SPEC, K_ENTER),    kbEnter },                                              
+    { K(KT_PAD, K_PENTER),    kbEnter | kfGray },                                     
+    { K(KT_PAD, K_PPLUS),     '+' | kfGray },                                         
+    { K(KT_PAD, K_PMINUS),    '-' | kfGray },                                         
+    { K(KT_PAD, K_PSTAR),     '*' | kfGray },                                         
+    { K(KT_PAD, K_PSLASH),    '/' | kfGray },                                         
+    { K(KT_PAD, K_P0),        kbIns },                                                
+    { K(KT_PAD, K_PDOT),      kbDel },                                                
+    { K(KT_PAD, K_P1),        kbEnd },                                                
+    { K(KT_PAD, K_P2),        kbDown },                                               
+    { K(KT_PAD, K_P3),        kbPgDn },                                               
+    { K(KT_PAD, K_P4),        kbLeft },                                               
+    { K(KT_PAD, K_P5),        kbCenter },                                             
+    { K(KT_PAD, K_P6),        kbRight },                                              
+    { K(KT_PAD, K_P7),        kbHome },                                               
+    { K(KT_PAD, K_P8),        kbUp },                                                 
+    { K(KT_PAD, K_P9),        kbPgUp },                                               
+    { K(KT_FN, K_PAUSE),      kbPause },                                              
+    { K(KT_LATIN, 27),        kbEsc },                                                
+    { K(KT_LATIN, 13),        kbEnter },                                              
+    { K(KT_LATIN, 8),         kbBackSp },                                             
+    { K(KT_LATIN, 127),       kbDel },                                                
+    { K(KT_LATIN, 9),         kbTab },                                                
+    { K(KT_SHIFT, KG_SHIFT),  kbShift | kfSpecial | kfModifier },                     
+    { K(KT_SHIFT, KG_SHIFTL), kbShift | kfSpecial | kfModifier },                     
+    { K(KT_SHIFT, KG_SHIFTR), kbShift | kfSpecial | kfModifier | kfGray },            
+    { K(KT_SHIFT, KG_CTRL),   kbCtrl  | kfSpecial | kfModifier },
+    { K(KT_SHIFT, KG_CTRLL),  kbCtrl  | kfSpecial | kfModifier },
+    { K(KT_SHIFT, KG_CTRLR),  kbCtrl  | kfSpecial | kfModifier | kfGray },
+    { K(KT_SHIFT, KG_ALT),    kbAlt   | kfSpecial | kfModifier },
+    { K(KT_SHIFT, KG_ALTGR),  kbAlt   | kfSpecial | kfModifier | kfGray },
+    { 0, 0 }
 };
 
 static const struct {
     unsigned int KeySym;
     char Diacr;
 } DeadTrans[] = {
-{ K_DGRAVE, '`' },
-{ K_DACUTE, '\'' },
-{ K_DCIRCM, '^' },
-{ K_DTILDE, '~' },
-{ K_DDIERE, '"' },
-{ K_DCEDIL, ',' }
+    { K_DGRAVE, '`' },
+    { K_DACUTE, '\'' },
+    { K_DCIRCM, '^' },
+    { K_DTILDE, '~' },
+    { K_DDIERE, '"' },
+    { K_DCEDIL, ',' }
 };
+// *INDENT-ON*
 
 int GetKeyEvent(TEvent *Event) {
     char keycode;
@@ -884,33 +886,31 @@ int GetKeyEvent(TEvent *Event) {
         // there is also a problem with shift-states (should update it
         // after getting back, but how to know when that happens, without
         // using VT_PROCESS?).
-        {
-            int vc = -1;
+	int vc = -1;
 
-//            switch (kbCode(Event->Key.Code) | kfCtrl) {
-            switch (kbCode(Event->Key.Code)) {
-            case kfAlt | kfCtrl | kbF1: vc = 1; break;
-            case kfAlt | kfCtrl | kbF2: vc = 2; break;
-            case kfAlt | kfCtrl | kbF3: vc = 3; break;
-            case kfAlt | kfCtrl | kbF4: vc = 4; break;
-            case kfAlt | kfCtrl | kbF5: vc = 5; break;
-            case kfAlt | kfCtrl | kbF6: vc = 6; break;
-            case kfAlt | kfCtrl | kbF7: vc = 7; break;
-            case kfAlt | kfCtrl | kbF8: vc = 8; break;
-            case kfAlt | kfCtrl | kbF9: vc = 9; break;
-            case kfAlt | kfCtrl | kbF10: vc = 10; break;
-            case kfAlt | kfCtrl | kbF11: vc = 11; break;
-            case kfAlt | kfCtrl | kbF12: vc = 12; break;
-            }
-            if (vc != -1) {
-                /* perform the console switch */
-                ioctl(VtFd, VT_ACTIVATE, vc);
-                Event->What = evNone;
-//                shift_state = lock_state = slock_state = 0; // bad
-                shift_state = slock_state = 0; // bad
-                return -1;
-            }
-        }
+	//            switch (kbCode(Event->Key.Code) | kfCtrl) {
+	switch (kbCode(Event->Key.Code)) {
+	case kfAlt | kfCtrl | kbF1: vc = 1; break;
+	case kfAlt | kfCtrl | kbF2: vc = 2; break;
+	case kfAlt | kfCtrl | kbF3: vc = 3; break;
+	case kfAlt | kfCtrl | kbF4: vc = 4; break;
+	case kfAlt | kfCtrl | kbF5: vc = 5; break;
+	case kfAlt | kfCtrl | kbF6: vc = 6; break;
+	case kfAlt | kfCtrl | kbF7: vc = 7; break;
+	case kfAlt | kfCtrl | kbF8: vc = 8; break;
+	case kfAlt | kfCtrl | kbF9: vc = 9; break;
+	case kfAlt | kfCtrl | kbF10: vc = 10; break;
+	case kfAlt | kfCtrl | kbF11: vc = 11; break;
+	case kfAlt | kfCtrl | kbF12: vc = 12; break;
+	}
+	if (vc != -1) {
+	    /* perform the console switch */
+	    ioctl(VtFd, VT_ACTIVATE, vc);
+	    Event->What = evNone;
+	    //                shift_state = lock_state = slock_state = 0; // bad
+	    shift_state = slock_state = 0; // bad
+	    return -1;
+	}
 
         return 0;
     }
@@ -926,8 +926,7 @@ int GetMouseEvent(TEvent *Event) {
     if (rc == 0) { 
         Gpm_Close();
         GpmFd = -1;
-    } else if (rc == -1) {
-    } else {
+    } else if (rc != -1) {
         //Gpm_FitEvent(&e);
         if ((e.type & GPM_MOVE) || (e.type & GPM_DRAG))
             Event->What = evMouseMove;
@@ -1168,7 +1167,7 @@ char ConGetDrawChar(unsigned int idx) {
         if (getenv("ISOCONSOLE")) {
             tab = GetGUICharacters("Linux", "++++-|+++++>.*-^v :[>");
         } else {
-            /* it's hard to pick usable charset between way to many fonts */
+            /* it's hard to pick usable chars between way to many fonts */
             tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A.\x0A\xC4\x18\x19\xB1\xB0\x1B\x1A");
             //tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\xFA\x04\xC4\x18\x19\xB1\xB0\x1B\x1A");
             //tab = GetGUICharacters("Linux", "\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");

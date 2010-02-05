@@ -53,7 +53,7 @@
  * \C           Match case sensitively from here on
  * \c           Match case ingnore from here on
  */
-
+// *INDENT-OFF*
 #define RE_NOTHING         0  // nothing
 #define RE_JUMP            1  // jump to
 #define RE_BREAK           2  // break |
@@ -88,7 +88,8 @@
 
 #define NSEXPS            64  // for replace only 0-9
 
-#define RX_CASE         1  // matchcase
+#define RX_CASE            1  // matchcase
+// *INDENT-ON*
 
 struct RxNode {
     short fWhat;

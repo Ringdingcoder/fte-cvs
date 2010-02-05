@@ -275,81 +275,80 @@ static void DrawMouse(int Show)
 		MOUSCursen(FALSE);
 }
 
+// *INDENT-OFF*
 static struct { // TransCharScan
-	unsigned short CharScan;
-	TKeyCode KeyCode;
+    unsigned short CharScan;
+    TKeyCode KeyCode;
 } TransCharScan[] = {
-	{ 0x0100, kbEsc },					   { 0x011B, kbEsc },
-	{ 0x1C0D, kbEnter },				   { 0x1C0A, kbEnter },
-	{ 0x1C00, kbEnter },				   { 0xE00D, kbEnter | kfGray },
-	{ 0xA600, kbEnter | kfGray },		   { 0xE00A, kbEnter | kfGray },
-	{ 0x0E08, kbBackSp },				   { 0x0E7F, kbBackSp },
-	{ 0x0E00, kbBackSp },				   { 0x0F09, kbTab },
-	{ 0x9400, kbTab },					   { 0xA500, kbTab },
-	{ 0x0F00, kbTab },					   { 0x4E00, '+' | kfGray },
-	{ 0x9000, '+' | kfGray },              { 0x4E2B, '+' | kfGray },
-	{ 0x4A00, '-' | kfGray },              { 0x8E00, '-' | kfGray },
-	{ 0x4A2D, '-' | kfGray },              { 0x3700, '*' | kfGray },
-	{ 0x9600, '*' | kfGray },              { 0x372A, '*' | kfGray },
-	{ 0xE02F, '/' | kfGray },              { 0xA400, '/' | kfGray },
-	{ 0x9500, '/' | kfGray },              { 0x0300, 0 }
+    { 0x0100, kbEsc },           { 0x011B, kbEsc },
+    { 0x1C0D, kbEnter },         { 0x1C0A, kbEnter },
+    { 0x1C00, kbEnter },         { 0xE00D, kbEnter | kfGray },
+    { 0xA600, kbEnter | kfGray },{ 0xE00A, kbEnter | kfGray },
+    { 0x0E08, kbBackSp },        { 0x0E7F, kbBackSp },
+    { 0x0E00, kbBackSp },        { 0x0F09, kbTab },
+    { 0x9400, kbTab },           { 0xA500, kbTab },
+    { 0x0F00, kbTab },           { 0x4E00, '+' | kfGray },
+    { 0x9000, '+' | kfGray },    { 0x4E2B, '+' | kfGray },
+    { 0x4A00, '-' | kfGray },    { 0x8E00, '-' | kfGray },
+    { 0x4A2D, '-' | kfGray },    { 0x3700, '*' | kfGray },
+    { 0x9600, '*' | kfGray },    { 0x372A, '*' | kfGray },
+    { 0xE02F, '/' | kfGray },    { 0xA400, '/' | kfGray },
+    { 0x9500, '/' | kfGray },    { 0x0300, 0 }
 };
 
 static struct { // TransScan
-	int ScanCode;
-	TKeyCode KeyCode;
+    int ScanCode;
+    TKeyCode KeyCode;
 } TransScan[] = {
-	{ 0x78, '1' }, { 0x79, '2' }, { 0x7A, '3' }, { 0x7B, '4' }, { 0x7C, '5' },
-	{ 0x7D, '6' }, { 0x7E, '7' }, { 0x7F, '8' }, { 0x80, '9' }, { 0x81, '0' },
+    { 0x78, '1' }, { 0x79, '2' }, { 0x7A, '3' }, { 0x7B, '4' }, { 0x7C, '5' },
+    { 0x7D, '6' }, { 0x7E, '7' }, { 0x7F, '8' }, { 0x80, '9' }, { 0x81, '0' },
 
-	{ 0x10, 'Q' }, { 0x11, 'W' }, { 0x12, 'E' }, { 0x13, 'R' }, { 0x14, 'T' },
-	{ 0x15, 'Y' }, { 0x16, 'U' }, { 0x17, 'I' }, { 0x18, 'O' }, { 0x19, 'P' },
+    { 0x10, 'Q' }, { 0x11, 'W' }, { 0x12, 'E' }, { 0x13, 'R' }, { 0x14, 'T' },
+    { 0x15, 'Y' }, { 0x16, 'U' }, { 0x17, 'I' }, { 0x18, 'O' }, { 0x19, 'P' },
 
-	{ 0x1E, 'A' }, { 0x1F, 'S' }, { 0x20, 'D' }, { 0x21, 'F' }, { 0x22, 'G' },
-	{ 0x23, 'H' }, { 0x24, 'J' }, { 0x25, 'K' }, { 0x26, 'L' },
+    { 0x1E, 'A' }, { 0x1F, 'S' }, { 0x20, 'D' }, { 0x21, 'F' }, { 0x22, 'G' },
+    { 0x23, 'H' }, { 0x24, 'J' }, { 0x25, 'K' }, { 0x26, 'L' }, { 0x2C, 'Z' },
+    { 0x2D, 'X' }, { 0x2E, 'C' }, { 0x2F, 'V' }, { 0x30, 'B' }, { 0x31, 'N' },
+    { 0x32, 'M' }, { 0x29, '`' }, { 0x82, '-' }, { 0x83, '=' }, { 0x2B, '\\' },
+    { 0x1A, '[' }, { 0x1B, ']' }, { 0x27, ';' }, { 0x28, '\'' }, { 0x33, ',' },
+    { 0x34, '.' }, { 0x35, '/' }, { 0x37, '*' }, { 0x4E, '+' }, { 0x4A, '-' },
 
-	{ 0x2C, 'Z' }, { 0x2D, 'X' }, { 0x2E, 'C' }, { 0x2F, 'V' }, { 0x30, 'B' },
-	{ 0x31, 'N' }, { 0x32, 'M' },
+    { 0x3B, kbF1    }, { 0x3C, kbF2     }, { 0x3D, kbF3    },
+    { 0x3E, kbF4    }, { 0x3F, kbF5     }, { 0x40, kbF6    },
+    { 0x41, kbF7    }, { 0x42, kbF8     }, { 0x43, kbF9    },
+    { 0x44, kbF10   }, { 0x85, kbF11    }, { 0x86, kbF12   },
 
-	{ 0x29, '`' }, { 0x82, '-' }, { 0x83, '=' }, { 0x2B, '\\' }, { 0x1A, '[' },
-	{ 0x1B, ']' }, { 0x27, ';' }, { 0x28, '\'' }, { 0x33, ',' }, { 0x34, '.' },
-	{ 0x35, '/' }, { 0x37, '*' }, { 0x4E, '+' }, { 0x4A, '-' },
+    { 0x54, kbF1    }, { 0x55, kbF2     }, { 0x56, kbF3    },
+    { 0x57, kbF4    }, { 0x58, kbF5     }, { 0x59, kbF6    },
+    { 0x5A, kbF7    }, { 0x5B, kbF8     }, { 0x5C, kbF9    },
+    { 0x5D, kbF10   }, { 0x87, kbF11    }, { 0x88, kbF12   },
 
-	{ 0x3B, kbF1	},	{ 0x3C, kbF2	},	{ 0x3D, kbF3	},
-	{ 0x3E, kbF4	},	{ 0x3F, kbF5	},	{ 0x40, kbF6	},
-	{ 0x41, kbF7	},	{ 0x42, kbF8	},	{ 0x43, kbF9	},
-	{ 0x44, kbF10	},	{ 0x85, kbF11	},	{ 0x86, kbF12	},
+    { 0x5E, kbF1    }, { 0x5F, kbF2     }, { 0x60, kbF3    },
+    { 0x61, kbF4    }, { 0x62, kbF5     }, { 0x63, kbF6    },
+    { 0x64, kbF7    }, { 0x65, kbF8     }, { 0x66, kbF9    },
+    { 0x67, kbF10   }, { 0x89, kbF11    }, { 0x8A, kbF12   },
 
-	{ 0x54, kbF1	},	{ 0x55, kbF2	},	{ 0x56, kbF3	},
-	{ 0x57, kbF4	},	{ 0x58, kbF5	},	{ 0x59, kbF6	},
-	{ 0x5A, kbF7	},	{ 0x5B, kbF8	},	{ 0x5C, kbF9	},
-	{ 0x5D, kbF10	},	{ 0x87, kbF11	},	{ 0x88, kbF12	},
+    { 0x68, kbF1    }, { 0x69, kbF2     }, { 0x6A, kbF3    },
+    { 0x6B, kbF4    }, { 0x6C, kbF5     }, { 0x6D, kbF6    },
+    { 0x6E, kbF7    }, { 0x6F, kbF8     }, { 0x70, kbF9    },
+    { 0x71, kbF10   }, { 0x8B, kbF11    }, { 0x8C, kbF12   },
 
-	{ 0x5E, kbF1	},	{ 0x5F, kbF2	},	{ 0x60, kbF3	},
-	{ 0x61, kbF4	},	{ 0x62, kbF5	},	{ 0x63, kbF6	},
-	{ 0x64, kbF7	},	{ 0x65, kbF8	},	{ 0x66, kbF9	},
-	{ 0x67, kbF10	},	{ 0x89, kbF11	},	{ 0x8A, kbF12	},
+    { 0x47, kbHome  }, { 0x48, kbUp     }, { 0x49, kbPgUp  },
+    { 0x4B, kbLeft  }, { 0x4C, kbCenter }, { 0x4D, kbRight },
+    { 0x4F, kbEnd   }, { 0x50, kbDown   }, { 0x51, kbPgDn  },
+    { 0x52, kbIns   }, { 0x53, kbDel    }, { 0x77, kbHome  },
 
-	{ 0x68, kbF1	},	{ 0x69, kbF2	},	{ 0x6A, kbF3	},
-	{ 0x6B, kbF4	},	{ 0x6C, kbF5	},	{ 0x6D, kbF6	},
-	{ 0x6E, kbF7	},	{ 0x6F, kbF8	},	{ 0x70, kbF9	},
-	{ 0x71, kbF10	},	{ 0x8B, kbF11	},	{ 0x8C, kbF12	},
+    { 0x8D, kbUp    }, { 0x84, kbPgUp   }, { 0x73, kbLeft  },
+    { 0x74, kbRight }, { 0x75, kbEnd    }, { 0x91, kbDown  },
+    { 0x76, kbPgDn  }, { 0x92, kbIns    }, { 0x93, kbDel   },
 
-	{ 0x47, kbHome	},	{ 0x48, kbUp	},	{ 0x49, kbPgUp	},
-	{ 0x4B, kbLeft	},	{ 0x4C, kbCenter},	{ 0x4D, kbRight },
-	{ 0x4F, kbEnd	},	{ 0x50, kbDown	},	{ 0x51, kbPgDn	},
-	{ 0x52, kbIns	},	{ 0x53, kbDel	},
-
-	{ 0x77, kbHome	},	{ 0x8D, kbUp	},	{ 0x84, kbPgUp	},
-	{ 0x73, kbLeft	},						{ 0x74, kbRight },
-	{ 0x75, kbEnd	},	{ 0x91, kbDown	},	{ 0x76, kbPgDn	},
-	{ 0x92, kbIns	},	{ 0x93, kbDel	},
-
-	{ 0x97, kbHome	| kfGray },  { 0x98, kbUp	 | kfGray },  { 0x99, kbPgUp  | kfGray },
-	{ 0x9B, kbLeft	| kfGray }, 							  { 0x9D, kbRight | kfGray },
-	{ 0x9F, kbEnd	| kfGray },  { 0xA0, kbDown  | kfGray },  { 0xA1, kbPgDn  | kfGray },
-	{ 0xA2, kbIns	| kfGray },  { 0xA3, kbDel	 | kfGray }
+    { 0x97, kbHome  | kfGray }, { 0x98, kbUp    | kfGray },
+    { 0x99, kbPgUp  | kfGray }, { 0xA1, kbPgDn  | kfGray },
+    { 0x9B, kbLeft  | kfGray }, { 0x9D, kbRight | kfGray },
+    { 0x9F, kbEnd   | kfGray }, { 0xA0, kbDown  | kfGray },
+    { 0xA2, kbIns   | kfGray }, { 0xA3, kbDel   | kfGray }
 };
+// *INDENT-ON*
 
 int ReadKbdEvent(TEvent *Event, int Wait)
 {
@@ -1137,10 +1136,9 @@ int ConPutEvent(TEvent Event)
 char ConGetDrawChar(unsigned int index) {
     static const char *tab = NULL;
 
-    if (!tab) {
-        //tab = GetGUICharacters ("DOS","Ú¿ÀÙÄ³ÂÃ´ÁÅ\x1AúÄ±°");
-        tab = GetGUICharacters ("DOS","Ú¿ÀÙÄ³ÂÃ´ÁÅ\x1Aú\x04Ä\x18\x19±°\x1B\x1A");
-    }
+    if (!tab)
+        tab = GetGUICharacters ("DOS","\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\xFA\x04\xC4\x18\x19\B1\xB0\x1B\x1A");
+
     assert(index < strlen(tab) && strlen(tab) > 20);
 
     return tab[index];

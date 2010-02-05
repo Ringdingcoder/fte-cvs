@@ -608,13 +608,13 @@ static int ResizeWindow()
 	return 1;
 }
 
-int ConGetEvent(TEventMask /*EventMask */ ,
-		TEvent * Event, int WaitTime, int Delete)
+// *INDENT-OFF*
+int ConGetEvent(TEventMask /*EventMask */, TEvent* Event, int WaitTime, int Delete)
 {
     int rtn;
-    TKeyEvent *KEvent = &(Event->Key);
+    TKeyEvent* KEvent = &(Event->Key);
 
-    if (ScreenSizeChanged && ResizeWindow() > 0) {
+    if (ScreenSizeChanged && (ResizeWindow() > 0)) {
 	Event->What = evCommand;
 	Event->Msg.Command = cmResize;
 	return 1;
@@ -629,7 +629,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	return 1;
     }
 
-    if ((rtn=WaitFdPipeEvent(Event, STDIN_FILENO, -1)) <= 0)
+    if ((rtn = WaitFdPipeEvent(Event, STDIN_FILENO, -1)) <= 0)
 	return rtn;
 
     if (Event->What == evNotify)
@@ -640,46 +640,41 @@ int ConGetEvent(TEventMask /*EventMask */ ,
     KEvent->Code = 0;
 
     //fprintf(stderr, "READKEY %d %s\n", ch, keyname(ch));
-    if(SevenBit && ch > 127 && ch < 256)
-    {
+    if (SevenBit && (ch > 127) && (ch < 256)) {
 	KEvent->Code |= kfAlt;
 	ch -= 128;
-	if(ch > 0x60 && ch < 0x7b ) /* Alt-A == Alt-a*/
-	    ch-=0x20;
+	if ((ch > 0x60) && (ch < 0x7b)) /* Alt-A == Alt-a*/
+	    ch -= 0x20;
     }
 
     if (ch < 0) Event->What = evNone;
     else if (ch == 27) {
 	//fprintf(stderr, "ESCAPEEVENT %x\n", (int)ch);
-	keypad(stdscr,0);
+	keypad(stdscr, 0);
 	timeout(escDelay);
 	if (!(KEvent->Code = ConGetEscEvent()))
 	    Event->What = evNone;
 	timeout(-1);
-	keypad(stdscr,1);
-    }
-    else if (ch == '\n' || ch == '\r')
+	keypad(stdscr, 1);
+    } else if ((ch == '\n') || (ch == '\r'))
 	KEvent->Code |= kbEnter;
     else if (ch == '\t')
 	KEvent->Code |= kbTab;
-    else if (ch >= 'A' && ch <= 'Z')
+    else if ((ch >= 'A') && (ch <= 'Z'))
 	KEvent->Code |= kfShift | ch;
     else if (ch < 32)
-	KEvent->Code |=  (kfCtrl | (ch + 'A' - 1)); // +0100
+	KEvent->Code |= (kfCtrl | (ch + 'A' - 1)); // +0100
     else if (ch < 256)
 	KEvent->Code |= ch;
-    else // > 255
-    {
-	switch(ch)
-	{
-	case KEY_RESIZE:
-	    break; // already handled
+    else   // > 255
+	switch (ch) {
 #ifdef CONFIG_MOUSE
 	case KEY_MOUSE:
 	    Event->What = evNone;
 	    ConGetMouseEvent(Event);
 	    break;
 #endif
+	case KEY_RESIZE: break; // already handled
 	case KEY_UP: KEvent->Code = kbUp; break;
 	case KEY_SR: KEvent->Code = kfShift | kbUp; break;
 	case 559: KEvent->Code = kfAlt | kbUp; break; // kUP3
@@ -801,24 +796,23 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 	case KEY_ENTER: KEvent->Code = kbEnter; break; /* shift enter */
 
 	default:
-	    if(key_sdown != 0 && ch == key_sdown)
+	    if ((key_sdown != 0) && (ch == key_sdown))
 		KEvent->Code = kfShift | kbDown;
-	    else if(key_sup != 0 && ch == key_sup)
+	    else if ((key_sup != 0) && (ch == key_sup))
 		KEvent->Code = kfShift | kbUp;
-	    else
-	    {
+	    else {
 		Event->What = evNone;
-		//	fprintf(stderr, "Unknown 0x%x %d\n", ch, ch);
+		//fprintf(stderr, "Unknown 0x%x %d\n", ch, ch);
 	    }
 	    break;
 	}
-    }
 
     if (!Delete)
 	Prev = *Event;
 
     return 1;
 }
+// *INDENT-ON*
 
 char ConGetDrawChar(unsigned int idx)
 {

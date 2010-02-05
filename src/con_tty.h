@@ -8,6 +8,7 @@
  * though there are some obviously visible bitmasks
  */
 
+#include "fte.h"
 
 #include "conkbd.h"
 
@@ -17,10 +18,12 @@
 #include <string.h>
 
 
-static const struct TTYDecodeSeq {
+struct TTYDecodeSeq {
     char seq[8];
     int key;
-} tty_seq_table_c[] = {
+};
+
+static const TTYDecodeSeq tty_seq_table_c[] = {
     /* '%' replaced with 2..8  with modified  Alt | Ctrl | Shift */
     { "[1;%A", kbUp },
     { "[%A", kbUp },
@@ -144,7 +147,7 @@ static const struct TTYDecodeSeq {
 };
 
 /* Sorted via qsort in runtime so there is NO const here! */
-static struct TTYDecodeSeq tty_esc_seq[7 * sizeof(tty_seq_table_c) / sizeof(tty_seq_table_c[0])];
+static struct TTYDecodeSeq tty_esc_seq[FTE_ARRAY_SIZE(tty_seq_table_c) * 7];
 static unsigned tty_seq_size = 0;
 
 static int TTYCompSeq(const void *a, const void *b)
@@ -196,8 +199,8 @@ static inline int TTYParseEsc(const char *seq)
 
 	//if ((c = strcmp(seq, tty_esc_seq[H].seq)) == 0) {
 	// replace strcmp with direct char compare
-	for (i = 0; (tty_esc_seq[H].seq[i]
-		     && !(c = (seq[i] - tty_esc_seq[H].seq[i]))); ++i)
+	for (i = 0; (!(c = (seq[i] - tty_esc_seq[H].seq[i]))
+		     && tty_esc_seq[H].seq[i]); ++i)
 	    ;
 	if (c == 0 && tty_esc_seq[H].seq[i] == 0) {
 	    //fprintf(stderr, "Found key: 0x%x  %s  %s\n",

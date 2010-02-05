@@ -243,7 +243,7 @@ static int InitXColors() {
     return 0;
 }
 
-
+// *INDENT-OFF*
 static struct {
     long keysym;
     long keycode;
@@ -312,6 +312,7 @@ static struct {
     { 0x1000FF75,        kbTab | kfShift },
     { 0, 0 }
 };
+// *INDENT-ON*
 
 void ConvertKeyToEvent(KeySym key, KeySym key1, char *keyname, int etype, int state, TEvent *Event) {
     unsigned int myState = 0;
@@ -2004,9 +2005,9 @@ void DieError(int rc, const char *msg, ...) {
 }
 
 char ConGetDrawChar(unsigned int index) {
-    static const char tab[] = "\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ";
+    static const char tab[] = "\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12\x01\x01 \x02";
 
-    assert(index < strlen(tab));
+    assert(index < sizeof(tab) - 1);
 
     return tab[index];
 }

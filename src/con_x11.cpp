@@ -752,6 +752,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         return -1;
     }
     //XClearArea(display, win, X, Y, W * FontCX, H * FontCY, False);
+    //DebugShowArea(X, Y, W, H, 13);
 
     //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
     for (i = 0; i < H; i++) {
@@ -793,14 +794,14 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
                                    x * FontCX, FontCYD + (Y + i) * FontCY,
                                    temp, l);
 #endif
-            DebugShowArea(x, Y + i, l, 1, 13);
+            //DebugShowArea(x, Y + i, l, 1, 13);
             //temp[l] = 0; printf("%s\n", temp);
             len -= l;
             x += l;
         }
 /*      if (x < ScreenCols - 1) {
             printf("XX %d   %d   %d\n", X, x, W);
-            XFillRectangle(display, win, GCs[15 * 16 + 7],
+            XFillRectangle(display, win, GCs[15 * 16 + 7],
                            x * FontCX, (Y + i) * FontCY,
                            (ScreenCols - x - 1) * FontCX, FontCY);
         }
@@ -1380,6 +1381,7 @@ static void ProcessXEvents(TEvent *Event) {
             //state = XEventsQueued(display, QueuedAfterReading); fprintf(stderr, "Events Expose %d\n", state);
             //XFlush(display);
             //XSync(display, 0);
+            //int cnt = 0;
             const int maxx = ScreenCols * FontCX;
             const int maxy = ScreenRows * FontCY;
             do {
@@ -1390,6 +1392,9 @@ static void ProcessXEvents(TEvent *Event) {
                     rect.height= (short) event.xexpose.height;
                     XUnionRectWithRegion(&rect, region, region);
                 }
+                //fprintf(stderr, "EXPOSE %d:%d   x:%3d y:%3d  w:%3d h:%3d\n", cnt++, event.xexpose.count,
+                //	event.xexpose.x / FontCX, event.xexpose.y / FontCY,
+                //	event.xexpose.width / FontCX + 1, event.xexpose.height / FontCY + 1);
             } while (XCheckTypedWindowEvent(display, win, event.type, &event));
 
             // get clipping bounding box for all Exposed areas

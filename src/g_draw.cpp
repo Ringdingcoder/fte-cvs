@@ -30,11 +30,13 @@ size_t CStrLen(const char *p) {
 #ifndef NTCONSOLE
 
 void MoveCh(PCell B, char CCh, TAttr Attr, size_t Count) {
+    assert((int)Count >= 0);
     for (;Count > 0; B++, Count--)
         B->Set(CCh, Attr);
 }
 
 void MoveChar(PCell B, int Pos, int Width, const char CCh, TAttr Attr, size_t Count) {
+    assert((int)Count >= 0);
     if (Pos < 0) {
 	if ((int)Count < -Pos)
             return;
@@ -48,6 +50,7 @@ void MoveChar(PCell B, int Pos, int Width, const char CCh, TAttr Attr, size_t Co
 }
 
 void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Count) {
+    assert((int)Count >= 0);
     if (Pos < 0) {
 	if ((int)Count < -Pos)
             return;
@@ -62,6 +65,7 @@ void MoveMem(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Cou
 }
 
 void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t MaxCount) {
+    assert((int)MaxCount >= 0);
     if (Pos < 0) {
 	if ((int)MaxCount < -Pos)
             return;
@@ -76,6 +80,7 @@ void MoveStr(PCell B, int Pos, int Width, const char* Ch, TAttr Attr, size_t Max
 }
 
 void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, size_t MaxCount) {
+    assert((int)MaxCount >= 0);
     TAttr attr = A0;
     if (Pos < 0) {
 	if ((int)MaxCount < -Pos)
@@ -99,6 +104,7 @@ void MoveCStr(PCell B, int Pos, int Width, const char* Ch, TAttr A0, TAttr A1, s
 }
 
 void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
+    assert((int)Count >= 0);
     if (Pos < 0) {
 	if ((int)Count < -Pos)
             return;
@@ -112,6 +118,7 @@ void MoveAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
 }
 
 void MoveBgAttr(PCell B, int Pos, int Width, TAttr Attr, size_t Count) {
+    assert((int)Count >= 0);
     if (Pos < 0) {
 	if ((int)Count < -Pos)
             return;

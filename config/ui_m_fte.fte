@@ -368,10 +368,10 @@ menu Toggle {
     item "&Make backups"		{ ToggleMakeBackups }
     item "&Backspace Unindents"		{ ToggleBackSpUnindents }
     item;
-    item "I&ndent with tabs"		{ ToggleIndentWithTabs }
+    item "I&ndent with tabs\tC+O Space"	{ ToggleIndentWithTabs }
     item "S&pace tabs"			{ ToggleSpaceTabs }
-    item "Backspace k&ill tab"		{ ToggleBackSpKillTab }
-    item "&Delete kill tab"		{ ToggleDeleteKillTab }
+    item "Backspace k&ill tab\tC+O BackSp" { ToggleBackSpKillTab }
+    item "&Delete kill tab\tC+O G+Del"  { ToggleDeleteKillTab }
 }
 menu Options {
     submenu "Change &mode\tC+O C+M",  MChangeMode;
@@ -388,7 +388,7 @@ menu Options {
     item "&Show markers\tC+O C+."	{ ToggleShowMarkers; WinRefresh }
     item "Highlight tags"		{ ToggleHilitTags; WinRefresh }
     item "Show &bookmarks"		{ ToggleShowBookmarks; WinRefresh }
-    item "S&how tabs\tC+O   Tab"	{ ToggleShowTabs; WinRefresh }
+    item "S&how tabs\tC+O Tab"		{ ToggleShowTabs; WinRefresh }
     item "&Tab size...\tC+O C+T"	{ ChangeTabSize; WinRefresh }
     item "E&xpand tabs\tC+O C+Tab"	{ ToggleExpandTabs; WinRefresh }
     item "&Insert tabulator\tS+Tab"	{ InsertTab }

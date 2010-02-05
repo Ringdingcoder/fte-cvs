@@ -147,6 +147,8 @@ void EBuffer::DrawLine(TDrawBuffer B, int VRow, int C, int W, int &HilitX) {
     int StartPos, EndPos;
 
     HilitX = 0;
+    assert(W >= 0);
+
     MoveChar(B, 0, W, ' ', hcPlain_Background, W);
     //    if ((VRow == VCount - 1) && !BFI(this, BFI_ForceNewLine)) {
     // if (BFI(this, BFI_ShowMarkers))
@@ -231,12 +233,14 @@ void EBuffer::DrawLine(TDrawBuffer B, int VRow, int C, int W, int &HilitX) {
             default:
                 StartPos = EndPos = 0;
                 break;
-            }
-            if (BFI(this, BFI_SeeThruSel))
-                MoveBgAttr(B, StartPos, W, hcPlain_Selected, EndPos - StartPos);
-            else
-                MoveAttr(B, StartPos, W, hcPlain_Selected, EndPos - StartPos);
-        }
+	    }
+	    if (EndPos > StartPos) {
+		if (BFI(this, BFI_SeeThruSel))
+		    MoveBgAttr(B, StartPos, W, hcPlain_Selected, EndPos - StartPos);
+		else
+		    MoveAttr(B, StartPos, W, hcPlain_Selected, EndPos - StartPos);
+	    }
+	}
 #ifdef CONFIG_BOOKMARKS
         if (BFI(this, BFI_ShowBookmarks)) {
             int i = 0;

@@ -112,7 +112,7 @@ eventmap DIRECTORY: MLIST {
     key [/]             { DirGoto }
     key [\\]            { DirGoto }
     key [C+D]           { DeleteFile }
-    key [Esc]           { FileClose 0 }
+    key [Esc]           { FileClose }
     
     key     [A+N]       { MainMenu 'N' }
     key     [C+O_C+V]   { ShowMenu 'MCvs' }
@@ -316,8 +316,10 @@ eventmap PLAIN: MODEL {
     key     [C+O_A+\]]  { ChangeRightMargin }
     key     [C+O_Tab]   { ToggleShowTabs ; WinRefresh }
     key     [C+O_C+Tab] { ToggleExpandTabs ; WinRefresh }
-    key     [C+O_G-Del]   { ToggleDeleteKillTab }
-    key     [C+O_G-Ins]   { ToggleInsert }
+    # Detection Control+Tab is not possible for terminal - so accept shift
+    key     [C+O_S+Tab] { ToggleExpandTabs ; WinRefresh }
+    key     [C+O_G-Del] { ToggleDeleteKillTab }
+    key     [C+O_G-Ins] { ToggleInsert }
     key    [C+O_BackSp] { ToggleBackSpKillTab }
     key     [C+O_Space] { ToggleIndentWithTabs }
     key  [C+O_C+BackSp] { ToggleBackSpUnindents }

@@ -15,9 +15,10 @@
 #define TAB(x) \
     { Ex##x, #x }
 
+// *INDENT-OFF*
 const struct {
     unsigned short CmdId;
-    const char *Name;
+    const char* Name;
 } Command_Table[] = {
 TAB(Nop),
 TAB(Fail),
@@ -379,5 +380,6 @@ TAB(BlockWritePipe),
 TAB(BlockPipe),
 #endif
 };
+// *INDENT-ON*
 
 #endif // CMDTAB_H

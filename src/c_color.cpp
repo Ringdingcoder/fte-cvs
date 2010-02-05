@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 
+// *INDENT-OFF*
 ChColor MsgColor[3] = { 0x07, 0x0B, 0x04 };
 
 /* Status line */
@@ -73,10 +74,9 @@ ChColor hcChoice_NormalItem = 0x1F;
 ChColor hcChoice_NormalChar = 0x1E;
 
 static const struct {
-    const char *Name;
-    ChColor *C;
-} Colors[] = 
-{
+    const char* Name;
+    ChColor* C;
+} Colors[] = {
     { "Status.Normal",     &hcStatus_Normal },
     { "Status.Active",     &hcStatus_Active },
 
@@ -137,6 +137,7 @@ static const struct {
     { "Choice.NormalItem", &hcChoice_NormalItem },
     { "Choice.NormalChar", &hcChoice_NormalChar },
 };
+// *INDENT-ON*
 
 int SetColor(const char *ColorV, const char *Value) {
     unsigned int ColBg, ColFg;

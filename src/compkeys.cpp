@@ -71,116 +71,48 @@ static unsigned get_linux_keycode(TKeyCode kcode)
             case kbF7:
             case kbF8:
             case kbF9:
-            case kbF10:
-                return 59+key-kbF1;
-                break;
-            case kbF11:
-                return 87;
-                break;
-            case kbF12:
-                return 88;
-                break;
-            case kbHome:
-                return 102;
-                break;
-            case kbEnd:
-                return 107;
-                break;
-            case kbPgUp:
-                return 104;
-                break;
-            case kbPgDn:
-                return 109;
-                break;
-            case kbIns:
-                return 110;
-                break;
-            case kbDel:
-                return 111;
-                break;
-            case kbUp:
-                return 103;
-                break;
-            case kbDown:
-                return 108;
-                break;
-            case kbLeft:
-                return 105;
-                break;
-            case kbRight:
-                return 106;
-                break;
-            case kbEnter:
-                return 28;
-                break;
-            case kbEsc:
-                return 1;
-                break;
-            case kbBackSp:
-                return 14;
-                break;
-            case kbSpace:
-                return 57;
-                break;
-            case kbTab:
-                return 15;
-                break;
-            case kbCenter:
-                return 76;
-                break;
-            case kfGray|'/':
-                return 98;
-                break;
-            case kfGray|'*':
-                return 55;
-                break;
-            case kfGray|'+':
-                return 78;
-                break;
-            case kfGray|'-':
-                return 74;
-                break;
-            case kfGray|kbEnter:
-                return 96;
-                break;
-            case kfGray|'.':
-                return 83;
-                break;
+            case kbF10:          return 59+key-kbF1;
+            case kbF11:          return 87;
+            case kbF12:          return 88;
+            case kbHome:         return 102;
+            case kbEnd:          return 107;
+            case kbPgUp:         return 104;
+            case kbPgDn:         return 109;
+            case kbIns:          return 110;
+            case kbDel:          return 111;
+            case kbUp:           return 103;
+            case kbDown:         return 108;
+            case kbLeft:         return 105;
+            case kbRight:        return 106;
+            case kbEnter:        return 28;
+            case kbEsc:          return 1;
+            case kbBackSp:       return 14;
+            case kbSpace:        return 57;
+            case kbTab:          return 15;
+            case kbCenter:       return 76;
+            case kfGray|'/':     return 98;
+            case kfGray|'*':     return 55;
+            case kfGray|'+':     return 78;
+            case kfGray|'-':     return 74;
+            case kfGray|kbEnter: return 96;
+            case kfGray|'.':     return 83;
             case kfGray|'7':
-            case kfGray|kbHome:
-                return 71;
-                break;
+            case kfGray|kbHome:  return 71;
             case kfGray|'8':
-            case kfGray|kbUp:
-                return 72;
-                break;
+            case kfGray|kbUp:    return 72;
             case kfGray|'9':
-            case kfGray|kbPgUp:
-                return 73;
-                break;
+            case kfGray|kbPgUp:  return 73;
             case kfGray|'4':
-            case kfGray|kbLeft:
-                return 75;
-                break;
-            case kfGray|'5':
-                return 76;
-                break;
+            case kfGray|kbLeft:  return 75;
+            case kfGray|'5':     return 76;
             case kfGray|'6':
-            case kfGray|kbRight:
-                return 77;
-                break;
+            case kfGray|kbRight: return 77;
             case kfGray|'1':
-            case kfGray|kbEnd:
-                return 79;
-                break;
+            case kfGray|kbEnd:   return 79;
             case kfGray|'2':
-            case kfGray|kbDown:
-                return 80;
-                break;
+            case kfGray|kbDown:  return 80;
             case kfGray|'3':
-            case kfGray|kbPgDn:
-                return 81;
-                break;
+            case kfGray|kbPgDn:  return 81;
             default:
                 if (key<128 && key>32) return lnxkeycodes[key-32];
                 else return 0;
@@ -278,34 +210,20 @@ static int ftesl_get_ctrlcode(TKeyCode key)
         TKeyCode        kcode = keyCode(key);
 
         switch(kcode) {
-            case kbUp:
-                return FTESL_KBDCTRL('u');
-            case kbDown:
-                return FTESL_KBDCTRL('d');
-            case kbLeft:
-                return FTESL_KBDCTRL('l');
-            case kbRight:
-                return FTESL_KBDCTRL('r');
-            case kbCenter:
-                return FTESL_KBDCTRL('x');
-            case kbHome:
-                return FTESL_KBDCTRL('b');
-            case kbEnd:
-                return FTESL_KBDCTRL('e');
-            case kbPgUp:
-                return FTESL_KBDCTRL('p');
-            case kbPgDn:
-                return FTESL_KBDCTRL('n');
-            case kbIns:
-                return FTESL_KBDCTRL('q');
-            case kbDel:
-                return FTESL_KBDCTRL('z');
-            case kbBackSp:
-                return FTESL_KBDCTRL('h');
-            case kbTab:
-                return FTESL_KBDCTRL('i');
-            case kbEnter:
-                return FTESL_KBDCTRL('m');
+            case kbUp:     return FTESL_KBDCTRL('u');
+            case kbDown:   return FTESL_KBDCTRL('d');
+            case kbLeft:   return FTESL_KBDCTRL('l');
+            case kbRight:  return FTESL_KBDCTRL('r');
+            case kbCenter: return FTESL_KBDCTRL('x');
+            case kbHome:   return FTESL_KBDCTRL('b');
+            case kbEnd:    return FTESL_KBDCTRL('e');
+            case kbPgUp:   return FTESL_KBDCTRL('p');
+            case kbPgDn:   return FTESL_KBDCTRL('n');
+            case kbIns:    return FTESL_KBDCTRL('q');
+            case kbDel:    return FTESL_KBDCTRL('z');
+            case kbBackSp: return FTESL_KBDCTRL('h');
+            case kbTab:    return FTESL_KBDCTRL('i');
+            case kbEnter:  return FTESL_KBDCTRL('m');
         }
         if (kcode>=kbF1 && kcode<=kbF12) return FTESL_KBDCTRL('f');
         else return (int)kcode;

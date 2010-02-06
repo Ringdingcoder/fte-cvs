@@ -396,6 +396,7 @@ int EBuffer::BeginMacro() {
     return NextCommand();
 }
 
+// *INDENT-OFF*
 int EBuffer::ExecCommand(ExCommands Command, ExState &State) {
     switch (Command) {
     case ExMoveUp:                return MoveUp();
@@ -688,6 +689,7 @@ int EBuffer::ExecCommand(ExCommands Command, ExState &State) {
     }
     return EModel::ExecCommand(Command, State);
 }
+// *INDENT-ON*
 
 void EBuffer::HandleEvent(TEvent &Event) {
     EModel::HandleEvent(Event);

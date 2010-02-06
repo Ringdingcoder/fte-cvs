@@ -250,10 +250,11 @@ static int SetModeString(EMode *mode, int what, const char *string) {
     return 0;
 }
 
-static int SetGlobalNumber(int what, int number) {
+// *INDENT-OFF*
+static int SetGlobalNumber(int what, int number)
+{
     STARTFUNC("SetGlobalNumber");
     LOG << "What: " << what << " Number: " << number << ENDLINE;
-
     switch (what) {
 #ifdef CONFIG_INDENT_C
     case FLAG_C_Indent:          C_Indent = number; break;
@@ -312,6 +313,7 @@ static int SetGlobalNumber(int what, int number) {
     }
     ENDFUNCRC(0);
 }
+// *INDENT-ON*
 
 static void SetRGBColor(const char *string) {
     int idx,r,g,b;

@@ -23,6 +23,7 @@ struct TTYDecodeSeq {
     int key;
 };
 
+// *INDENT-OFF*
 static const TTYDecodeSeq tty_seq_table_c[] = {
     /* '%' replaced with 2..8  with modified  Alt | Ctrl | Shift */
     { "[1;%A", kbUp },
@@ -145,6 +146,7 @@ static const TTYDecodeSeq tty_seq_table_c[] = {
     { "O%S", kbF4 },
     { "OS", kbF4 },
 };
+// *INDENT-ON*
 
 /* Sorted via qsort in runtime so there is NO const here! */
 static struct TTYDecodeSeq tty_esc_seq[FTE_ARRAY_SIZE(tty_seq_table_c) * 7];

@@ -768,7 +768,7 @@ char ConGetDrawChar(unsigned int idx)
     return use_tab[idx];
 }
 
-#if 0 /*fold00*/
+#if 0
     if (SLang_input_pending(0) > 0) {
 	TKeyCode kcode = 0, kcode1;
 
@@ -875,8 +875,8 @@ char ConGetDrawChar(unsigned int idx)
 
     return -1;
 #endif
- /*fold00*/
-#if 0 /*fold00*/
+
+#if 0
 /*
  * Definitions for keyboard handling under SLang.
  */
@@ -1099,4 +1099,3 @@ static TKeyCode ftesl_process_key(int key, int ctrlhack = 0)
 	}
 }
 #endif
- /*fold00*/

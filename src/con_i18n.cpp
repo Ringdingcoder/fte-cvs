@@ -57,7 +57,7 @@ struct i18n_context_t {
  * Quite a complex function to convert normal keys
  * to dead-keys and remapped keys
  */
-static int i18n_key_analyze(XKeyEvent * keyEvent, KeySym * key, /*FOLD00*/
+static int i18n_key_analyze(XKeyEvent * keyEvent, KeySym * key,
 			  char *keyName, int nbytes)
 {
     static long prev_state = 0, local_switch = 0,
@@ -166,7 +166,7 @@ static int i18n_key_analyze(XKeyEvent * keyEvent, KeySym * key, /*FOLD00*/
     }
     return 0;
 }
- /*FOLD00*/
+
 #else
 
 /*********************************************
@@ -182,7 +182,7 @@ static int i18n_key_analyze(XKeyEvent * keyEvent, KeySym * key, /*FOLD00*/
  * but as I only need ISO-8859 encoding support,
  * I don't care about this (for now).
  */
-static int i18n_key_analyze(XKeyEvent * /*keyEvent*/, KeySym * key, /*FOLD00*/
+static int i18n_key_analyze(XKeyEvent * /*keyEvent*/, KeySym * key,
 			    char *keyName, int nbytes)
 {
     KeySym t = (unsigned char) keyName[0];
@@ -211,7 +211,7 @@ static int i18n_key_analyze(XKeyEvent * /*keyEvent*/, KeySym * key, /*FOLD00*/
 #endif
     return nbytes;
 }
- /*FOLD00*/
+
 #endif
 
 /*
@@ -221,7 +221,7 @@ static int i18n_key_analyze(XKeyEvent * /*keyEvent*/, KeySym * key, /*FOLD00*/
  * is using Xt Toolkit some things have to be made
  * different
  */
-i18n_context_t* i18n_open(Display* display, Window win, unsigned long* mask) /*FOLD00*/
+i18n_context_t* i18n_open(Display* display, Window win, unsigned long* mask)
 {
     *mask = 0;
 #if XlibSpecificationRelease >= 6
@@ -350,7 +350,7 @@ i18n_context_t* i18n_open(Display* display, Window win, unsigned long* mask) /*F
     return NULL;
 #endif
 }
- /*FOLD00*/
+
 
 void i18n_destroy(i18n_context_t** ctx)
 {
@@ -366,28 +366,28 @@ void i18n_destroy(i18n_context_t** ctx)
 }
 
 
-void i18n_focus_in(i18n_context_t* ctx) /*FOLD00*/
+void i18n_focus_in(i18n_context_t* ctx)
 {
 #if XlibSpecificationRelease >= 6
     if (ctx->xic != NULL)
 	XSetICFocus(ctx->xic);
 #endif
 }
- /*FOLD00*/
 
-void i18n_focus_out(i18n_context_t* ctx) /*FOLD00*/
+
+void i18n_focus_out(i18n_context_t* ctx)
 {
 #if XlibSpecificationRelease >= 6
     if (ctx->xic != NULL)
 	XUnsetICFocus(ctx->xic);
 #endif
 }
- /*FOLD00*/
+
 
 /*
  * Lookup correct keysymbol from keymap event
  */
-int i18n_lookup_sym(i18n_context_t* ctx, XKeyEvent * keyEvent, /*FOLD00*/
+int i18n_lookup_sym(i18n_context_t* ctx, XKeyEvent * keyEvent,
 		    char *keyName, int keySize, KeySym * key)
 {
     static int showKeys = 0;
@@ -436,4 +436,3 @@ int i18n_lookup_sym(i18n_context_t* ctx, XKeyEvent * keyEvent, /*FOLD00*/
 
     return i18n_key_analyze(keyEvent, key, keyName, nbytes);
 }
- /*FOLD00*/

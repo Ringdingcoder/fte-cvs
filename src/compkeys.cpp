@@ -18,7 +18,7 @@
 
 
 #define FTESL_KBDCTRL(x)    (x - 'a' +  1)
-
+// *INDENT-OFF*
 static unsigned get_linux_keycode(TKeyCode kcode)
 {
         static const unsigned lnxkeycodes[] = {
@@ -118,6 +118,7 @@ static unsigned get_linux_keycode(TKeyCode kcode)
                 else return 0;
         }
 }
+// *INDENT-ON*
 
 struct keymapper {
         TKeyCode        kcode;

@@ -106,6 +106,7 @@ static void DrawMouse(int Show) {
     }
 }
 
+// *INDENT-OFF*
 static struct { // TransCharScan
     USHORT CharScan;
     TKeyCode KeyCode;
@@ -181,6 +182,7 @@ static struct { // TransScan
     { 0x9F, kbEnd   | kfGray },  { 0xA0, kbDown  | kfGray },  { 0xA1, kbPgDn  | kfGray },
     { 0xA2, kbIns   | kfGray },  { 0xA3, kbDel   | kfGray }
 };
+// *INDENT-ON*
 
 int ReadKbdEvent(TEvent *Event, int Wait) {
     KBDKEYINFO ki;

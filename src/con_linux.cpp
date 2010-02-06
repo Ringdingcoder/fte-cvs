@@ -76,7 +76,7 @@ struct GPipe {
 
 static GPipe Pipes[MAX_PIPES];
 
-#define die(s) { printf("%s\n", s); exit(1); } while(0);
+#define die(s) do { printf("%s\n", s); exit(1); } while(0)
 
 unsigned int VideoCols = 80;
 unsigned int VideoRows = 25;
@@ -903,6 +903,7 @@ int GetKeyEvent(TEvent *Event) {
 	case kfAlt | kfCtrl | kbF11: vc = 11; break;
 	case kfAlt | kfCtrl | kbF12: vc = 12; break;
 	}
+
 	if (vc != -1) {
 	    /* perform the console switch */
 	    ioctl(VtFd, VT_ACTIVATE, vc);
@@ -1170,7 +1171,7 @@ char ConGetDrawChar(unsigned int idx) {
             /* it's hard to pick usable chars between way to many fonts */
             tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A.\x0A\xC4\x18\x19\xB1\xB0\x1B\x1A");
             //tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\xFA\x04\xC4\x18\x19\xB1\xB0\x1B\x1A");
-            //tab = GetGUICharacters("Linux", "\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12 ");
+            //tab = GetGUICharacters("Linux", "\x0D\x0C\x0E\x0B\x12\x19____+>\x1F\x01\x12\x01\x01 \x02\x01\x01");
         }
         tablen = strlen(tab);
     }

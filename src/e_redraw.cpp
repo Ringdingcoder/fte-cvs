@@ -284,6 +284,7 @@ void EBuffer::Redraw() {
     int W1, H1;
     if (!(View && View->MView))
 	return;
+
     View->MView->ConQuerySize(&W1, &H1);
 
     if (H1 < 1 || W1 < 1)
@@ -412,13 +413,15 @@ void EBuffer::Redraw() {
             SColor = hcStatus_Normal;
         MoveChar(B, 0, W->Cols, ' ', SColor, W->Cols);
 
-        if (V->MView->Win->GetViewContext() == V->MView) {
+	if (!V->MView->Win)
+            continue;
+
+	if (V->MView->Win->GetViewContext() == V->MView) {
             V->MView->Win->SetSbVPos(W->TP.Row, W->Rows, VCount + (WeirdScroll ? W->Rows - 1 : 0));
             V->MView->Win->SetSbHPos(W->TP.Col, W->Cols, 1024 + (WeirdScroll ? W->Cols - 1 : 0));
         }
 
         if (V->CurMsg == 0) {
-            {
                 int CurLine = W->CP.Row;
                 int ActLine = VToR(W->CP.Row);
                 int CurColumn = W->CP.Col;
@@ -495,7 +498,6 @@ void EBuffer::Redraw() {
                 } else {
                     MoveStr(B, l, W->Cols, FileName, SColor, W->Cols);
                 }
-            }
         } else {
             MoveStr(B, 0, W->Cols, V->CurMsg, SColor, W->Cols);
         }

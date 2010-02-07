@@ -14,8 +14,8 @@
 #include <stdio.h>
 
 int EBuffer::BlockPrint() {
-    const char cr = 13;
-    const char lf = 10;
+    const char cr = '\r';
+    const char lf = '\n';
     EPoint B, E;
     int L;
     int A, Z;
@@ -126,7 +126,6 @@ int EBuffer::BlockPrint() {
     Msg(S_INFO, "Failed to write to %s", PrintDevice);
     return 0;
 }
-
 
 int EBuffer::FilePrint() {
     const char cr = 13;

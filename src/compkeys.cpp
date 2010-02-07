@@ -69,7 +69,7 @@ static unsigned get_linux_keycode(TKeyCode kcode)
             case kbF7:
             case kbF8:
             case kbF9:
-            case kbF10:          return 59+key-kbF1;
+            case kbF10:          return 59 + (unsigned)key - kbF1;
             case kbF11:          return 87;
             case kbF12:          return 88;
             case kbHome:         return 102;
@@ -112,8 +112,9 @@ static unsigned get_linux_keycode(TKeyCode kcode)
             case kfGray|'3':
             case kfGray|kbPgDn:  return 81;
             default:
-                if (key<128 && key>32) return lnxkeycodes[key-32];
-                else return 0;
+		if (key > 32 && key < 128)
+		    return lnxkeycodes[key - 32];
+		return 0;
         }
 }
 // *INDENT-ON*

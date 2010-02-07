@@ -13,8 +13,6 @@
 #include "console.h"
 
 #include <stdarg.h>
-#include <sys/types.h>
-#include <string.h>
 
 class GFramePeer;
 class GViewPeer;
@@ -215,7 +213,7 @@ struct SearchReplaceOptions {
     int resCount;
     int lastInsertLen;
 
-    SearchReplaceOptions() { memset(this, 0, sizeof(*this)); }
+    SearchReplaceOptions();
 };
 
 int DLGGetFind(GView *View, SearchReplaceOptions &sr);

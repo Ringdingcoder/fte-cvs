@@ -17,6 +17,11 @@
 
 #include <ctype.h>
 
+SearchReplaceOptions::SearchReplaceOptions()
+{
+    memset(this, 0, sizeof(*this));
+}
+
 // *INDENT-OFF*
 int ParseSearchOption(int replace, char c, unsigned long &opt) {
     switch (tolower(c)) {

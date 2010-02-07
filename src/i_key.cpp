@@ -10,13 +10,9 @@
 #include "i_key.h"
 #include "sysdep.h"
 
-#include <string.h>
-
-ExKey::ExKey(const char *APrompt): ExView() {
-    if (APrompt)
-        Prompt = strdup(APrompt);
-    else
-        Prompt = 0;
+ExKey::ExKey(const char *APrompt) :
+    Prompt((APrompt) ? strdup(APrompt) : 0)
+{
 }
 
 ExKey::~ExKey() {

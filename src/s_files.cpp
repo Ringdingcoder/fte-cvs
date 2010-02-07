@@ -14,7 +14,6 @@
 #include "s_string.h"
 
 #include <stdlib.h> // getenv
-#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h> // stat
 

@@ -13,6 +13,7 @@
 
 #include "c_bind.h"
 #include "o_buflist.h"
+
 #include <ctype.h>
 
 #define hsAda_Normal       0

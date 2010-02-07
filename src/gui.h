@@ -206,12 +206,13 @@ int DLGPickChoice(GView *View, const char *ATitle, int NSel, va_list ap, int Fla
 
 struct SearchReplaceOptions {
     int ok;
-    char strSearch[MAXSEARCH];
-    char strReplace[MAXSEARCH];
-    unsigned long Options;
-    //
     int resCount;
     int lastInsertLen;
+    unsigned long Options;
+
+    //enum { MAXSEARCH = 512 };
+    char strSearch[MAXSEARCH];
+    char strReplace[MAXSEARCH];
 
     SearchReplaceOptions();
 };

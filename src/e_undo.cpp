@@ -156,14 +156,14 @@ int EBuffer::GetUData(int No, int pos, void **data, size_t len) {
 
 #define UGETC(rc,no,pos,what) \
     do { void *d; \
-    rc = GetUData(no, pos, &d, (int) sizeof(unsigned char)); \
+    rc = GetUData(no, pos, &d, sizeof(unsigned char)); \
     *(unsigned char *)&what = *(unsigned char *)d; \
     pos -= (int) sizeof(unsigned char); \
     } while (0)
 
 #define UGET(rc,no,pos,what) \
     do { void *d; \
-    rc = GetUData(no, pos, &d, (int) sizeof(what)); \
+    rc = GetUData(no, pos, &d, sizeof(what)); \
     memcpy(&what, d, sizeof(what)); \
     pos -= (int) sizeof(what); \
     } while (0)
@@ -253,17 +253,17 @@ unsigned    long Col;
         case ucBlock: 
             {
                 EPoint P;
-unsigned                long l;
+		unsigned long l;
                 
 //                printf("\tBlock\n");
                 UGET(rc, No, Pos, l); if (rc == 0) return 0;
                 if (BlockMode != (int)l) BlockRedraw();
-                BlockMode = l;
-                UGET(rc, No, Pos, l); if (rc == 0) return 0;   P.Row = l;
-                UGET(rc, No, Pos, l); if (rc == 0) return 0;   P.Col = l;
+		BlockMode = (int)l;
+                UGET(rc, No, Pos, l); if (rc == 0) return 0;   P.Row = (int)l;
+                UGET(rc, No, Pos, l); if (rc == 0) return 0;   P.Col = (int)l;
                 if (SetBE(P) == 0) return 0;
-                UGET(rc, No, Pos, l); if (rc == 0) return 0;   P.Row = l;
-                UGET(rc, No, Pos, l); if (rc == 0) return 0;   P.Col = l;
+                UGET(rc, No, Pos, l); if (rc == 0) return 0;   P.Row = (int)l;
+                UGET(rc, No, Pos, l); if (rc == 0) return 0;   P.Col = (int)l;
                 if (SetBB(P) == 0) return 0;
             }
             break;

@@ -59,7 +59,7 @@ int PutPMClip(int clipboard) {
         L = SSBuffer->RLine(i);
         char *n = (char *)realloc(p, l + L->Count + 1);
         if (n != NULL) {
-            for(int j = 0; j < L->Count; j++) {
+            for(unsigned j = 0; j < L->Count; ++j) {
                 if ((j < (L->Count - 1)) && (L->Chars[j + 1] == '\b'))
                     j++;
                 else

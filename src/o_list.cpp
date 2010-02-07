@@ -313,16 +313,22 @@ void EListPort::RepaintStatus() {
         View->MView->Win->ConSetCursorPos(0, Row - TopRow);
 }
 
-EList::EList(int createFlags, EModel **ARoot, const char *aTitle): EModel(createFlags, ARoot) {
-    Title = strdup(aTitle);
-    Row = TopRow = Count = LeftCol = 0;
-    NeedsUpdate = 1;
-    NeedsRedraw = 1;
-    MouseMoved = 0;
-    MouseCaptured = 0;
+EList::EList(int createFlags, EModel **ARoot, const char *aTitle) :
+    EModel(createFlags, ARoot),
+    Title(strdup(aTitle)),
+    Row(0),
+    LeftCol(0),
+    TopRow(0),
+    Count(0),
+    MouseCaptured(0),
+    MouseMoved(0),
+    NeedsUpdate(1),
+    NeedsRedraw(1)
+{
 }
 
-EList::~EList() {
+EList::~EList()
+{
     free(Title);
 }
 
@@ -341,8 +347,7 @@ EListPort *EList::GetVPort() {
 }
 
 void EList::SetTitle(const char *ATitle) {
-    if (Title)
-        free(Title);
+    free(Title);
     Title = strdup(ATitle);
     if (View && View->MView)
         View->MView->RepaintStatus();

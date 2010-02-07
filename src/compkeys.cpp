@@ -13,9 +13,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
-
 
 #define FTESL_KBDCTRL(x)    (x - 'a' +  1)
 // *INDENT-OFF*

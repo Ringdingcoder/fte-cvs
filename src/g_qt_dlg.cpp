@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <assert.h>
-#include <stdarg.h>
-
 #include "sysdep.h"
 #include "console.h"
 #include "gui.h"
@@ -17,6 +10,12 @@
 #include <qbutton.h>
 #include <qpushbt.h>
 #include <qfiledlg.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdarg.h>
+
 
 #define DEBUGX(x) // printf x
 

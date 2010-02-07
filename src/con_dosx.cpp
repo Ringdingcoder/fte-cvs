@@ -10,24 +10,21 @@
 
 // include
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <signal.h>
-#ifdef DJGPP
-#include <sys/stat.h>
-#endif
-
 #include "sysdep.h"
 #include "console.h"
 #include "c_config.h"
 #include "gui.h"
 #include "s_string.h"
 
-#include <stdlib.h>
 #include <process.h>
 #include "port.h"                // DOS portability calls,
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#ifdef DJGPP
+#include <sys/stat.h>
+#endif
 
 #define MAX_PIPES 4
 #define PIPE_BUFLEN 4096
@@ -65,9 +62,6 @@ static GPipe Pipes[MAX_PIPES] = {
 
 #include <io.h>
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 /* hold file pointer, descriptor, command, mode, temporary file name,

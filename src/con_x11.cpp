@@ -58,9 +58,7 @@
 #include "icons/fte64x64.xpm"
 #endif // CONFIG_X11_XICON
 
-#include <assert.h>
 #include <stdarg.h>
-#include <string.h>
 
 #ifdef WINNT
 #include <winsock.h>

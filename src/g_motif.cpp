@@ -7,14 +7,9 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <assert.h>
-#include <stdarg.h>
-#include <fcntl.h>
-#include <sys/wait.h>
+#include "console.h"
+#include "gui.h"
+
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -38,8 +33,12 @@
 #include <Xm/DrawingA.h>
 #include <Xm/Label.h>
 
-#include "console.h"
-#include "gui.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <fcntl.h>
+#include <sys/wait.h>
 
 #define DEBUG(x)
 //printf x

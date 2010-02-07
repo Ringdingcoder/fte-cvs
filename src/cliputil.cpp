@@ -8,9 +8,10 @@
  */
 
 #include "clip.h"
+
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAXCLIPTEXT 256 * 1024   /* just for demo */
 

@@ -9,15 +9,19 @@
 
 // include
 
+#include "console.h"
+#include "gui.h"
+#include "sysdep.h"
+
+#include <process.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <signal.h>
 
-#include "sysdep.h"
-#include "console.h"
-#include "gui.h"
+#ifndef OS2_INCLUDED
+#include <os2.h>
+#endif
 
 extern int ShowVScroll;
 
@@ -32,12 +36,6 @@ extern int ShowVScroll;
 #define INCL_DOS
 #define INCL_DOSDEVIOCTL
 
-#include <stdlib.h>
-#include <process.h>
-
-#ifndef OS2_INCLUDED
-#include <os2.h>
-#endif
 
 #define MAX_PIPES 4
 #define PIPE_BUFLEN 4096

@@ -38,13 +38,11 @@
 #include "s_string.h"
 #include "sysdep.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <os2.h>
 #include <process.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <string.h>
 
 #define PM_STACK_SIZE (96 * 1024)
 

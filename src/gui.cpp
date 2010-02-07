@@ -1,11 +1,6 @@
 
 #include "gui.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <stdarg.h>
-
 int GFrame::isLastFrame() {
     if (this == Next && frames == this)
         return 1;

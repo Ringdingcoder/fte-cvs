@@ -45,7 +45,6 @@ extern "C" {
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/kd.h>
 #include <sys/stat.h>

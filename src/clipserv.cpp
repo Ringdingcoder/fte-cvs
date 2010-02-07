@@ -9,12 +9,12 @@
 
 #define INCL_DOS
 #define INCL_PM
+#include "sysdep.h"
+
 #include <os2.h>
-#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <process.h>
-#include "sysdep.h"
 
 #define SEM_PREFIX  "\\SEM32\\PMCLIPS\\"
 #define MEM_PREFIX  "\\SHAREMEM\\PMCLIPS\\"

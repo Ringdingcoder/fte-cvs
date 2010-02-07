@@ -20,7 +20,6 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 /*
  * For now the only supported input style is root !!!

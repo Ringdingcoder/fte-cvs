@@ -567,37 +567,34 @@ int GFramePeer::ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMa
 
 ///////////////////////////////////////////////////////////////////////////
 
-GFrame::GFrame(int XSize, int YSize) {
-    Menu = 0;
+GFrame::GFrame(int XSize, int YSize) :
+    Top(0),
+    Active(0),
+    Menu(0)
+{
     if (frames == 0) {
         frames = Prev = Next = this;
     } else {
         Next = frames->Next;
-        Prev = frames;
+	Prev = frames;
         frames->Next->Prev = this;
         frames->Next = this;
         frames = this;
     }
-    Top = Active = 0;
     Peer = new GFramePeer(this, XSize, YSize);
 }
 
 GFrame::~GFrame() {
-    if (Peer) {
-        delete Peer;
-        Peer = 0;
-    }
+    //fprintf(stderr, "DELETE GFRAME %p  %p\n", Next, this);
+    delete Peer;
     if (Next == this) {
         frames = 0;
-//        printf("No more frames\x7\x7\n");
     } else {
         Next->Prev = Prev;
         Prev->Next = Next;
         frames = Next;
     }
-    Next = Prev = 0;
-    if (Menu)
-	free(Menu);
+    free(Menu);
 }
 
 int GFrame::ConSetTitle(const char *Title, const char *STitle) {

@@ -1371,10 +1371,8 @@ GFrame::GFrame(int XSize, int YSize) {
 }
 
 GFrame::~GFrame() {
-    if (Peer) {
-        delete Peer;
-        Peer = 0;
-    }
+    delete Peer;
+
     if (Next == this) {
         frames = 0;
         //        DEBUG(("No more frames\x7\x7\n"));
@@ -1383,7 +1381,6 @@ GFrame::~GFrame() {
         Prev->Next = Next;
         frames = Next;
     }
-    Next = Prev = 0;
 }
 
 int GFrame::ConSetTitle(const char *Title, const char *STitle) {
@@ -1426,31 +1423,28 @@ int GFrame::ConResizeView(GView *view, int DeltaY) {
 }
 
 int GFrame::AddView(GView *view) {
-    if (Top != 0) {
+    if (Top != 0)
         return ConSplitView(Top, view);
-    } else {
-        //        int W, H;
 
-        view->Parent = this;
-        view->Prev = view->Next = 0;
+    //        int W, H;
 
-        //        view->Peer->wX = 0;
-        //        view->Peer->wY = 0;
-        //        ConQuerySize(&W, &H);
-        //        view->ConSetSize(W, H);
-        InsertView(Top, view);
-        return 0;
-    }
+    view->Parent = this;
+    view->Prev = view->Next = 0;
+
+    //        view->Peer->wX = 0;
+    //        view->Peer->wY = 0;
+    //        ConQuerySize(&W, &H);
+    //        view->ConSetSize(W, H);
+    InsertView(Top, view);
+    return 0;
 }
 
 void GFrame::Update() {
-    GView *v = Active;
 
     UpdateMenu();
-    while (v) {
+    for (GView *v = Active; v; v = v->Next) {
         v->Update();
-        v = v->Next;
-        if (v == Active)
+        if (v->Next == Active)
             break;
     }
 }

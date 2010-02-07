@@ -91,52 +91,36 @@ EBufferFlags DefaultBufferFlags = {
 };
 
 EMode *GetModeForName(const char *FileName) {
-    //    char ext[10];
-    //    char *p;
-    int l, i;
     EMode *m;
     RxMatchRes RM;
-    char buf[81];
     int fd;
 
-    m = Modes;
-    while (m) {
-        if (m->MatchNameRx)
-            if (RxExec(m->MatchNameRx,
-                       FileName, strlen(FileName), FileName,
-                       &RM) == 1)
+    for (m = Modes; m; m = m->fNext)
+	if (RxExec(m->MatchNameRx, FileName, strlen(FileName),
+		   FileName, &RM) == 1)
                 return m;
-        if (m->fNext == 0) break;
-        m = m->fNext;
-    }
 
-    fd = open(FileName, O_RDONLY);
-    if (fd != -1) {
-        l = read(fd, buf, sizeof(buf));
+    if ((fd = open(FileName, O_RDONLY)) != -1) {
+	char buf[81];
+	int l = read(fd, buf, sizeof(buf) - 1);
         close(fd);
-        if (l > 0) {
-            buf[l] = 0;
-            for (i = 0; i < l; i++) {
-                if (buf[i] == '\n') {
-                    buf[i] = 0;
-                    l = i;
-                    break;
-                }
-            }
-            m = Modes;
-            while (m) {
-                if (m->MatchLineRx)
-                    if (RxExec(m->MatchLineRx, buf, l, buf, &RM) == 1)
-                        return m;
-                if (m->fNext == 0) break;
-                m = m->fNext;
-            }
-        }
+	if (l > 0) {
+            int i;
+	    for (i = 0; i < l && buf[i] != '\n'; ++i)
+                ;
+
+	    buf[i] = 0;
+            for (m = Modes; m; m = m->fNext)
+		if (RxExec(m->MatchLineRx, buf, i, buf, &RM) == 1)
+		    return m;
+	}
     }
 
-    if ((m = FindMode(DefaultModeName)) != 0) return m;
+    if ((m = FindMode(DefaultModeName)))
+	return m;
 
-    m = Modes;
-    while (m && m->fNext) m = m->fNext;
+    for (m = Modes; m && m->fNext; m = m->fNext)
+        ;
+
     return m;
 }

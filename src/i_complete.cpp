@@ -38,7 +38,6 @@ static int CmpStr(const void *p1, const void *p2) {
  * Create Sorted list of possible word extensions
  */
 ExComplete::ExComplete(EBuffer *B) :
-    ExView(),
     Orig(B->CP),
     Buffer(B),
     WordsLast(0),

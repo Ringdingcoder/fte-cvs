@@ -2736,7 +2736,6 @@ GView::~GView() {
     if (Peer) {
         Peer->View = 0;
         delete Peer;
-        Peer = 0;
     }
 }
 

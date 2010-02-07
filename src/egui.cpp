@@ -40,15 +40,13 @@ EFrame::~EFrame() {
 }
 
 void EFrame::Update() {
-    GxView *V = (GxView *)Active;
-
-    if (V) {
+    if (Active) {
         if (CModel != ActiveModel && ActiveModel) {
             char Title[256] = ""; //fte: ";
             char STitle[256] = ""; //"fte: ";
 
-            ActiveModel->GetTitle(Title, sizeof(Title) - 1,
-                                  STitle, sizeof(STitle) - 1);
+            ActiveModel->GetTitle(Title, sizeof(Title),
+                                  STitle, sizeof(STitle));
             ConSetTitle(Title, STitle);
             CModel = ActiveModel;
         }
@@ -88,14 +86,17 @@ void EFrame::UpdateMenu() {
     GFrame::UpdateMenu();
 }
 
-EGUI::EGUI(int &argc, char **argv, int XSize, int YSize)
-: GUI(argc, argv, XSize, YSize) {
-    ActiveMap = 0;
-    OverrideMap = 0;
+EGUI::EGUI(int &argc, char **argv, int XSize, int YSize) :
+    GUI(argc, argv, XSize, YSize),
+    ActiveMap(0),
+    OverrideMap(0)
+{
     CharMap[0] = 0;
 }
 
-EGUI::~EGUI() {
+EGUI::~EGUI()
+{
+    assert(frames == 0);
 }
 
 int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
@@ -107,7 +108,7 @@ int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
 
     if (view->IsModelView()) {
         ExModelView *V = (ExModelView *)view->Top;
-        EView *View = V->View;
+        EView *View = V->GetView();
 
         switch (Command) {
         case ExFileClose:               return FileClose(View, State);
@@ -124,7 +125,7 @@ int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
         }
     }
     switch (Command) {
-    case ExWinRefresh:              view->Repaint(); return 1;
+    case ExWinRefresh:              view->Repaint(); return ErOK;
     case ExWinNext:                 return WinNext(view);
     case ExWinPrev:                 return WinPrev(view);
     case ExShowEntryScreen:         return ShowEntryScreen();
@@ -153,13 +154,12 @@ int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
 
             if (State.GetStrParam(0, kmaps, sizeof(kmaps)) == 0) {
                 SetOverrideMap(0, 0);
-                return 0;
+                return ErFAIL;
             }
-            m = FindEventMap(kmaps);
-            if (m == 0)
-                return 0;
+            if ((m = FindEventMap(kmaps)) == 0)
+                return ErFAIL;
             SetOverrideMap(m->KeyMap, m->Name);
-            return 1;
+            return ErOK;
         }
     default:
         ;
@@ -343,7 +343,7 @@ void EGUI::DispatchEvent(GFrame *frame, GView *view, TEvent &Event) {
         case evCommand:
             if (Event.Msg.Command >= 65536) {
                 DispatchCommand(xview, Event);
-            } else {
+            } else
                 switch (Event.Msg.Command) {
                 case cmClose:
                     {
@@ -352,7 +352,6 @@ void EGUI::DispatchEvent(GFrame *frame, GView *view, TEvent &Event) {
                         return;
                     }
                 }
-            }
         }
     }
     GUI::DispatchEvent(frame, view, Event);
@@ -450,24 +449,17 @@ int EGUI::FileCloseAll(EView *View, ExState &State) {
 }
 
 int EGUI::WinHSplit(GxView *View) {
-    GxView *view;
-    ExModelView *edit;
-    EView *win;
     int W, H;
 
     View->ConQuerySize(&W, &H);
 
     if (H < 8)
         return 0;
-    view = new GxView(View->Parent);
-    if (view == 0)
-        return 0;
-    win = new EView(ActiveModel);
-    if (win == 0)
-        return 0;
-    edit = new ExModelView(win);
-    if (edit == 0)
-        return 0;
+
+    GxView *view = new GxView(View->Parent);
+    EView *win = new EView(ActiveModel);
+    ExModelView *edit = new ExModelView(win);
+
     view->PushView(edit);
     view->Parent->SelectNext(0);
     return 1;
@@ -512,24 +504,20 @@ int EGUI::WinResize(ExState &State, GxView *View) {
 }
 
 int EGUI::ExitEditor(EView *View) {
-    EModel *B = ActiveModel;
-
     // check/save modified files
-    while (ActiveModel) {
-        if (ActiveModel->CanQuit()) ;
-        else {
+    for (EModel *B = ActiveModel; ActiveModel; ActiveModel = ActiveModel->Next) {
+	if (!ActiveModel->CanQuit()) {
             View->SelectModel(ActiveModel);
             int rc = ActiveModel->ConfQuit(View->MView->Win, 1);
+            if (rc == 0)
+                return 0;
             if (rc == -2) {
                 View->FileSaveAll();
                 break;
             }
-            if (rc == 0)
-                return 0;
         }
 
-        ActiveModel = ActiveModel->Next;
-        if (ActiveModel == B)
+        if (ActiveModel->Next == B)
             break;
     }
 
@@ -557,9 +545,9 @@ int EGUI::ExitEditor(EView *View) {
 
         View->Model->DeleteRelated();  // delete related views first
 
-        while (View->Model->Next != View->Model &&
-               View->Model->Next->CanQuit())
-            delete View->Model->Next;
+//        while (View->Model->Next != View->Model &&
+//               View->Model->Next->CanQuit())
+//            delete View->Model->Next;
 
         View->DeleteModel(View->Model);
     }
@@ -639,8 +627,6 @@ int EGUI::DesktopSaveAs(ExState &State, GxView *view) {
 }
 
 int EGUI::FrameNew() {
-    GxView *view;
-    ExModelView *edit;
 
     if (!multiFrame() && frames)
         return 0;
@@ -648,16 +634,11 @@ int EGUI::FrameNew() {
     (void) new EFrame(ScreenSizeX, ScreenSizeY);
     assert(frames != 0);
 
-    //frames->SetMenu("Main"); //??
+    GxView *view = new GxView(frames);
 
-    view = new GxView(frames);
-    assert(view != 0);
+    (void)new EView(ActiveModel); // ->ActiveView
 
-    (void)new EView(ActiveModel);
-    assert(ActiveView != 0);
-
-    edit = new ExModelView(ActiveView);
-    assert(edit != 0);
+    ExModelView *edit = new ExModelView(ActiveView);
     view->PushView(edit);
     frames->Show();
     return 1;
@@ -668,11 +649,10 @@ int EGUI::FrameClose(GxView *View) {
     assert(View != 0);
 
     if (!frames->isLastFrame()) {
-        deleteFrame(frames);
+        delete frames;
     } else {
         if (ExitEditor(ActiveView) == 0)
             return 0;
-        deleteFrame(frames);
     }
     return 1;
 }
@@ -984,29 +964,13 @@ void EGUI::EditorCleanup() {
     delete SSBuffer;
     SSBuffer = NULL;
 
-    if (ActiveView != NULL) {
-       	EView *BW, *NW;
-
-       	// If EView what is about to be deleted is currently ActiveView, ActiveView moves to next one
-       	// or if there is no next, it will be set as NULL.
-       	while ((BW = ActiveView) != NULL) {
-       		NW = BW->Next;
-       		delete BW;
-       	}
-        //EView *BW, *NW, *AW;
-        //BW = AW = ActiveView;
-        //do {
-        //    NW = BW->Next;
-        //    delete BW;
-        //    BW = NW;
-        //} while (BW != AW);
+    EView *BW;
+    // If EView what is about to be deleted is currently ActiveView, ActiveView moves to next one
+    // or if there is no next, it will be set as NULL.
+    while ((BW = ActiveView) != NULL) {
+	ActiveView = ActiveView->Next;
+	delete BW;
     }
-    ActiveView = NULL;
-}
-
-void EGUI::InterfaceCleanup() {
-    while (frames)
-        delete frames;
 }
 
 void EGUI::Stop() {
@@ -1107,7 +1071,8 @@ void EGUI::Stop() {
 
     EditorCleanup();
 
-    InterfaceCleanup();
+    while (frames)
+        delete frames;
 
     GUI::Stop();
 }

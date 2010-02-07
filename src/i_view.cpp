@@ -17,6 +17,8 @@
 #include "o_buflist.h"
 #include "s_files.h"
 
+//#include <stdio.h>
+
 GxView::GxView(GFrame *Parent) :
     GView(Parent, -1, -1),
     Top(0),
@@ -26,6 +28,7 @@ GxView::GxView(GFrame *Parent) :
 }
 
 GxView::~GxView() {
+    //fprintf(stderr, "DELETE GXVIEW %p   %p\n", Top, this);
     while (Top) {
 	ExView *V = Top;
 	Top = Top->Next;
@@ -38,6 +41,7 @@ void GxView::PushView(ExView *view) {
     int W, H;
     ConQuerySize(&W, &H);
 
+    //fprintf(stderr, "PUSHVIEW %p   %p\n", view, this);
     view->Win = this;
     if (Top == 0) {
         Top = Bottom = view;
@@ -52,14 +56,14 @@ void GxView::PushView(ExView *view) {
 }
 
 ExView *GxView::PopView() {
-    ExView *V;
 
+    //fprintf(stderr, "POPVIEW %p   %p\n", Top, this);
     if (Top == 0)
         return 0;
 
     Top->Activate(0);
 
-    V = Top;
+    ExView *V = Top;
     Top = Top->Next;
 
     if (Top == 0)
@@ -105,11 +109,10 @@ void GxView::HandleEvent(TEvent &Event) {
         if (Event.What != evMouseDown || Event.Mouse.Y == H - 1) {
             switch (Event.What) {
             case evMouseDown:
-                if (CaptureMouse(1))
-                    MouseCaptured = 1;
-                else
-                    break;
-                Event.What = evNone;
+		if (CaptureMouse(1)) {
+		    MouseCaptured = 1;
+		    Event.What = evNone;
+		}
                 break;
             case evMouseMove:
                 if (MouseCaptured) {
@@ -123,25 +126,21 @@ void GxView::HandleEvent(TEvent &Event) {
                     Event.What = evNone;
                 break;
             case evMouseUp:
-                if (MouseCaptured)
+		if (MouseCaptured) {
                     CaptureMouse(0);
-                else
-                    break;
-                MouseCaptured = 0;
-                Event.What = evNone;
+		    MouseCaptured = 0;
+		    Event.What = evNone;
+		}
                 break;
             }
-            return ;
         }
     }
 #endif
 }
 
 void GxView::Update() {
-    if (Top) {
+    if (Top)
         Top->Update();
-    }// else
-       // Repaint();
 }
 
 void GxView::Repaint() {
@@ -158,14 +157,11 @@ void GxView::Repaint() {
 }
 
 void GxView::Resize(int width, int height) {
-    ExView *V;
-    GView::Resize(width, height);
-    V = Top;
 
-    while (V) {
+    GView::Resize(width, height);
+
+    for (ExView *V = Top; V; V = V->Next)
         V->Resize(width, height);
-        V = V->Next;
-    }
 }
 
 void GxView::Activate(int gotfocus) {
@@ -175,17 +171,15 @@ void GxView::Activate(int gotfocus) {
 }
 
 void GxView::UpdateTitle(const char *Title, const char *STitle) {
-    if (Parent && Parent->Active == this) {
+    if (Parent && Parent->Active == this)
         Parent->ConSetTitle(Title, STitle);
-    }
 }
 
 int GxView::GetStr(const char *Prompt, size_t BufLen, char *Str, int HistId) {
-    if ((HaveGUIDialogs & GUIDLG_PROMPT) && GUIDialogs) {
+    if ((HaveGUIDialogs & GUIDLG_PROMPT) && GUIDialogs)
         return DLGGetStr(this, Prompt, BufLen, Str, HistId, 0);
-    } else {
-        return ReadStr(Prompt, BufLen, Str, 0, 1, HistId);
-    }
+
+    return ReadStr(Prompt, BufLen, Str, 0, 1, HistId);
 }
 
 int GxView::GetFile(const char *Prompt, size_t BufLen, char *Str, int HistId, int Flags) {
@@ -197,13 +191,9 @@ int GxView::GetFile(const char *Prompt, size_t BufLen, char *Str, int HistId, in
 
 int GxView::ReadStr(const char *Prompt, size_t BufLen, char *Str, Completer Comp, int Select, int HistId) {
     int rc;
-    ExInput *input;
+    ExInput input(Prompt, Str, BufLen, Comp, Select, HistId);
 
-    input = new ExInput(Prompt, Str, BufLen, Comp, Select, HistId);
-    if (input == 0)
-        return 0;
-
-    PushView((ExView *)input);
+    PushView(&input);
 
     rc = Execute();
 
@@ -212,10 +202,9 @@ int GxView::ReadStr(const char *Prompt, size_t BufLen, char *Str, Completer Comp
     Repaint();
 
     if (rc == 1) {
-        strncpy(Str, input->Line, BufLen - 1);
+        strncpy(Str, input.Line, BufLen - 1);
         Str[BufLen - 1] = 0;
     }
-    delete input;
 
     return rc;
 }

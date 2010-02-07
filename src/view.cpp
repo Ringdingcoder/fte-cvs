@@ -62,19 +62,19 @@ EView::~EView() {
             ActiveView = Next;
     } else
         ActiveView = 0;
-    if (MView)
-        MView->View = 0;
+
     if (Model)
-        Model->RemoveView(this);
-    if (Port)
-        delete Port;
+	Model->RemoveView(this);
+
+    delete Port;
+    delete MView;
 }
 
 int EView::CanQuit() {
     if (Model)
         return Model->CanQuit();
-    else
-        return 1;
+
+    return 1;
 }
 
 void EView::FocusChange(int GetFocus) {
@@ -380,41 +380,39 @@ int EView::FileLast() {
 }
 
 int EView::SwitchTo(ExState &State) {
-    EModel *M;
     int No;
 
     if (State.GetIntParam(this, &No) == 0) {
         char str[10] = "";
 
-        if (MView->Win->GetStr("Obj.Number", sizeof(str), (char *)str, 0) == 0) return 0;
+        if (MView->Win->GetStr("Obj.Number", sizeof(str), str, 0) == 0) return 0;
         No = atoi(str);
     }
-    M = Model;
-    while (M) {
+
+    for (EModel* M = Model; M; M = M->Next) {
         if (M->ModelNo == No) {
             SwitchToModel(M);
             return 1;
         }
-        M = M->Next;
-        if (M == Model)
-            return 0;
+        if (M->Next == Model)
+	    break;
     }
     return 0;
 }
 
 
 int EView::FileSaveAll() {
-    EModel *M = Model;
-    while (M) {
+    for (EModel *M = Model; M; M = M->Next) {
         if (M->GetContext() == CONTEXT_FILE) {
             EBuffer *B = (EBuffer *)M;
             if (B->Modified) {
                 SwitchToModel(B);
-                if (B->Save() == 0) return 0;
+		if (B->Save() == 0)
+		    return 0;
             }
         }
-        M = M->Next;
-        if (M == Model) break;
+	if (M->Next == Model)
+	    break;
     }
     return 1;
 }
@@ -464,7 +462,7 @@ int EView::FileOpenInMode(ExState &State) {
 }
 
 int EView::SetPrintDevice(ExState &State) {
-    char Dev[MAXPATH];
+    char Dev[sizeof(PrintDevice)];
 
     strcpy(Dev, PrintDevice);
     if (State.GetStrParam(this, Dev, sizeof(Dev)) == 0)
@@ -497,7 +495,7 @@ void EView::Msg(int level, const char *s, ...) {
     va_list ap;
 
     va_start(ap, s);
-    vsprintf(msgbuftmp, s, ap);
+    vsnprintf(msgbuftmp, sizeof(msgbuftmp), s, ap);
     va_end(ap);
 
     if (level != S_BUSY)
@@ -507,10 +505,10 @@ void EView::Msg(int level, const char *s, ...) {
 void EView::SetMsg(const char *msg) {
     if (CurMsg)
         free(CurMsg);
-    CurMsg = 0;
-    if (msg && strlen(msg))
-        CurMsg = strdup(msg);
-    if (CurMsg && msg && MView) {
+
+    CurMsg = (msg && msg[0]) ? strdup(msg) : 0;
+
+    if (CurMsg && MView) {
         TDrawBuffer B;
         char SColor;
         int Cols, Rows;
@@ -538,19 +536,15 @@ int EView::ViewBuffers(ExState &/*State*/) {
         BufferList->UpdateList();
         BufferList->Row = 1;
         SwitchToModel(BufferList);
-        return 1;
     }
-    return 0;
+    return 1;
 }
 
 #ifdef CONFIG_OBJ_ROUTINE
 int EView::ViewRoutines(ExState &/*State*/) {
-    //int rc = 1;
-    //RoutineView *routines;
-    EModel *M;
     EBuffer *Buffer;
+    EModel *M = Model;
 
-    M = Model;
     if (M->GetContext() != CONTEXT_FILE)
         return 0;
     Buffer = (EBuffer *)M;
@@ -561,8 +555,6 @@ int EView::ViewRoutines(ExState &/*State*/) {
             return 0;
         }
         Buffer->Routines = new RoutineView(0, &ActiveModel, Buffer);
-        if (Buffer->Routines == 0)
-            return 0;
     } else {
         Buffer->Routines->UpdateList();
     }
@@ -578,6 +570,7 @@ int EView::DirOpen(ExState &State) {
     if (State.GetStrParam(this, Path, sizeof(Path)) == 0)
         if (GetDefaultDirectory(Model, Path, sizeof(Path)) == 0)
             return 0;
+
     return OpenDir(Path);
 }
 
@@ -587,21 +580,19 @@ int EView::OpenDir(const char *Path) {
 
     if (ExpandPath(Path, XPath, sizeof(XPath)) == -1)
         return 0;
-    {
-        EModel *x = Model;
-        while (x) {
-            if (x->GetContext() == CONTEXT_DIRECTORY) {
-                if (filecmp(((EDirectory *)x)->Path.c_str(), XPath) == 0)
-                {
-                    dir = (EDirectory *)x;
-                    break;
-                }
-            }
-            x = x->Next;
-            if (x == Model)
-                break;
-        }
+
+    for (EModel *x = Model; x; x = x->Next) {
+	if (x->GetContext() == CONTEXT_DIRECTORY) {
+	    if (filecmp(((EDirectory *)x)->Path.c_str(), XPath) == 0)
+	    {
+		dir = (EDirectory *)x;
+		break;
+	    }
+	}
+	if (x->Next == Model)
+	    break;
     }
+
     if (dir == 0)
         dir = new EDirectory(0, &ActiveModel, XPath);
     SelectModel(dir);
@@ -626,11 +617,11 @@ int EView::Compile(ExState &State) {
                 strcpy(Cmd, BFS(B, BFS_CompileCommand));
         }
         if (Cmd[0] == 0)
-            strcpy(Cmd, CompileCommand);
+            strlcpy(Cmd, CompileCommand, sizeof(Cmd));
 
         if (MView->Win->GetStr("Compile", sizeof(Cmd), Cmd, HIST_COMPILE) == 0) return 0;
 
-        strcpy(Command, Cmd);
+        strlcpy(Command, Cmd, sizeof(Cmd));
     } else {
         if (MView->Win->GetStr("Compile", sizeof(Command), Command, HIST_COMPILE) == 0) return 0;
     }
@@ -649,10 +640,10 @@ int EView::RunCompiler(ExState &State) {
         if (Model->GetContext() == CONTEXT_FILE) {
             EBuffer *B = (EBuffer *)Model;
             if (BFS(B, BFS_CompileCommand) != 0) 
-                strcpy(Command, BFS(B, BFS_CompileCommand));
+                strlcpy(Command, BFS(B, BFS_CompileCommand), sizeof(Command));
         }
         if (Command[0] == 0)
-            strcpy(Command, CompileCommand);
+            strlcpy(Command, CompileCommand, sizeof(Command));
     }
     return Compile(Command);
 }
@@ -662,7 +653,7 @@ int EView::Compile(char *Command) {
     EMessages *msgs;
     
     if (CompilerMsgs != 0) {
-        strcpy(Dir, CompilerMsgs->GetDirectory());
+        strlcpy(Dir, CompilerMsgs->GetDirectory(), sizeof(Dir));
         CompilerMsgs->RunPipe(Dir, Command);
         msgs = CompilerMsgs;
     } else {
@@ -705,11 +696,13 @@ int EView::ViewModeMap(ExState &/*State*/) {
     if (TheEventMapView != 0)
         TheEventMapView->ViewMap(GetEventMap());
     else
+	// FIXME: Complete MESS!!
         (void)new EventMapView(0, &ActiveModel, GetEventMap());
-    if (TheEventMapView != 0)
-        SwitchToModel(TheEventMapView);
-    else
-        return 0;
+
+    if (!TheEventMapView)
+	return 0;
+
+    SwitchToModel(TheEventMapView);
     return 1;
 }
 
@@ -730,11 +723,10 @@ int EView::TagLoad(ExState &State) {
     char Tag[MAXPATH];
     char FullTag[MAXPATH];
 
-    char const* pTagFile = getenv("TAGFILE");
+    const char* pTagFile = getenv("TAGFILE");
     if (pTagFile == NULL)
-    {
         pTagFile = "tags";
-    }
+
     if (ExpandPath(pTagFile, Tag, sizeof(Tag)) == -1)
         return 0;
     if (State.GetStrParam(this, Tag, sizeof(Tag)) == 0)
@@ -1106,11 +1098,11 @@ int EView::Svn(char *Options) {
 
     if (GetDefaultDirectory(Model, Dir, sizeof(Dir)) == 0) return 0;
 
-    strcpy(Command, SvnCommand);
-    strcat(Command, " ");
+    strlcpy(Command, SvnCommand, sizeof(Command));
+    strlcat(Command, " ", sizeof(Command));
     if (Options[0] != 0) {
-        strcat(Command, Options);
-        strcat(Command, " ");
+        strlcat(Command, Options, sizeof(Command));
+        strlcat(Command, " ", sizeof(Command));
     }
 
     switch (Model->GetContext()) {

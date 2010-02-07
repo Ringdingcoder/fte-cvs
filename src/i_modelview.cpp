@@ -10,20 +10,19 @@
 #include "i_modelview.h"
 #include "o_routine.h"
 
+//#include <stdio.h>
+
 ExModelView::ExModelView(EView *AView) :
-    ExView(),
     View(AView),
     MouseCaptured(0),
     MouseMoved(0)
 {
+    //fprintf(stderr, "Create ExModel %p   View %p\n", this, View);
     View->MView = this;
 }
 
 ExModelView::~ExModelView() {
-    if (View) { // close it
-        delete View;
-        View = 0;
-    }
+    //fprintf(stderr, "Delete ExModel %p   View %p\n", this, View);
 }
 
 int ExModelView::GetContext() {
@@ -70,9 +69,4 @@ void ExModelView::UpdateStatus() {
 
 void ExModelView::Resize(int width, int height) {
     View->Resize(width, height);
-}
-
-void ExModelView::WnSwitchBuffer(EModel *B) {
-   if (View)
-       View->SwitchToModel(B);
 }

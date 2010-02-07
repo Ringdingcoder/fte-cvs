@@ -20,6 +20,7 @@ class EEventMap;
 class ExState;
 
 class ExView {
+protected:
 public:
     GxView *Win;
     ExView *Next;
@@ -56,7 +57,6 @@ public:
     int ConSetCursorSize(int Start, int End);
 
     virtual int IsModelView() { return 0; }
-    virtual void WnSwitchBuffer(EModel *M) { Next->WnSwitchBuffer(M); }
 };
 
 #endif // I_OVIEW_H

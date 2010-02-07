@@ -15,8 +15,8 @@
 class EView;
 
 class ExModelView: public ExView {
-public:
     EView *View;
+public:
     int MouseCaptured;
     int MouseMoved;
 
@@ -35,8 +35,9 @@ public:
     virtual void UpdateStatus();
     virtual void RepaintStatus();
     virtual void Resize(int width, int height);
-    virtual void WnSwitchBuffer(EModel *M);
     virtual int IsModelView() { return 1; }
+
+    EView* GetView() { return  View; }
 };
 
 #endif // I_MODELVIEW_H

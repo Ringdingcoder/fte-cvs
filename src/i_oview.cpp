@@ -15,16 +15,15 @@ ExView::ExView() :
 {
 }
 
-ExView::~ExView() {
+ExView::~ExView()
+{
 }
 
 void ExView::Activate(int /*gotfocus*/) {
 }
 
 int ExView::IsActive() {
-    if (Win)
-        return Win->IsActive();
-    return 0;
+    return (Win) ? Win->IsActive() : 0;
 }
 
 int ExView::GetContext()

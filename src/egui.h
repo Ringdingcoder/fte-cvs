@@ -91,7 +91,6 @@ public:
     void DoSaveHistoryOnExit();
 
     void EditorCleanup();
-    void InterfaceCleanup();
     
     virtual int Start(int &argc, char **argv);
     virtual void Stop();

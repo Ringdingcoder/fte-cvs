@@ -145,7 +145,6 @@ public:
     int ClosePipe(int id);
 
     int multiFrame();
-    void deleteFrame(GFrame *frame);
 
     int fArgc;
     char **fArgv;

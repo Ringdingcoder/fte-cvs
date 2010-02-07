@@ -14,7 +14,7 @@
 #include "i_view.h"
 #include "s_util.h"
 
-#include <stdio.h>
+#include <stdio.h> // vsnprintf
 
 EModel* ActiveModel = 0;
 
@@ -28,7 +28,7 @@ EModel *FindModelID(EModel *Model, int ID) {
     return 0;
 }
 
-int GetNewModelID(EModel *B) {
+static int GetNewModelID(EModel *B) {
     static int lastid = -1;
 
     if (ReassignModelIds) lastid = 0;   // 0 is used by buffer list
@@ -66,12 +66,10 @@ EModel::EModel(int createFlags, EModel **ARoot) :
 }
 
 EModel::~EModel() {
-    EModel *D = this;
-
-    while (D) {
+    //printf("Delete model  %p\n", this);
+    for (EModel *D = this; D; D = D->Next) {
         D->NotifyDelete(this);
-        D = D->Next;
-        if (D == this)
+        if (D->Next == this)
             break;
     }
 
@@ -85,19 +83,23 @@ EModel::~EModel() {
 }
 
 void EModel::AddView(EView *V) {
+    //fprintf(stderr, "****Add view %p n:(%p)  -> %p\n", V, V ? V->NextView : NULL, this);
     RemoveView(V);
     if (V)
         V->NextView = View;
     View = V;
+    //fprintf(stderr, "Add view %p  -> %p\n", View, this);
 }
 
 void EModel::RemoveView(EView *V) {
     EView **X = &View;
 
+    //fprintf(stderr, "Remove view %p n:(%p) <- %p, v:%p\n", V, V ? V->NextView : NULL, this, View);
     if (!V) return;
     while (*X) {
         if ((*X) == V) {
-            *X = V->NextView;
+	    (*X)->NextView = 0;
+	    *X = V->NextView;
             return;
         }
         X = (&(*X)->NextView);
@@ -128,7 +130,7 @@ void EModel::Msg(int level, const char *s, ...) {
         return;
 
     va_start(ap, s);
-    vsprintf(msgbuftmp, s, ap);
+    vsnprintf(msgbuftmp, sizeof(msgbuftmp), s, ap);
     va_end(ap);
 
     if (level != S_BUSY)
@@ -157,17 +159,6 @@ void EModel::NotifyDelete(EModel * /*Deleted*/) {
 void EModel::DeleteRelated() {
 }
 
-EViewPort::EViewPort(EView *V) { View = V; ReCenter = 0; }
-EViewPort::~EViewPort() {}
-void EViewPort::HandleEvent(TEvent &/*Event*/) { }
-void EViewPort::UpdateView() { }
-void EViewPort::RepaintView() { }
-void EViewPort::UpdateStatus() { }
-void EViewPort::RepaintStatus() { }
-void EViewPort::GetPos() { }
-void EViewPort::StorePos() { }
-void EViewPort::Resize(int /*Width*/, int /*Height*/) {}
-
 void EModel::UpdateTitle() {
     char Title[256];
     char STitle[256];
@@ -189,3 +180,19 @@ int EModel::GetStrVar(int var, char *str, size_t buflen) {
 int EModel::GetIntVar(int /*var*/, int * /*value*/) {
     return 0;
 }
+
+
+EViewPort::EViewPort(EView *V) :
+    View(V),
+    ReCenter(0)
+{
+}
+EViewPort::~EViewPort() {}
+void EViewPort::HandleEvent(TEvent &/*Event*/) { }
+void EViewPort::UpdateView() { }
+void EViewPort::RepaintView() { }
+void EViewPort::UpdateStatus() { }
+void EViewPort::RepaintStatus() { }
+void EViewPort::GetPos() { }
+void EViewPort::StorePos() { }
+void EViewPort::Resize(int /*Width*/, int /*Height*/) {}

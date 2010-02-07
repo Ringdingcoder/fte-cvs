@@ -111,7 +111,6 @@ EBuffer::~EBuffer() {
 #ifdef CONFIG_BOOKMARKS
     vector_iterate(EBookmark*, BMarks, it)
 	delete *it;
-    BMarks.clear();
 #endif
 #ifdef CONFIG_OBJ_ROUTINE
     if (rlst.Lines) {

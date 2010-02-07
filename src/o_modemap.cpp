@@ -8,11 +8,11 @@
  */
 
 #include "o_modemap.h"
+
 #include "s_string.h"
 #include "sysdep.h"
 
 #include <stdio.h>
-#include <string.h>
 
 EventMapView *TheEventMapView = 0;
 

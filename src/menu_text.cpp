@@ -12,12 +12,10 @@
 #include "gui.h"
 #include "sysdep.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <string.h>
 
 class UpMenu {
 public:

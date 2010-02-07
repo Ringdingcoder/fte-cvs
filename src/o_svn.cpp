@@ -16,7 +16,6 @@
 #include "s_files.h"
 #include "sysdep.h"
 
-#include <string.h>
 #include <stdio.h>
 
 static int SameDir (const char *D1, const char *D2) {

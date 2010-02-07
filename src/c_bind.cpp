@@ -28,6 +28,122 @@ ExMacro *Macros = 0;
 
 //////////////////////////////////////////////////////////////////////////////
 
+static const struct {
+    const char Name[8];
+    TKeyCode Key;
+} KeyList[] = {
+    { "Esc", kbEsc },
+    { "Tab", kbTab },
+    { "Space", kbSpace },
+    { "Enter", kbEnter },
+    { "BackSp", kbBackSp },
+    { "F1", kbF1 },
+    { "F2", kbF2 },
+    { "F3", kbF3 },
+    { "F4", kbF4 },
+    { "F5", kbF5 },
+    { "F6", kbF6 },
+    { "F7", kbF7 },
+    { "F8", kbF8 },
+    { "F9", kbF9 },
+    { "F10", kbF10 },
+    { "F11", kbF11 },
+    { "F12", kbF12 },
+    { "Left", kbLeft },
+    { "Right", kbRight },
+    { "Up", kbUp },
+    { "Down", kbDown },
+    { "Home", kbHome },
+    { "End", kbEnd },
+    { "PgUp", kbPgUp },
+    { "PgDn", kbPgDn },
+    { "Ins", kbIns },
+    { "Del", kbDel },
+    { "Center", kbCenter },
+    { "Break", kbBreak },
+    { "Pause", kbPause },
+    { "PrtScr", kbPrtScr },
+    { "SysReq", kbSysReq },
+};
+
+static int ParseKey(const char *Key, KeySel &ks) {
+    TKeyCode KeyFlags = 0;
+
+    ks.Mask = 0;
+    ks.Key = 0;
+    while (Key[0] && ((Key[1] == '+') || (Key[1] == '-'))) {
+        if (Key[1] == '-') {
+            switch (Key[0]) {
+            case 'A': ks.Mask |= kfAlt; break;
+            case 'C': ks.Mask |= kfCtrl; break;
+            case 'S': ks.Mask |= kfShift; break;
+            case 'G': ks.Mask |= kfGray; break;
+            case 'X': ks.Mask |= kfSpecial; break;
+            }
+        } else if (Key[1] == '+') {
+            switch (Key[0]) {
+            case 'A': KeyFlags |= kfAlt; break;
+            case 'C': KeyFlags |= kfCtrl; break;
+            case 'S': KeyFlags |= kfShift; break;
+            case 'G': KeyFlags |= kfGray; break;
+            case 'X': KeyFlags |= kfSpecial; break;
+            }
+        }
+        Key += 2;
+    }
+
+    for (size_t i = 0; i < FTE_ARRAY_SIZE(KeyList); ++i)
+        if (strcmp(Key, KeyList[i].Name) == 0) {
+            ks.Key = KeyList[i].Key;
+            break;
+        }
+
+    if (ks.Key == 0)
+        ks.Key = *Key;
+    if ((KeyFlags & kfCtrl) && !(KeyFlags & kfSpecial)) {
+        if (ks.Key < 256) {
+            if (ks.Key < 32)
+                ks.Key += 64;
+            else
+                ks.Key = toupper(ks.Key);
+        }
+    }
+    ks.Key |= KeyFlags;
+    return 0;
+}
+
+int GetKeyName(char *Key, size_t KeySize, KeySel &ks) {
+    strlcpy(Key, "", KeySize);
+
+    if (ks.Key  & kfAlt)   strlcat(Key, "A+", KeySize);
+    if (ks.Mask & kfAlt)   strlcat(Key, "A-", KeySize);
+    if (ks.Key  & kfCtrl)  strlcat(Key, "C+", KeySize);
+    if (ks.Mask & kfCtrl)  strlcat(Key, "C-", KeySize);
+    if (ks.Key  & kfGray)  strlcat(Key, "G+", KeySize);
+    if (ks.Mask & kfGray)  strlcat(Key, "G-", KeySize);
+    if (ks.Key  & kfShift) strlcat(Key, "S+", KeySize);
+    if (ks.Mask & kfShift) strlcat(Key, "S-", KeySize);
+
+    if (keyCode(ks.Key) < 256) {
+	char c[2] = { (char)ks.Key, 0 };
+
+        //if (ks.Key & kfCtrl)
+        //    if (c[0] < ' ')
+        //        c[0] += '@';
+        if (c[0] == 32)
+            strlcat(Key, "Space", KeySize);
+        else
+            strlcat(Key, c, KeySize);
+    } else {
+        for (size_t i = 0; i < FTE_ARRAY_SIZE(KeyList); ++i)
+            if (KeyList[i].Key == keyCode(ks.Key)) {
+                strlcat(Key, KeyList[i].Name, KeySize);
+                break;
+            }
+    }
+    return 0;
+}
+
 const char *GetCommandName(int Command) {
     if (Command & CMD_EXT) {
         Command &= ~CMD_EXT;
@@ -199,10 +315,9 @@ static void InitWordChars() {
 }
 
 void SetWordChars(char *w, const char *s) {
-    const char *p;
+    const char *p = s;
     memset(w, 0, 32);
 
-    p = s;
     while (p && *p) {
         if (*p == '\\') {
             p++;
@@ -424,138 +539,20 @@ EAbbrev *EMode::FindAbbrev(const char *string) {
 }
 #endif
 
-static const struct {
-    const char Name[8];
-    TKeyCode Key;
-} KeyList[] = {
-    { "Esc", kbEsc },
-    { "Tab", kbTab },
-    { "Space", kbSpace },
-    { "Enter", kbEnter },
-    { "BackSp", kbBackSp },
-    { "F1", kbF1 },
-    { "F2", kbF2 },
-    { "F3", kbF3 },
-    { "F4", kbF4 },
-    { "F5", kbF5 },
-    { "F6", kbF6 },
-    { "F7", kbF7 },
-    { "F8", kbF8 },
-    { "F9", kbF9 },
-    { "F10", kbF10 },
-    { "F11", kbF11 },
-    { "F12", kbF12 },
-    { "Left", kbLeft },
-    { "Right", kbRight },
-    { "Up", kbUp },
-    { "Down", kbDown },
-    { "Home", kbHome },
-    { "End", kbEnd },
-    { "PgUp", kbPgUp },
-    { "PgDn", kbPgDn },
-    { "Ins", kbIns },
-    { "Del", kbDel },
-    { "Center", kbCenter },
-    { "Break", kbBreak },
-    { "Pause", kbPause },
-    { "PrtScr", kbPrtScr },
-    { "SysReq", kbSysReq },
-};
-
-int ParseKey(const char *Key, KeySel &ks) {
-    const unsigned char *p = (const unsigned char *)Key;
-    TKeyCode KeyFlags = 0;
-
-    ks.Mask = 0;
-    ks.Key = 0;
-    while ((*p) && ((p[1] == '+') || (p[1] == '-'))) {
-        if (p[1] == '-') {
-            switch (p[0]) {
-            case 'A': ks.Mask |= kfAlt; break;
-            case 'C': ks.Mask |= kfCtrl; break;
-            case 'S': ks.Mask |= kfShift; break;
-            case 'G': ks.Mask |= kfGray; break;
-            case 'X': ks.Mask |= kfSpecial; break;
-            }
-        } else if (p[1] == '+') {
-            switch (p[0]) {
-            case 'A': KeyFlags |= kfAlt; break;
-            case 'C': KeyFlags |= kfCtrl; break;
-            case 'S': KeyFlags |= kfShift; break;
-            case 'G': KeyFlags |= kfGray; break;
-            case 'X': KeyFlags |= kfSpecial; break;
-            }
-        }
-        p += 2;
-    }
-
-    for (size_t i = 0; i < FTE_ARRAY_SIZE(KeyList); ++i)
-        if (strcmp((const char *)p, KeyList[i].Name) == 0) {
-            ks.Key = KeyList[i].Key;
-            break;
-        }
-
-    if (ks.Key == 0)
-        ks.Key = *p;
-    if ((KeyFlags & kfCtrl) && !(KeyFlags & kfSpecial)) {
-        if (ks.Key < 256) {
-            if (ks.Key < 32)
-                ks.Key += 64;
-            else
-                ks.Key = toupper(ks.Key);
-        }
-    }
-    ks.Key |= KeyFlags;
-    return 0;
-}
-
-int GetKeyName(char *Key, size_t KeySize, KeySel &ks) {
-    strlcpy(Key, "", KeySize);
-
-    if (ks.Key  & kfAlt)   strlcat(Key, "A+", KeySize);
-    if (ks.Mask & kfAlt)   strlcat(Key, "A-", KeySize);
-    if (ks.Key  & kfCtrl)  strlcat(Key, "C+", KeySize);
-    if (ks.Mask & kfCtrl)  strlcat(Key, "C-", KeySize);
-    if (ks.Key  & kfGray)  strlcat(Key, "G+", KeySize);
-    if (ks.Mask & kfGray)  strlcat(Key, "G-", KeySize);
-    if (ks.Key  & kfShift) strlcat(Key, "S+", KeySize);
-    if (ks.Mask & kfShift) strlcat(Key, "S-", KeySize);
-
-    if (keyCode(ks.Key) < 256) {
-        char c[2];
-
-        c[0] = (char)(ks.Key & 0xFF);
-        c[1] = 0;
-
-        //if (ks.Key & kfCtrl)
-        //    if (c[0] < ' ')
-        //        c[0] += '@';
-        if (c[0] == 32)
-            strlcat(Key, "Space", KeySize);
-        else
-            strlcat(Key, c, KeySize);
-    } else {
-        for (size_t i = 0; i < FTE_ARRAY_SIZE(KeyList); ++i)
-            if (KeyList[i].Key == keyCode(ks.Key)) {
-                strlcat(Key, KeyList[i].Name, KeySize);
-                break;
-            }
-    }
-    return 0;
-}
-
-EKey::EKey(const char *aKey) {
-    fNext = 0;
+EKey::EKey(const char *aKey) :
+    Cmd(-1),
+    fKeyMap(0),
+    fNext(0)
+{
     ParseKey(aKey, fKey);
-    fKeyMap = 0;
-    Cmd = -1;
 }
 
-EKey::EKey(const char *aKey, EKeyMap *aKeyMap) {
-    fNext = 0;
-    Cmd = -1;
+EKey::EKey(const char *aKey, EKeyMap *aKeyMap) :
+    Cmd(-1),
+    fKeyMap(aKeyMap),
+    fNext(0)
+{
     ParseKey(aKey, fKey);
-    fKeyMap = aKeyMap;
 }
 
 EKey::~EKey()
@@ -565,18 +562,20 @@ EKey::~EKey()
 }
 
 #ifdef CONFIG_ABBREV
-EAbbrev::EAbbrev(const char *aMatch, const char *aReplace) {
-    next = 0;
-    Match = strdup(aMatch);
-    Replace = strdup(aReplace);
-    Cmd = -1;
+EAbbrev::EAbbrev(const char *aMatch, const char *aReplace) :
+    next(0),
+    Cmd(-1),
+    Match(strdup(aMatch)),
+    Replace(strdup(aReplace))
+{
 }
 
-EAbbrev::EAbbrev(const char *aMatch, int aCmd) {
-    next = 0;
-    Replace = 0;
-    Match = strdup(aMatch);
-    Cmd = aCmd;
+EAbbrev::EAbbrev(const char *aMatch, int aCmd) :
+    next(0),
+    Cmd(aCmd),
+    Match(strdup(aMatch)),
+    Replace(0)
+{
 }
 
 EAbbrev::~EAbbrev() {

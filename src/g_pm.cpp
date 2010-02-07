@@ -2716,10 +2716,12 @@ int GViewPeer::PMSetCursorPos() {
 
 ///////////////////////////////////////////////////////////////////////////
 
-GView::GView(GFrame *parent, int XSize, int YSize) {
-    Parent = parent;
-    Prev = Next = 0;
-    Peer = new GViewPeer(this, XSize, YSize);
+GView::GView(GFrame *parent, int XSize, int YSize) :
+    Parent(parent),
+    Next(0),
+    Prev(0),
+    Peer(new GViewPeer(this, XSize, YSize))
+{
     if (Parent)
         Parent->AddView(this);
 }

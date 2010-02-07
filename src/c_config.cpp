@@ -365,7 +365,7 @@ static int SetGlobalString(long what, const char *string) {
     ENDFUNCRC(0);
 }
 
-static int SetEventString(EEventMap *Map, long what, const char *string) {
+static int SetEventString(EEventMap *Map, int what, const char *string) {
     STARTFUNC("SetEventString");
     LOG << "What: " << what << " String: " << string << ENDLINE;
     switch (what) {

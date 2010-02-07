@@ -14,7 +14,6 @@
 #define INCL_DOS
 #define INCL_ORDINALS
 #include <os2.h>
-#include <string.h>
 #include <stdlib.h>
 
 /*

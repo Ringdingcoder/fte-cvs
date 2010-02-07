@@ -19,7 +19,6 @@
 #include "o_svnbase.h"
 #include "s_string.h"
 
-//#include <sys/stat.h>
 #include <fcntl.h>
 
 struct GUICharactersEntry {

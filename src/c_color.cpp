@@ -10,7 +10,6 @@
 #include "c_mode.h"
 #include "o_routine.h"
 
-#include <string.h>
 #include <stdio.h>
 
 // *INDENT-OFF*

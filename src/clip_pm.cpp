@@ -12,7 +12,6 @@
 
 #define INCL_WIN
 #include <os2.h>
-#include <string.h>
 #include <stdlib.h>
 
 extern HAB hab;

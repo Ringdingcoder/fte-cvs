@@ -22,7 +22,7 @@ int Hilit_Plain(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine* Lin
     int j = 0;
     
     if (BF->Mode->fColorize->Keywords.TotalCount > 0 ||
-        BF->WordCount > 0)
+        BF->GetWordCount() > 0)
     { /* words have to be hilited, go slow */
         for(i = 0; i < Line->Count;) {
             IF_TAB() else {

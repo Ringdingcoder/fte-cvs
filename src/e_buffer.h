@@ -230,7 +230,7 @@ public:
 
 #ifdef CONFIG_WORD_HILIT
     StlVector<char*> WordList;
-    int WordCount;
+    size_t GetWordCount() const { return WordList.size(); }
 #endif
 #ifdef CONFIG_SYNTAX_HILIT
     SyntaxProc HilitProc;
@@ -245,6 +245,7 @@ public:
     virtual EViewPort *CreateViewPort(EView *V);
     EEditPort *GetViewVPort(EView *V);
     EEditPort *GetVPort();
+
     virtual int CanQuit();
     virtual int ConfQuit(GxView *V, int multiFile = 0);
 

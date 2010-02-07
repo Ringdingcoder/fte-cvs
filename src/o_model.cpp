@@ -19,14 +19,10 @@
 EModel* ActiveModel = 0;
 
 EModel *FindModelID(EModel *Model, int ID) {
-    EModel *M = Model;
-    int No = ID;
-
-    while (M) {
-        if (M->ModelNo == No)
+    for (EModel *M = Model; M; M = M->Next) {
+        if (M->ModelNo == ID)
             return M;
-        M = M->Next;
-        if (M == Model)
+        if (M->Next == Model)
             break;
     }
     return 0;
@@ -36,7 +32,8 @@ int GetNewModelID(EModel *B) {
     static int lastid = -1;
 
     if (ReassignModelIds) lastid = 0;   // 0 is used by buffer list
-    while (FindModelID(B, ++lastid) != 0) /* */;
+    while (FindModelID(B, ++lastid) != 0)
+	;
 
     return lastid;
 }
@@ -174,15 +171,11 @@ void EViewPort::Resize(int /*Width*/, int /*Height*/) {}
 void EModel::UpdateTitle() {
     char Title[256];
     char STitle[256];
-    EView *V;
 
     GetTitle(Title, sizeof(Title), STitle, sizeof(STitle));
 
-    V = View;
-    while (V) {
-        V->MView->Win->UpdateTitle(Title, STitle);
-        V = V->NextView;
-    }
+    for (EView *V = View; V; V = V->NextView)
+	V->MView->Win->UpdateTitle(Title, STitle);
 }
 
 int EModel::GetStrVar(int var, char *str, size_t buflen) {

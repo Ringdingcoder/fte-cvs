@@ -204,7 +204,6 @@ public:
 extern EModel *ActiveModel;
 extern EView *ActiveView;
 
-int GetNewModelID(EModel *B);
 EModel *FindModelID(EModel *B, int ID);
 
 #define MSGBUFTMP_SIZE 1024

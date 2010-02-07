@@ -67,7 +67,7 @@ int RoutineView::ExecCommand(ExCommands Command, ExState &State) {
 }
     
 void RoutineView::DrawLine(PCell B, int Line, int Col, ChColor color, int Width) {
-    if (Buffer->RLine(Buffer->rlst.Lines[Line])->Count > Col) {
+    if ((int)Buffer->RLine(Buffer->rlst.Lines[Line])->Count > Col) {
         char str[1024];
         size_t len;
 

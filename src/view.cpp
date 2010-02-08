@@ -67,7 +67,7 @@ EView::~EView() {
 	Model->RemoveView(this);
 
     delete Port;
-    delete MView;
+    //delete MView;
 }
 
 int EView::CanQuit() {

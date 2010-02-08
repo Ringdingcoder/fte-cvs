@@ -23,6 +23,7 @@ ExModelView::ExModelView(EView *AView) :
 
 ExModelView::~ExModelView() {
     //fprintf(stderr, "Delete ExModel %p   View %p\n", this, View);
+    delete View;
 }
 
 int ExModelView::GetContext() {

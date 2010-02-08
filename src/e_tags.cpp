@@ -425,10 +425,6 @@ int TagFind(EBuffer *B, EView *View, const char *Tag) { /*FOLD00*/
             if (PushPos(B) == 0)
                 return 0;
 
-            free(CurrentTag);
-            CurrentTag = strdup(Tag);
-            if (CurrentTag == 0)
-                return 0;
             TagPosition = TStack->TagPos;
 
             return TagNext(View);

@@ -530,9 +530,7 @@ int EGUI::ExitEditor(EView *View) {
         if (gx->GetStr("Save desktop As",
                        sizeof(DesktopFileName), DesktopFileName,
                        HIST_DEFAULT) != 0)
-        {
             SaveDesktop(DesktopFileName);
-        }
     }
 #endif
 

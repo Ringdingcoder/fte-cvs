@@ -1453,12 +1453,9 @@ void GFrame::UpdateMenu() {
 }
 
 void GFrame::Repaint() {
-    GView *v = Active;
-
-    while (v) {
+    for (GView* v = Active; v; v = v->Next) {
         v->Repaint();
-        v = v->Next;
-        if (v == Active)
+        if (v->Next == Active)
             break;
     }
 }

@@ -250,6 +250,7 @@ int GViewPeer::ExpandHeight(int DeltaY) {
         DeltaY = View->Next->Peer->wH - 3;
     View->Peer->ConSetSize(wW, wH + DeltaY);
     View->Next->Peer->wY += DeltaY;
+    assert(View->Next->Peer->wY >= 0);
     View->Next->Peer->ConSetSize(View->Next->Peer->wW, View->Next->Peer->wH - DeltaY);
     View->Resize(View->Peer->wW, View->Peer->wH);
     View->Next->Resize(View->Next->Peer->wW, View->Next->Peer->wH);
@@ -307,12 +308,12 @@ int GViewPeer::DrawScrollBar() {
     
     ConQuerySize(&W, &H);
 
-    if (ShowVScroll) {
+    if (ShowVScroll && H > 1) {
         MoveCh(B, ConGetDrawChar(DCH_AUP), hcScrollBar_Arrows, 1);
         ConPutBox(W, 0, 1, 1, B);
         MoveCh(B, ConGetDrawChar(DCH_ADOWN), hcScrollBar_Arrows, 1);
         ConPutBox(W, H - 1, 1, 1, B);
-        
+
         NRows = H - 2;
         
         if (sbVtotal <= NRows) {
@@ -331,7 +332,7 @@ int GViewPeer::DrawScrollBar() {
             ConPutBox(W, I + 1, 1, 1, B);
         }
     }
-    if (ShowHScroll) {
+    if (ShowHScroll && W > 1) {
         MoveCh(B, ConGetDrawChar(DCH_ALEFT), hcScrollBar_Arrows, 1);
         ConPutBox(0, H, 1, 1, B);
         MoveCh(B, ConGetDrawChar(DCH_ARIGHT), hcScrollBar_Arrows, 1);
@@ -622,6 +623,7 @@ int GFrame::ConSplitView(GView *view, GView *newview) {
     if (ShowVScroll) 
         newview->Peer->wW--;
     newview->Peer->wY = view->Peer->wY + view->Peer->wH / 2;
+    assert(newview->Peer->wY >= 0);
     newview->Peer->wH = view->Peer->wH - view->Peer->wH / 2;
     if (ShowHScroll) {
         newview->Peer->wY++;
@@ -692,19 +694,17 @@ void GFrame::UpdateMenu() {
 }
 
 void GFrame::Repaint() {
-    GView *v = Active;
     
     if (ShowMenuBar)
         DrawMenuBar();
-    while (v) {
+    for (GView *v = Active; v; v = v->Next) {
         v->Repaint();
         if (ShowVScroll || ShowHScroll) {
             v->Peer->DrawScrollBar();
             v->Peer->sbVupdate = 0;
             v->Peer->sbHupdate = 0;
         }
-        v = v->Next;
-        if (v == Active) 
+        if (v->Next == Active)
             break;
     }
 }
@@ -741,6 +741,7 @@ void GFrame::RemoveView(GView *view) {
         if (Top == view) {
             Top = view->Next;
             Top->Peer->wY -= view->Peer->wH;
+            assert(Top->Peer->wY >= 0);
             Top->ConSetSize(Top->Peer->wW, Top->Peer->wH + view->Peer->wH + (ShowHScroll ? 1 : 0));
         } else {
             view->Prev->ConSetSize(view->Prev->Peer->wW,
@@ -795,13 +796,12 @@ int GFrame::SelectView(GView *view) {
 }
 
 void GFrame::Resize(int width, int height) {
-    GView *V;
     int count = 0;
     
-    
-    V = Top;
+    GView *V = Top;
     while (V) {
         count++;
+        V = V->Prev;
         if (V == Top) break;
     }
     if (height < 2 * count + 2 || width < 16) {
@@ -816,8 +816,8 @@ void GFrame::Resize(int width, int height) {
         width--;
     if (ShowHScroll)
         height--;
-    
-//    fprintf(stderr, "Resize: %d %d\n", width, height);
+
+    //fprintf(stderr, "Resize: %d %d   c:%d\n", width, height, count);
     
     V = Top->Prev;
     

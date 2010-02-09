@@ -92,11 +92,10 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
 
 #define ColorChar() \
     do {\
-    BPos = C - Pos; \
-    if (B) \
-    if (BPos >= 0 && BPos < Width) \
-        B[BPos].Set(*p, HILIT_CLRD()); \
-    if (StateMap) StateMap[i] = (hsState)(State & 0xFF); \
+	BPos = C - Pos; \
+	if (B && BPos >= 0 && BPos < Width) \
+	    B[BPos].Set(*p, HILIT_CLRD()); \
+	if (StateMap) StateMap[i] = (hsState)(State & 0xFF); \
     } while (0)
 
 // MoveChar(B, C - Pos, Width, *p, Color, 1); 
@@ -150,7 +149,7 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
     NC = NextTab(C, TabSize); \
     if (StateMap) StateMap[i] = hsState(State);\
     if (B) MoveChar(B, C - Pos, Width, ' ', HILIT_CLRD(), NC - C);\
-    if (BFI(BF, BFI_ShowTabs)) ColorChar();\
+    if (BFI(BF, BFI_ShowTabs)) { ChColor t = Color; Color = CLR_Punctuation; ColorChar(); Color = t; }\
     i++,len--,p++;\
     C = NC;\
     continue;\
@@ -164,7 +163,7 @@ static inline bool isZeroArray(int* Count, size_t len)
     return 1;
 }
 
-#define TEST_ZERO isZeroArray(Count, sizeof(Count)/sizeof(Count[0]))
+#define TEST_ZERO isZeroArray(Count, FTE_ARRAY_SIZE(Count))
 
 struct ColorKeywords {
     int TotalCount;

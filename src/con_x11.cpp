@@ -770,7 +770,8 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
 
                 if (!Refresh && Cell[p] == pCell[p])
                     break;
-                // find larges not yet printed string with same attributes
+		// find larges not yet printed string with same attributes
+                pCell[p] = Cell[p];
                 char& ch = temp[l];
                 switch (Cell[p].GetChar()) {
                 case '\t': ch = (char)3; break;  // HT
@@ -803,7 +804,6 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
                            (ScreenCols - x - 1) * FontCX, FontCY);
         }
         */
-        memmove(pCell, Cell, W * sizeof(TCell));
         if (i + Y == CursorY)
             DrawCursor(1);
         Cell += W;

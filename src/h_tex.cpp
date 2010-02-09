@@ -74,7 +74,6 @@ int Hilit_TEX(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line,
                 State = hsTEX_Normal;
                 continue;
             case hsTEX_Comment:
-                Color = CLR_Comment;
                 goto hilit;
             default:
                 State = hsTEX_Normal;

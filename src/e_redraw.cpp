@@ -407,14 +407,14 @@ void EBuffer::Redraw() {
         if (W->TP.Row > W->CP.Row) W->TP.Row = W->CP.Row;
         if (W->TP.Row < 0) W->TP.Row = 0;
 
+	if (!V->MView->Win)
+            continue;
+
         if (V->MView->IsActive()) // hack
             SColor = hcStatus_Active;
         else
             SColor = hcStatus_Normal;
         MoveChar(B, 0, W->Cols, ' ', SColor, W->Cols);
-
-	if (!V->MView->Win)
-            continue;
 
 	if (V->MView->Win->GetViewContext() == V->MView) {
             V->MView->Win->SetSbVPos(W->TP.Row, W->Rows, VCount + (WeirdScroll ? W->Rows - 1 : 0));

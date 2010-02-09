@@ -149,7 +149,7 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
     NC = NextTab(C, TabSize); \
     if (StateMap) StateMap[i] = hsState(State);\
     if (B) MoveChar(B, C - Pos, Width, ' ', HILIT_CLRD(), NC - C);\
-    if (BFI(BF, BFI_ShowTabs)) { ChColor t = Color; Color = CLR_Punctuation; ColorChar(); Color = t; }\
+    if (BFI(BF, BFI_ShowTabs)) ColorChar(); /*{ ChColor t = Color; Color = CLR_Punctuation; ColorChar(); Color = t; }*/\
     i++,len--,p++;\
     C = NC;\
     continue;\

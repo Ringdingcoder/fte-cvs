@@ -737,74 +737,72 @@ void DrawCursor(int Show) {
 }
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
-    int i;
-    unsigned int attr;
-    //unsigned char *p, *ps, *c, *ops;
-    unsigned int len, x, l, skip;
-    TCell *pCell, *psCell, *opsCell, *cCell;
     char temp[ScreenCols + 1];
 
-    if (X >= ScreenCols || Y >= ScreenRows ||
-        X + W > ScreenCols || Y + H > ScreenRows) {
+    if (X >= ScreenCols || Y >= ScreenRows) {
         //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
         return -1;
     }
     //XClearArea(display, win, X, Y, W * FontCX, H * FontCY, False);
     //DebugShowArea(X, Y, W, H, 13);
-
+    assert(Y >= 0 && H >= 0);
     //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
-    for (i = 0; i < H; i++) {
-        len = W;
-        pCell = CursorXYPos(X, Y + i);
-        psCell = Cell;
-        x = X;
-        while (len > 0) {
-            if (!Refresh) {
-                cCell = CursorXYPos(x, Y + i);
-                opsCell = psCell;
-                for (skip = 0; ((len - skip) > 0) && *cCell == *psCell; skip++) {
-                    psCell++;
-                    cCell++;
-                }
-                if ((len - skip) <= 0) break;
-                if (0 && skip <= 4) {
-                    psCell = opsCell;
-                } else {
-                    x += skip;
-                    len -= skip;
+    if (W > ScreenCols)
+        W = ScreenCols;
+
+    if (H > ScreenRows)
+        H = ScreenRows;
+
+    for (int i = 0; i < H; ++i) {
+        TCell* pCell = CursorXYPos(X, Y + i);
+        int x = 0, l;
+        while (x < W) {
+            if (!Refresh && Cell[x] == pCell[x]) {
+                x++;
+                continue;
+            }
+
+            TAttr attr = Cell[x].GetAttr();
+            for (l = 0; (x + l) < W && l < (int)sizeof(temp) - 1; ++l) {
+                const unsigned p = x + l;
+                if (attr != Cell[p].GetAttr())
+                    break;
+
+                if (!Refresh && Cell[p] == pCell[p])
+                    break;
+                // find larges not yet printed string with same attributes
+                char& ch = temp[l];
+                switch (Cell[p].GetChar()) {
+                case '\t': ch = (char)3; break;  // HT
+                case '\n': ch = (char)9; break;  // NL
+                case '\r': ch = (char)5; break;  // CR
+                default: ch = Cell[p].GetChar();
                 }
             }
-            pCell = psCell;
-            attr = psCell->GetAttr();
-            temp[0] = psCell++->GetChar();
-            for (l = 1; ((l < len) && (psCell->GetAttr() == attr)); psCell++)
-                temp[l++] = psCell->GetChar();
 
             if (!useXMB)
                 XDrawImageString(display, win, colorXGC->GetGC(attr),
-                                 x * FontCX, font_struct->max_bounds.ascent +
+                                 (X + x) * FontCX, font_struct->max_bounds.ascent +
                                  (Y + i) * FontCY,
                                  temp, l);
 #ifdef CONFIG_X11_XMB
             else
                 XmbDrawImageString(display, win, font_set,
                                    colorXGC->GetGC(attr),
-                                   x * FontCX, FontCYD + (Y + i) * FontCY,
+                                   (X + x) * FontCX, FontCYD + (Y + i) * FontCY,
                                    temp, l);
 #endif
             //DebugShowArea(x, Y + i, l, 1, 13);
             //temp[l] = 0; printf("%s\n", temp);
-            len -= l;
             x += l;
         }
-/*      if (x < ScreenCols - 1) {
+        /*      if (x < ScreenCols - 1) {
             printf("XX %d   %d   %d\n", X, x, W);
             XFillRectangle(display, win, GCs[15 * 16 + 7],
                            x * FontCX, (Y + i) * FontCY,
                            (ScreenCols - x - 1) * FontCX, FontCY);
         }
         */
-        pCell = CursorXYPos(X, Y + i);
         memmove(pCell, Cell, W * sizeof(TCell));
         if (i + Y == CursorY)
             DrawCursor(1);

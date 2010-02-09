@@ -280,31 +280,30 @@ void EBuffer::Redraw() {
     char s[256];
     ChColor SColor;
     int RowA, RowZ;
-
     int W1, H1;
-    if (!(View && View->MView))
-	return;
-
-    View->MView->ConQuerySize(&W1, &H1);
-
-    if (H1 < 1 || W1 < 1)
-	return;
+    int first;
 
     //    printf("Redraw\n");
     if (CP.Row >= VCount) CP.Row = VCount - 1;
     if (CP.Row < 0) CP.Row = 0;
 
     CheckBlock();
-    V = View; /* check some window data */
-    if (!V) {
+    /* check some window data */
+    if (!View || !View->MView) {
         MinRedraw = MaxRedraw = -1;
         RedrawToEos = 0;
         return;
     }
-    if (View == 0 || View->MView == 0 || View->MView->Win == 0)
-        return ;
 
-    for ( ; V; V = V->NextView) {
+    View->MView->ConQuerySize(&W1, &H1);
+    if (H1 < 1 || W1 < 1)
+	return;
+
+    first = 1;
+    for (V = View; V && (first || V != View); V = V->NextView) {
+	if (!V->MView || !V->MView->Win)
+	    continue;
+
         //        printf("Checking\x7\n");
         if (V->Model != this)
             assert(1 == 0);
@@ -406,9 +405,6 @@ void EBuffer::Redraw() {
         if (W->CP.Row < 0) W->CP.Row = 0;
         if (W->TP.Row > W->CP.Row) W->TP.Row = W->CP.Row;
         if (W->TP.Row < 0) W->TP.Row = 0;
-
-	if (!V->MView->Win)
-            continue;
 
         if (V->MView->IsActive()) // hack
             SColor = hcStatus_Active;
@@ -551,8 +547,12 @@ void EBuffer::Redraw() {
     //    puts("xxx\x7");
     //printf("\nRowA = %d, RowZ = %d", RowA, RowZ);
 
-    V = View;
-    while (V) {
+    first = 1;
+    for (V = View; V && (first || V != View); V = V->NextView) {
+        first = 0;
+	if (!V->MView || !V->MView->Win)
+            continue;
+
         if (V->Model != this)
             assert(1 == 0);
 
@@ -569,7 +569,6 @@ void EBuffer::Redraw() {
                     RowZ++;
             }
         }
-        V = V->NextView;
     }
     MinRedraw = MaxRedraw = -1;
     RedrawToEos = 0;

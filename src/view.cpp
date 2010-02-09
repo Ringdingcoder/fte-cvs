@@ -542,12 +542,11 @@ int EView::ViewBuffers(ExState &/*State*/) {
 
 #ifdef CONFIG_OBJ_ROUTINE
 int EView::ViewRoutines(ExState &/*State*/) {
-    EBuffer *Buffer;
     EModel *M = Model;
 
     if (M->GetContext() != CONTEXT_FILE)
         return 0;
-    Buffer = (EBuffer *)M;
+    EBuffer *Buffer = (EBuffer *)M;
 
     if (Buffer->Routines == 0) {
         if (BFS(Buffer, BFS_RoutineRegexp) == 0) {

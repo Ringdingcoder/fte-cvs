@@ -10,14 +10,9 @@
 
 FTE_BEGIN_NAMESPACE;
 
-static char empty_string[] = ""; // used as empty string - shall never be overwritten
+static char xempty_string[] = ""; // used as empty string - shall never be overwritten
 
-string::string()
-{
-    //str = new char[1];
-    //str[0] = 0;
-    str = empty_string;
-}
+char* string::empty_string = xempty_string;
 
 string::string(char s)
 {
@@ -26,31 +21,79 @@ string::string(char s)
     str[1] = 0;
 }
 
+string::string(const char* s)
+{
+    if (s)
+    {
+	size_t slen = string::slen(s);
+
+	if (slen)
+	{
+	    str = new char[slen + 1];
+	    memcpy(str, s, slen);
+	    str[slen] = 0;
+	    return;
+	}
+    }
+    str = empty_string;
+}
+
 string::string(const char* s, size_type len)
 {
     if (s)
     {
-	size_t slen = strlen(s);
+	size_t slen = string::slen(s);
 
-        if (len > slen)
-	    len = slen;
+	if (slen > len)
+	    slen = len;
 
-	str = new char[len + 1];
-	memcpy(str, s, len);
-	str[len] = 0;
+	if (slen)
+	{
+	    str = new char[slen + 1];
+	    memcpy(str, s, slen);
+	    str[slen] = 0;
+	    return;
+	}
+    }
+    str = empty_string;
+}
+
+string::string(const string& s)
+{
+    size_type slen = s.size();
+
+    if (slen)
+    {
+	str = new char[slen + 1];
+	memcpy(str, s.str, slen);
+	str[slen] = 0;
     }
     else
-        str = empty_string;
+	str = empty_string;
 }
 
 string::string(const string& s, size_type len)
 {
-    if (len > s.size())
-	len = s.size();
+    size_type slen = s.size();
 
-    str = new char[len + 1];
-    memcpy(str, s.str, len);
-    str[len] = 0;
+    if (slen > len)
+	slen = len;
+
+    if (slen)
+    {
+	str = new char[slen + 1];
+	memcpy(str, s.str, slen);
+	str[slen] = 0;
+    }
+    else
+	str = empty_string;
+}
+
+string::string(const char* s1, size_type sz1, const char* s2, size_type sz2) :
+    str(new char[sz1 + ++sz2])
+{
+    memcpy(str, s1, sz1);
+    memcpy(str + sz1, s2, sz2);
 }
 
 string::~string()
@@ -61,9 +104,7 @@ string::~string()
 
 bool string::operator==(const char* s) const
 {
-    if (s)
-	return !strcmp(str, s);
-    return (size() == 0);
+    return (s) ? !strcmp(str, s) : empty();
 }
 
 bool string::operator<(const string& s) const
@@ -73,66 +114,64 @@ bool string::operator<(const string& s) const
 
 string& string::operator=(const char* s)
 {
-    if (str != s)
-    {
-	if (str != empty_string)
-	    delete[] str;
-
-	size_t sz = s ? strlen(s) + 1 : 0;
-
-	if (sz > 1)
-	{
-	    str = new char[sz];
-	    memcpy(str, s, sz);
-	}
-	else
-	    str = empty_string;
-    }
+    string tmp(s);
+    swap(tmp);
     return *this;
 }
 
-string& string::operator+=(const char* s)
+string string::operator+(const char* s) const
+{
+    return string(str) += s;
+}
+
+string string::operator+(const string& s) const
+{
+    return string(str) += s;
+}
+
+string& string::append(const char* s)
 {
     if (s)
     {
-	size_type s1 = size();
-	size_t s2 = strlen(s) + 1; // with '0'
-	if (s2 > 1)
-	{
-	    char* p = new char[s1 + s2];
-	    memcpy(p, str, s1);
-	    memcpy(p + s1, s, s2);
-
-	    if (str != empty_string)
-		delete[] str;
-
-	    str = p;
-	}
+	string tmp(str, size(), s, slen(s));
+	swap(tmp);
     }
     return *this;
 }
 
-string& string::erase(size_type from, size_type to)
+string& string::erase(size_type pos, size_type n)
 {
-    if (str != empty_string)
+    char* p = str + pos;
+    if (n != npos && n > 0)
     {
-	char* p = str + from;
-	if (to != npos && to > 0 && to < size())
-	{
-	    // add check for size() ???
-	    char* i = p + to;
-	    while (*i)
-		*p++ = *i++;
-	}
-	if (p == str)
-	{
-	    delete[] str;
-	    str = empty_string;
-	}
-	else
-	    *p = 0;
+	// add check for size() ???
+	for (char* i = p + n; *i; ++i)
+	    *p++ = *i;
     }
+    if (p != str)
+	*p = 0;
+    else
+	clear();
+
     return *this;
+}
+
+string::size_type string::find(const string& s, size_type startpos) const
+{
+    const char* p = strstr(str + startpos, s.str);
+    return (p) ? p - str : npos;
+}
+
+string::size_type string::find(char c) const
+{
+    const char* p = strchr(str, c);
+    return (p) ? p - str : npos;
+}
+
+string::size_type string::rfind(char c) const
+{
+    const char* p = strrchr(str, c);
+    return (p) ? p - str : npos;
 }
 
 void string::insert(size_type pos, const string& s)
@@ -154,87 +193,55 @@ void string::insert(size_type pos, const string& s)
     str = p;
 }
 
-string::size_type string::find(const string& s, size_type startpos) const
-{
-    const char* p = strstr(str + startpos, s.str);
-    return (p) ? p - str : npos;
-}
-
-string::size_type string::find(char c) const
-{
-    const char* p = strchr(str, c);
-    return (p) ? p - str : npos;
-}
-
-string::size_type string::rfind(char c) const
-{
-    const char* p = strrchr(str, c);
-    return (p) ? p - str : npos;
-}
-
 int string::sprintf(const char* fmt, ...)
 {
     int r;
-    char* s = 0;
     va_list ap;
     va_start(ap, fmt);
 
-    if (str != empty_string)
-	delete[] str;
-
 #ifdef _GNU_SOURCE
+    char* s = 0;
     r = vasprintf(&s, fmt, ap);
 #else
     // a bit poor hack but should be sufficient
     // eventually write full implementation
-    s = malloc(1000);
-    r = vsnprintf(s, 999, fmt, ap);
+    char s[1000];
+    r = vsnprintf(s, sizeof(s), fmt, ap);
 #endif
 
     va_end(ap);
 
-    if (r < 0) {
-	free(s);
-	s = 0;
-	r = 0;
-    }
-
-    if (s)
+    if (s && r > 0)
     {
-	str = new char[r + 1];
-	memcpy(str, s, r);
-	str[r] = 0;
-	free(s);
+	string tmp(s, r);
+	swap(tmp);
     }
     else
     {
-	str = empty_string;
+	string tmp;
+	swap(tmp);
 	r = 0;
     }
+
+#ifdef _GNU_SOURCE
+    free(s);
+#endif
 
     return r;
 }
 
 string& string::tolower()
 {
-    char* p = str;
-
-    while (*p) {
+    for (char *p = str; *p;  p++)
 	*p = (char)::tolower(*p);
-	p++;
-    }
 
     return *this;
 }
 
 string& string::toupper()
 {
-    char* p = str;
-
-    while (*p) {
+    for (char *p = str; *p;  p++)
 	*p = (char)::toupper(*p);
-	p++;
-    }
 
     return *this;
 }

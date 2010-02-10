@@ -21,13 +21,14 @@
 #   define _fte_printf_attr(a,b)
 #endif
 
+//#include <stdio.h>
+
 FTE_BEGIN_NAMESPACE;
 
 /**
  * Simple class for storing SmartPointers
  */
-template <class T, bool ARRAY = false>
-    class aptr
+template <class T, bool ARRAY = false> class aptr
 {
 public:
     explicit aptr(T* p) : pointer(p) {}
@@ -45,6 +46,17 @@ private:
 };
 
 /**
+ * Class to be used for swapping two variable of the same type
+ */
+template <class T>
+inline void swap(T& a, T& b)
+{
+    const T tmp = a;
+    a = b;
+    b = tmp;
+}
+
+/**
  * Class to be used instead of line sequence:
  *   delete p;
  *   p = 0;
@@ -52,7 +64,6 @@ private:
 //template <class T> inline void destroy(T*& p) { delete p; p = 0; }
 
 
-//#include <stdio.h>
 /**
  * Simple class for storing char*
  *
@@ -66,12 +77,14 @@ class string
 public:
     typedef size_t size_type;
     static const size_type npos = ~0U;
-    string();
+
+    string() : str(empty_string) {}
     string(char s);
-    string(const char* s, size_type len = npos);
-    string(const string& s, size_type len = npos);
+    string(const char* s);
+    string(const char* s, size_type len);
+    string(const string& s);
+    string(const string& s, size_type len);
     ~string();
-    size_type size() const { size_type i = 0; while (str[i]) i++; return i; }
     char operator[](size_type i) const { return str[i]; }
     char& operator[](size_type i) { return str[i]; }
     bool operator==(const char* s) const;
@@ -79,25 +92,29 @@ public:
     bool operator!=(const char* s) const { return !operator==(s); }
     bool operator!=(const string& s) const { return !operator==(s); }
     bool operator<(const string& s) const;
+    string& operator=(const char* s);
+    string& operator=(const string& s) { return (this == &s) ? *this : operator=(s.str); }
+    string& operator+=(const char* s) { return append(s); }
+    string& operator+=(const string& s) { return append(s.str); }
+    string operator+(const char* s) const;
+    string operator+(const string& s) const;
+    string& append(const char* s);
     char* begin() { return str; }
     const char* begin() const { return str; }
+    void clear() { string tmp; swap(tmp); }
+    const char* c_str() const { return str; }
     char* end() { return str + size(); }
     const char* end() const { return str + size(); }
-    const char* c_str() const { return str; }
-    string& operator=(const char* s);
-    string& operator=(const string& s) { return operator=(s.str); }
-    string& operator+=(const char* s);
-    string& operator+=(const string& s) { return operator+=(s.str); }
-    string operator+(const char* s) const { return string(str) += s; }
-    string operator+(const string& s) const { return string(str) += s; }
-    string substr(size_type from = 0, size_type to = npos) const { return string(str + from, to); };
     bool empty() const { return str[0] == 0; }
     size_type find(const string& s, size_type startpos = 0) const;
     size_type find(char c) const;
     size_type rfind(char c) const;
     void insert(size_type pos, const string& s);
-    string& erase(size_type from = 0, size_type to = npos);
-    void swap(string& s) { char *t = s.str; s.str = str; str = t; }
+    string& erase(size_type pos = 0, size_type n = npos);
+    size_type size() const { return slen(str); }
+    string substr(size_type from = 0, size_type to = npos) const { return string(str + from, to); };
+    void swap(string& s) { fte::swap(str, s.str); }
+
     /* string extensions */
     int sprintf(const char* fmt, ...) _fte_printf_attr(2, 3); // allocates size
     // it will use just 1024 bytes for non _GNU_SOURCE compilation!!
@@ -106,7 +123,12 @@ public:
 
 private:
     char* str;
+    static char* empty_string;
+    static inline size_type slen(const char* s) { size_type i = 0; while (s[i]) ++i; return i; }
+    string(const char* s1, size_type sz1, const char* s2, size_type sz2);
 };
+
+template<> inline void swap(fte::string& a, fte::string& b) { a.swap(b); }
 
 /*
  * without this operator attempt to compare const char* with string will give quite unexpected
@@ -136,23 +158,26 @@ public:
     {
     }
 
-    vector<Type>(size_type prealloc)
-	:m_type(0), m_capacity(prealloc), m_size(prealloc)
+    vector<Type>(size_type prealloc) :
+	m_type(0), m_capacity(prealloc), m_size(0)
     {
 	if (m_capacity > 0)
 	    m_type = new Type[m_capacity];
     }
 
     // we will not count references - we have to program with this in mind!
-    vector<Type>(const vector<Type>& t) :m_type(0)
+    vector<Type>(const vector<Type>& t) :
+	m_type(0), m_capacity(0), m_size(0)
     {
-	operator=(t);
+	vector<Type> tmp;
+	tmp.operator=(t);
+	swap(tmp);
     }
     vector<Type>& operator=(const vector<Type>& t)
     {
 	//printf("operator=    %p   %d	%d\n", t.m_type, t.m_size, t.m_capacity);
 	if (this != &t)
-	    copy(t.m_type, t.m_size, t.m_capacity);
+	    copy(t.m_type, t.m_size, t.m_size);
 	return *this;
     }
     ~vector();
@@ -181,34 +206,39 @@ public:
     {
 	//printf("vector pop_back %d\n", m_size);
 	assert(m_size > 0);
-	m_size--;
-	if ((m_capacity >= 2 * min_capacity) && (m_size < m_capacity / 4))
-	    copy(m_type, m_size, m_capacity / 2);
+	if (--m_size < m_capacity / 4)
+	    internal_copy(m_type, m_size, m_capacity / 2);
     }
     void pop_front()
     {
 	assert(m_size > 0);
-	for (size_type i = 1; i < m_size; i++)
-	    m_type[i - 1] = m_type[i];
+	for (size_type i = 1; i < m_size; ++i)
+	    internal_swap(m_type + (i - 1), m_type[i]);
 	pop_back();
     }
     void push_back(const_reference m)
     {
 	if (m_size + 1 >= m_capacity)
-	    copy(m_type, m_size, m_capacity * 2);
+	    internal_copy(m_type, m_size, m_capacity * 2);
 	m_type[m_size++] = m;
     }
     void reserve(size_type sz)
     {
 	if (sz > m_capacity)
-	    copy(m_type, m_size, sz);
+	    internal_copy(m_type, m_size, sz);
     }
     void resize(size_type sz)
     {
-	copy(m_type, (sz < m_size) ? sz : m_size, sz);
+	internal_copy(m_type, (sz < m_size) ? sz : m_size, sz);
 	m_size = sz;
     }
     size_type size() const { return m_size; }
+    void swap(vector<Type>& v)
+    {
+	fte::swap(m_type, v.m_type);
+	fte::swap(m_capacity, v.m_capacity);
+	fte::swap(m_size, v.m_size);
+    }
 
     /* vector extensions */
     void remove(const_reference t);
@@ -219,6 +249,8 @@ protected:
     size_type m_capacity;
     size_type m_size;
     void copy(const_iterator in, size_type size, size_type alloc);
+    void internal_copy(iterator in, size_type size, size_type alloc);
+    void internal_swap(iterator pos, Type& t) { *pos = t; }
 };
 
 template <class Type>
@@ -239,16 +271,23 @@ void vector<Type>::clear()
 template <class Type>
 void vector<Type>::copy(const_iterator in, size_type sz, size_type alloc)
 {
-    const size_type new_capacity = (alloc < min_capacity) ? min_capacity : alloc;
-    //printf("COPY VECT %d  %d\n", sz, alloc);
-    assert(sz <= new_capacity);
-    Type* tmp = new Type[new_capacity];
+    assert(sz <= alloc);
+    vector<Type> tmp((alloc < min_capacity) ? min_capacity : alloc);
     for (size_type i = 0; i < sz; ++i)
 	tmp[i] = in[i];
-    delete[] m_type;
-    m_capacity = new_capacity;
+    swap(tmp);
     m_size = sz;
-    m_type = tmp;
+}
+
+template <class Type>
+void vector<Type>::internal_copy(iterator in, size_type sz, size_type alloc)
+{
+    assert(sz <= alloc);
+    vector<Type> tmp((alloc < min_capacity) ? min_capacity : alloc);
+    for (size_type i = 0; i < sz; ++i)
+	internal_swap(tmp.begin() + i, in[i]);
+    swap(tmp);
+    m_size = sz;
 }
 
 template <class Type>
@@ -256,8 +295,8 @@ typename vector<Type>::iterator vector<Type>::erase(iterator pos)
 {
     assert(pos < end());
     for (iterator p = pos; p + 1 < end(); ++p)
-	p[0] = p[1];
-    m_size--;
+	internal_swap(p, p[1]);
+    --m_size;
     return pos;
 }
 
@@ -270,25 +309,25 @@ typename vector<Type>::iterator vector<Type>::insert(iterator pos, const Type& t
     assert(n <= m_size);
     if (m_size + 1 >= m_capacity)
     {
-	const size_type nc = (m_capacity < min_capacity) ? min_capacity : 2 * m_capacity;
+	const size_type nc = (m_capacity < min_capacity) ? min_capacity : m_capacity * 2;
 	tmp = new Type[m_capacity];
-        m_capacity = nc;
+	m_capacity = nc;
     }
 
     for (size_type i = m_size; i > n; --i)
-	tmp[i] = m_type[i - 1];
+	internal_swap(tmp + i, m_type[i - 1]);
 
     tmp[n] = t;
 
     if (tmp != m_type)
     {
 	for (size_type i = 0; i < n; ++i)
-	    tmp[i] = m_type[i];
+	    internal_swap(tmp + i, m_type[i]);
 	delete[] m_type;
 	m_type = tmp;
     }
 
-    m_size++;
+    ++m_size;
 
     return m_type + n;
 }
@@ -301,11 +340,25 @@ void vector<Type>::remove(const_reference t)
 	if (t != *it)
 	{
 	    if (from != it)
-		*from = *it;
+		internal_swap(from, *it);
 	    ++from;
 	}
     m_size -= (end() - from);
 }
+
+template <class Type>
+inline void swap(fte::vector<Type>& a, fte::vector<Type>& b) { a.swap(b); }
+
+/*
+ * partial specialization for some common types
+ * for more effective transfers in copy constructions
+ * instead of heaving two copies - we allow to swap between field values
+ * thus we can maintain vector<string> without reallocation of string with
+ * every size change of vector<>
+ */
+template <>
+inline void vector<fte::string>::internal_swap(vector<fte::string>::iterator pos, fte::string& t) { (*pos).swap(t); }
+
 
 #define StlString   fte::string
 #define StlVector   fte::vector

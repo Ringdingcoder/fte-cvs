@@ -1550,10 +1550,8 @@ void GFrame::Resize(int width, int height) {
     if (width < 8 || height < 2)
         return;
 
-    if (Top == Top->Next) {
+    if (Top == Top->Next)
         Top->ConSetSize(width, height);
-    } else {
-    }
 }
 
 Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc MenuProc) {

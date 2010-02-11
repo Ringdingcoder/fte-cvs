@@ -98,7 +98,7 @@ void EModel::RemoveView(EView *V) {
     if (!V) return;
     while (*X) {
         if ((*X) == V) {
-	    (*X)->NextView = 0;
+	    //(*X)->NextView = 0;
 	    *X = V->NextView;
             return;
         }

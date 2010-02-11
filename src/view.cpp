@@ -68,6 +68,7 @@ EView::~EView() {
 
     delete Port;
     //delete MView;
+    free(CurMsg);
 }
 
 int EView::CanQuit() {
@@ -503,8 +504,7 @@ void EView::Msg(int level, const char *s, ...) {
 }
 
 void EView::SetMsg(const char *msg) {
-    if (CurMsg)
-        free(CurMsg);
+    free(CurMsg);
 
     CurMsg = (msg && msg[0]) ? strdup(msg) : 0;
 

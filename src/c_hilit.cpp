@@ -114,24 +114,23 @@ int EBuffer::HilitAddWord(const char *Word) {
 }
 
 int EBuffer::HilitFindWord(const char *Word) {
-    vector_iterate(char*, WordList, it) {
+    vector_iterate(StlString, WordList, it) {
         if (BFI(this, BFI_MatchCase) == 1) {
-            if (strcmp(Word, *it) == 0) return 1;
+            if (strcmp(Word, (*it).c_str()) == 0) return 1;
         } else {
-            if (stricmp(Word, *it) == 0) return 1;
+            if (stricmp(Word, (*it).c_str()) == 0) return 1;
         }
     }
     return 0;
 }
 
 int EBuffer::HilitRemoveWord(const char *Word) {
-    vector_iterate(char*, WordList, it) {
+    vector_iterate(StlString, WordList, it) {
         if (BFI(this, BFI_MatchCase) == 1) {
-            if (strcmp(Word, *it) != 0) continue;
+            if (strcmp(Word, (*it).c_str()) != 0) continue;
         } else {
-            if (stricmp(Word, *it) != 0) continue;
+            if (stricmp(Word, (*it).c_str()) != 0) continue;
 	}
-        free(*it);
         WordList.erase(it);
         FullRedraw();
         return 1;

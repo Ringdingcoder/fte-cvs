@@ -229,7 +229,7 @@ public:
     int RedrawToEos;
 
 #ifdef CONFIG_WORD_HILIT
-    StlVector<char*> WordList;
+    StlVector<StlString> WordList;
     size_t GetWordCount() const { return WordList.size(); }
 #endif
 #ifdef CONFIG_SYNTAX_HILIT

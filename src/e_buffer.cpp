@@ -135,8 +135,6 @@ int EBuffer::Clear() {
 #ifdef CONFIG_SYNTAX_HILIT
     EndHilit = -1;
     StartHilit = 0;
-    vector_iterate(char*, WordList, it)
-        free(*it);
     WordList.clear();
 #endif
 #ifdef CONFIG_OBJ_ROUTINE

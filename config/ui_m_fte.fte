@@ -163,7 +163,7 @@ menu Window {
     item "New &Frame" { FrameNew }
     item;
     item "Split &Horizontal\tCtrl+F4" { WinHSplit }
-    item "&Close view\tShift+Alt+F4" { WinClose }
+    item "&Close view\tShift+Ctrl+F4" { WinClose }
     item "Close &other views\tF5" { WinZoom }
     item "&Next view\tF4" { WinNext }
     item "&Prev view\tShift+F4" { WinPrev }

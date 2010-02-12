@@ -6,7 +6,7 @@ eventmap MODEL {
     key       [F4]      { WinNext }
     key     [C+F4]      { WinHSplit }
     key     [S+F4]      { WinPrev }
-    key   [A+S+F4]      { WinClose }
+    key   [C+S+F4]      { WinClose }
     key       [F5]      { WinZoom }
     key       [F6]      { FileNext }
     key     [S+F6]      { FilePrev }

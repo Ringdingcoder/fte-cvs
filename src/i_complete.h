@@ -30,10 +30,7 @@ class ExComplete: public ExView {
     size_t WordFixedCount;
 
     int RefreshComplete();
-    int CheckASCII(int c) {
-	return ((c < 256)
-		&& (isalnum(c) || (c == '_') || (c == '.')));
-    }
+    int CheckASCII(int c) { return (isalnum(c) || (c == '_') || (c == '.')); }
     void FixedUpdate(int add);
 
 public:

@@ -354,7 +354,7 @@ int ConContinue() {
     struct termios newt;
     int tmp;
 
-    newt.c_lflag &= ~ (ICANON | ECHO | ISIG);
+    newt.c_lflag = ~ (ICANON | ECHO | ISIG);
     newt.c_iflag = 0;
     newt.c_cc[VMIN] = 16;
     newt.c_cc[VTIME] = 1;

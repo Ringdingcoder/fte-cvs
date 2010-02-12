@@ -127,8 +127,8 @@ void EBuffer::Rehilit(int ToRow) {
 }
 
 void EBuffer::Draw(int Row0, int RowE) {
-    //    printf("r0 = %d, re = %d\n", Row0, RowE);
-    //    printf("m = %d, max = %d, rts = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
+    //printf("r0 = %d, re = %d\n", Row0, RowE);
+    //printf("m = %d, max = %d, rts = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
     if (Row0 == -1) Row0 = 0;
     if ((Row0 < MinRedraw) || (MinRedraw == -1)) {
         MinRedraw = Row0;
@@ -139,7 +139,7 @@ void EBuffer::Draw(int Row0, int RowE) {
         MaxRedraw = MinRedraw;
     } else if (((RowE > MaxRedraw) || (MaxRedraw == -1)) && (RowE != -1))
 	MaxRedraw = RowE;
-    //    printf("m = %d, max = %d, rts = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
+    //printf("m = %d, max = %d, rts = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
 }
 
 void EBuffer::DrawLine(TDrawBuffer B, int VRow, int C, int W, int &HilitX) {
@@ -283,9 +283,12 @@ void EBuffer::Redraw() {
     int W1, H1;
     int first;
 
-    //    printf("Redraw\n");
+    //printf("EBuffer::Redraw1\n");
     if (CP.Row >= VCount) CP.Row = VCount - 1;
     if (CP.Row < 0) CP.Row = 0;
+
+    //printf("EBuffer::Redraw t:%p  %p   %p   %p  %p\n", this, View, View ? View->MView : (void*)1, Next, Prev);
+    //assert(View != 0);
 
     CheckBlock();
     /* check some window data */
@@ -298,6 +301,7 @@ void EBuffer::Redraw() {
     View->MView->ConQuerySize(&W1, &H1);
     if (H1 < 1 || W1 < 1)
 	return;
+    //printf("EBuffer::Redraw4\n");
 
     first = 1;
     for (V = View; V && (first || V != View); V = V->NextView) {

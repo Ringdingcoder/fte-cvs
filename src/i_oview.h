@@ -45,8 +45,8 @@ public:
     virtual void EndExec(int NewResult);
     int IsActive();
 
-    void Repaint() { RepaintStatus(); RepaintView(); }
-    void Update() { UpdateStatus(); UpdateView(); }
+    void Repaint();
+    void Update();
 
     int ConPutBox(int X, int Y, int W, int H, PCell Cell);
     int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count);
@@ -56,7 +56,7 @@ public:
     int ConHideCursor();
     int ConSetCursorSize(int Start, int End);
 
-    virtual int IsModelView() { return 0; }
+    virtual int IsModelView();
 };
 
 #endif // I_OVIEW_H

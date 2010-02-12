@@ -79,6 +79,18 @@ void ExView::RepaintView() {
 void ExView::RepaintStatus() {
 }
 
+void ExView::Repaint()
+{
+    RepaintStatus();
+    RepaintView();
+}
+
+void ExView::Update()
+{
+    UpdateStatus();
+    UpdateView();
+}
+
 void ExView::Resize(int /*width*/, int /*height*/) {
     Repaint();
 }
@@ -123,4 +135,9 @@ int ExView::ConSetCursorSize(int Start, int End) {
     if (Win)
         return Win->ConSetCursorSize(Start, End);
     return -1;
+}
+
+int ExView::IsModelView()
+{
+    return 0;
 }

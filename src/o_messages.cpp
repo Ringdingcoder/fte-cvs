@@ -109,14 +109,12 @@ void EMessages::FindErrorFile(unsigned err) {
     assert(err < ErrList.size());
     if (ErrList[err]->file.empty())
         return;
-    
-    EBuffer *B;
 
     ErrList[err]->Buf = 0;
-    
-    B = FindFile(ErrList[err]->file.c_str());
+
+    EBuffer *B = FindFile(ErrList[err]->file.c_str());
     if (B == 0)
-        return ;
+        return;
 
     if (B->Loaded == 0)
         return;
@@ -165,18 +163,13 @@ int EMessages::RunPipe(const char *ADir, const char *ACommand) {
     BufLen = BufPos = 0;
     Row = (int)ErrList.size() - 1;
 
-    {
-        char s[2 * MAXPATH * 4];
+    char s[2 * MAXPATH * 4];
 
-        sprintf(s, "[running '%s' in '%s']", ACommand, ADir);
-        AddError(0, -1, 0, s);
-    }
+    sprintf(s, "[running '%s' in '%s']", ACommand, ADir);
+    AddError(0, -1, 0, s);
 
-    {
-        char s[MAXPATH * 2];
-        sprintf(s, "Messages [%s]: %s", ADir, ACommand);
-        SetTitle(s);
-    }
+    sprintf(s, "Messages [%s]: %s", ADir, ACommand);
+    SetTitle(s);
     
     ChangeDir(ADir);
     PipeId = gui->OpenPipe(ACommand, this);

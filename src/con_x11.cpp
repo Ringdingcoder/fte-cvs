@@ -336,7 +336,7 @@ public:
 
     GC& GetGC(unsigned i)
     {
-        i &= 0xff;
+        assert(i < 256);
         if (!GCs[i]) {
             gcv.foreground = Colors[i % 16].pixel;
             gcv.background = Colors[i / 16].pixel;

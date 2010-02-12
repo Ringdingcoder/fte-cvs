@@ -92,13 +92,18 @@ public:
     bool operator!=(const char* s) const { return !operator==(s); }
     bool operator!=(const string& s) const { return !operator==(s); }
     bool operator<(const string& s) const;
-    string& operator=(const char* s);
-    string& operator=(const string& s) { return (this == &s) ? *this : operator=(s.str); }
-    string& operator+=(const char* s) { return append(s); }
-    string& operator+=(const string& s) { return append(s.str); }
+    string operator+(char c) const;
     string operator+(const char* s) const;
     string operator+(const string& s) const;
+    string& operator=(char c);
+    string& operator=(const char* s);
+    string& operator=(const string& s) { return (this == &s) ? *this : operator=(s.str); }
+    string& operator+=(char c) { return append(c); }
+    string& operator+=(const char* s) { return append(s); }
+    string& operator+=(const string& s) { return append(s.str); }
+    string& append(char c);
     string& append(const char* s);
+    string& append(const string& s) { return append(s.str); }
     char* begin() { return str; }
     const char* begin() const { return str; }
     void clear() { string tmp; swap(tmp); }
@@ -212,9 +217,11 @@ public:
     void pop_front()
     {
 	assert(m_size > 0);
-	for (size_type i = 1; i < m_size; ++i)
-	    internal_swap(m_type + (i - 1), m_type[i]);
-	pop_back();
+	if (--m_size >= m_capacity / 4)
+	    for (size_type i = 1; i <= m_size; ++i)
+		internal_swap(m_type + (i - 1), m_type[i]);
+        else
+	    internal_copy(m_type + 1, m_size, m_capacity / 2);
     }
     void push_back(const_reference m)
     {

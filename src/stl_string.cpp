@@ -2,6 +2,8 @@
 
 #ifndef CONFIG_FTE_USE_STL
 
+#include <new>
+
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -10,52 +12,58 @@
 
 FTE_BEGIN_NAMESPACE;
 
+/*
+ * Ok I think it's worth to add comment about this  g++ feature:
+ *
+ * when we get char* from new and assing it member value - we lose strict-aliasing
+ * property. Thus every write access through str[] basically leads to the necesity of
+ * reread of this member value
+ *
+ * That's why local var is used to manipulate with str
+ */
+
+
 static char xempty_string[] = ""; // used as empty string - shall never be overwritten
 
 char* string::empty_string = xempty_string;
 
-string::string(char s)
+string::string(char c)
 {
-    str = new char[2];
-    str[0] = s;
-    str[1] = 0;
+    char* tmp = str = new char[2]; // stored to local value
+    tmp[0] = c;
+    tmp[1] = 0;
 }
 
 string::string(const char* s)
 {
-    if (s)
-    {
-	size_t slen = string::slen(s);
+    size_type slen = s ? string::slen(s) : 0;
 
-	if (slen)
-	{
-	    str = new char[slen + 1];
-	    memcpy(str, s, slen);
-	    str[slen] = 0;
-	    return;
-	}
+    if (slen)
+    {
+	char* tmp = str = new char[slen + 1];
+	tmp[slen] = 0;
+	memcpy(tmp, s, slen);
     }
-    str = empty_string;
+    else
+	str = empty_string;
 }
 
 string::string(const char* s, size_type len)
 {
-    if (s)
+    size_type slen = s ? string::slen(s) : 0;
+
+    if (slen > len)
+	slen = len;
+
+    if (slen)
     {
-	size_t slen = string::slen(s);
-
-	if (slen > len)
-	    slen = len;
-
-	if (slen)
-	{
-	    str = new char[slen + 1];
-	    memcpy(str, s, slen);
-	    str[slen] = 0;
-	    return;
-	}
+	char* tmp = str = new char[len + 1];
+	tmp[slen] = 0;
+	memcpy(tmp, s, slen);
+	return;
     }
-    str = empty_string;
+    else
+	str = empty_string;
 }
 
 string::string(const string& s)
@@ -64,9 +72,9 @@ string::string(const string& s)
 
     if (slen)
     {
-	str = new char[slen + 1];
-	memcpy(str, s.str, slen);
-	str[slen] = 0;
+	char* tmp = str = new char[slen + 1];
+	tmp[slen] = 0;
+	memcpy(tmp, s.str, slen);
     }
     else
 	str = empty_string;
@@ -81,9 +89,9 @@ string::string(const string& s, size_type len)
 
     if (slen)
     {
-	str = new char[slen + 1];
-	memcpy(str, s.str, slen);
-	str[slen] = 0;
+	char* tmp = str = new char[slen + 1];
+	tmp[slen] = 0;
+	memcpy(tmp, s.str, slen);
     }
     else
 	str = empty_string;
@@ -102,6 +110,35 @@ string::~string()
 	delete[] str;
 }
 
+string string::operator+(char c) const
+{
+    return string(*this) += c;
+}
+
+string string::operator+(const char* s) const
+{
+    return string(*this) += s;
+}
+
+string string::operator+(const string& s) const
+{
+    return string(*this) += s;
+}
+
+string& string::operator=(char c)
+{
+    string tmp(c);
+    swap(tmp);
+    return *this;
+}
+
+string& string::operator=(const char* s)
+{
+    string tmp(s);
+    swap(tmp);
+    return *this;
+}
+
 bool string::operator==(const char* s) const
 {
     return (s) ? !strcmp(str, s) : empty();
@@ -112,21 +149,13 @@ bool string::operator<(const string& s) const
     return (strcmp(str, s.str)<0);
 }
 
-string& string::operator=(const char* s)
+string& string::append(char c)
 {
-    string tmp(s);
+    char s[2] = { c, 0 };
+
+    string tmp(str, size(), s, 1);
     swap(tmp);
     return *this;
-}
-
-string string::operator+(const char* s) const
-{
-    return string(str) += s;
-}
-
-string string::operator+(const string& s) const
-{
-    return string(str) += s;
 }
 
 string& string::append(const char* s)

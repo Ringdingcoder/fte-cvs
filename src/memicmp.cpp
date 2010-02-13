@@ -1,5 +1,7 @@
 // Contributed by Markus F.X.J. Oberhumer <markus.oberhumer@jk.uni-linz.ac.at>
 
+#include "fte.h"
+
 #include <stddef.h>
 #include <ctype.h>
 
@@ -23,4 +25,3 @@ int memicmp(const void *s1, const void *s2, size_t n)
 }
 
 #endif
-

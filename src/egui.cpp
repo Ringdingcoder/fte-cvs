@@ -319,7 +319,7 @@ void EGUI::DispatchCommand(GxView *view, TEvent &Event) {
         Event.What = evNone;
     } else if (Event.Msg.Command >= 65536) {
         Event.Msg.Command -= 65536;
-        ExecMacro(view, Event.Msg.Command);
+        ExecMacro(view, (int)Event.Msg.Command);
         Event.What = evNone;
     }
 }
@@ -418,9 +418,8 @@ int EGUI::FileCloseX(EView *View, int CreateNew, int XClose) {
             ActiveView->MView->Win->Parent->SelectNext(1);
         }
 
-        if (ActiveModel == 0) {
+        if (ActiveModel == 0)
             StopLoop();
-        } 
 
         return 1;
     }
@@ -462,6 +461,7 @@ int EGUI::WinHSplit(GxView *View) {
 
     view->PushView(edit);
     view->Parent->SelectNext(0);
+    //fprintf(stderr, "WinHSplit %p   gv:%p\n", frames, view);
     return 1;
 }
 
@@ -619,9 +619,10 @@ int EGUI::DesktopSaveAs(ExState &State, GxView *view) {
         if (view->GetFile("Save Desktop", sizeof(DesktopFileName), DesktopFileName, HIST_PATH, GF_SAVEAS) == 0)
             return 0;
 
-    if (DesktopFileName[0] != 0)
-        return SaveDesktop(DesktopFileName);
-    return 0;
+    if (!DesktopFileName[0])
+	return 0;
+
+    return SaveDesktop(DesktopFileName);
 }
 
 int EGUI::FrameNew() {
@@ -629,7 +630,7 @@ int EGUI::FrameNew() {
     if (!multiFrame() && frames)
         return 0;
 
-    (void) new EFrame(ScreenSizeX, ScreenSizeY);
+    (void) new EFrame(ScreenSizeX, ScreenSizeY); // -> frames
     assert(frames != 0);
 
     GxView *view = new GxView(frames);
@@ -639,6 +640,7 @@ int EGUI::FrameNew() {
     ExModelView *edit = new ExModelView(ActiveView);
     view->PushView(edit);
     frames->Show();
+    //fprintf(stderr, "FrameNew  %p\n", frames);
     return 1;
 }
 
@@ -646,6 +648,7 @@ int EGUI::FrameClose(GxView *View) {
     assert(frames != 0);
     assert(View != 0);
 
+    //fprintf(stderr, "FrameClose  %p  v:%p\n", frames, View);
     if (!frames->isLastFrame()) {
         delete frames;
     } else {
@@ -656,19 +659,19 @@ int EGUI::FrameClose(GxView *View) {
 }
 
 int EGUI::FrameNext(GxView * /*View*/) {
-    if (!frames->isLastFrame()) {
-        frames->Next->Activate();
-        return 1;
-    }
-    return 0;
+    if (frames->isLastFrame())
+	return 0;
+
+    frames->Next->Activate();
+    return 1;
 }
 
 int EGUI::FramePrev(GxView * /*View*/) {
-    if (!frames->isLastFrame()) {
-        frames->Prev->Activate();
-        return 1;
-    }
-    return 0;
+    if (frames->isLastFrame())
+	return 0;
+
+    frames->Prev->Activate();
+    return 1;
 }
 
 #ifdef CONFIG_DESKTOP
@@ -756,7 +759,6 @@ void EGUI::DoLoadDesktopOnEntry(int &/*argc*/, char **argv) {
 
 void EGUI::EditorInit() {
     SSBuffer = new EBuffer(0, (EModel **)&SSBuffer, "Scrap");
-    assert(SSBuffer != 0);
     BFI(SSBuffer, BFI_Undo) = 0; // disable undo for clipboard
     ActiveModel = 0;
 }
@@ -962,6 +964,7 @@ void EGUI::EditorCleanup() {
     delete SSBuffer;
     SSBuffer = NULL;
 
+#if 0
     EView *BW;
     // If EView what is about to be deleted is currently ActiveView, ActiveView moves to next one
     // or if there is no next, it will be set as NULL.
@@ -969,6 +972,10 @@ void EGUI::EditorCleanup() {
 	ActiveView = ActiveView->Next;
 	delete BW;
     }
+#endif
+
+    while (frames && frames->Top)
+        delete frames->Top;
 }
 
 void EGUI::Stop() {
@@ -1069,8 +1076,7 @@ void EGUI::Stop() {
 
     EditorCleanup();
 
-    while (frames)
-        delete frames;
+    assert(frames == 0);
 
     GUI::Stop();
 }

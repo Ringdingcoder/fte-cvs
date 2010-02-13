@@ -27,15 +27,13 @@ public:
 
 static int GetHOfsItem(int id, int cur) {
     int pos = 2;
-    unsigned i;
     size_t len;
     
-    for (i = 0; i < Menus[id].Count; i++) {
+    for (unsigned i = 0; i < Menus[id].Count; i++) {
         if ((int)i == cur) return pos;
-        if (Menus[id].Items[i].Name) {
-            len = CStrLen(Menus[id].Items[i].Name);
-            pos += (int)len + 2;
-        } else
+        if (Menus[id].Items[i].Name)
+            pos += (int)CStrLen(Menus[id].Items[i].Name) + 2;
+        else
             pos++;
     }
     return -1;
@@ -77,7 +75,7 @@ static int DrawHMenu(int x, int y, int id, int active) {
                 color1 = hcMenu_NormalItem;
                 color2 = hcMenu_NormalChar;
             }
-            
+
             if (Menus[id].Items[i].Name) {
                 len = CStrLen(Menus[id].Items[i].Name);
                 MoveChar(B, pos, Cols, ' ', color1, len + 2);
@@ -119,8 +117,6 @@ static int GetVSize(int id, int &X, int &Y) {
 
 static int DrawVMenu(int x, int y, int id, int active) {
     TDrawBuffer B;
-    unsigned i;
-    size_t len;
     TAttr color1, color2;
     int w, h;
     
@@ -134,7 +130,7 @@ static int DrawVMenu(int x, int y, int id, int active) {
     MoveCh(B, ConGetDrawChar(DCH_C1), hcMenu_Background, 1);
     MoveCh(B + w - 1, ConGetDrawChar(DCH_C2), hcMenu_Background, 1);
     ConPutBox(x, y, w, 1, B);
-    for (i = 0; i < Menus[id].Count; i++) {
+    for (unsigned i = 0; i < Menus[id].Count; ++i) {
         if ((int)i == active) {
             color1 = hcMenu_ActiveItem;
             color2 = hcMenu_ActiveChar;
@@ -144,18 +140,15 @@ static int DrawVMenu(int x, int y, int id, int active) {
         }
         if (Menus[id].Items[i].Name) {
             char name[128];
-            char *arg = 0;
-            size_t len2 = 0;
-            
+
             strcpy(name, Menus[id].Items[i].Name);
-            arg = strchr(name, '\t');
+            char* arg = strchr(name, '\t');
             if (arg)
                 *arg++ = 0;
 
-            len = CStrLen(name);
-            if (arg) 
-                len2 = CStrLen(arg);
-            
+            size_t len = CStrLen(name);
+            size_t len2 = (arg) ? CStrLen(arg) : 0;
+
             MoveChar(B, 0, w, ' ', color1, w);
             MoveCh(B, ConGetDrawChar(DCH_V), hcMenu_Background, 1);
             MoveCh(B + w - 1, ConGetDrawChar(DCH_V), hcMenu_Background, 1);
@@ -163,10 +156,9 @@ static int DrawVMenu(int x, int y, int id, int active) {
             MoveCStr(B, 2, (int)len + 2, Menus[id].Items[i].Name, color1, color2, len);
             if (arg)
                 MoveCStr(B, w - (int)len2 - 2, w + 4, arg, color1, color2, len2);
-            
-            if (Menus[id].Items[i].SubMenu != -1) {
+
+            if (Menus[id].Items[i].SubMenu != -1)
                 MoveCh(B + w - 2, ConGetDrawChar(DCH_RPTR), color1, 1);
-            }
         } else {
             MoveChar(B, 0, w, ConGetDrawChar(DCH_H), hcMenu_Background, w);
             //for (int i = 0; i <= DCH_ARIGHT; i++) MoveCh(B + i, ConGetDrawChar(i), hcMenu_Background, 1);
@@ -189,9 +181,6 @@ int ExecVertMenu(int x, int y, int id, TEvent &E, UpMenu *up) {
     PCell c;
     PCell SaveC = 0;
     int SaveX, SaveY, SaveW, SaveH;
-#ifdef CONFIG_MOUSE
-    int wasmouse = 0;
-#endif
     UpMenu here;
     int dovert = 0;
     int rx;
@@ -249,6 +238,7 @@ int ExecVertMenu(int x, int y, int id, TEvent &E, UpMenu *up) {
     SaveH = h;
     
 #ifdef CONFIG_MOUSE
+    int wasmouse = 0;
     if (E.What == evMouseMove || E.What == evMouseDown) {
     }
     if (E.What & evMouse) {
@@ -484,7 +474,7 @@ int ExecMainMenu(TEvent &E, char sub) {
     int dovert = 1;
     int rx;
     static UpMenu top = { 0, 0, 0, 0, 0, 0, 1 };
-    PCell topline[ConMaxCols];
+    TCell topline[ConMaxCols];
     int Cols, Rows;
     
     ConQuerySize(&Cols, &Rows);
@@ -496,19 +486,16 @@ int ExecMainMenu(TEvent &E, char sub) {
     top.id = id;
     top.vert = 0;
     
-    ConGetBox(0, 0, Cols, 1, (PCell) topline);
+    ConGetBox(0, 0, Cols, 1, topline);
     
     if (sub != 0) {
-        int i;
-        
-        for (i = 0; i < Menus[id].Count; i++) {
+        for (int i = 0; i < Menus[id].Count; i++) {
             if (Menus[id].Items[i].Name) {
                 char *o = strchr(Menus[id].Items[i].Name, '&');
-                if (o)
-                    if (toupper(o[1]) == toupper(sub)) {
-                        cur = i;
-                        break;
-                    }
+                if (o && toupper(o[1]) == toupper(sub)) {
+                    cur = i;
+                    break;
+                }
             }
         }
     }
@@ -660,15 +647,13 @@ int ExecMainMenu(TEvent &E, char sub) {
         }
     }
     DrawHMenu(0, 0, id, -1);
-    ConPutBox(0, 0, Cols, 1, (PCell) topline);
+    ConPutBox(0, 0, Cols, 1, topline);
     ConShowCursor();
     return (abort == 1) ? 1 : -1;
 }
 
 void GFrame::DrawMenuBar() {
-    int id = GetMenuId(Menu);
-
-    DrawHMenu(0, 0, id, -1);
+    DrawHMenu(0, 0, GetMenuId(Menu), -1);
 }
 
 extern TEvent NextEvent;

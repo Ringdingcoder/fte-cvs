@@ -1,37 +1,33 @@
 /*    con_slang.cpp
  *
  *    Copyright (c) 1998, István Váradi
+ *    Copyright (c) 2010, Zdenek Kabelac
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
  */
 
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
-
-#include "sysdep.h"
 #include "c_config.h"
-#include "console.h"
-//#include "slangkbd.h"
-#include "gui.h"
 #include "con_tty.h"
+#include "console.h"
+#include "gui.h"
 #include "s_string.h"
+#include "sysdep.h"
+//#include "slangkbd.h"
 
 //#include <slang/slang.h>
 #include <slang.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
-
-#include <sys/types.h>
-#include <sys/wait.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+extern TEvent NextEvent; // g_text.cpp
 
 /* These characters cannot appear on a console, so we can detect
  * them in the output routine.
@@ -117,7 +113,6 @@ static const char slang_colors[][14] =
     "yellow",
     "white",
 };
-
 
 static volatile int ScreenSizeChanged;
 
@@ -214,13 +209,13 @@ int ConClear()
 
 static void fte_write_color_chars(PCell Cell, int W)
 {
-    int i = 0;
     int chset = 0, chsetprev = 2;
     unsigned char ch, col = 0, colprev = 0x80;
     char buf[256];
 
     while (W > 0) {
-	for (i = 0; i < W && i < (int) sizeof(buf); i++) {
+	int i;
+	for (i = 0; i < W && i < (int)sizeof(buf); ++i) {
 	    ch = Cell[i].GetChar();
 	    col = Cell[i].GetAttr() & 0x7f;
 	    //fprintf(stderr, "W: %d  i:%d  ch: %d %c  col: %2x / %2x\n", W, i, ch, ch, col, Cell[i].GetAttr() & 0x7f);
@@ -275,27 +270,22 @@ static int ConPutBoxRaw(int X, int Y, int W, int H, SLsmg_Char_Type *box)
     int CurX, CurY;
 
     ConQueryCursorPos(&CurX, &CurY);
-    while (H > 0) {
+    for (;H > 0; box += W, --H) {
 	SLsmg_gotorc(Y++, X);
 	SLsmg_write_raw(box, W);
-	box += W;
-	H--;
     }
     ConSetCursorPos(CurX, CurY);
 
     return 0;
-
 }
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 {
     int CurX, CurY, i;
-    SLsmg_Char_Type *linebuf;
-
-    linebuf = new SLsmg_Char_Type[W];
+    SLsmg_Char_Type linebuf[W];
 
     ConQueryCursorPos(&CurX, &CurY);
-    while (H > 0) {
+    for (;H > 0; Cell += W, --H) {
 	SLsmg_gotorc(Y++, X);
 	SLsmg_read_raw(linebuf, W);
 	for (i = 0; i < W; i++) {
@@ -316,12 +306,8 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 	     */
 	    Cell[i].SetAttr(linebuf[i].color & 0x7f);
 	}
-	Cell += W;
-	H--;
     }
     ConSetCursorPos(CurX, CurY);
-
-    delete[] linebuf;
 
     return 0;
 
@@ -332,11 +318,9 @@ static int ConGetBoxRaw(int X, int Y, int W, int H, SLsmg_Char_Type *box)
     int CurX, CurY;
 
     ConQueryCursorPos(&CurX, &CurY);
-    while (H > 0) {
+    for (;H > 0; box += W, --H) {
 	SLsmg_gotorc(Y++, X);
 	SLsmg_read_raw(box, W);
-	box += W;
-	H--;
     }
     ConSetCursorPos(CurX, CurY);
 
@@ -348,10 +332,9 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell)
     int CurX, CurY;
 
     ConQueryCursorPos(&CurX, &CurY);
-    while (H > 0) {
+    for (;H > 0; --H) {
 	SLsmg_gotorc(Y, X);
 	fte_write_color_chars(Cell, W);
-	H--;
     }
     ConSetCursorPos(CurX, CurY);
 
@@ -476,8 +459,6 @@ int ConQueryMouseButtons(int *ButtonCount)
     return 0;
 }
 
-static TEvent Prev = { evNone };
-
 static int getkey(int tsecs)
 {
     int key;
@@ -539,9 +520,8 @@ static int parseEsc(TEvent *Event)
 	    Event->Msg.Param1 = 10;
 	    Event->Msg.Command = (seq[2] & 1) ? cmVScrollDown : cmVScrollUp;
 	} else {
-	    /* FIXME: hack - this should be 'next' */
-	    Prev = *Event;
-	    Prev.Mouse.What = evMouseUp;
+	    NextEvent = *Event;
+	    NextEvent.Mouse.What = evMouseUp;
 	}
 #endif // CONFIG_MOUSE
 	return 0;
@@ -549,6 +529,8 @@ static int parseEsc(TEvent *Event)
 
     return TTYParseEsc(seq);
 }
+
+static TEvent Prev = { evNone };
 
 int ConGetEvent(TEventMask /*EventMask */ ,
 		TEvent * Event, int WaitTime, int Delete)
@@ -622,7 +604,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
     return 1;
 }
 
-int ConPutEvent(TEvent Event)
+int ConPutEvent(const TEvent& Event)
 {
     Prev = Event;
 
@@ -768,6 +750,10 @@ char ConGetDrawChar(unsigned int idx)
     return use_tab[idx];
 }
 
+/*
+ * Code bellow is no longer needed
+ * - will be removed in future
+ */
 #if 0
     if (SLang_input_pending(0) > 0) {
 	TKeyCode kcode = 0, kcode1;

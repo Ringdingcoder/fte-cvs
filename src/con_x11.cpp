@@ -1697,7 +1697,7 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
     return 0;
 }
 
-int ConPutEvent(TEvent Event) {
+int ConPutEvent(const TEvent& Event) {
     Pending = Event;
     return 0;
 }

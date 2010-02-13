@@ -230,8 +230,8 @@ int ConMouseVisible();
 int ConQueryMouseButtons(int *ButtonCount);
 #endif
 
-int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete);
-int ConPutEvent(TEvent Event);
+int ConGetEvent(TEventMask EventMask, TEvent* Event, int WaitTime, int Delete);
+int ConPutEvent(const TEvent& Event);
 
 void MoveCh(PCell B, char Ch, TAttr Attr, size_t Count);
 void MoveChar(PCell B, int Pos, int Width, const char Ch, TAttr Attr, size_t Count);

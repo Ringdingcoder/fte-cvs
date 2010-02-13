@@ -1206,7 +1206,7 @@ int ConCursorVisible() {
     return (CursorVisible == 1);
 }
 
-int ConPutEvent(TEvent Event) {
+int ConPutEvent(const TEvent& Event) {
     EventBuf = Event;
     return 0;
 }

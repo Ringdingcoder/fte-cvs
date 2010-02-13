@@ -820,7 +820,7 @@ char ConGetDrawChar(unsigned int idx)
 	return (char)idx;
 }
 
-int ConPutEvent(TEvent Event)
+int ConPutEvent(const TEvent& Event)
 {
 	Prev = Event;
 	return 0;

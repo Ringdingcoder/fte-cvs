@@ -768,7 +768,7 @@ int ConQueryMouseButtons(int *ButtonCount) { /*FOLD00*/
     return 0;
 }
 
-int ConPutEvent(TEvent Event) { /*FOLD00*/
+int ConPutEvent(const TEvent& Event) { /*FOLD00*/
     EventBuf = Event;
     return 0;
 }

@@ -126,8 +126,8 @@ public:
     
     void ProcessEvent();
     virtual void DispatchEvent(GFrame *frame, GView *view, TEvent &Event);
-    int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete, GView **view);
-    int ConPutEvent(TEvent Event);
+    int ConGetEvent(TEventMask EventMask, TEvent* Event, int WaitTime, int Delete, GView **view);
+    int ConPutEvent(const TEvent& Event);
     int ConFlush();
     int ConGrabEvents(TEventMask EventMask);
 

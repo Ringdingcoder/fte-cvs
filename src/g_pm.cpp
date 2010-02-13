@@ -3436,7 +3436,7 @@ int GUI::ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Dele
     return ::ConGetEvent(EventMask, Event, WaitTime, Delete, view);
 }
 
-int GUI::ConPutEvent(TEvent Event) {
+int GUI::ConPutEvent(const TEvent& Event) {
     EventBuf = Event;
     return 0;
 }

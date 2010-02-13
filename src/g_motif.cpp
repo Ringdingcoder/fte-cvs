@@ -1747,7 +1747,7 @@ int GUI::ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Dele
     return 0;
 }
 
-int GUI::ConPutEvent(TEvent Event) {
+int GUI::ConPutEvent(const TEvent& Event) {
     EventBuf = Event;
     return 0;
 }

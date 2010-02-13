@@ -872,7 +872,7 @@ int GUI::ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Dele
     return ::ConGetEvent(EventMask, Event, WaitTime, Delete);
 }
 
-int GUI::ConPutEvent(TEvent Event) {
+int GUI::ConPutEvent(const TEvent& Event) {
     return ::ConPutEvent(Event);
 }
 
@@ -1073,11 +1073,9 @@ void GUI::ProcessEvent() {
     if (E.What != evNone)
         NextEvent.What = evNone;
 
-    if (E.What == evNone &&
-       ( ConGetEvent(evMouse | evCommand | evKeyboard, &E, 0, 1, 0) == -1 ||
-          E.What == evNone )
-       )
-    {
+    if (E.What == evNone
+	&& (ConGetEvent(evMouse | evCommand | evKeyboard, &E, 0, 1, 0) == -1
+	    || E.What == evNone)) {
         frames->Update();
         while(ConGetEvent(evMouse | evCommand | evKeyboard, &E, -1, 1, 0) == -1 ||
            (E.What == evMouseMove && E.Mouse.Buttons == 0));

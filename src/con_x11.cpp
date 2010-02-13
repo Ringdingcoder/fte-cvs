@@ -58,8 +58,6 @@
 #include "icons/fte64x64.xpm"
 #endif // CONFIG_X11_XICON
 
-#include <stdarg.h>
-
 #ifdef WINNT
 #include <winsock.h>
 #define NO_PIPES
@@ -80,6 +78,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #define MAX_SCRWIDTH 255
 #define MAX_SCRHEIGHT 255
@@ -182,15 +181,12 @@ static Atom GetXClip(int clipboard) {
 }
 
 static int GetFTEClip(Atom clip) {
-    if (clip==XA_CLIPBOARD) {
+    if (clip==XA_CLIPBOARD)
         return 0;
-    }
-    if (clip==XA_PRIMARY) {
+    if (clip==XA_PRIMARY)
         return 1;
-    }
-    if (clip==XA_SECONDARY) {
+    if (clip==XA_SECONDARY)
         return 2;
-    }
     return -1;
 }
 
@@ -222,8 +218,7 @@ static void SetColor(int i) {
         Colors[i].blue  = (unsigned short)((RGBColor[i].b << 8) | RGBColor[i].b);
         Colors[i].green = (unsigned short)((RGBColor[i].g << 8) | RGBColor[i].g);
         Colors[i].red   = (unsigned short)((RGBColor[i].r << 8) | RGBColor[i].r);
-    }
-    else {
+    } else {
         Colors[i].blue  = (unsigned short)((dcolors[i].b << 8) | dcolors[i].b);
         Colors[i].green = (unsigned short)((dcolors[i].g << 8) | dcolors[i].g);
         Colors[i].red   = (unsigned short)((dcolors[i].r << 8) | dcolors[i].r);
@@ -232,21 +227,18 @@ static void SetColor(int i) {
 }
 
 static int InitXColors(Colormap colormap) {
-    int i, j;
     long d = 0x7FFFFFFF, d1;
     XColor clr;
-    unsigned long pix;
-    int num;
     long d_red, d_green, d_blue;
     long u_red, u_green, u_blue;
 
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; ++i) {
         SetColor(i);
         if (XAllocColor(display, colormap, &Colors[i]) == 0) {
             SetColor(i);
-            pix = 0xFFFFFFFF;
-            num = DisplayCells(display, DefaultScreen(display));
-            for (j = 0; j < num; j++) {
+	    unsigned long pix = 0xFFFFFFFF;
+	    int num = DisplayCells(display, DefaultScreen(display));
+            for (int j = 0; j < num; ++j) {
                 clr.pixel = j;
                 XQueryColor(display, colormap, &clr);
 
@@ -273,18 +265,14 @@ static int InitXColors(Colormap colormap) {
             }
             if (pix == 0xFFFFFFFF) {
                 fprintf(stderr, "Color search failed for #%04X%04X%04X\n",
-                        Colors[i].red,
-                        Colors[i].green,
-                        Colors[i].blue);
+                        Colors[i].red, Colors[i].green, Colors[i].blue);
             }
             clr.pixel = pix;
             XQueryColor(display, colormap, &clr);
             Colors[i] = clr;
             if (XAllocColor(display, colormap, &Colors[i]) == 0) {
                 fprintf(stderr, "Color alloc failed for #%04X%04X%04X\n",
-                        Colors[i].red,
-                        Colors[i].green,
-                        Colors[i].blue);
+                        Colors[i].red, Colors[i].green, Colors[i].blue);
             }
             /*colormap = XCreateColormap(display, win, DefaultVisual(display, screen), AllocNone);
              for (i = 0; i < 16; i++) {
@@ -336,7 +324,7 @@ public:
 
     GC& GetGC(unsigned i)
     {
-        assert(i < 256);
+        assert(i < FTE_ARRAY_SIZE(GCs));
         if (!GCs[i]) {
             gcv.foreground = Colors[i % 16].pixel;
             gcv.background = Colors[i / 16].pixel;
@@ -434,7 +422,6 @@ static int InitXFonts()
 
 static int SetupXWindow(int argc, char **argv)
 {
-
 #ifdef WINHCLX
     HCLXlibInit(); /* HCL - Initialize the X DLL */
 #endif
@@ -634,6 +621,52 @@ static int SetupXWindow(int argc, char **argv)
     return 0;
 }
 
+#define CursorXYPos(x, y) (ScreenBuffer + ((x) + ((y) * ScreenCols)))
+static void DebugShowArea(int X, int Y, int W, int H, int clr)
+{
+    return;
+    fprintf(stderr, "Draw %02d X:%2d Y:%2d  W:%2d x H:%2d\n", clr, X, Y, W, H);
+    XFillRectangle(display, win, colorXGC->GetGC(clr),
+                   X * FontCX, Y * FontCY, W * FontCX,
+                   H * FontCY / ((clr == 13) ? 2 : 1));
+    XEvent e;
+    while (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e))
+        XNextEvent(display, &e);
+    usleep(2000);
+}
+
+static void DrawCursor(int Show) {
+    if (CursorVisible) {
+        TCell *Cell = CursorXYPos(CursorX, CursorY);
+
+        // Check if cursor is on or off due to flashing
+        if (CursorBlink)
+            Show &= (CursorLastTime % (CursorFlashInterval * 2)) > CursorFlashInterval;
+        int attr = Cell->GetAttr() ^ (Show ? 0xff : 0);
+        char ch = (char) Cell->GetChar();
+        if (!useXMB)
+            XDrawImageString(display, win, colorXGC->GetGC(attr),
+                             CursorX * FontCX,
+                             font_struct->max_bounds.ascent + CursorY * FontCY,
+                             &ch, 1);
+#ifdef CONFIG_X11_XMB
+        else
+            XmbDrawImageString(display, win, font_set, colorXGC->GetGC(attr),
+                               CursorX * FontCX, FontCYD + CursorY * FontCY,
+                               &ch, 1);
+#endif
+#if 0
+        if (Show) {
+            int cs = (CursorStart * FontCY + FontCY / 2) / 100;
+            int ce = (CursorEnd   * FontCY + FontCY / 2) / 100;
+            XFillRectangle (display, win, GCs[p[1]],
+                            CursorX * FontCX, CursorY * FontCY + cs,
+                            FontCX, ce - cs);
+        }
+#endif
+    }
+}
+
 int ConInit(int XSize, int YSize) {
     if (XSize != -1)
         ScreenCols = XSize;
@@ -689,55 +722,9 @@ int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
     return 0;
 }
 
-#define CursorXYPos(x, y) (ScreenBuffer + ((x) + ((y) * ScreenCols)))
-static void DebugShowArea(int X, int Y, int W, int H, int clr)
+int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 {
-    return;
-    fprintf(stderr, "Draw %02d X:%2d Y:%2d  W:%2d x H:%2d\n", clr, X, Y, W, H);
-    XFillRectangle(display, win, colorXGC->GetGC(clr),
-                   X * FontCX, Y * FontCY, W * FontCX,
-                   H * FontCY / ((clr == 13) ? 2 : 1));
-    XEvent e;
-    while (XCheckTypedWindowEvent(display, win, GraphicsExpose, &e))
-        XNextEvent(display, &e);
-    usleep(2000);
-}
-
-
-void DrawCursor(int Show) {
-    if (CursorVisible) {
-        TCell *Cell = CursorXYPos(CursorX, CursorY);
-
-        // Check if cursor is on or off due to flashing
-        if (CursorBlink)
-            Show &= (CursorLastTime % (CursorFlashInterval * 2)) > CursorFlashInterval;
-        int attr = Cell->GetAttr() ^ (Show ? 0xff : 0);
-        char ch = (char) Cell->GetChar();
-        if (!useXMB)
-            XDrawImageString(display, win, colorXGC->GetGC(attr),
-                             CursorX * FontCX,
-                             font_struct->max_bounds.ascent + CursorY * FontCY,
-                             &ch, 1);
-#ifdef CONFIG_X11_XMB
-        else
-            XmbDrawImageString(display, win, font_set, colorXGC->GetGC(attr),
-                               CursorX * FontCX, FontCYD + CursorY * FontCY,
-                               &ch, 1);
-#endif
-#if 0
-        if (Show) {
-            int cs = (CursorStart * FontCY + FontCY / 2) / 100;
-            int ce = (CursorEnd   * FontCY + FontCY / 2) / 100;
-            XFillRectangle (display, win, GCs[p[1]],
-                            CursorX * FontCX, CursorY * FontCY + cs,
-                            FontCX, ce - cs);
-        }
-#endif
-    }
-}
-
-int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
-    char temp[ScreenCols + 1];
+    assert(X >= 0 && W >= 0 && Y >= 0 && H >= 0);
 
     if (X >= ScreenCols || Y >= ScreenRows) {
         //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
@@ -745,7 +732,6 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
     }
     //XClearArea(display, win, X, Y, W * FontCX, H * FontCY, False);
     //DebugShowArea(X, Y, W, H, 13);
-    assert(Y >= 0 && H >= 0);
     //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
     if (W > ScreenCols)
         W = ScreenCols;
@@ -754,6 +740,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         H = ScreenRows;
 
     for (int i = 0; i < H; ++i) {
+	char temp[ScreenCols + 1];
         TCell* pCell = CursorXYPos(X, Y + i);
         int x = 0, l;
         while (x < W) {
@@ -774,9 +761,10 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
                 pCell[p] = Cell[p];
                 char& ch = temp[l];
                 switch (Cell[p].GetChar()) {
-                case '\t': ch = (char)3; break;  // HT
-                case '\n': ch = (char)9; break;  // NL
-                case '\r': ch = (char)5; break;  // CR
+		// remap needs to be done in upper layer
+		case '\t': ch = (char)3; break;  // HT
+                //case '\n': ch = (char)9; break;  // NL
+		//case '\r': ch = (char)5; break;  // CR
                 default: ch = Cell[p].GetChar();
                 }
             }
@@ -797,13 +785,6 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
             //temp[l] = 0; printf("%s\n", temp);
             x += l;
         }
-        /*      if (x < ScreenCols - 1) {
-            printf("XX %d   %d   %d\n", X, x, W);
-            XFillRectangle(display, win, GCs[15 * 16 + 7],
-                           x * FontCX, (Y + i) * FontCY,
-                           (ScreenCols - x - 1) * FontCX, FontCY);
-        }
-        */
         if (i + Y == CursorY)
             DrawCursor(1);
         Cell += W;
@@ -813,28 +794,24 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
 }
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
-    int i;
-
-    for (i = 0; i < H; i++) {
+    for (int i = 0; i < H; Cell += W, ++i)
         memcpy(Cell, CursorXYPos(X, Y + i), W * sizeof(TCell));
-        Cell += W;
-    }
+
     return 0;
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
-    int i;
-    for (i = 0; i < H; i++) {
-        if (ConPutBox(X, Y + i, W, 1, Cell) != 0) return -1;
-    }
+    for (int i = 0; i < H; i++)
+	if (ConPutBox(X, Y + i, W, 1, Cell) != 0)
+	    return -1;
+
     return 0;
 }
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
     TDrawBuffer B;
-    int i;
 
-    for (i = 0; i < W; i++)
+    for (int i = 0; i < W; i++)
         B[i] = Cell;
     ConPutLine(X, Y, W, H, B);
     return 0;
@@ -848,55 +825,37 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
     if (Way == csUp) {
         DebugShowArea(X, (Y + Count), W, (H - Count), 14);
         XCopyArea(display, win, win, colorXGC->GetGC(0),
-                  X * FontCX,
-                  (Y + Count) * FontCY,
-                  W * FontCX,
-                  (H - Count) * FontCY,
-                  X * FontCX,
-                  Y * FontCY);
-        for (l = 0; l < H - Count; l++)
-            memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
+                  X * FontCX, (Y + Count) * FontCY,
+                  W * FontCX, (H - Count) * FontCY,
+                  X * FontCX, Y * FontCY);
+	//for (l = 0; l < H - Count; ++l)
+        //    memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
         //l = H - Count;
-        //ConGetBox(X, Y + Count, W, l, CursorXYPos(X, Y));
-        if (Count > 1 && ConSetBox(X, Y + l, W, Count, Cell) == -1)
-            return -1;
+        ConGetBox(X, Y + Count, W, H - Count, CursorXYPos(X, Y));
+	//if (Count > 1 && ConSetBox(X, Y + l, W, Count, Cell) == -1)
+        //    return -1;
     } else if (Way == csDown) {
         DebugShowArea(X, Y, W, (H - Count), 15);
         XCopyArea(display, win, win, colorXGC->GetGC(0),
-                  X * FontCX,
-                  Y * FontCY,
-                  W * FontCX,
-                  (H - Count) * FontCY,
-                  X * FontCX,
-                  (Y + Count) * FontCY);
-        for (l = H - 1; l >= Count; l--)
+                  X * FontCX, Y * FontCY,
+                  W * FontCX, (H - Count) * FontCY,
+                  X * FontCX, (Y + Count) * FontCY);
+        for (l = H - 1; l >= Count; --l)
             memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l - Count), W * sizeof(TCell));
 
-        if (Count > 1 && ConSetBox(X, Y, W, Count, Cell) == -1)
-            return -1;
+	//if (Count > 1 && ConSetBox(X, Y, W, Count, Cell) == -1)
+        //    return -1;
     }
     DrawCursor(1);
     return 0;
 }
 
 int ConSetSize(int X, int Y) {
-    TCell *NewBuffer,  *p;
-    int i;
-    int MX, MY;
-
-    if (!(NewBuffer = new TCell[X * Y]))
-        return -1;
-    MX = ScreenCols;
-    if (X < MX)
-        MX = X;
-    MY = ScreenRows;
-    if (Y < MY)
-        MY = Y;
-    p = NewBuffer;
-    for (i = 0; i < MY; i++) {
-        memcpy(p, CursorXYPos(0, i), MX * sizeof(TCell));
-        p += X;
-    }
+    TCell* NewBuffer = new TCell[X * Y];
+    int MX = (X < ScreenCols) ? X : ScreenCols;
+    int MY = (Y < ScreenRows) ? Y : ScreenRows;
+    for (int i = 0; i < MY; i++)
+        memcpy(NewBuffer + X * i, CursorXYPos(0, i), MX * sizeof(TCell));
     delete[] ScreenBuffer;
     ScreenBuffer = NewBuffer;
     ScreenCols = X;
@@ -946,7 +905,7 @@ int ConSetCursorSize(int Start, int End) {
     CursorStart = Start;
     CursorEnd = End;
     DrawCursor(CursorVisible);
-    return 1;
+    return 0;
 }
 
 int ConSetMousePos(int /*X*/, int /*Y*/) {
@@ -1125,11 +1084,8 @@ static void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char *
 
     if (state & ShiftMask) myState |= kfShift;
     if (state & ControlMask) myState |= kfCtrl;
-    if (state & Mod1Mask) myState |= kfAlt;
     //if (state & Mod2Mask) myState |= kfAlt; // NumLock
-    if (state & Mod3Mask) myState |= kfAlt;
-    if (state & Mod4Mask) myState |= kfAlt;
-    if (state & Mod5Mask) myState |= kfAlt;
+    if (state & (Mod1Mask | Mod3Mask | Mod4Mask | Mod5Mask)) myState |= kfAlt;
 
     /* modified kabi@users.sf.net
      * for old method
@@ -1144,8 +1100,8 @@ static void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char *
         if (myState == kfShift)
             myState = 0;
         if (myState & (kfAlt | kfCtrl))
-            if ((key >= 'a') && (key < 'z' + 32))
-                key &= ~0x20;
+            if ((key >= 'a') && (key <= 'z'))
+                key -= ('a' - 'A');
         if ((myState & kfCtrl) && key < 32)
             key += 64;
         Event->Key.Code = key | myState;
@@ -1661,8 +1617,8 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
                 Pending = *Event;
             if (Event->What & EventMask)
                 return 0;
-            else
-                Pending.What = evNone;
+
+	    Pending.What = evNone;
             Event->What = evNone;
         }
 

@@ -1,10 +1,12 @@
-/*    g_motif.cpp
+/*    g_qt.cpp
  *
  *    Copyright (c) 1994-1996, Marko Macek
+ *    Copyright (c) 2010, Zdenek Kabelac
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
+ *    Only a demo code - not really fully functional
  */
 
 #include "gui.h"
@@ -20,7 +22,6 @@
 #include <qscrbar.h>
 #include <qtimer.h>
 #include <qwidget.h>
-//#include <qfiledlg.h> // conflicts with <Xlib.h> above
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -175,7 +176,7 @@ public:
     int PMShowCursor();
     int PMHideCursor();
     int PMSetCursorPos();
-};      
+};
 
 class GFramePeer {
 public:
@@ -522,44 +523,44 @@ static const struct {
     unsigned int q_code;
     TKeyCode keyCode;
 } key_table[] = {
-{ Qt::Key_Escape,     kbEsc },
-{ Qt::Key_Tab,        kbTab },
-{ Qt::Key_Backtab,    kbTab | kfShift },
-{ Qt::Key_Backspace,  kbBackSp },
-{ Qt::Key_Return,     kbEnter },
-{ Qt::Key_Enter,      kbEnter },
-{ Qt::Key_Insert,     kbIns },
-{ Qt::Key_Delete,     kbDel },
-{ Qt::Key_Pause,      kbPause },
-{ Qt::Key_Print,      kbPrtScr },
-{ Qt::Key_SysReq,     kbSysReq },
-{ Qt::Key_Home,       kbHome },
-{ Qt::Key_End,        kbEnd },
-{ Qt::Key_Left,       kbLeft },
-{ Qt::Key_Up,         kbUp },
-{ Qt::Key_Right,      kbRight },
-{ Qt::Key_Down,       kbDown },
-{ Qt::Key_Prior,      kbPgUp },
-{ Qt::Key_Next,       kbPgDn },
-{ Qt::Key_Shift,      kbShift | kfModifier },
-{ Qt::Key_Control,    kbCtrl | kfModifier },
-{ Qt::Key_Meta,       kbAlt | kfModifier },
-{ Qt::Key_Alt,        kbAlt | kfModifier },
-{ Qt::Key_CapsLock,   kbCapsLock | kfModifier },
-{ Qt::Key_NumLock,    kbNumLock | kfModifier },
-{ Qt::Key_ScrollLock, kbScrollLock | kfModifier },
-{ Qt::Key_F1,         kbF1 },
-{ Qt::Key_F2,         kbF2 },
-{ Qt::Key_F3,         kbF3 },
-{ Qt::Key_F4,         kbF4 },
-{ Qt::Key_F5,         kbF5 },
-{ Qt::Key_F6,         kbF6 },
-{ Qt::Key_F7,         kbF7 },
-{ Qt::Key_F8,         kbF8 },
-{ Qt::Key_F9,         kbF9 },
-{ Qt::Key_F10,        kbF10 },
-{ Qt::Key_F11,        kbF11 },
-{ Qt::Key_F12,        kbF12 },
+    { Qt::Key_Escape,     kbEsc },
+    { Qt::Key_Tab,        kbTab },
+    { Qt::Key_Backtab,    kbTab | kfShift },
+    { Qt::Key_Backspace,  kbBackSp },
+    { Qt::Key_Return,     kbEnter },
+    { Qt::Key_Enter,      kbEnter },
+    { Qt::Key_Insert,     kbIns },
+    { Qt::Key_Delete,     kbDel },
+    { Qt::Key_Pause,      kbPause },
+    { Qt::Key_Print,      kbPrtScr },
+    { Qt::Key_SysReq,     kbSysReq },
+    { Qt::Key_Home,       kbHome },
+    { Qt::Key_End,        kbEnd },
+    { Qt::Key_Left,       kbLeft },
+    { Qt::Key_Up,         kbUp },
+    { Qt::Key_Right,      kbRight },
+    { Qt::Key_Down,       kbDown },
+    { Qt::Key_Prior,      kbPgUp },
+    { Qt::Key_Next,       kbPgDn },
+    { Qt::Key_Shift,      kbShift | kfModifier },
+    { Qt::Key_Control,    kbCtrl | kfModifier },
+    { Qt::Key_Meta,       kbAlt | kfModifier },
+    { Qt::Key_Alt,        kbAlt | kfModifier },
+    { Qt::Key_CapsLock,   kbCapsLock | kfModifier },
+    { Qt::Key_NumLock,    kbNumLock | kfModifier },
+    { Qt::Key_ScrollLock, kbScrollLock | kfModifier },
+    { Qt::Key_F1,         kbF1 },
+    { Qt::Key_F2,         kbF2 },
+    { Qt::Key_F3,         kbF3 },
+    { Qt::Key_F4,         kbF4 },
+    { Qt::Key_F5,         kbF5 },
+    { Qt::Key_F6,         kbF6 },
+    { Qt::Key_F7,         kbF7 },
+    { Qt::Key_F8,         kbF8 },
+    { Qt::Key_F9,         kbF9 },
+    { Qt::Key_F10,        kbF10 },
+    { Qt::Key_F11,        kbF11 },
+    { Qt::Key_F12,        kbF12 },
 };
 
 void QEText::ActiveEvent(TEvent &Event) {
@@ -755,39 +756,36 @@ static void CloseWindow(Widget w, GFramePeer *frame, XEvent *event, Boolean *con
 #endif
 ///////////////////////////////////////////////////////////////////////////
 
-GViewPeer::GViewPeer(GView *view, int XSize, int YSize) {
-    
-    View = view;
-    
-    //    wX = 0;
-    //    wY = 0;
-    wW = XSize;
-    wH = YSize;
-    sbVtotal = 0;
-    sbVstart = 0;
-    sbVamount = 0;
-    sbHtotal = 0;
-    sbHstart = 0;
-    sbHamount = 0;
-    wState = 0;
-    cVisible = 1;
-    cStart = 0; // %
-    cEnd = 100;
-    wRefresh = 0;
-    ScreenBuffer = 0;
-    cX = -1;
-    cY = -1;
-    VertPos = HorzPos = -1;
-
+GViewPeer::GViewPeer(GView *view, int XSize, int YSize) :
+    View(view),
+    wW(XSize),
+    wH(YSize),
+    wState(0),
+    wRefresh(0),
+    cX(-1),
+    cY(-1),
+    cVisible(1),
+    cStart(0), // %
+    cEnd(100),
+    sbVstart(0),
+    sbVamount(0),
+    sbVtotal(0),
+    sbHstart(0),
+    sbHamount(0),
+    sbHtotal(0),
+    VertPos(-1),
+    HorzPos(-1),
+    ScreenBuffer(0)
+{
     for (int jj = 0; jj < 256; jj++)
          GCs[jj] = 0;
-    
+
     qView = new QEView(this, frames->Peer->qFrame);
     qView->show();
 }
 
 GViewPeer::~GViewPeer() {
-    delete qView;
+    //delete qView; // auto deleted
 }
 
 int GViewPeer::AllocBuffer() {
@@ -948,7 +946,7 @@ int GViewPeer::ConPutBox(int X, int Y, int W, int H, PCell Cell) {
             len -= l;
         }
         p = CursorXYPos(X, Y + i);
-        memcpy(p, Cell, W * 2);
+        memmove(p, Cell, W * sizeof(TCell));
         if (i + Y == cY)
             DrawCursor(1);
         Cell += W;
@@ -1278,10 +1276,12 @@ int GViewPeer::PMSetCursorPos() {
 
 ///////////////////////////////////////////////////////////////////////////
 
-GView::GView(GFrame *parent, int XSize, int YSize) {
-    Parent = parent;
-    Prev = Next = 0;
-    Peer = new GViewPeer(this, XSize, YSize);
+GView::GView(GFrame *parent, int XSize, int YSize) :
+    Parent(parent),
+    Next(0),
+    Prev(0),
+    Peer(new GViewPeer(this, XSize, YSize))
+{
     if (Parent)
         Parent->AddView(this);
 }
@@ -1289,8 +1289,7 @@ GView::GView(GFrame *parent, int XSize, int YSize) {
 GView::~GView() {
     if (Parent)
         Parent->RemoveView(this);
-    if (Peer)
-        delete Peer;
+    delete Peer;
 }
 
 int GView::ConClear() {

@@ -25,10 +25,11 @@ GxView::GxView(GFrame *Parent) :
     Bottom(0),
     MouseCaptured(0)
 {
+    //fprintf(stderr, "CREATE GXVIEW %p\n", this);
 }
 
 GxView::~GxView() {
-    //fprintf(stderr, "DELETE GXVIEW %p   %p\n", Top, this);
+    //fprintf(stderr, "DESTROY GXVIEW %p   t:%p\n", this, Top);
     while (Top) {
 	ExView *V = Top;
 	Top = Top->Next;
@@ -41,7 +42,7 @@ void GxView::PushView(ExView *view) {
     int W, H;
     ConQuerySize(&W, &H);
 
-    //fprintf(stderr, "PUSHVIEW %p   %p\n", view, this);
+    //fprintf(stderr, "PUSHVIEW %p   %p  t:%p\n", view, this, Top);
     view->Win = this;
     if (Top == 0) {
         Top = Bottom = view;
@@ -57,7 +58,8 @@ void GxView::PushView(ExView *view) {
 
 ExView *GxView::PopView() {
 
-    //fprintf(stderr, "POPVIEW %p   %p\n", Top, this);
+    //fprintf(stderr, "POPVIEW %p  t:%p\n", this, Top);
+    assert(Top != 0);
     if (Top == 0)
         return 0;
 

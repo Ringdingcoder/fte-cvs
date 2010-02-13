@@ -270,7 +270,6 @@ int GViewPeer::SetSbVPos(int Start, int Amount, int Total) {
         sbVamount = Amount;
         sbVtotal = Total;
         sbVupdate = 1;
-//        DrawScrollBar();
     }
     return 1;
 }
@@ -284,7 +283,6 @@ int GViewPeer::SetSbHPos(int Start, int Amount, int Total) {
         sbHamount = Amount;
         sbHtotal = Total;
         sbHupdate = 1;
-//        DrawScrollBar();
     }
     return 1;
 }
@@ -376,12 +374,14 @@ GView::GView(GFrame *parent, int XSize, int YSize) :
 {
     if (Parent)
         Parent->AddView(this);
+    //fprintf(stderr, "CREATE GVIEW  %p\n", this);
 }
 
 GView::~GView() {
     if (Parent)
         Parent->RemoveView(this);
     delete Peer;
+    //fprintf(stderr, "DESTROY GVIEW  %p\n", this);
 }
 
 int GView::ConClear() {
@@ -588,6 +588,7 @@ GFrame::GFrame(int XSize, int YSize) :
 GFrame::~GFrame() {
     //fprintf(stderr, "DELETE GFRAME %p  %p\n", Next, this);
     delete Peer;
+
     if (Next == this) {
         frames = 0;
     } else {
@@ -645,45 +646,40 @@ int GFrame::ConResizeView(GView * /*view*/, int /*DeltaY*/) {
 }
 
 int GFrame::AddView(GView *view) {
-    if (Active != 0) {
+    //fprintf(stderr, "GFRAME ADDVIEW %p,  t %p   a %p\n", view, Top, Active);
+    if (Active != 0)
         return ConSplitView(Active, view);
-    } else {
-        int W, H;
-        
-        view->Parent = this;
-        view->Prev = view->Next = 0;
-        
-        view->Peer->wX = 0;
-        if (ShowMenuBar)
-            view->Peer->wY = 1;
-        else
-            view->Peer->wY = 0;
-        ConQuerySize(&W, &H);
-        if (ShowMenuBar)
-            H--;
-        if (ShowVScroll)
-            W--;
-        if (ShowHScroll)
-            H--;
-        view->ConSetSize(W, H);
-        InsertView(Top, view);
-        return 0;
-    }
+
+    int W, H;
+
+    view->Parent = this;
+    view->Prev = view->Next = 0;
+
+    view->Peer->wX = 0;
+    view->Peer->wY = (ShowMenuBar) ? 1 : 0;
+	ConQuerySize(&W, &H);
+    if (ShowMenuBar)
+	H--;
+    if (ShowVScroll)
+	W--;
+    if (ShowHScroll)
+	H--;
+    view->ConSetSize(W, H);
+    InsertView(Top, view);
+    return 0;
 }
 
 void GFrame::Update() {
-    GView *v = Active;
     
     UpdateMenu();
-    while (v) {
+    for (GView *v = Active; v; v = v->Next) {
         v->Update();
         if ((ShowVScroll || ShowHScroll) && (v->Peer->sbVupdate || v->Peer->sbHupdate)) {
             v->Peer->DrawScrollBar();
             v->Peer->sbVupdate = 0;
             v->Peer->sbHupdate = 0;
         }
-        v = v->Next;
-        if (v == Active) 
+        if (v->Next == Active)
             break;
     }
 }
@@ -727,10 +723,11 @@ void GFrame::InsertView(GView *prev, GView *view) {
 }
 
 void GFrame::RemoveView(GView *view) {
-    if (!view) return ;
+    if (!view) return;
     
     if (Active == view)
         Active->Activate(0);
+
     if (view->Next == view) {
         Top = Active = 0;
         delete this;
@@ -796,22 +793,18 @@ int GFrame::SelectView(GView *view) {
 }
 
 void GFrame::Resize(int width, int height) {
-    int count = 0;
-    
-    GView *V = Top;
-    while (V) {
+    if (!Top)
+        return;
+
+    int count = 1;
+    for (GView *V = Top->Next; V != Top; V = V->Next)
         count++;
-        V = V->Prev;
-        if (V == Top) break;
-    }
+
     if (height < 2 * count + 2 || width < 16) {
         ::ConSetSize(16, 2 * count + 1);
         return;
     }
-    
-    if (!Top)
-        return;
-    
+
     if (ShowVScroll)
         width--;
     if (ShowHScroll)
@@ -819,9 +812,7 @@ void GFrame::Resize(int width, int height) {
 
     //fprintf(stderr, "Resize: %d %d   c:%d\n", width, height, count);
     
-    V = Top->Prev;
-    
-    while (V != Top) {
+    for (GView *V = Top->Prev; V != Top; V = V->Prev) {
         int h, y;
         
         h = V->Peer->wH;
@@ -836,7 +827,6 @@ void GFrame::Resize(int width, int height) {
         V->Peer->wY = y;
         V->ConSetSize(width, h);
         height = y;
-        V = V->Prev;
     }
     if (ShowMenuBar)
         height--;
@@ -853,7 +843,7 @@ int GFrame::ExecMainMenu(char Sub) {
 }
 
 int GFrame::SetMenu(const char *Name) {
-    if (Menu) free(Menu);
+    free(Menu);
     Menu = strdup(Name);
     return 0;
 }
@@ -901,11 +891,10 @@ static inline int scrollBreak(TEvent &E)
 }
 
 static void HandleVScroll(GView *view, TEvent &E) {
-    int y; //, x
+    int y;
     int wY, wH;
     TEvent E1;
     
-    //x = E.Mouse.X;
     y = E.Mouse.Y;
     wY = view->Peer->wY;
     wH = view->Peer->wH;
@@ -990,11 +979,10 @@ static void HandleVScroll(GView *view, TEvent &E) {
 }
 
 static void HandleHScroll(GView *view, TEvent &E) {
-    int x; //, x
+    int x;
     int wX, wW;
     TEvent E1;
     
-    //x = E.Mouse.X;
     x = E.Mouse.X;
     wX = view->Peer->wX;
     wW = view->Peer->wW;
@@ -1082,9 +1070,9 @@ void GUI::ProcessEvent() {
     TEvent E;
     
     E = NextEvent;
-    if (E.What != evNone) {
+    if (E.What != evNone)
         NextEvent.What = evNone;
-    }
+
     if (E.What == evNone &&
        ( ConGetEvent(evMouse | evCommand | evKeyboard, &E, 0, 1, 0) == -1 ||
           E.What == evNone )

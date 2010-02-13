@@ -344,7 +344,6 @@ void EView::DeleteModel(EModel *M) {
     }
     delete M;
     SetMsg(0);
-    return;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -666,23 +665,25 @@ int EView::Compile(char *Command) {
 }
 
 int EView::ViewMessages(ExState &/*State*/) {
-    if (CompilerMsgs != 0) {
-        SwitchToModel(CompilerMsgs);
-        return 1;
-    }
-    return 0;
+    if (!CompilerMsgs)
+        return 0;
+
+    SwitchToModel(CompilerMsgs);
+    return 1;
 }
 
 int EView::CompilePrevError(ExState &/*State*/) {
-    if (CompilerMsgs != 0)
-        return CompilerMsgs->CompilePrevError(this);
-    return 0;
+    if (!CompilerMsgs)
+        return 0;
+
+    return CompilerMsgs->CompilePrevError(this);
 }
 
 int EView::CompileNextError(ExState &/*State*/) {
-    if (CompilerMsgs != 0)
-        return CompilerMsgs->CompileNextError(this);
-    return 0;
+    if (!CompilerMsgs)
+        return 0;
+
+    return CompilerMsgs->CompileNextError(this);
 }
 #endif
 
@@ -895,11 +896,11 @@ int EView::ClearCvsMessages(ExState &/*State*/) {
 }
 
 int EView::ViewCvs(ExState &/*State*/) {
-    if (CvsView != 0) {
-        SwitchToModel(CvsView);
-        return 1;
-    }
-    return 0;
+    if (!CvsView)
+        return 0;
+
+    SwitchToModel(CvsView);
+    return 1;
 }
 
 int EView::CvsDiff(ExState &State) {
@@ -973,11 +974,11 @@ int EView::CvsDiff(char *Options) {
 }
 
 int EView::ViewCvsDiff(ExState &/*State*/) {
-    if (CvsDiffView != 0) {
-        SwitchToModel(CvsDiffView);
-        return 1;
-    }
-    return 0;
+    if (!CvsDiffView)
+        return 0;
+
+    SwitchToModel(CvsDiffView);
+    return 1;
 }
 
 int EView::CvsCommit(ExState &State) {
@@ -1143,11 +1144,11 @@ int EView::ClearSvnMessages(ExState &/*State*/) {
 }
 
 int EView::ViewSvn(ExState &/*State*/) {
-    if (SvnView != 0) {
-        SwitchToModel(SvnView);
-        return 1;
-    }
-    return 0;
+    if (!SvnView)
+        return 0;
+
+    SwitchToModel(SvnView);
+    return 1;
 }
 
 int EView::SvnDiff(ExState &State) {
@@ -1221,11 +1222,11 @@ int EView::SvnDiff(char *Options) {
 }
 
 int EView::ViewSvnDiff(ExState &/*State*/) {
-    if (SvnDiffView != 0) {
-        SwitchToModel(SvnDiffView);
-        return 1;
-    }
-    return 0;
+    if (!SvnDiffView)
+        return 0;
+
+    SwitchToModel(SvnDiffView);
+    return 1;
 }
 
 int EView::SvnCommit(ExState &State) {
@@ -1287,7 +1288,7 @@ int EView::SvnCommit(char *Options) {
             break;
     }
 
-    if (SvnView == 0) svn = new ESvn(0, &ActiveModel);else svn = SvnView;
+    svn = (!SvnView) ? new ESvn(0, &ActiveModel) : SvnView;
     SwitchToModel(svn);
     svn->RunCommit(Dir, Command, OnFiles);
     if (OnFiles != buf) free(OnFiles);
@@ -1295,11 +1296,11 @@ int EView::SvnCommit(char *Options) {
 }
 
 int EView::ViewSvnLog(ExState &/*State*/) {
-    if (SvnLogView != 0) {
-        SwitchToModel(SvnLogView);
-        return 1;
-    }
-    return 0;
+    if (!SvnLogView)
+        return 0;
+
+    SwitchToModel(SvnLogView);
+    return 1;
 }
 
 #endif

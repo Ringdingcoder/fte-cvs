@@ -48,21 +48,24 @@ static InputHistory inputHistory;
 void ClearHistory() { /*FOLD00*/
 
     // free filenames from all entries
-    while(FPHistoryCount--)
-    {
+    while (FPHistoryCount-- > 0) {
         free(FPHistory[FPHistoryCount]->FileName);
         free(FPHistory[FPHistoryCount]);
     }
-
+    FPHistoryCount = 0;
     // free history list
     free(FPHistory);
+    FPHistory = NULL;
 
     // free input history
-    while(inputHistory.Count--)
+    while (inputHistory.Count-- > 0)
 	free(inputHistory.Line[inputHistory.Count]);
 
+    inputHistory.Count = 0;
     free(inputHistory.Line);
+    inputHistory.Line = NULL;
     free(inputHistory.Id);
+    inputHistory.Id = NULL;
 }
 
 int SaveHistory(const char *FileName) { /*FOLD00*/

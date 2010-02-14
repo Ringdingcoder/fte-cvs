@@ -20,10 +20,15 @@
 
 #include <signal.h>
 #include <sys/ioctl.h>
+#include <sys/time.h>
+#include <sys/wait.h>
 #include <termios.h>
+#include <unistd.h>
 
 /* Escape sequence delay in milliseconds */
 #define escDelay 10
+
+extern TEvent NextEvent; // g_text.cpp
 
 /* translate fte colors to curses*/
 static const short fte_curses_colors[] =
@@ -420,7 +425,7 @@ static int ConGetMouseEvent(TEvent *Event)
 #if 0
 	fprintf(stderr, "EVENT %x  %x %x  %d  %d\n", (int)bstate,
 		(int)BUTTON_CTRL, (int)BUTTON_CTRL, (int)mevent.x, (int)mevent.y);
-	for (int i = 1; i <=5; ++i)
+	for (int i = 1; i <= 5; ++i)
 		fprintf(stderr, "EVENTXXX %d R:%lx P:%lx C:%lx D:%lx T:%lx E:%lx\n",
 			i, BUTTON_RELEASE(bstate, i),
 			BUTTON_PRESS(bstate, i),
@@ -432,38 +437,39 @@ static int ConGetMouseEvent(TEvent *Event)
 	Event->What = evNone;
 	Event->Mouse.X = mevent.x;
 	Event->Mouse.Y = mevent.y;
-	Event->Mouse.Buttons = 0;
-
-	if (BUTTON_PRESS(bstate, 1)) {
-		Event->Mouse.What = evMouseDown;
-		Event->Mouse.Buttons |= 1;
+	Event->Mouse.Count = 0;
+        int i;
+	for (i = 1; i < 3; ++i) {
+	    if (BUTTON_CLICK(bstate, i)) {
 		Event->Mouse.Count = 1;
-	} else if (BUTTON_RELEASE(bstate, 1)) {
-		Event->Mouse.What = evMouseUp;
-		Event->Mouse.Count = (BUTTON_DOUBLE_CLICK(bstate, 1)) ? 2 : 1;
-	} else if (BUTTON_CLICK(bstate, 1)) {
-		Event->Mouse.What = evMouseDown;
-		Event->Mouse.Buttons |= 1;
-		Event->Mouse.Count = 1;
-		//mevent.bstate ^= BUTTON1_CLICKED;
-		mevent.bstate |= BUTTON1_RELEASED;
-		ungetmouse(&mevent);
-	} else if (BUTTON_DOUBLE_CLICK(bstate, 1)) {
-		Event->Mouse.What = evMouseDown;
-		Event->Mouse.Buttons |= 1;
+                break;
+	    } else if (BUTTON_DOUBLE_CLICK(bstate, i)) {
 		Event->Mouse.Count = 2;
-		mevent.bstate |= BUTTON1_RELEASED;
-		ungetmouse(&mevent);
-	} else if (BUTTON_PRESS(bstate, 4)
-		   || (bstate & (BUTTON2_PRESSED | REPORT_MOUSE_POSITION))) {
-		/* Scroll screen */
-		Event->What = evCommand;
-		Event->Msg.Param1 = 10;
-		/* HACK - with control move in opposite direction
-		 * as the 'upward' scroll is really slow with plain Button4
-		 */
-		Event->Msg.Command = (bstate & (BUTTON_CTRL | BUTTON4_PRESSED))
-			? cmVScrollUp : cmVScrollDown;
+                break;
+	    } else if (BUTTON_TRIPLE_CLICK(bstate, i)) {
+		Event->Mouse.Count = 3;
+                break;
+	    }
+	}
+
+	//fprintf(stderr, "BUTTONS b:%d c:%d\n", i, (int)Event->Mouse.Count);
+	if (Event->Mouse.Count) {
+	    switch (i) {
+	    case 1: Event->Mouse.Buttons = 1; break;
+	    case 2: Event->Mouse.Buttons = 2; break;
+	    case 3: Event->Mouse.Buttons = 4; break;
+	    }
+	    Event->Mouse.What = evMouseDown;
+	    NextEvent = *Event;
+	    NextEvent.Mouse.What = evMouseUp;
+	} else if (BUTTON_DOUBLE_CLICK(bstate, 5) || BUTTON_PRESS(bstate, 4)) {
+	    Event->What = evCommand;
+	    Event->Msg.Param1 = 10;
+	    /* HACK - with control move in opposite direction
+	     * as the 'upward' scroll is really slow with plain Button4
+	     */
+	    Event->Msg.Command = (bstate & (BUTTON_CTRL | BUTTON4_PRESSED))
+		? cmVScrollUp : cmVScrollDown;
 	}
 
 	return 0;
@@ -879,9 +885,8 @@ int GUI::RunProgram(int /*mode */ , char *Command)
 #endif
 	ConQuerySize(&W1, &H1);
 
-	if (W != W1 || H != H1) {
+	if (W != W1 || H != H1)
 		frames->Resize(W1, H1);
-	}
 	frames->Repaint();
 	return rc;
 }

@@ -801,7 +801,7 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
-    for (int i = 0; i < H; i++)
+    for (int i = 0; i < H; ++i)
 	if (ConPutBox(X, Y + i, W, 1, Cell) != 0)
 	    return -1;
 
@@ -828,11 +828,12 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
                   X * FontCX, (Y + Count) * FontCY,
                   W * FontCX, (H - Count) * FontCY,
                   X * FontCX, Y * FontCY);
-	for (l = 0; l < H - Count; ++l)
+        for (l = 0; l < H - Count; ++l)
             memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
         //l = H - Count;
-	//ConGetBox(X, Y + Count, W, H - Count, CursorXYPos(X, Y));
-	//if (Count > 1 && ConSetBox(X, Y + l, W, Count, Cell) == -1)
+        //fprintf(stderr, "X:%d   Y:%d   W:%d   H:%d  c:%d\n", X, Y, W, H, Count);
+        //ConGetBox(0, Y + Count, ScreenCols, H - Count, CursorXYPos(0, Y));
+        //if (Count > 1 && ConSetBox(X, Y + l, W, Count, Cell) == -1)
         //    return -1;
     } else if (Way == csDown) {
         DebugShowArea(X, Y, W, (H - Count), 15);
@@ -1130,10 +1131,10 @@ static TEvent LastMouseEvent = { evNone };
 
 static void ConvertClickToEvent(int type, int xx, int yy, int button, int state,
                                 TEvent *Event, Time mtime) {
-    unsigned int myState = 0;
     static unsigned long LastClickTime = 0;
     static short LastClickCount = 0;
     static unsigned long LastClick = 0;
+    unsigned int myState = 0;
     unsigned long CurTime = mtime;
 
     //printf("Mouse x:%d y:%d  %d\n", xx, yy, type);
@@ -1175,11 +1176,8 @@ static void ConvertClickToEvent(int type, int xx, int yy, int button, int state,
     Event->Mouse.Count = 1;
     if (state & ShiftMask) myState |= kfShift;
     if (state & ControlMask) myState |= kfCtrl;
-    if (state & Mod1Mask) myState |= kfAlt;
+    if (state & (Mod1Mask | Mod3Mask | Mod4Mask | Mod5Mask)) myState |= kfAlt;
     //if (state & Mod2Mask) myState |= kfAlt;
-    if (state & Mod3Mask) myState |= kfAlt;
-    if (state & Mod4Mask) myState |= kfAlt;
-    if (state & Mod5Mask) myState |= kfAlt;
     Event->Mouse.KeyMask = myState;
 
     if (Event->What == evMouseDown) {

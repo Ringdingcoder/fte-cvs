@@ -693,14 +693,14 @@ static int FindPrevIndent(EBuffer *B, int &RowP, int &ColP, char &CharP, int Fla
                     }
                     break;
                 case '?':
-                    //if ((Flags & FIND_QUESTION)) {
-                    PRINTF(("FOUND ?"));
-                    if (BolChar == ':' || BolChar == ',') {
-                        BolChar = ' ';
-                        BolCol = -1;
-                        BolRow = -1;
-                    }
-                    //}
+		    if ((Flags & FIND_QUESTION)) {
+			PRINTF(("FOUND ?"));
+			if (BolChar == ':' || BolChar == ',') {
+			    BolChar = ' ';
+			    BolCol = -1;
+			    BolRow = -1;
+			}
+		    }
                     break;
                 }
             } else if (StateMap[ColP] == hsC_Keyword && (BolChar == ' ' || BolChar == ':')) {

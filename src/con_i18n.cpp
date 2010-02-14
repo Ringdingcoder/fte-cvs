@@ -368,7 +368,7 @@ void i18n_destroy(i18n_context_t** ctx)
 void i18n_focus_in(i18n_context_t* ctx)
 {
 #if XlibSpecificationRelease >= 6
-    if (ctx->xic != NULL)
+    if (ctx && ctx->xic != NULL)
 	XSetICFocus(ctx->xic);
 #endif
 }
@@ -377,7 +377,7 @@ void i18n_focus_in(i18n_context_t* ctx)
 void i18n_focus_out(i18n_context_t* ctx)
 {
 #if XlibSpecificationRelease >= 6
-    if (ctx->xic != NULL)
+    if (ctx && ctx->xic != NULL)
 	XUnsetICFocus(ctx->xic);
 #endif
 }
@@ -406,7 +406,7 @@ int i18n_lookup_sym(i18n_context_t* ctx, XKeyEvent * keyEvent,
             nbytes = XwcLookupString(ctx->xic, keyEvent, &wk, 1, key, &status_return);
             printf("code=%0X\n", wk);
             keySize = 1;
-            keyName[0] = wk & 0xFF;
+            keyName[0] = (char)wk;
 #endif
 	}
     } else

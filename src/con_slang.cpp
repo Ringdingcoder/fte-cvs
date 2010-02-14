@@ -128,19 +128,16 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 {
     SLtt_get_terminfo();
 
-    if (SLkp_init() == -1) {
+    if ((SLkp_init() == -1)
+	|| (SLang_init_tty(0, 1, 1) == -1))
 	return -1;
-    }
-    if (SLang_init_tty(0, 1, 1) == -1) {
-	return -1;
-    }
 
-    SLsignal_intr(SIGWINCH, sigwinch_handler);
     if (SLsmg_init_smg() == -1) {
 	SLang_reset_tty();
 	return -1;
     }
 
+    SLsignal_intr(SIGWINCH, sigwinch_handler);
     SLang_set_abort_signal(NULL);
     SLtty_set_suspend_state(0);
 
@@ -257,11 +254,9 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
     int CurX, CurY;
 
     ConQueryCursorPos(&CurX, &CurY);
-    while (H > 0) {
+    for (;H > 0; Cell += W, --H) {
 	SLsmg_gotorc(Y++, X);
 	fte_write_color_chars(Cell, W);
-	Cell += W;
-	H--;
     }
     ConSetCursorPos(CurX, CurY);
 

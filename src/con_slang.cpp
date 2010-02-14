@@ -8,6 +8,9 @@
  *
  */
 
+// to have %PRId64 defined for C++
+#define __STDC_FORMAT_MACROS
+
 #include "c_config.h"
 #include "con_tty.h"
 #include "console.h"
@@ -333,7 +336,7 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell)
 
     ConQueryCursorPos(&CurX, &CurY);
     for (;H > 0; --H) {
-	SLsmg_gotorc(Y, X);
+	SLsmg_gotorc(Y++, X);
 	fte_write_color_chars(Cell, W);
     }
     ConSetCursorPos(CurX, CurY);
@@ -494,27 +497,33 @@ static int parseEsc(TEvent *Event)
 	// FIXME: hardcoded timeouts
 	static const int64_t timeout[] = {
 	    300000,// 300ms  double
-	    500000 // 500ms  tripple
+	    500000,// 500ms  tripple
+	    700000,// 700ms  4 clicks
+	    900000 // 900ms  5 clicks
 	};
-	static int64_t time_prev[2];
+	static int64_t time_prev[FTE_ARRAY_SIZE(timeout)];
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	int64_t time_new = tv.tv_sec * 1000000 + tv.tv_usec;
 
+	// only mouse clicks are reported
 	Event->Mouse.What = evMouseDown;
 	Event->Mouse.X = (unsigned char)seq[3] - 33;
 	Event->Mouse.Y = (unsigned char)seq[4] - 33;
 	Event->Mouse.Buttons = (seq[2] == 32) ? 1 : (seq[2] == 33) ? 4 : 2;
 
-	// detect triple/double mouse click
-	if (time_new - time_prev[1] < timeout[1]) // 500ms
-	    Event->Mouse.Count = 3;
-	else
-	    Event->Mouse.Count = (time_new - time_prev[0] < timeout[0]) ? 2 : 1;
-	//fprintf(stderr, "B:%2d  X:%3d  Y:%3d  Time %"PRId64 "  %"PRId64 " \n",
-	//	Event->Mouse.Buttons, Event->Mouse.X, Event->Mouse.Y, tnew, tprev);
-	time_prev[1] = time_prev[0];
+	// FIXME: this code should be moved to upper layer
+	// detect 2,3,4 mouse clicks
+	Event->Mouse.Count = 1;
+	for (size_t i = 0; i < FTE_ARRAY_SIZE(timeout)
+             && ((time_new - time_prev[i]) < timeout[i]); ++i)
+		Event->Mouse.Count++;
+	for (size_t i = FTE_ARRAY_SIZE(timeout); --i > 0;)
+	    time_prev[i] = time_prev[i - 1];
 	time_prev[0] = time_new;
+	//fprintf(stderr, "B:%2d:%d  X:%3d  Y:%3d  Time %"PRId64 "\n",
+	//	Event->Mouse.Buttons, Event->Mouse.Count, Event->Mouse.X, Event->Mouse.Y, time_new);
+
 	if (seq[2] & 0x40) {
 	    Event->What = evCommand;
 	    Event->Msg.Param1 = 10;

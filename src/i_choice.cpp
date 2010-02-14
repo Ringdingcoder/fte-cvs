@@ -11,82 +11,61 @@
 
 #include "c_color.h"
 #include "i_view.h"
+#include "s_string.h"
 #include "sysdep.h"
 
 #include <ctype.h>
 #include <stdio.h>
 
 ExChoice::ExChoice(const char *ATitle, int NSel, va_list ap) :
-    ExView(),
-    Title(strdup(ATitle)),
+    Title(ATitle),
+    lTitle((int)Title.size()),
     NOpt(NSel),
-    Cur(0),
+    SOpt(NSel),
     lChoice(0),
+    Cur(0),
     MouseCaptured(0)
 {
-    char msg[1024];
-    int i;
-    char *fmt;
-
-    lTitle = strlen(Title);
-
-    for (i = 0; i < NSel; i++) {
-        SOpt[i] = strdup(va_arg(ap, char *));
-        lChoice += CStrLen(SOpt[i]) + 1;
+    for (int i = 0; i < NSel; i++) {
+        SOpt.push_back((va_arg(ap, char *)));
+        lChoice += SOpt.back().GetCStrLen() + 1;
     }
 
-    fmt = va_arg(ap, char *);
-    vsprintf(msg, fmt, ap);
-    strncpy(Prompt, msg, sizeof(Prompt));
-    Prompt[sizeof(Prompt) - 1] = 0;
+    char *fmt = va_arg(ap, char *);
+    vsnprintf(Prompt, sizeof(Prompt), fmt, ap);
 }
 
-ExChoice::~ExChoice() {
-    free(Title);
-    for (int i = 0; i < NOpt; i++)
-        free(SOpt[i]);
-}
-
-void ExChoice::Activate(int gotfocus) {
-    ExView::Activate(gotfocus);
-}
-
-int ExChoice::BeginMacro() {
-    return 1;
+ExChoice::~ExChoice()
+{
 }
 
 int ExChoice::FindChoiceByPoint(int x, int y) {
-    int pos, i;
     int W, H;
-    
+
     Win->ConQuerySize(&W, &H);
-    
+
     if (y != H - 1)
         return -1;
-    
-    pos = W - lChoice;
+
+    int pos = W - lChoice;
     if (x < pos)
         return -1;
-    
-    for (i = 0; i < NOpt; i++) {
-        int clen = CStrLen(SOpt[i]);
-        
-        if (x > pos && x <= pos + clen)
+
+    for (int i = 0; i < NOpt; i++) {
+        if (x > pos && x <= pos + SOpt[i].GetCStrLen())
             return i;
-        pos += clen + 1;
+        pos += SOpt[i].GetCStrLen() + 1;
     }
     return -1;
 }
 
 void ExChoice::HandleEvent(TEvent &Event) {
-    int i;
-    
     switch (Event.What) {
     case evKeyDown:
         switch (kbCode(Event.Key.Code)) {
-        case kbTab | kfShift:
+        case kbTab | kfShift: /* fall */
         case kbLeft: if (Cur == -1) Cur = 0; Cur--; if (Cur < 0) Cur = NOpt - 1; Event.What = evNone; break;
-        case kbTab:
+        case kbTab: /* fall */
         case kbRight: if (Cur == -1) Cur = 0; Cur++; if (Cur >= NOpt) Cur = 0; Event.What = evNone; break;
         case kbHome: Cur = 0; Event.What = evNone; break;
         case kbEnd: Cur = NOpt - 1; Event.What = evNone; break;
@@ -94,15 +73,10 @@ void ExChoice::HandleEvent(TEvent &Event) {
         case kbEsc: EndExec(-1); Event.What = evNone; break;
         default:
             if (isAscii(Event.Key.Code)) {
-                char c = char(Event.Key.Code & 0xFF);
-                char s[3];
-                
-                s[0] = '&';
-                s[1] = (char)(toupper((char)c) & 0xFF);
-                s[2] = 0;
-                
-                for (i = 0; i < NOpt; i++) {
-                    if (strstr(SOpt[i], s) != 0) {
+		char s[3] = { '&', (char)(toupper((char)Event.Key.Code)), 0 };
+
+                for (int i = 0; i < NOpt; ++i) {
+                    if (strstr(SOpt[i].GetCStr(), s) != 0) {
                         Win->EndExec(i);
                         break;
                     }
@@ -114,10 +88,9 @@ void ExChoice::HandleEvent(TEvent &Event) {
         break;
 #ifdef CONFIG_MOUSE
     case evMouseDown:
-        if (Win->CaptureMouse(1))
-            MouseCaptured = 1;
-        else
-            break;
+	if (!Win->CaptureMouse(1))
+	    break;
+	MouseCaptured = 1;
         Cur = FindChoiceByPoint(Event.Mouse.X, Event.Mouse.Y);
         Event.What = evNone;
         break;
@@ -127,15 +100,14 @@ void ExChoice::HandleEvent(TEvent &Event) {
         Event.What = evNone;
         break;
     case evMouseUp:
-        if (MouseCaptured)
-            Win->CaptureMouse(0);
-        else
-            break;
+	if (!MouseCaptured)
+	    break;
+	Win->CaptureMouse(0);
         MouseCaptured = 0;
         Cur = FindChoiceByPoint(Event.Mouse.X, Event.Mouse.Y);
         Event.What = evNone;
         if (Cur >= 0 && Cur < NOpt && NOpt > 0)
-            EndExec(Cur); 
+            EndExec(Cur);
         else
             Cur = 0;
         break;
@@ -143,43 +115,25 @@ void ExChoice::HandleEvent(TEvent &Event) {
     }
 }
 
-void ExChoice::UpdateView() {
-    if (Next) {
-        Next->UpdateView();
-    }
-}
-
-void ExChoice::RepaintView() {
-    if (Next) {
-        Next->RepaintView();
-    }
-}
-
-void ExChoice::UpdateStatus() {
-    RepaintStatus();
-}
-
 void ExChoice::RepaintStatus() {
     TDrawBuffer B;
     int W, H;
-    int pos, i;
-    TAttr color1, color2;
-    
+
     ConQuerySize(&W, &H);
-    
-    
+
     if (Cur != -1) {
         if (Cur >= NOpt) Cur = NOpt - 1;
         if (Cur < 0) Cur = 0;
     }
-    
+
     MoveCh(B, ' ', hcChoice_Background, W);
-    MoveStr(B, 0, W, Title, hcChoice_Title, W);
+    MoveStr(B, 0, W, Title.c_str(), hcChoice_Title, W);
     MoveChar(B, lTitle, W, ':', hcChoice_Background, 1);
     MoveStr(B, lTitle + 2, W, Prompt, hcChoice_Param, W);
-    
-    pos = W - lChoice;
-    for (i = 0; i < NOpt; i++) {
+
+    int pos = W - lChoice;
+    for (int i = 0; i < NOpt; ++i) {
+	TAttr color1, color2;
         if (i == Cur) {
             color1 = hcChoice_ActiveItem;
             color2 = hcChoice_ActiveChar;
@@ -190,8 +144,8 @@ void ExChoice::RepaintStatus() {
         if (i == Cur)
             ConSetCursorPos(pos + 1, H - 1);
         MoveChar(B, pos, W, ConGetDrawChar(DCH_V), hcChoice_Background, 1);
-        MoveCStr(B, pos + 1, W, SOpt[i], color1, color2, W);
-        pos += CStrLen(SOpt[i]) + 1;
+        MoveCStr(B, pos + 1, W, SOpt[i].GetCStr(), color1, color2, W);
+        pos += SOpt[i].GetCStrLen() + 1;
     }
     ConPutBox(0, H - 1, W, 1, B);
 }

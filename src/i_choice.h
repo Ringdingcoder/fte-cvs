@@ -14,28 +14,33 @@
 
 #include <stdarg.h>
 
-class ExChoice: public ExView {
-public:
-    char *Title;
+class ExChoice: public ExViewNext {
+    struct option {
+        StlString str;
+        int len;
+
+        option() : len(0) {}
+        option(const char *s) : str(s), len((int)CStrLen(s)) {}
+        const char* GetCStr() { return str.c_str(); };
+        int GetCStrLen() { return len; }
+    };
+    StlString Title;
+    int lTitle;
     char Prompt[160];
     int NOpt;
-    char *SOpt[10];
-    int Cur;
-    int lTitle;
+    StlVector<option> SOpt;
     int lChoice;
+    int Cur;
     int MouseCaptured;
-    
+
+    int FindChoiceByPoint(int x, int y);
+
+public:
+
     ExChoice(const char *ATitle, int NSel, va_list ap /* choices, format, args */);
     virtual ~ExChoice();
-    virtual void Activate(int gotfocus);
-    
-    virtual ExView* GetViewContext() { return Next; }
-    virtual int BeginMacro();
-    int FindChoiceByPoint(int x, int y);
+
     virtual void HandleEvent(TEvent &Event);
-    virtual void UpdateView();
-    virtual void RepaintView();
-    virtual void UpdateStatus();
     virtual void RepaintStatus();
 };
 

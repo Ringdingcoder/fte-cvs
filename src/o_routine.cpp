@@ -74,17 +74,16 @@ void RoutineView::DrawLine(PCell B, int Line, int Col, ChColor color, int Width)
         len = UnTabStr(str, sizeof(str),
                        Buffer->RLine(Buffer->rlst.Lines[Line])->Chars,
                        Buffer->RLine(Buffer->rlst.Lines[Line])->Count);
-                    
-        if (len > Col)
+
+        if ((int)len > Col)
             MoveStr(B, 0, Width, str + Col, color, len - Col);
     }
 }
 
 char* RoutineView::FormatLine(int Line) {
-    char *p = 0;
     PELine L = Buffer->RLine(Buffer->rlst.Lines[Line]);
     
-    p = (char *) malloc(L->Count + 1);
+    char *p = (char *) malloc(L->Count + 1);
     if (p) {
         memcpy(p, L->Chars, L->Count);
         p[L->Count] = 0;
@@ -93,12 +92,12 @@ char* RoutineView::FormatLine(int Line) {
 }
 
 int RoutineView::Activate(int No) {
-    if (No < Buffer->rlst.Count) {
-        View->SwitchToModel(Buffer);
-        Buffer->CenterPosR(0, Buffer->rlst.Lines[No]);
-        return 1;
-    }
-    return 0;
+    if (No >= Buffer->rlst.Count)
+	return 0;
+
+    View->SwitchToModel(Buffer);
+    Buffer->CenterPosR(0, Buffer->rlst.Lines[No]);
+    return 1;
 }
 
 void RoutineView::RescanList() {

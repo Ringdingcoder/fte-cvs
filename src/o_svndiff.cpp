@@ -40,15 +40,13 @@ ESvnDiff::~ESvnDiff()
 void
 ESvnDiff::ParseFromTo(char *line, int /*len */ )
 {
-    char           *start;
-    char           *end;
+    char* end;
 
     // "@@ -1,20 +1,20 @@"
     //            ^ ^^
+    char* start = strchr(line, '+');
 
-    start = strchr(line, '+');
-
-    CurrLine = strtol(start, &end, 10) - 1;
+    CurrLine = (int)strtol(start, &end, 10) - 1;
     if(*end == ',')
         ToLine = CurrLine + atoi(end + 1);
     else

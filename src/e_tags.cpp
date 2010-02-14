@@ -26,12 +26,28 @@ struct TagData {
 };
 
 struct TagStack {
-    char *FileName;
+    static TagStack* TStack;
+
+    StlString CurrentTag;
+    StlString FileName;
     int Line, Col;
-    TagStack *Next;
     int TagPos;
-    char *CurrentTag;
+
+    TagStack(const char* tag, const char* file, int line, int col, int pos) :
+        CurrentTag(tag), FileName(file), Line(line), Col(col), TagPos(pos), Next(TStack)
+    {
+        TStack = this;
+    }
+    ~TagStack()
+    {
+        TStack = Next;
+    }
+
+private:
+    TagStack *Next;
 };
+
+TagStack* TagStack::TStack = 0;
 
 static char *TagMem = 0;
 static int TagLen = 0;
@@ -45,9 +61,8 @@ static int TagFileCount = 0;
 static int *TagFiles = 0;
 
 static int TagFilesLoaded = 0;   // tag files are loaded at first lookup
-static char *CurrentTag = 0;
+static char *CurrentTag;
 static int TagPosition = -1;
-static TagStack *TStack;
 
 static int AllocMem(const char *Mem, size_t Len) { /*FOLD00*/
     int N = 1024;
@@ -95,8 +110,22 @@ int _LNK_CONV cmptags(const void *p1, const void *p2) {
 #else
 int cmptags(const void *p1, const void *p2) {
 #endif
-    return strcmp(TagMem + TagD[*(int *)p1].Tag,
-                  TagMem + TagD[*(int *)p2].Tag);
+    //return strcmp(TagMem + TagD[*(int *)p1].Tag,
+    //              TagMem + TagD[*(int *)p2].Tag);
+    int r = strcmp(TagMem + TagD[*(int *)p1].Tag,
+		   TagMem + TagD[*(int *)p2].Tag);
+    if (r != 0)
+	return r;
+
+    r = strcmp(TagMem + TagD[*(int *)p1].FileName,
+	       TagMem + TagD[*(int *)p2].FileName);
+    if (r != 0)
+	return r;
+
+    if (TagD[*(int *)p1].Line != TagD[*(int *)p2].Line)
+	r = TagD[*(int *)p1].Line < TagD[*(int *)p2].Line ? -1 : 1;
+
+    return r;
 }
 
 int SortTags() { /*FOLD00*/
@@ -106,7 +135,7 @@ int SortTags() { /*FOLD00*/
     if (CTags == 0)
         return 0;
 
-    NI = (int *)realloc((void *)TagI, CTags * sizeof(int));
+    NI = (int *)realloc(TagI, CTags * sizeof(int));
     if (NI == 0)
         return -1;
     TagI = NI;
@@ -247,21 +276,11 @@ int TagsSave(FILE *fp) { /*FOLD00*/
 }
 
 static void ClearTagStack() { /*FOLD00*/
-    TagStack *T;
-
-    if (CurrentTag) {
-        free(CurrentTag);
-        CurrentTag = 0;
-    }
+    free(CurrentTag);
+    CurrentTag = 0;
     TagPosition = -1;
-    while (TStack) {
-        T = TStack;
-        TStack = TStack->Next;
-
-        free(T->CurrentTag);
-        free(T->FileName);
-        free(T);
-    }
+    while (TagStack::TStack)
+        delete TagStack::TStack;
 }
 
 int TagLoad(const char *FileName) { /*FOLD00*/
@@ -354,25 +373,11 @@ static int GotoTag(int M, EView *View) { /*FOLD00*/
     return 1;
 }
 
-static int PushPos(EBuffer *B) { /*FOLD00*/
-    TagStack *T;
-
-    T = (TagStack *)malloc(sizeof(TagStack));
-    if (T == 0)
-        return 0;
-    T->FileName = strdup(B->FileName);
-    if (T->FileName == 0) {
-        free(T);
-        return 0;
-    }
-    T->Line = B->VToR(B->CP.Row);
-    T->Col = B->CP.Col;
-    T->Next = TStack;
-    T->CurrentTag = CurrentTag;
-    CurrentTag = 0;
-    T->TagPos = TagPosition;
-    TagPosition = -1;
-    TStack = T;
+static int PushPos(EBuffer *B) /*FOLD00*/
+{
+    (void) new TagStack(CurrentTag, B->FileName,
+			B->VToR(B->CP.Row), B->CP.Col,
+			TagPosition);
     return 1;
 }
 
@@ -419,13 +424,14 @@ int TagFind(EBuffer *B, EView *View, const char *Tag) { /*FOLD00*/
             return 0;
 
     int L = 0, R = CTags, M, cmp;
-
+    //printf("TAGFIND %s  %s   tp:%d\n", Tag,  CurrentTag, TagPosition);
     if (CurrentTag) {
         if (strcmp(CurrentTag, Tag) == 0) {
-            if (PushPos(B) == 0)
-                return 0;
+            if (TagPosition != TagStack::TStack->TagPos)
+                if (PushPos(B) == 0)
+                    return 0;
 
-            TagPosition = TStack->TagPos;
+            TagPosition = TagStack::TStack->TagPos;
 
             return TagNext(View);
         }
@@ -539,9 +545,8 @@ int TagComplete(char **Words, int *WordsPos, int WordsMax, const char *Tag) {
 int TagNext(EView *View) { /*FOLD00*/
     assert(View != 0);
 
-    if (CurrentTag == 0 || TagPosition == -1) {
+    if (CurrentTag == 0 || TagPosition == -1)
         return 0;
-    }
 
     if (TagPosition < CTags - 1 && strcmp(CurrentTag, TagMem + TagD[TagI[TagPosition + 1]].Tag) == 0) {
         TagPosition++;
@@ -572,23 +577,17 @@ int TagPrev(EView *View) { /*FOLD00*/
 }
 
 int TagPop(EView *View) { /*FOLD00*/
-    TagStack *T = TStack;
 
     assert(View != 0);
 
+    delete TagStack::TStack;
+
+    TagStack* T = TagStack::TStack;
     if (T) {
-        TStack = T->Next;
-
         free(CurrentTag);
-
-        CurrentTag = T->CurrentTag;
+        CurrentTag = strdup(T->CurrentTag.c_str());
         TagPosition = T->TagPos;
-
-        int rc = (GotoFilePos(View, T->FileName, T->Line, T->Col) == 0) ? 0 : 1;
-
-        free(T->FileName);
-        free(T);
-        return rc;
+        return GotoFilePos(View, T->FileName.c_str(), T->Line, T->Col);
     }
     View->Msg(S_INFO, "Tag stack empty.");
     return 0;

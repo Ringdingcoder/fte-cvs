@@ -10,10 +10,6 @@
 #include "gui.h"
 #include "sysdep.h"
 
-#include <stdio.h>
-#include <signal.h>
-#include <stdarg.h>
-
 int MenuCount = 0;
 mMenu *Menus = 0;
 
@@ -75,4 +71,3 @@ int GetMenuId(const char *Name) {
                 return i;
     return -1;
 }
-

@@ -96,7 +96,7 @@ void ExISearch::HandleEvent(TEvent &Event) {
             Direction = SEARCH_BACK;
             if (len == 0) {
                 strcpy(ISearchStr, PrevISearch);
-                len = strlen(ISearchStr);
+                len = (int)strlen(ISearchStr);
                 if (len == 0)
                     break;
             }
@@ -109,7 +109,7 @@ void ExISearch::HandleEvent(TEvent &Event) {
             Direction = 0;
             if (len == 0) {
                 strcpy(ISearchStr, PrevISearch);
-                len = strlen(ISearchStr);
+                len = (int)strlen(ISearchStr);
                 if (len == 0)
                     break;
             }
@@ -122,7 +122,7 @@ void ExISearch::HandleEvent(TEvent &Event) {
             Event.What = evKeyDown;
             Event.Key.Code = Win->GetChar(0);
         default:
-            if (isAscii(Event.Key.Code) && (len < MAXISEARCH)) {
+            if (isAscii(Event.Key.Code) && (len < (int)MAXISEARCH)) {
                 char Ch = (char) Event.Key.Code;
                 
                 stack[stacklen++] = Buffer->CP;
@@ -134,8 +134,7 @@ void ExISearch::HandleEvent(TEvent &Event) {
                     stacklen--;
                     ISearchStr[len] = 0;
                     Buffer->FindStr(ISearchStr, len, Case | Direction);
-                } else {
-                }
+                } 
             }
             break;
         }
@@ -161,7 +160,7 @@ void ExISearch::RepaintStatus() {
     MoveCh(B, ' ', 0x17, W);
     MoveStr(B, 0, W, s, 0x17, W);
     ConPutBox(0, H - 1, W, 1, B);
-    ConSetCursorPos(strlen(s) - 1, H - 1);
+    ConSetCursorPos((int)strlen(s) - 1, H - 1);
     ConShowCursor();
 }
 

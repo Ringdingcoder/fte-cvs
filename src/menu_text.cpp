@@ -27,7 +27,6 @@ public:
 
 static int GetHOfsItem(int id, int cur) {
     int pos = 2;
-    size_t len;
     
     for (unsigned i = 0; i < Menus[id].Count; i++) {
         if ((int)i == cur) return pos;

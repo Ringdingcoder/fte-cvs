@@ -18,10 +18,6 @@
 #include "s_string.h"
 #include "s_util.h"
 
-#ifndef _FILE_OFFSET_BITS
-#error NE
-#endif
-
 #ifdef CONFIG_OBJ_DIRECTORY
 EDirectory::EDirectory(int createFlags, EModel **ARoot, char *aPath) :
     EList(createFlags, ARoot, aPath),
@@ -319,7 +315,7 @@ void EDirectory::HandleEvent(TEvent &Event) {
         default:
             resetSearch = 0; // moved here - its better for user
             // otherwice there is no way to find files like i_ascii
-            if (isAscii(Event.Key.Code) && (SearchLen < MAXISEARCH)) {
+            if (isAscii(Event.Key.Code) && (SearchLen < ExISearch::MAXISEARCH)) {
                 char Ch = (char) Event.Key.Code;
                 int Found;
 

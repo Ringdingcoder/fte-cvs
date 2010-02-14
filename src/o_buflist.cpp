@@ -206,7 +206,7 @@ void BufferView::HandleEvent(TEvent &Event) {
                     break;
                 default:
                     resetSearch = 0;
-                    if (isAscii(Event.Key.Code) && (SearchLen < MAXISEARCH)) {
+                    if (isAscii(Event.Key.Code) && (SearchLen < ExISearch::MAXISEARCH)) {
                         char Ch = (char) Event.Key.Code;
 
                         SearchPos[SearchLen] = Row;

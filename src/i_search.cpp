@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 
-static char PrevISearch[MAXISEARCH] = "";
+static char PrevISearch[ExISearch::MAXISEARCH] = "";
 
 ExISearch::ExISearch(EBuffer *B) :
     Orig(B->CP), // ?
@@ -26,19 +26,13 @@ ExISearch::ExISearch(EBuffer *B) :
     state(INoMatch),
     Direction(0)
 {
-    strcpy(ISearchStr, "");
+    ISearchStr[0] = 0;
 }
 
 ExISearch::~ExISearch() {
     if (ISearchStr[0] != 0)
         strcpy(PrevISearch, ISearchStr);
 }
-
-void ExISearch::Activate(int gotfocus) {
-    ExView::Activate(gotfocus);
-}
-
-int ExISearch::BeginMacro() { return 1; }
 
 void ExISearch::HandleEvent(TEvent &Event) {
     int Case = BFI(Buffer, BFI_MatchCase) ? 0 : SEARCH_NCASE;
@@ -148,22 +142,6 @@ void ExISearch::HandleEvent(TEvent &Event) {
     }
 }
 
-void ExISearch::UpdateView() {
-    if (Next) {
-        Next->UpdateView();
-    }
-}
-
-void ExISearch::RepaintView() {
-    if (Next) {
-        Next->RepaintView();
-    }
-}
-
-void ExISearch::UpdateStatus() {
-    RepaintStatus();
-}
-
 void ExISearch::RepaintStatus() {
     TDrawBuffer B;
     char s[MAXISEARCH + 1];
@@ -191,4 +169,5 @@ void ExISearch::SetState(IState s) {
     state = s;
     RepaintView();
 }
+
 #endif

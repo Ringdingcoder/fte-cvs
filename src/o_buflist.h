@@ -18,8 +18,8 @@ public:
     char **BList;
     int BCount;
     int SearchLen;
-    char SearchString[MAXISEARCH];
-    int SearchPos[MAXISEARCH];
+    char SearchString[ExISearch::MAXISEARCH];
+    int SearchPos[ExISearch::MAXISEARCH];
 
     BufferView(int createFlags, EModel **ARoot);
     virtual ~BufferView();

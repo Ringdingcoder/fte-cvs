@@ -13,12 +13,21 @@
 #include "i_oview.h"
 #include "e_buffer.h"
 
-#define MAXISEARCH 256
-
-class ExISearch: public ExView {
-public:
+class ExISearch: public ExViewNext
+{
     enum IState { IOk, INoMatch, INoPrev, INoNext };
-    
+public:
+    static const unsigned MAXISEARCH = 256;
+
+    ExISearch(EBuffer *B);
+    virtual ~ExISearch();
+
+    virtual void HandleEvent(TEvent &Event);
+    virtual void RepaintStatus();
+
+    void SetState(IState state);
+
+private:
     char ISearchStr[MAXISEARCH + 1];
     EPoint Orig;
     EPoint stack[MAXISEARCH];
@@ -27,20 +36,6 @@ public:
     EBuffer *Buffer;
     IState state;
     int Direction;
-
-    ExISearch(EBuffer *B);
-    virtual ~ExISearch();
-    virtual void Activate(int gotfocus);
-
-    virtual ExView *GetViewContext() { return Next; }
-    virtual int BeginMacro();
-    virtual void HandleEvent(TEvent &Event);
-    virtual void UpdateView();
-    virtual void RepaintView();
-    virtual void UpdateStatus();
-    virtual void RepaintStatus();
-    
-    void SetState(IState state);
 };
 
 #endif // I_SEARCH_H

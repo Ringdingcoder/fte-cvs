@@ -23,8 +23,8 @@ public:
     FileInfo **Files;
     int FCount;
     int SearchLen;
-    char SearchName[MAXISEARCH];
-    int SearchPos[MAXISEARCH];
+    char SearchName[ExISearch::MAXISEARCH];
+    int SearchPos[ExISearch::MAXISEARCH];
     
     EDirectory(int createFlags, EModel **ARoot, char *aPath);
     virtual ~EDirectory();

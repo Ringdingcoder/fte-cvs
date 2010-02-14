@@ -42,19 +42,17 @@ ExComplete::ExComplete(EBuffer *B) :
     Buffer(B),
     WordsLast(0),
     Words(new char *[MAXCOMPLETEWORDS + 2]),
-    WordBegin(NULL),
+    WordBegin(0),
     WordPos(0),
     WordFixed(0)
 {
-	RefreshComplete();
+    RefreshComplete();
 }
 
 ExComplete::~ExComplete()
 {
 //    fprintf(stderr, "W %p %p %p %d\n", Words, WordContinue, WordBegin, WordsLast);
-
-    if (WordBegin != NULL)
-	delete[] WordBegin;
+    delete[] WordBegin;
 
     if (Words != NULL) {
 	for(int i = 0; i < WordsLast; i++)
@@ -63,21 +61,9 @@ ExComplete::~ExComplete()
     }
 }
 
-void ExComplete::Activate(int gotfocus)
-{
-    ExView::Activate(gotfocus);
-}
-
-int ExComplete::BeginMacro()
-{
-    return 1;
-}
-
 bool ExComplete::IsSimpleCase()
 {
-    if (WordsLast < 2) return true;
-
-    return false;
+    return (WordsLast < 2) ? true : false;
 }
 
 int ExComplete::DoCompleteWord()
@@ -219,31 +205,9 @@ void ExComplete::HandleEvent(TEvent &Event)
         }*/
 
         int rc = DoCompleteWord();
-
         EndExec(rc);
-
 	Event.What = evNone;
     }
-
-}
-
-void ExComplete::UpdateView()
-{
-    if (Next) {
-        Next->UpdateView();
-    }
-}
-
-void ExComplete::RepaintView()
-{
-    if (Next) {
-        Next->RepaintView();
-    }
-}
-
-void ExComplete::UpdateStatus()
-{
-    RepaintStatus();
 }
 
 void ExComplete::RepaintStatus()

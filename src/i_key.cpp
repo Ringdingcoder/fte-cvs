@@ -11,20 +11,11 @@
 #include "sysdep.h"
 
 ExKey::ExKey(const char *APrompt) :
-    Prompt((APrompt) ? strdup(APrompt) : 0)
+    Prompt(APrompt)
 {
 }
 
 ExKey::~ExKey() {
-    free(Prompt);
-}
-
-void ExKey::Activate(int gotfocus) {
-    ExView::Activate(gotfocus);
-}
-
-int ExKey::BeginMacro() {
-    return 1;
 }
 
 void ExKey::HandleEvent(TEvent &Event) {
@@ -38,28 +29,12 @@ void ExKey::HandleEvent(TEvent &Event) {
     }
 }
 
-void ExKey::UpdateView() {
-    if (Next) {
-        Next->UpdateView();
-    }
-}
-
-void ExKey::RepaintView() {
-    if (Next) {
-        Next->RepaintView();
-    }
-}
-
-void ExKey::UpdateStatus() {
-    RepaintStatus();
-}
-
 void ExKey::RepaintStatus() {
     TDrawBuffer B;
     int W, H;
-    
+
     ConQuerySize(&W, &H);
-    
+
     MoveCh(B, ' ', 0x17, W);
     ConPutBox(0, H - 1, W, 1, B);
 }

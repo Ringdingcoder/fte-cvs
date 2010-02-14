@@ -16,56 +16,48 @@
 
 #include <ctype.h>
 
-ExInput::ExInput(const char *APrompt, char *ALine, size_t ABufLen, Completer AComp, int Select, int AHistId)
+ExInput::ExInput(const char *APrompt, const char *ALine, size_t ABufLen,
+                 Completer AComp, int Select, int AHistId) :
+    Prompt(APrompt),
+    MaxLen(ABufLen - 1),
+    Line(new char[MaxLen + 1]),
+    MatchStr(new char[MaxLen + 1]),
+    CurStr(new char[MaxLen + 1]),
+    LPos(0),
+    Comp(AComp),
+    TabCount(0),
+    HistId(AHistId),
+    CurItem(0),
+    SelStart(0),
+    SelEnd(0)
 {
     assert(ABufLen > 0);
-    MaxLen = ABufLen - 1;
-    Comp = AComp;
-    SelStart = SelEnd = 0;
-    Prompt = strdup(APrompt);
-    Line = (char *) malloc(MaxLen + 1);
-    MatchStr = (char *) malloc(MaxLen + 1);
-    CurStr = (char *) malloc(MaxLen + 1);
-    if (Line) {
-        Line[MaxLen] = 0;
-        strncpy(Line, ALine, MaxLen);
-        Pos = strlen(Line);
-        LPos = 0;
-    }
+    Line[MaxLen] = 0;
+    strncpy(Line, ALine, MaxLen);
+    Pos = strlen(Line);
     if (Select)
         SelEnd = Pos;
-    TabCount = 0;
-    HistId = AHistId;
-    CurItem = 0;
 }
 
 ExInput::~ExInput() {
-    if (Prompt)
-        free(Prompt);
-    if (Line)
-        free(Line);
-    if (MatchStr)
-        free(MatchStr);
-    if (CurStr)
-        free(CurStr);
-    Prompt = 0;
-    Line = 0;
-}
-
-void ExInput::Activate(int gotfocus) {
-    ExView::Activate(gotfocus);
-}
-
-int ExInput::BeginMacro() {
-    return 1;
+    delete[] Line;
+    delete[] MatchStr;
+    delete[] CurStr;
 }
 
 void ExInput::HandleEvent(TEvent &Event) {
     switch (Event.What) {
     case evKeyDown:
         switch (kbCode(Event.Key.Code)) {
-        case kbLeft: if (Pos > 0) Pos--; SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
-        case kbRight: Pos++; SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
+        case kbLeft:
+            if (Pos > 0)
+                Pos--;
+        common:
+            SelStart = SelEnd = 0;
+            TabCount = 0;
+            Event.What = evNone;
+            break;
+        case kbRight: Pos++; goto common;
         case kbLeft | kfCtrl:
             if (Pos > 0) {
                 Pos--;
@@ -75,61 +67,42 @@ void ExInput::HandleEvent(TEvent &Event) {
                     Pos--;
                 }
             }
-            SelStart = SelEnd = 0;
-            TabCount = 0;
-            Event.What = evNone;
-            break;
+            goto common;
         case kbRight | kfCtrl:
-            {
-                size_t len = strlen(Line);
-                if (Pos < len) {
-                    Pos++;
-                    while (Pos < len) {
-                        if (isalnum(Line[Pos]) && !isalnum(Line[Pos - 1]))
-                            break;
-                        Pos++;
-                    }
-                }
-            }
-            SelStart = SelEnd = 0;
-            TabCount = 0;
-            Event.What = evNone;
-            break;
-        case kbHome: Pos = 0; SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
-        case kbEnd: Pos = strlen(Line); SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
-        case kbEsc: EndExec(0); Event.What = evNone; break;
-        case kbEnter: 
+            while (Line[Pos])
+                if (!isalnum(Line[Pos++]) && (isalnum(Line[Pos])))
+                    break;
+            goto common;
+        case kbHome: Pos = 0; goto common;
+        case kbEnd: Pos = strlen(Line); goto common;
+        case kbEsc: EndExec(0); goto common;
+        case kbEnter:
 #ifdef CONFIG_HISTORY
             AddInputHistory(HistId, Line);
 #endif
             EndExec(1);
-            Event.What = evNone; 
-            break;
+            goto common;
         case kbBackSp | kfCtrl | kfShift:
-            SelStart = SelEnd = 0; 
             Pos = 0;
             Line[0] = 0;
-            TabCount = 0;
-            break;
+            goto common;
         case kbBackSp | kfCtrl:
             if (Pos > 0) {
                 if (Pos > strlen(Line)) {
                     Pos = strlen(Line);
                 } else {
                     char Ch;
-                    
-                    if (Pos > 0) do {
-                        Pos--;
-                        memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
-                        if (Pos == 0) break;
-                        Ch = Line[Pos - 1];
-                    } while (Pos > 0 && Ch != '\\' && Ch != '/' && Ch != '.' && isalnum(Ch));
+
+                    if (Pos > 0)
+                        do {
+                            Pos--;
+                            memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
+                            if (Pos == 0) break;
+                            Ch = Line[Pos - 1];
+                        } while (Pos > 0 && Ch != '\\' && Ch != '/' && Ch != '.' && isalnum(Ch));
                 }
             }
-            SelStart = SelEnd = 0; 
-            TabCount = 0;
-            Event.What = evNone;
-            break;
+            goto common;
         case kbBackSp:
         case kbBackSp | kfShift:
             if (SelStart < SelEnd) {
@@ -164,19 +137,14 @@ void ExInput::HandleEvent(TEvent &Event) {
                 SelStart = SelEnd = 0;
                 break;
             }
-            SelStart = SelEnd = 0;
             Line[Pos] = 0;
-            TabCount = 0;
-            Event.What = evNone;
-            break;
+            goto common;
         case kbIns | kfShift:
         case 'V'   | kfCtrl:
             {
-                int len;
-
                 if (SystemClipboard)
                     GetPMClip(0);
-                
+
                 if (SSBuffer == 0) break;
                 if (SSBuffer->RCount == 0) break;
 
@@ -186,61 +154,57 @@ void ExInput::HandleEvent(TEvent &Event) {
                     SelStart = SelEnd = 0;
                 }
 
-                len = SSBuffer->LineChars(0);
+                size_t len = SSBuffer->LineChars(0);
                 if (strlen(Line) + len < MaxLen) {
                     memmove(Line + Pos + len, Line + Pos, strlen(Line + Pos) + 1);
                     memcpy(Line + Pos, SSBuffer->RLine(0)->Chars, len);
+                    Pos += len;
                     TabCount = 0;
                     Event.What = evNone;
-                    Pos += len;
                 }
             }
             break;
 #ifdef CONFIG_HISTORY
         case kbUp:
-            SelStart = SelEnd = 0;
-            if (CurItem == 0) 
+            if (CurItem == 0)
                 strcpy(CurStr, Line);
             CurItem += 2;
+            /* fall */
         case kbDown:
             SelStart = SelEnd = 0;
             if (CurItem == 0) break;
             CurItem--;
             {
                 int cnt = CountInputHistory(HistId);
-                
+
                 if (CurItem > cnt) CurItem = cnt;
                 if (CurItem < 0) CurItem = 0;
-                
-                if (CurItem == 0)
+
+                if (!CurItem || !GetInputHistory(HistId, Line, MaxLen, CurItem))
                     strcpy(Line, CurStr);
-                else if (GetInputHistory(HistId, Line, MaxLen, CurItem));
-                else strcpy(Line, CurStr);
                 Pos = strlen(Line);
-//                SelStart = SelEnd = 0;
             }
             Event.What = evNone;
             break;
 #endif
         case kbTab | kfShift:
             TabCount -= 2;
+            /* fall */
         case kbTab:
             if (Comp) {
-                char *Str2 = (char *) malloc(MaxLen + 1);
+                char Str2[MaxLen + 1];
                 int n;
 
-                assert(Str2);
                 TabCount++;
                 if (TabCount < 1) TabCount = 1;
-                if ((TabCount == 1) && (kbCode(Event.Key.Code) == kbTab)) {
+                if ((TabCount == 1) && (kbCode(Event.Key.Code) == kbTab))
                     strcpy(MatchStr, Line);
-                }
+
                 n = Comp(MatchStr, Str2, TabCount);
                 if ((n > 0) && (TabCount <= n)) {
                     strcpy(Line, Str2);
                     Pos = strlen(Line);
                 } else if (TabCount > n) TabCount = n;
-                free(Str2);
             }
             SelStart = SelEnd = 0;
             Event.What = evNone;
@@ -271,39 +235,23 @@ void ExInput::HandleEvent(TEvent &Event) {
     }
 }
 
-void ExInput::UpdateView() {
-    if (Next) {
-        Next->UpdateView();
-    }
-}
-
-void ExInput::RepaintView() {
-    if (Next) {
-        Next->RepaintView();
-    }
-}
-
-void ExInput::UpdateStatus() {
-    RepaintStatus();
-}
-
 void ExInput::RepaintStatus() {
     TDrawBuffer B;
     int W, H, FLen, FPos;
-    
+
     ConQuerySize(&W, &H);
-    
-    FPos = strlen(Prompt) + 2;
+
+    FPos = Prompt.size() + 2;
     FLen = W - FPos;
-    
-    if (Pos > strlen(Line)) 
+
+    if (Pos > strlen(Line))
         Pos = strlen(Line);
     //if (Pos < 0) Pos = 0;
     if (LPos + FLen <= Pos) LPos = Pos - FLen + 1;
     if (Pos < LPos) LPos = Pos;
-    
+
     MoveChar(B, 0, W, ' ', hcEntry_Field, W);
-    MoveStr(B, 0, W, Prompt, hcEntry_Prompt, FPos);
+    MoveStr(B, 0, W, Prompt.c_str(), hcEntry_Prompt, FPos);
     MoveChar(B, FPos - 2, W, ':', hcEntry_Prompt, 1);
     MoveStr(B, FPos, W, Line + LPos, hcEntry_Field, FLen);
     MoveAttr(B, FPos + SelStart - LPos, W, hcEntry_Selection, SelEnd - SelStart);

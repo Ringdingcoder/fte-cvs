@@ -12,23 +12,20 @@
 
 #include "i_oview.h"
 
-class ExKey: public ExView {
-public:
-    char *Prompt;
+class ExKey: public ExViewNext {
+    StlString Prompt;
     TKeyCode Key;
     char ch;
-    
+
+public:
+
     ExKey(const char *APrompt);
     virtual ~ExKey();
-    virtual void Activate(int gotfocus);
-    
-    virtual ExView* GetViewContext() { return Next; }
-    virtual int BeginMacro();
+
     virtual void HandleEvent(TEvent &Event);
-    virtual void UpdateView();
-    virtual void RepaintView();
-    virtual void UpdateStatus();
     virtual void RepaintStatus();
+
+    TKeyCode GetKey() const { return Key; }
 };
 
 #endif // I_KEY_H

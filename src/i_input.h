@@ -15,33 +15,30 @@
 
 typedef int (*Completer)(const char *Name, char *Completed, int Num);
 
-class ExInput: public ExView {
-public:
-    char *Prompt;
+class ExInput: public ExViewNext {
+    StlString Prompt;
+    size_t MaxLen;
     char *Line;
     char *MatchStr;
     char *CurStr;
-    unsigned int Pos;
-    unsigned int LPos;
-    size_t MaxLen;
+    unsigned Pos;
+    unsigned LPos;
     Completer Comp;
     int TabCount;
     int HistId;
     int CurItem;
-    unsigned int SelStart;
-    unsigned int SelEnd;
-    
-    ExInput(const char *APrompt, char *ALine, size_t AMaxLen, Completer AComp, int Select, int AHistId);
+    unsigned SelStart;
+    unsigned SelEnd;
+
+public:
+
+    ExInput(const char *APrompt, const char *ALine, size_t AMaxLen, Completer AComp, int Select, int AHistId);
     virtual ~ExInput();
-    virtual void Activate(int gotfocus);
-    
-    virtual ExView *GetViewContext() { return Next; }
-    virtual int BeginMacro();
+
     virtual void HandleEvent(TEvent &Event);
-    virtual void UpdateView();
-    virtual void RepaintView();
-    virtual void UpdateStatus();
     virtual void RepaintStatus();
+
+    const char* GetLine() const { return Line; }
 };
 
 #endif // I_INPUT_H

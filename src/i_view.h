@@ -24,17 +24,17 @@ public:
     ExView *Top;
     ExView *Bottom;
     int MouseCaptured;
-    
+
     GxView(GFrame *Parent);
     virtual ~GxView();
-    
+
     void PushView(ExView *view);
     ExView *PopView();
     void NewView(ExView *view);
-    
+
     EEventMap *GetEventMap();
     int ExecCommand(ExCommands Command, ExState &State);
-    
+
     virtual int GetContext();
     virtual ExView* GetStatusContext() { if (Top) return Top->GetStatusContext(); else return 0; }
     virtual ExView* GetViewContext() { if (Top) return Top->GetViewContext(); else return 0; }
@@ -62,7 +62,7 @@ public:
 
     int GetStr(const char *Prompt, size_t BufLen, char *Str, int HistId);
     int GetFile(const char *Prompt, size_t BufLen, char *Str, int HistId, int Flags);
-    
+
     int IsModelView() { return Top ? Top->IsModelView() : 0; }
 };
 

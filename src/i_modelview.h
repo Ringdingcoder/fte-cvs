@@ -16,12 +16,14 @@ class EView;
 
 class ExModelView: public ExView {
     EView *View;
+
 public:
     int MouseCaptured;
     int MouseMoved;
 
     ExModelView(EView *AView);
     virtual ~ExModelView();
+
     virtual void Activate(int gotfocus);
 
     virtual EEventMap *GetEventMap();

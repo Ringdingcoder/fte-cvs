@@ -91,7 +91,7 @@ int GxView::ExecCommand(ExCommands Command, ExState &State) {
 }
 
 int GxView::BeginMacro() {
-    return (Top) ?  Top->BeginMacro() : 1;
+    return (Top) ? Top->BeginMacro() : 1;
 }
 
 int GxView::GetContext() {
@@ -196,70 +196,47 @@ int GxView::ReadStr(const char *Prompt, size_t BufLen, char *Str, Completer Comp
     ExInput input(Prompt, Str, BufLen, Comp, Select, HistId);
 
     PushView(&input);
-
-    rc = Execute();
-
-    PopView();
-
-    Repaint();
-
-    if (rc == 1) {
-        strncpy(Str, input.Line, BufLen - 1);
+    if ((rc = Execute()) == 1) {
+        strncpy(Str, input.GetLine(), BufLen - 1);
         Str[BufLen - 1] = 0;
     }
+    PopView();
+    Repaint();
 
     return rc;
 }
 
 int GxView::Choice(unsigned long Flags, const char *Title, int NSel, ... /* choices, format, args */) {
-    int rc;
     va_list ap;
+    int rc;
 
     if ((HaveGUIDialogs & GUIDLG_CHOICE) && GUIDialogs) {
         va_start(ap, NSel);
         rc = DLGPickChoice(this, Title, NSel, ap, Flags);
         va_end(ap);
-        return rc;
     } else {
-        ExChoice *choice;
-
         va_start(ap, NSel);
-
-        choice = new ExChoice(Title, NSel, ap);
-
+	ExChoice choice(Title, NSel, ap);
         va_end(ap);
 
-        if (choice == 0)
-            return 0;
-
-        PushView(choice);
+        PushView(&choice);
         rc = Execute();
         PopView();
         Repaint();
-
-        delete choice;
-
-        return rc;
     }
+
+    return rc;
 }
 
 TKeyCode GxView::GetChar(const char *Prompt) {
-    int rc;
-    ExKey *key;
     TKeyCode K = 0;
+    ExKey key(Prompt);
 
-    key = new ExKey(Prompt);
-    if (key == 0)
-        return 0;
-
-    PushView(key);
-    rc = Execute();
+    PushView(&key);
+    if (Execute() == 1)
+	K = key.GetKey();
     PopView();
     Repaint();
-
-    if (rc == 1)
-        K = key->Key;
-    delete key;
 
     return K;
 }
@@ -267,25 +244,15 @@ TKeyCode GxView::GetChar(const char *Prompt) {
 #ifdef CONFIG_I_SEARCH
 int GxView::IncrementalSearch(EView *View) {
     int rc;
-    ExISearch *search;
-    EBuffer *B = 0;
-
     if (View->GetContext() != CONTEXT_FILE)
         return 0;
 
-    B = (EBuffer *)View->Model;
+    ExISearch search((EBuffer *)View->Model);
 
-    search = new ExISearch(B);
-
-    if (search == 0)
-        return 0;
-
-    PushView(search);
+    PushView(&search);
     rc = Execute();
     PopView();
     Repaint();
-
-    delete search;
 
     return rc;
 }
@@ -294,45 +261,34 @@ int GxView::IncrementalSearch(EView *View) {
 #ifdef CONFIG_I_ASCII
 int GxView::PickASCII() {
     int rc;
-    ExASCII *ascii;
+    ExASCII ascii;
 
-    ascii = new ExASCII();
-    if (ascii == 0)
-        return 0;
-
-    PushView(ascii);
+    PushView(&ascii);
     rc = Execute();
     PopView();
     Repaint();
 
-    delete ascii;
     return rc;
 }
 #endif
 
 #ifdef CONFIG_I_COMPLETE
 int GxView::ICompleteWord(EView *View) {
-    int rc = 0;
+    int rc;
 
-    if (View->GetContext() == CONTEXT_FILE) {
-        ExComplete *c = new ExComplete((EBuffer *)View->Model);
-        if (c != NULL) {
+    if (View->GetContext() != CONTEXT_FILE)
+        return 0;
 
-            if (c->IsSimpleCase())
-            {
-                rc = c->DoCompleteWord();
-            } else
-            {
-                PushView(c);
-                rc = Execute();
-                PopView();
-            }
-
-            Repaint();
-
-            delete c;
-        }
+    ExComplete c((EBuffer *)View->Model);
+    if (c.IsSimpleCase())
+	rc = c.DoCompleteWord();
+    else {
+	PushView(&c);
+	rc = Execute();
+	PopView();
     }
+    Repaint();
+
     return rc;
 }
 #endif

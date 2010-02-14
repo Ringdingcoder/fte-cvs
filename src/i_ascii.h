@@ -13,20 +13,15 @@
 #include "console.h"
 #include "i_oview.h"
 
-class ExASCII: public ExView {
-public:
+class ExASCII: public ExViewNext {
     int Pos, LPos;
+
+public:
 
     ExASCII();
     virtual ~ExASCII();
-    virtual void Activate(int gotfocus);
 
-    virtual ExView* GetViewContext();
-    virtual int BeginMacro();
     virtual void HandleEvent(TEvent &Event);
-    virtual void UpdateView();
-    virtual void RepaintView();
-    virtual void UpdateStatus();
     virtual void RepaintStatus();
 };
 

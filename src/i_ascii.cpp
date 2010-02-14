@@ -17,7 +17,6 @@ static int SPos = 0;
 static int SLPos = 0;
 
 ExASCII::ExASCII() :
-    ExView(),
     Pos(SPos),
     LPos(SLPos)
 {
@@ -28,24 +27,11 @@ ExASCII::~ExASCII() {
     SLPos = LPos;
 }
 
-void ExASCII::Activate(int gotfocus) {
-    ExView::Activate(gotfocus);
-}
-
-int ExASCII::BeginMacro() {
-    return 1;
-}
-
-ExView* ExASCII::GetViewContext()
-{
-    return Next;
-}
-
 void ExASCII::HandleEvent(TEvent &Event) {
     int W, H;
-    
+
     ConQuerySize(&W, &H);
-    
+
     switch (Event.What) {
     case evKeyDown:
         switch(kbCode(Event.Key.Code)) {
@@ -69,7 +55,7 @@ void ExASCII::HandleEvent(TEvent &Event) {
             abort = 2;
             break;
         }
-        
+
         do {
             x = E.Mouse.X - XPos - 1;
             y = E.Mouse.Y - YPos - 1;
@@ -100,35 +86,19 @@ void ExASCII::HandleEvent(TEvent &Event) {
     }
 }
 
-void ExASCII::UpdateView() {
-    if (Next) {
-        Next->UpdateView();
-    }
-}
-
-void ExASCII::RepaintView() {
-    if (Next) {
-        Next->RepaintView();
-    }
-}
-
-void ExASCII::UpdateStatus() {
-    RepaintStatus();
-}
-
 void ExASCII::RepaintStatus() {
     TDrawBuffer B;
     int W, H;
-    
+
     ConQuerySize(&W, &H);
-    
+
     if (Pos > 255) Pos = 255;
     if (Pos < 0) Pos = 0;
     if (LPos + W < Pos) LPos = Pos - W + 1;
     if (LPos > 255 - W) LPos = 255 - W + 1;
     if (LPos > Pos) LPos = Pos;
     if (LPos < 0) LPos = 0;
-    
+
     for (int i = 0; i < W; i++)
         MoveCh(B + i, char(i + LPos), hcAsciiChars, 1);
     ConSetCursorPos(Pos - LPos, H - 1);

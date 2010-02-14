@@ -20,7 +20,7 @@
 #define fiDIRECTORY 2
 
 class FileInfo {
-    char *name;   // minimum set of file information
+    StlString name;   // minimum set of file information
     off_t size;
     time_t mtime;
     int type;
@@ -29,7 +29,7 @@ public:
     FileInfo(const char *Name, int type, off_t Size, time_t MTime);
     ~FileInfo();
 
-    const char *Name() const { return name; }
+    const char *Name() const { return name.c_str(); }
     off_t Size() const { return size; }
     int Type() const { return type; }
     time_t MTime() const { return mtime; }

@@ -53,16 +53,15 @@ static int my_stat(const char *name, struct stat *s)
 
 
 FileInfo::FileInfo(const char *Name, int Type, off_t Size, time_t MTime) :
-    name(new char[strlen(Name) + 1]),
+    name(Name),
     size(Size),
     mtime(MTime),
     type(Type)
 {
-    strcpy(name, Name);
 }
 
-FileInfo::~FileInfo() {
-    delete [] name;
+FileInfo::~FileInfo()
+{
 }
 
 FileFind::FileFind(const char *aDirectory, const char *aPattern, int aFlags) :

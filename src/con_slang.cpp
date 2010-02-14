@@ -353,20 +353,18 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 {
-    SLsmg_Char_Type *box = new SLsmg_Char_Type[W * H];
+    SLsmg_Char_Type box[W * H];
     TCell fill(' ', Fill);
 
     ConGetBoxRaw(X, Y, W, H, box);
 
     if (Way == csUp) {
 	ConPutBoxRaw(X, Y, W, H - Count, box + W * Count);
-	ConSetBox(X, Y + H - Count, W, Count, fill);
+	//ConSetBox(X, Y + H - Count, W, Count, fill);
     } else {
 	ConPutBoxRaw(X, Y + Count, W, H - Count, box);
-	ConSetBox(X, Y, W, Count, fill);
+	//ConSetBox(X, Y, W, Count, fill);
     }
-
-    delete[] box;
 
     return 0;
 }

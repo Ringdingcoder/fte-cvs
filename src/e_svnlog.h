@@ -18,7 +18,7 @@
 class ESvnLog:public EBuffer {
     public:
         ESvnLog (int createFlags,EModel **ARoot,char *Directory,char *OnFiles);
-        ~ESvnLog ();
+	virtual ~ESvnLog ();
 
         // List files into buffer
         // p        - line where to print

@@ -146,7 +146,7 @@ int EBuffer::HilitWord() {
     P = CharOffset(L, CP.Col);
     while ((P > 0) && ((ChClass(L->Chars[P - 1]) == 1) || (L->Chars[P - 1] == '_'))) 
         P--;
-    while (len < CK_MAXLEN && P < L->Count && (ChClass(L->Chars[P]) == 1 || L->Chars[P] == '_'))
+    while (len < CK_MAXLEN && P < (int)L->Count && (ChClass(L->Chars[P]) == 1 || L->Chars[P] == '_'))
         s[len++] = L->Chars[P++];
     if (len == 0)
         return 0;
@@ -200,7 +200,7 @@ int EColorize::SetColor(int idx, const char *Value) {
 
     if (idx < 0 || idx >= COUNT_CLR)
         return 0;
-    Colors[idx] = ColFg | (ColBg << 4);
+    Colors[idx] = ChColor(ColFg | (ColBg << 4));
     return 1;
 }
 

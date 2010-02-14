@@ -14,8 +14,6 @@
 #include "c_commands.h"
 
 class GxView;
-class EBuffer;
-class EWindow;
 class EEventMap;
 class ExState;
 
@@ -36,15 +34,16 @@ public:
     virtual ExView *GetViewContext();
     virtual ExView *GetStatusContext();
     virtual int BeginMacro();
+    virtual void EndExec(int NewResult);
     virtual void HandleEvent(TEvent &Event);
-    virtual void UpdateView();
-    virtual void UpdateStatus();
+    virtual int IsModelView();
     virtual void RepaintView();
     virtual void RepaintStatus();
     virtual void Resize(int width, int height);
-    virtual void EndExec(int NewResult);
-    int IsActive();
+    virtual void UpdateView();
+    virtual void UpdateStatus();
 
+    int IsActive();
     void Repaint();
     void Update();
 
@@ -55,8 +54,15 @@ public:
     int ConShowCursor();
     int ConHideCursor();
     int ConSetCursorSize(int Start, int End);
+};
 
-    virtual int IsModelView();
+/* Implement most common used methods for ExView *Next  */
+class ExViewNext: public ExView {
+public:
+    virtual ExView *GetViewContext();
+    virtual void RepaintView();
+    virtual void UpdateStatus();
+    virtual void UpdateView();
 };
 
 #endif // I_OVIEW_H

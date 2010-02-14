@@ -61,9 +61,8 @@ void ExView::EndExec(int NewResult) {
     if (Win->Result == -2) { // hack
         Win->EndExec(NewResult);
     } else {
-        if (Next) {
+        if (Next)
             delete Win->PopView(); // self
-        }
     }
 }
 
@@ -96,48 +95,56 @@ void ExView::Resize(int /*width*/, int /*height*/) {
 }
 
 int ExView::ConPutBox(int X, int Y, int W, int H, PCell Cell) {
-    if (Win)
-        return Win->ConPutBox(X, Y, W, H, Cell);
-    return -1;
+    return (Win) ? Win->ConPutBox(X, Y, W, H, Cell) : -1;
 }
 
 int ExView::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
-    if (Win)
-        return Win->ConScroll(Way, X, Y, W, H, Fill, Count);
-    return -1;
+    return (Win) ? Win->ConScroll(Way, X, Y, W, H, Fill, Count) : -1;
 }
 
 int ExView::ConQuerySize(int *X, int *Y) {
-    if (Win)
-        return Win->ConQuerySize(X, Y);
-    return -1;
+    return (Win) ? Win->ConQuerySize(X, Y) : -1;
 }
 
 int ExView::ConSetCursorPos(int X, int Y) {
-    if (Win)
-        return Win->ConSetCursorPos(X, Y);
-    return -1;
+    return (Win) ? Win->ConSetCursorPos(X, Y) : -1;
 }
 
 int ExView::ConShowCursor() {
-    if (Win)
-        return Win->ConShowCursor();
-    return -1;
+    return (Win) ? Win->ConShowCursor() : -1;
 }
 
 int ExView::ConHideCursor() {
-    if (Win)
-        return Win->ConHideCursor();
-    return -1;
+    return (Win) ? Win->ConHideCursor() : -1;
 }
 
 int ExView::ConSetCursorSize(int Start, int End) {
-    if (Win)
-        return Win->ConSetCursorSize(Start, End);
-    return -1;
+    return (Win) ? Win->ConSetCursorSize(Start, End) : -1;
 }
 
 int ExView::IsModelView()
 {
     return 0;
+}
+
+ExView* ExViewNext::GetViewContext()
+{
+    return Next;
+}
+
+void ExViewNext::RepaintView()
+{
+    if (Next)
+        Next->RepaintView();
+}
+
+void ExViewNext::UpdateView()
+{
+    if (Next)
+        Next->UpdateView();
+}
+
+void ExViewNext::UpdateStatus()
+{
+    RepaintStatus();
 }

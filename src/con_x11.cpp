@@ -828,10 +828,10 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
                   X * FontCX, (Y + Count) * FontCY,
                   W * FontCX, (H - Count) * FontCY,
                   X * FontCX, Y * FontCY);
-	//for (l = 0; l < H - Count; ++l)
-        //    memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
+	for (l = 0; l < H - Count; ++l)
+            memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
         //l = H - Count;
-        ConGetBox(X, Y + Count, W, H - Count, CursorXYPos(X, Y));
+	//ConGetBox(X, Y + Count, W, H - Count, CursorXYPos(X, Y));
 	//if (Count > 1 && ConSetBox(X, Y + l, W, Count, Cell) == -1)
         //    return -1;
     } else if (Way == csDown) {
@@ -1101,7 +1101,7 @@ static void ConvertKeyToEvent(KeySym key, KeySym key1, char */*keyname*/, char *
             myState = 0;
         if (myState & (kfAlt | kfCtrl))
             if ((key >= 'a') && (key <= 'z'))
-                key -= ('a' - 'A');
+                key += ('A' - 'a');
         if ((myState & kfCtrl) && key < 32)
             key += 64;
         Event->Key.Code = key | myState;

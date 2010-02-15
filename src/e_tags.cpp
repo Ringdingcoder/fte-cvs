@@ -427,7 +427,7 @@ int TagFind(EBuffer *B, EView *View, const char *Tag) { /*FOLD00*/
     //printf("TAGFIND %s  %s   tp:%d\n", Tag,  CurrentTag, TagPosition);
     if (CurrentTag) {
         if (strcmp(CurrentTag, Tag) == 0) {
-            if (TagPosition != TagStack::TStack->TagPos)
+            if (!TagStack::TStack || TagPosition != TagStack::TStack->TagPos)
                 if (PushPos(B) == 0)
                     return 0;
 

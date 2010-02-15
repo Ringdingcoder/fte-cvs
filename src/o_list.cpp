@@ -279,7 +279,8 @@ void EListPort::RepaintStatus() {
         return ;
     
     View->MView->ConQuerySize(&W, &H);
-    
+
+    assert(W >= 0 && H >= 0 && W < 1000 && H < 1000);
     List->UpdateList();
     
     List->FixPos();

@@ -332,10 +332,10 @@ void EGUI::DispatchEvent(GFrame *frame, GView *view, TEvent &Event) {
         return;
 
     if (Event.What == evNotify && Event.Msg.Command == cmPipeRead) {
-        Event.Msg.Model->NotifyPipe(Event.Msg.Param1);
+        Event.Msg.Model->NotifyPipe((int)Event.Msg.Param1);
         return;
     }
-    if (xview->GetEventMap() != 0) {
+    if (xview && xview->GetEventMap() != 0) {
         switch (Event.What) {
         case evKeyDown:
             DispatchKey(xview, Event);

@@ -7,38 +7,43 @@
  *
  */
 
+#include "c_config.h"
 #include "console.h"
 #include "gui.h"
+#include "s_string.h"
 
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
+
 #ifdef HPUX
 #include </usr/include/X11R5/X11/HPkeysym.h>
 #endif
+
 #include <Xm/Xm.h>
-#include <Xm/Form.h>
-#include <Xm/PanedW.h>
-#include <Xm/MainW.h>
-#include <Xm/RowColumn.h>
-#include <Xm/MainW.h>
-#include <Xm/PushB.h>
+
 #include <Xm/BulletinB.h>
 #include <Xm/CascadeB.h>
-#include <Xm/Text.h>
-#include <Xm/Separator.h>
+#include <Xm/DrawingA.h>
+#include <Xm/Form.h>
+#include <Xm/Label.h>
+#include <Xm/MainW.h>
+#include <Xm/MainW.h>
+#include <Xm/PanedW.h>
+#include <Xm/PushB.h>
+#include <Xm/RowColumn.h>
 #include <Xm/ScrollBar.h>
 #include <Xm/ScrolledW.h>
-#include <Xm/DrawingA.h>
-#include <Xm/Label.h>
+#include <Xm/Separator.h>
+#include <Xm/Text.h>
 
+#include <fcntl.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <stdarg.h>
-#include <fcntl.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #define DEBUG(x)
 //printf x
@@ -66,7 +71,8 @@ static long MouseAutoDelay = 40;
 static long MouseAutoRepeat = 200;
 static long MouseMultiClick = 300;
 
-static Atom   WM_DELETE_WINDOW;
+static Atom WM_DELETE_WINDOW;
+static Atom XA_CLIPBOARD;
 
 class GViewPeer {
 public:
@@ -85,7 +91,7 @@ public:
     int sbVstart, sbVamount, sbVtotal;
     int sbHstart, sbHamount, sbHtotal;
     int VertPos, HorzPos;
-    unsigned char *ScreenBuffer;
+    char *ScreenBuffer;
 
     GViewPeer(GView *view, int XSize, int YSize);
     ~GViewPeer();
@@ -243,7 +249,7 @@ static int InitXColors() {
 }
 
 // *INDENT-OFF*
-static struct {
+static const struct {
     long keysym;
     long keycode;
 } key_table[] = {
@@ -313,7 +319,7 @@ static struct {
 };
 // *INDENT-ON*
 
-void ConvertKeyToEvent(KeySym key, KeySym key1, char *keyname, int etype, int state, TEvent *Event) {
+static void ConvertKeyToEvent(KeySym key, KeySym key1, char *keyname, int etype, int state, TEvent *Event) {
     unsigned int myState = 0;
     int k;
 
@@ -368,7 +374,7 @@ static TEvent LastMouseEvent = { evNone };
 
 #define TM_DIFF(x,y) ((long)(((long)(x) < (long)(y)) ? ((long)(y) - (long)(x)) : ((long)(x) - (long)(y))))
 
-void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent *Event, Time time) {
+static void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent *Event, Time time) {
     unsigned int myState = 0;
     static unsigned long LastClickTime = 0;
     static unsigned long LastClickCount = 0;
@@ -440,7 +446,7 @@ void ConvertClickToEvent(int type, int xx, int yy, int button, int state, TEvent
     LastMouseEvent = *Event;
 }
 
-void ProcessXEvents(XEvent *event, TEvent *Event, GViewPeer *Peer) {
+static void ProcessXEvents(XEvent *event, TEvent *Event, GViewPeer *Peer) {
     XAnyEvent *anyEvent = (XAnyEvent *) event;
     XExposeEvent *exposeEvent = (XExposeEvent *) event;
     XButtonEvent *buttonEvent = (XButtonEvent *) event;
@@ -482,7 +488,9 @@ void ProcessXEvents(XEvent *event, TEvent *Event, GViewPeer *Peer) {
     }
 }
 
-static void CloseWindow(Widget w, GFramePeer *frame, XEvent *event, Boolean *cont) {
+static void CloseWindow(Widget w, void *framev, XEvent *event, Boolean *cont)
+{
+    GFramePeer *frame = (GFramePeer*)framev;
     if (event->type != ClientMessage ||
         ((XClientMessageEvent *)event)->data.l[0] != WM_DELETE_WINDOW)
     {
@@ -493,19 +501,25 @@ static void CloseWindow(Widget w, GFramePeer *frame, XEvent *event, Boolean *con
     *cont = False;
 }
 
-void MainCallback (Widget w, mItem *item, XtPointer callData) {
+static void MainCallback (Widget w, void* itemv, XtPointer callData)
+{
+    mItem *item = (mItem*) itemv;
     DEBUG(("Main: %d\n", item->Cmd));
     NextEvent.What = evCommand;
     NextEvent.Msg.Command = item->Cmd;
 }
 
-void PopupCallback (Widget w, mItem *item, XtPointer callData) {
+static void PopupCallback (Widget w, void* itemv, XtPointer callData)
+{
+    mItem *item = (mItem*) itemv;
     DEBUG(("Popup: %d\n", item->Cmd));
     NextEvent.What = evCommand;
     NextEvent.Msg.Command = item->Cmd;
 }
 
-void MenuPopdownCb (Widget w, mItem *item, XtPointer callData) {
+static void MenuPopdownCb (Widget w, void* itemv, XtPointer callData)
+{
+    mItem *item = (mItem*) itemv;
     DEBUG(("Popdown: %d\n", item->Cmd));
     if (LPopupMenu != 0) {
         XtDestroyWidget(XtParent(LPopupMenu));
@@ -513,7 +527,10 @@ void MenuPopdownCb (Widget w, mItem *item, XtPointer callData) {
     }
 }
 
-void InputWindow(Widget w, GViewPeer *Peer, XEvent *event, Boolean *cont) {
+static void InputWindow(Widget w, void *PeerV, XEvent *event, Boolean *cont)
+{
+    GViewPeer *Peer = (GViewPeer*)PeerV;
+
     DEBUG(("Input\n"));
     if (!Peer->View->IsActive())
         Peer->View->Parent->SelectView(Peer->View);
@@ -522,7 +539,10 @@ void InputWindow(Widget w, GViewPeer *Peer, XEvent *event, Boolean *cont) {
     *cont = False;
 }
 
-static void VisibilityCb(Widget w, GViewPeer *peer, XEvent *event, Boolean *cont) {
+static void VisibilityCb(Widget w, void* peerv, XEvent *event, Boolean *cont)
+{
+    GViewPeer *peer = (GViewPeer*)peerv;
+
     if (event->type != VisibilityNotify)
         return;
 
@@ -538,14 +558,16 @@ static void VisibilityCb(Widget w, GViewPeer *peer, XEvent *event, Boolean *cont
     *cont = True;
 }
 
-void ConfigureWindow(Widget w, GViewPeer *Peer, XEvent *event, Boolean *cont) {
+static void ConfigureWindow(Widget w, void *PeerV, XEvent *event, Boolean *cont)
+{
+    GViewPeer *Peer = (GViewPeer*)PeerV;
     Dimension Xd, Yd;
     int X, Y;
     XConfigureEvent *confEvent = (XConfigureEvent *) event;
 
     DEBUG(("Configure\n"));
-    Xd = confEvent->width;
-    Yd = confEvent->height;
+    Xd = (Dimension)confEvent->width;
+    Yd = (Dimension)confEvent->height;
     X = Xd;
     Y = Yd;
     DEBUG(("Resize %d, %d\n", X, Y));
@@ -561,7 +583,10 @@ void ConfigureWindow(Widget w, GViewPeer *Peer, XEvent *event, Boolean *cont) {
     *cont = True;
 }
 
-void ExposeWindow(Widget w, GViewPeer *Peer, XmDrawingAreaCallbackStruct *Call) {
+static void ExposeWindow(Widget w, void* PeerV, void* CallV)
+{
+    GViewPeer *Peer = (GViewPeer*)PeerV;
+    XmDrawingAreaCallbackStruct *Call = (XmDrawingAreaCallbackStruct*)CallV;
     XExposeEvent *exposeEvent = (XExposeEvent *) Call->event;
 
     DEBUG(("Expose\n"));
@@ -574,7 +599,11 @@ void ExposeWindow(Widget w, GViewPeer *Peer, XmDrawingAreaCallbackStruct *Call) 
 }
 
 
-void VertValueChanged(Widget w, GViewPeer *Peer, XmScrollBarCallbackStruct *Call) {
+static void VertValueChanged(Widget w, void* PeerV, void* CallV)
+{
+    GViewPeer *Peer = (GViewPeer*)PeerV;
+    XmScrollBarCallbackStruct *Call = (XmScrollBarCallbackStruct*)CallV;
+
     if (!Peer->View->IsActive())
         Peer->View->Parent->SelectView(Peer->View);
     if (Peer->VertPos != Call->value) {
@@ -587,7 +616,12 @@ void VertValueChanged(Widget w, GViewPeer *Peer, XmScrollBarCallbackStruct *Call
     }
 }
 
-void HorzValueChanged(Widget w, GViewPeer *Peer, XmScrollBarCallbackStruct *Call) {
+//void HorzValueChanged(Widget w, GViewPeer *Peer, XmScrollBarCallbackStruct *Call)
+void HorzValueChanged(Widget w, void* PeerV, void* CallV)
+{
+    GViewPeer *Peer = (GViewPeer*)PeerV;
+    XmScrollBarCallbackStruct *Call = (XmScrollBarCallbackStruct*) CallV;
+
     if (!Peer->View->IsActive())
         Peer->View->Parent->SelectView(Peer->View);
     if (Call->value != Peer->HorzPos) {
@@ -603,38 +637,42 @@ void HorzValueChanged(Widget w, GViewPeer *Peer, XmScrollBarCallbackStruct *Call
 ///////////////////////////////////////////////////////////////////////////
 
 GViewPeer::GViewPeer(GView *view, int XSize, int YSize) :
-    View(view),
     Visibility(VisibilityFullyObscured),
-    //    wX(0),
-    //    wY(0),
-    wW(XSize),
-    wH(YSize),
-    sbVtotal(0),
-    sbVstart(0),
-    sbVamount(0),
-    sbHtotal(0),
-    sbHstart(0),
-    sbHamount(0),
+    View(view),
+    //wX(0),
+    //wY(0),
+    //wW(XSize),
+    //wH(YSize),
+    wW(80),
+    wH(40),
     wState(0),
+    wRefresh(0),
+    cX(-1),
+    cY(-1),
     cVisible(1),
     cStart(0), // %
     cEnd(100),
-    wRefresh(0),
-    ScreenBuffer(0),
-    cX(-1),
-    cY(-1),
+    sbVstart(0),
+    sbVamount(0),
+    sbVtotal(0),
+    sbHstart(0),
+    sbHamount(0),
+    sbHtotal(0),
     VertPos(-1),
-    HorzPos(-1)
+    HorzPos(-1),
+    ScreenBuffer(0)
 {
     for (int jj = 0; jj < 256; jj++)
         gc[jj] = 0;
+
+    AllocBuffer();
 
     ScrollWin = XtVaCreateWidget("ScrollWin",
                                  xmScrolledWindowWidgetClass, frames->Peer->PanedWin,
                                  XmNmarginHeight, 0,
                                  XmNmarginWidth, 0,
                                  XmNspacing, 0,
-                                 0);
+                                 NULL);
 
     TextWin = XtVaCreateManagedWidget ("TextWin",
                                        xmDrawingAreaWidgetClass, ScrollWin,
@@ -646,20 +684,20 @@ GViewPeer::GViewPeer(GView *view, int XSize, int YSize) :
                                        XmNheightInc, cyChar,
                                        XmNwidth, cxChar * 80,
                                        XmNheight, cyChar * 30,
-                                       0);
+                                       NULL);
 
-    /*    XSetWindowColormap(display, XtWindow(TextWin), colormap);*/
+    // XSetWindowColormap(display, XtWindow(TextWin), colormap);
 
     XtVaSetValues (ScrollWin,
                    XmNworkWindow, TextWin,
-                   0);
+                   NULL);
 
     SbVert = XtVaCreateManagedWidget("VScrollBar",
                                      xmScrollBarWidgetClass, ScrollWin,
                                      XmNmarginHeight, 0,
                                      XmNmarginWidth, 0,
                                      XmNwidth, 20,
-                                     0);
+                                     NULL);
 
     SbHorz = XtVaCreateManagedWidget("HScrollBar",
                                      xmScrollBarWidgetClass, ScrollWin,
@@ -671,7 +709,7 @@ GViewPeer::GViewPeer(GView *view, int XSize, int YSize) :
     XtVaSetValues(ScrollWin,
                   XmNhorizontalScrollBar, SbHorz,
                   XmNverticalScrollBar, SbVert,
-                  0);
+                  NULL);
 
     XtManageChild(ScrollWin);
 
@@ -716,7 +754,6 @@ GViewPeer::GViewPeer(GView *view, int XSize, int YSize) :
     XtAddCallback(SbVert, XmNpageDecrementCallback, VertValueChanged, this);
     XtAddCallback(SbVert, XmNtoTopCallback, VertValueChanged, this);
     XtAddCallback(SbVert, XmNtoBottomCallback, VertValueChanged, this);
-
 }
 
 GViewPeer::~GViewPeer() {
@@ -725,9 +762,9 @@ GViewPeer::~GViewPeer() {
 
 int GViewPeer::AllocBuffer() {
     int i;
-    unsigned char *p;
-
-    ScreenBuffer = (unsigned char *)malloc(2 * wW * wH);
+    char *p;
+    /* FIXME */
+    ScreenBuffer = (char *)malloc(wW * wH * sizeof(TCell));
     if (ScreenBuffer == NULL) return -1;
     for (i = 0, p = ScreenBuffer; i < wW * wH; i++) {
         *p++ = 32;
@@ -759,7 +796,7 @@ void GViewPeer::DrawCursor(int Show) {
     //    if (!XtIsManaged(TextWin)) return ;
 
     if (cVisible && cX >= 0 && cY >= 0) {
-        unsigned char *p = CursorXYPos(cX, cY), attr;
+        char *p = CursorXYPos(cX, cY), attr;
         attr = p[1];
         /*if (Show) attr = ((((attr << 4) & 0xF0)) | (attr >> 4)) ^ 0x77;*/
         if (Show) attr = (attr ^ 0x77);
@@ -774,14 +811,14 @@ void GViewPeer::DrawCursor(int Show) {
         XDrawImageString(display, XtWindow(TextWin), gc[attr],
                          cX * cxChar,
                          fontStruct->max_bounds.ascent + cY * cyChar,
-                         p, 1);
+                         (const char*)p, 1);
     }
 }
 
 int GViewPeer::ConPutBox(int X, int Y, int W, int H, PCell Cell) {
     int i;
-    unsigned char temp[256], attr;
-    unsigned char *p, *ps, *c, *ops;
+    char temp[256], attr;
+    char *p, *ps, *c, *ops;
     int len, x, l, ox, olen, skip;
 
     if (!(View && View->Parent && gc))
@@ -797,12 +834,11 @@ int GViewPeer::ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         return -1;
     }
 
-
     DEBUG(("PutBox %d | %d %d %d %d | %d %d\n", wRefresh, X, Y, W, H, wW, wH));
     for (i = 0; i < H; i++) {
         len = W;
         p = CursorXYPos(X, Y + i);
-        ps = (unsigned char *) Cell;
+        ps = (char *) Cell;
         x = X;
         while (len > 0) {
             if (!wRefresh) {
@@ -938,12 +974,12 @@ int GViewPeer::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Co
 }
 
 int GViewPeer::ConSetSize(int X, int Y) {
-    unsigned char *NewBuffer;
-    unsigned char *p;
+    char *NewBuffer;
+    char *p;
     int i;
-    unsigned int MX, MY;
+    int MX, MY;
 
-    p = NewBuffer = (unsigned char *) malloc(X * Y * 2);
+    p = NewBuffer = (char *) malloc(X * Y * sizeof(TCell));
     if (NewBuffer == NULL) return -1;
     for (i = 0; i < X * Y; i++) {
         *p++ = ' ';
@@ -955,7 +991,7 @@ int GViewPeer::ConSetSize(int X, int Y) {
         if (X < MX) MX = X;
         p = NewBuffer;
         for (i = 0; i < MY; i++) {
-            memcpy(p, CursorXYPos(0, i), MX * 2);
+            memcpy(p, CursorXYPos(0, i), MX * sizeof(TCell));
             p += X * 2;
         }
         free(ScreenBuffer);
@@ -973,6 +1009,7 @@ int GViewPeer::ConSetSize(int X, int Y) {
 }
 
 int GViewPeer::ConQuerySize(int *X, int *Y) {
+    //printf("3CONQUERYSIZE  %d  %d\n", wW, wH);
     if (X) *X = wW;
     if (Y) *Y = wH;
     return 1;
@@ -1047,7 +1084,7 @@ int GViewPeer::SetSbVPos(int Start, int Amount, int Total) {
                           XmNpageIncrement, 1,
                           XmNsliderSize, 1,
                           XmNvalue, 0,
-                          0);
+                          NULL);
         } else {
             XtVaSetValues(SbVert,
                           XmNmaximum, Total,
@@ -1055,7 +1092,7 @@ int GViewPeer::SetSbVPos(int Start, int Amount, int Total) {
                           XmNpageIncrement, ((Amount > 1) ? Amount : 1),
                           XmNsliderSize, Amount,
                           XmNvalue, Start,
-                          0);
+                          NULL);
         }
     }
     return 1;
@@ -1080,7 +1117,7 @@ int GViewPeer::SetSbHPos(int Start, int Amount, int Total) {
                           XmNpageIncrement, 1,
                           XmNsliderSize, 1,
                           XmNvalue, 0,
-                          0);
+                          NULL);
         } else {
             XtVaSetValues(SbHorz,
                           XmNmaximum, Total,
@@ -1088,7 +1125,7 @@ int GViewPeer::SetSbHPos(int Start, int Amount, int Total) {
                           XmNpageIncrement, ((Amount > 1) ? Amount : 1),
                           XmNsliderSize, Amount,
                           XmNvalue, Start,
-                          0);
+                          NULL);
         }
     }
     return 1;
@@ -1130,7 +1167,7 @@ int GViewPeer::PMSetCursorPos() {
 
 ///////////////////////////////////////////////////////////////////////////
 
-GView::GView(GFrame *parent, int XSize, int YSize)
+GView::GView(GFrame *parent, int XSize, int YSize) :
     Parent(parent),
     Next(0),
     Prev(0),
@@ -1177,6 +1214,7 @@ int GView::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 }
 
 int GView::ConSetSize(int X, int Y) {
+    printf("ConSetSize %d  %d\n", X, Y);
     if (Peer->ConSetSize(X, Y)) ;
     //        Resize(X, Y);
     else
@@ -1304,11 +1342,11 @@ GFramePeer::GFramePeer(GFrame *frame, int Width, int Height) {
                                        xmPanedWindowWidgetClass, MainWin,
                                        XmNmarginHeight, 0,
                                        XmNmarginWidth, 0,
-                                       0 );
+                                       NULL);
 
     XtVaSetValues (MainWin,
                    XmNworkWindow, PanedWin,
-                   0);
+                   NULL);
 
     if (Width != -1 && Height != -1)
         ConSetSize(Width, Height);
@@ -1318,22 +1356,22 @@ GFramePeer::~GFramePeer() {
 }
 
 int GFramePeer::ConSetSize(int X, int Y) {
+    printf("SetSIZE %d  %d\n", X, Y);
     //return ::ConSetSize(X, Y);
     return 0;
 }
 
 int GFramePeer::ConQuerySize(int *X, int *Y) {
-    //    ::ConQuerySize(&fW, &fH);
-    //    if (X) *X = fW;
-    //    if (Y) *Y = fH;
+    //::ConQuerySize(&fW, &fH);
+    //if (X) *X = fW;
+    //if (Y) *Y = fH;
+    if (X) *X = 80;
+    if (Y) *Y = 25;
+
+    printf("1CONQUERYSIZE %d  %d\n", *X, *Y);
     return 1;
 }
 
-//int GFrame::ConQuerySize(int *X, int *Y) {
-//    ::ConQuerySize(X, Y);
-//    if (ShowVScroll)
-//        --*X;
-//}
 
 int GFramePeer::ConSetTitle(const char *Title, const char *STitle) {
     XSetStandardProperties(display, XtWindow(ShellWin), Title, STitle, 0, NULL, 0, NULL);
@@ -1554,7 +1592,7 @@ void GFrame::Resize(int width, int height) {
         Top->ConSetSize(width, height);
 }
 
-Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc MenuProc) {
+static Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc MenuProc) {
     Widget hmenu;
     int i;
     char s[256];
@@ -1582,16 +1620,17 @@ Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc MenuPro
 
             strcpy(s, Menus[menu].Items[i].Name);
             p = strchr(s, '&');
-            if (p) {
-                strcpy(p, p + 1);
+	    if (p) {
                 mn = p;
+                // for strcpy src & dest may not overlap!
+                for (; p[0]; ++p)
+                    p[0] = p[1];
             }
             p = strchr(s, '\t');
             if (p) {
                 *p = 0;
                 p++;
             }
-
             if (Menus[menu].Items[i].SubMenu != -1) {
                 item = XtVaCreateManagedWidget(s,
                                                xmCascadeButtonWidgetClass,
@@ -1600,11 +1639,11 @@ Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc MenuPro
                                                CreateMotifMenu(hmenu,
                                                                Menus[menu].Items[i].SubMenu,
                                                                0, MenuProc),
-                                               NULL );
+					       NULL);
             } else {
                 item = XtVaCreateManagedWidget(s,
                                                xmPushButtonWidgetClass, hmenu,
-                                               0);
+                                               NULL);
                 XtAddCallback(item, XmNactivateCallback,
                               MenuProc, &(Menus[menu].Items[i]));
             }
@@ -1613,17 +1652,17 @@ Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc MenuPro
                 XtVaSetValues(item,
                               XmNacceleratorText,
                               XmStringCreate(p, XmSTRING_DEFAULT_CHARSET),
-                              0);
+                              NULL);
             if (mn)
                 XtVaSetValues(item,
                               XmNmnemonic,
                               KeySym(*mn),
-                              0);
+                              NULL);
         } else {
             item = XtVaCreateManagedWidget("separator",
                                            xmSeparatorWidgetClass,
                                            hmenu,
-                                           0);
+                                           NULL);
             //XmCreateSeparator(parent, "xx", 0, 0);
         }
         //        item.id = Menus[menu].Items[i].Cmd & 0xFFFF; // ?
@@ -1638,14 +1677,14 @@ Widget CreateMotifMainMenu(Widget parent, char *Name) {
 }
 
 int GFrame::SetMenu(const char *Name) {
-    if (Menu) free(Menu);
+    free(Menu);
     Menu = strdup(Name);
 
-    Peer->MenuBar = CreateMotifMainMenu(Peer->MainWin, Name);
+    Peer->MenuBar = CreateMotifMainMenu(Peer->MainWin, Menu);
     XtManageChild (Peer->MenuBar);
     XtVaSetValues (Peer->MainWin,
                    XmNmenuBar, Peer->MenuBar,
-                   0);
+                   NULL);
 
     return 1;
 }
@@ -1664,11 +1703,27 @@ int GFrame::PopupMenu(const char *Name) {
     return 1;
 }
 
+void GFrame::Show() {
+    Update();
+    Peer->MapFrame();
+}
+
+void GFrame::Activate() {
+    frames = this;
+    Update();
+    //Peer->ShowFrame();
+}
+
 // GUI
 
+int GUI::multiFrame() {
+    return 1;
+}
 
-GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
-
+GUI::GUI(int &argc, char **argv, int XSize, int YSize) :
+    fArgc(argc),
+    fArgv(argv)
+{
     char *fs = getenv("VIOFONT");
     if (fs == 0 && WindowFont[0] != 0)
         fs = WindowFont;
@@ -1677,14 +1732,12 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
                                  &argc, argv, NULL,
                                  XmNmappedWhenManaged, FALSE,
                                  NULL);
-
-    if (TopLevel == 0)
-        return ;
-
-    display = XtDisplay(TopLevel);
-    //XSynchronize(display, True);
-    if (display == NULL)
+    if (!TopLevel)
         return;
+
+    if (!(display = XtDisplay(TopLevel)))
+        return;
+    //XSynchronize(display, True);
 
     root = DefaultRootWindow(display);
     screen = DefaultScreen(display);
@@ -1718,6 +1771,7 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
     XtRealizeWidget(TopLevel);
 
     WM_DELETE_WINDOW = XInternAtom(display, "WM_DELETE_WINDOW", False);
+    XA_CLIPBOARD = XInternAtom(display, "CLIPBOARD", False);
 
     gui = this;
 }
@@ -1772,11 +1826,20 @@ void GUI::ProcessEvent() {
 }
 
 int GUI::Run() {
-    frames->Peer->MapFrame();
+    if (Start(fArgc, fArgv) == 0) {
+        doLoop = 1;
+        frames->Show();
 
-    //XtAppMainLoop(AppContext);
-    while (frames != 0)
-        ProcessEvent();
+	if (frames && frames->Peer)
+	    frames->Peer->MapFrame();
+
+	//XtAppMainLoop(AppContext);
+	while (frames != 0)
+	    ProcessEvent();
+
+	Stop();
+        return 0;
+    }
 
     return 0;
 }
@@ -1785,7 +1848,7 @@ int GUI::ShowEntryScreen() {
     return 1;
 }
 
-int GUI::RunProgram(char *Command) {
+int GUI::RunProgram(int mode, char *Command) {
     char Cmd[1024];
 
     strlcpy(Cmd, XShellCommand, sizeof(Cmd));
@@ -1802,7 +1865,10 @@ int GUI::RunProgram(char *Command) {
     return system(Cmd);
 }
 
-void PipeCallback(GPipe *pipe, int *source, XtInputId *input) {
+//void PipeCallback(GPipe *pipe, int *source, XtInputId *input)
+void PipeCallback(void *pipev, int *source, XtInputId *input)
+{
+    GPipe *pipe = (GPipe*)pipev;
     if (pipe && pipe->notify && *source == pipe->fd) {
         NextEvent.What = evNotify;
         NextEvent.Msg.View = frames->Active;
@@ -1842,8 +1908,8 @@ int GUI::OpenPipe(const char *Command, EModel *notify) {
                 fcntl(pfd[0], F_SETFL, O_NONBLOCK);
                 Pipes[i].fd = pfd[0];
             }
-            Pipes[i].input =
-                XtAppAddInput(AppContext, Pipes[i].fd, XtInputReadMask, PipeCallback, &Pipes[i]);
+            Pipes[i].input =                                 /* FIXME: */
+                XtAppAddInput(AppContext, Pipes[i].fd, (void*)XtInputReadMask, PipeCallback, &Pipes[i]);
             Pipes[i].used = 1;
             //fprintf(stderr, "Pipe Open: %d\n", i);
             return i;
@@ -1859,16 +1925,17 @@ int GUI::SetPipeView(int id, EModel *notify) {
         return -1;
     //fprintf(stderr, "Pipe View: %d %08X\n", id, notify);
     Pipes[id].notify = notify;
-    if (notify != Pipes[id].notify)
+    if (notify != Pipes[id].notify) {
         if (notify) {
-            Pipes[id].input =
-                XtAppAddInput(AppContext, Pipes[id].fd, XtInputReadMask, PipeCallback, &Pipes[id]);
+            Pipes[id].input =                               /* FIXME */
+                XtAppAddInput(AppContext, Pipes[id].fd, (void*)XtInputReadMask, PipeCallback, &Pipes[id]);
         } else {
             if (Pipes[id].input != 0) {
                 XtRemoveInput(Pipes[id].input);
                 Pipes[id].input = 0;
             }
-        }
+	}
+    }
     return 0;
 }
 

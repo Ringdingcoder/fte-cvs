@@ -1,10 +1,12 @@
 /*    g_motif.cpp
  *
  *    Copyright (c) 1994-1996, Marko Macek
+ *    Copyright (c) 2010, Zdenek Kabelac
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
+ *    Only demo code
  */
 
 #include "c_config.h"
@@ -522,7 +524,7 @@ static void MenuPopdownCb (Widget w, void* itemv, XtPointer callData)
     mItem *item = (mItem*) itemv;
     DEBUG(("Popdown: %d\n", item->Cmd));
     if (LPopupMenu != 0) {
-        XtDestroyWidget(XtParent(LPopupMenu));
+        XtDestroyWidget(LPopupMenu);
         LPopupMenu = 0;
     }
 }
@@ -561,18 +563,12 @@ static void VisibilityCb(Widget w, void* peerv, XEvent *event, Boolean *cont)
 static void ConfigureWindow(Widget w, void *PeerV, XEvent *event, Boolean *cont)
 {
     GViewPeer *Peer = (GViewPeer*)PeerV;
-    Dimension Xd, Yd;
+    XConfigureEvent *confEvent = (XConfigureEvent*)event;
     int X, Y;
-    XConfigureEvent *confEvent = (XConfigureEvent *) event;
 
     DEBUG(("Configure\n"));
-    Xd = (Dimension)confEvent->width;
-    Yd = (Dimension)confEvent->height;
-    X = Xd;
-    Y = Yd;
-    DEBUG(("Resize %d, %d\n", X, Y));
-    X /= cxChar;
-    Y /= cyChar;
+    X = confEvent->width / cxChar;
+    Y = confEvent->height / cyChar;
     DEBUG(("!! Resize %d, %d\n", X, Y));
     if (X > 0 && Y > 0) {
         Peer->ConSetSize(X, Y);
@@ -757,7 +753,10 @@ GViewPeer::GViewPeer(GView *view, int XSize, int YSize) :
 }
 
 GViewPeer::~GViewPeer() {
-    XtDestroyWidget(ScrollWin);
+    // Widget destroyed recursively
+    // from master shell widget
+    free(ScreenBuffer);
+    ScreenBuffer = 0;
 }
 
 int GViewPeer::AllocBuffer() {
@@ -880,7 +879,7 @@ int GViewPeer::ConPutBox(int X, int Y, int W, int H, PCell Cell) {
             len -= l;
         }
         p = CursorXYPos(X, Y + i);
-        memcpy(p, Cell, W * 2);
+        memmove(p, Cell, W * sizeof(TCell));
         if (i + Y == cY)
             DrawCursor(1);
         Cell += W;
@@ -981,7 +980,7 @@ int GViewPeer::ConSetSize(int X, int Y) {
 
     p = NewBuffer = (char *) malloc(X * Y * sizeof(TCell));
     if (NewBuffer == NULL) return -1;
-    for (i = 0; i < X * Y; i++) {
+    for (int i = 0; i < X * Y; i++) {
         *p++ = ' ';
         *p++ = 0x07;
     }
@@ -1017,9 +1016,9 @@ int GViewPeer::ConQuerySize(int *X, int *Y) {
 
 int GViewPeer::ConSetCursorPos(int X, int Y) {
     if (X < 0) X = 0;
-    if (X >= wW) X = wW - 1;
+    else if (X >= wW) X = wW - 1;
     if (Y < 0) Y = 0;
-    if (Y >= wH) Y = wH - 1;
+    else if (Y >= wH) Y = wH - 1;
     DrawCursor(0);
     cX = X;
     cY = Y;
@@ -1326,7 +1325,9 @@ int GView::CaptureMouse(int grab) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-GFramePeer::GFramePeer(GFrame *frame, int Width, int Height) {
+GFramePeer::GFramePeer(GFrame *frame, int Width, int Height) :
+    MenuBar(0)
+{
     ShellWin = XtCreatePopupShell("fte", topLevelShellWidgetClass,
                                   TopLevel, NULL, 0);
 
@@ -1353,6 +1354,9 @@ GFramePeer::GFramePeer(GFrame *frame, int Width, int Height) {
 }
 
 GFramePeer::~GFramePeer() {
+    // Kill master window - deletes recursively all related widgets
+    XtDestroyWidget(MenuBar);
+    XtDestroyWidget(ShellWin);
 }
 
 int GFramePeer::ConSetSize(int X, int Y) {
@@ -1410,6 +1414,7 @@ GFrame::GFrame(int XSize, int YSize) {
 
 GFrame::~GFrame() {
     delete Peer;
+    free(Menu);
 
     if (Next == this) {
         frames = 0;
@@ -1594,9 +1599,6 @@ void GFrame::Resize(int width, int height) {
 
 static Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc MenuProc) {
     Widget hmenu;
-    int i;
-    char s[256];
-    char *p;
     Widget item;
 
     if (main == 1) {
@@ -1614,13 +1616,14 @@ static Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc 
                                      NULL, 0);
     }
 
-    for (i = 0; i < Menus[menu].Count; i++) {
+    for (int i = 0; i < Menus[menu].Count; ++i) {
         if (Menus[menu].Items[i].Name) {
+            char s[256];
             char *mn = 0;
 
             strcpy(s, Menus[menu].Items[i].Name);
-            p = strchr(s, '&');
-	    if (p) {
+            char* p = strchr(s, '&');
+            if (p) {
                 mn = p;
                 // for strcpy src & dest may not overlap!
                 for (; p[0]; ++p)
@@ -1639,10 +1642,11 @@ static Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc 
                                                CreateMotifMenu(hmenu,
                                                                Menus[menu].Items[i].SubMenu,
                                                                0, MenuProc),
-					       NULL);
+                                               NULL);
             } else {
                 item = XtVaCreateManagedWidget(s,
-                                               xmPushButtonWidgetClass, hmenu,
+                                               xmPushButtonWidgetClass,
+                                               hmenu,
                                                NULL);
                 XtAddCallback(item, XmNactivateCallback,
                               MenuProc, &(Menus[menu].Items[i]));
@@ -1670,7 +1674,7 @@ static Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc 
     return hmenu;
 }
 
-Widget CreateMotifMainMenu(Widget parent, char *Name) {
+static Widget CreateMotifMainMenu(Widget parent, char *Name) {
     int id = GetMenuId(Name);
 
     return CreateMotifMenu(parent, id, 1, MainCallback);
@@ -1680,12 +1684,14 @@ int GFrame::SetMenu(const char *Name) {
     free(Menu);
     Menu = strdup(Name);
 
+    if (Peer->MenuBar)
+        XtDestroyWidget(Peer->MenuBar);
+
     Peer->MenuBar = CreateMotifMainMenu(Peer->MainWin, Menu);
     XtManageChild (Peer->MenuBar);
     XtVaSetValues (Peer->MainWin,
                    XmNmenuBar, Peer->MenuBar,
                    NULL);
-
     return 1;
 }
 
@@ -1696,10 +1702,13 @@ int GFrame::ExecMainMenu(char Sub) {
 int GFrame::PopupMenu(const char *Name) {
     int id = GetMenuId(Name);
 
-    LPopupMenu = CreateMotifMenu(Peer->MainWin, id, 2, (XtCallbackProc)PopupCallback);
+    if (LPopupMenu)
+        XtDestroyWidget(LPopupMenu);
+
+    LPopupMenu = CreateMotifMenu(Peer->MainWin, id, 2, PopupCallback);
     XtAddCallback(XtParent(LPopupMenu), XmNpopdownCallback, MenuPopdownCb, 0);
-    XmMenuPosition (LPopupMenu, (XButtonEvent *)&LastRelease);
-    XtManageChild (LPopupMenu);
+    XmMenuPosition(LPopupMenu, &LastRelease);
+    XtManageChild(LPopupMenu);
     return 1;
 }
 
@@ -1777,6 +1786,8 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) :
 }
 
 GUI::~GUI() {
+    //core: XtCloseDisplay(display);
+    //core: XtDestroyApplicationContext(AppContext);
     gui = 0;
 }
 
@@ -1830,11 +1841,11 @@ int GUI::Run() {
         doLoop = 1;
         frames->Show();
 
-	if (frames && frames->Peer)
-	    frames->Peer->MapFrame();
+	//if (frames && frames->Peer)
+	//    frames->Peer->MapFrame();
 
 	//XtAppMainLoop(AppContext);
-	while (frames != 0)
+	while (doLoop)
 	    ProcessEvent();
 
 	Stop();

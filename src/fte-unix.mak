@@ -153,7 +153,7 @@ NLIBS    = -lncurses
 SLIBS    = -lslang
 #QLIBS    = $(QLIBDIR) -lqt
 QLIBS    = $(QLIBDIR) -lqt-mt
-#MLIBS    = $(MLIBDIR) -lXm -lXp -lXt -lXpm -lXext
+MLIBS    = $(MLIBDIR) -lXm -lXp -lXt -lXpm -lXext
 
 .cpp.o:
 	$(CC) -c $< $(CXXFLAGS) $(CPPFLAGS) $(CCFLAGS)

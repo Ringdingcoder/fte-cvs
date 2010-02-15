@@ -1834,11 +1834,10 @@ void QEFrame::timerDone() {
 
 // GUI
 
-
-GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
-
-    fArgc = argc;
-    fArgv = argv;
+GUI::GUI(int &argc, char **argv, int XSize, int YSize) :
+    fArgc(argc),
+    fArgv(argv)
+{
 
     new QApplication(argc, argv);
 
@@ -1855,7 +1854,7 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
     if (fontStruct == NULL)
         fontStruct = XLoadQueryFont(display, "fixed");
     if (fontStruct == NULL) 
-        return ;
+        return;
 
     cxChar = fontStruct->max_bounds.width;
     cyChar = fontStruct->max_bounds.ascent + fontStruct->max_bounds.descent;

@@ -1003,9 +1003,10 @@ int RestoreScreen() {
     return 1;
 }
 
-GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
-    fArgc = argc;
-    fArgv = argv;
+GUI::GUI(int &argc, char **argv, int XSize, int YSize) :
+    fArgc(argc),
+    fArgv(argv)
+{
     ::ConInit(-1, -1);
     SaveScreen();
     ::ConSetSize(XSize, YSize);

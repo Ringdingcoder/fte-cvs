@@ -1,8 +1,18 @@
 Revision history
 -----------------------------------------------------------------------
-0.50.2b3 -- <fill month here> 201X
-   planning to use std::string & std::vector templates - should
-   save a lot of code
+0.50.2b5 -- <fill month here> 201X
+
+0.50.2b4 -- February 2010
+  ! Fixed memory leaks on exits - properly destroy all buffers
+  ! Fixed tags scanning push/pop
+  ! Made mfte (motif version) compilable
+  ! NCurses now handles tripple mouse clicks
+  ! SLang even 5 clicks - and it's much better with wheel scrolling
+    (anyone has some idea what is broken with ncurses....??)
+  + Started to use StlString and StlVector templates - should
+    save some code lines and make the code more readable
+  + more constructors are using constructor initializers
+  + simplified Xorg string printing - though there might be some errors...
 
 0.50.2b3 -- January 2010
   + Completely new keyboard handling for Slang version - 
@@ -26,6 +36,8 @@ Revision history
   - Cleanup of header file include - fte.h is now only 'base' header
   ! Fixed bug tracker issue: 1325707 on Linux platform
     - using _FILE_OFFSET_BITS 64 for 32bit compilation
+  ! Fixed weird stack trashing due to passing of <0 numbers as unsigned
+  + Updated several menu entries, add 'find' command example
 
 0.50.2b2 -- January 2010
   + Applied a few submitted patches from various Inet developers

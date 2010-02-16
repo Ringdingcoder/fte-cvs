@@ -174,15 +174,15 @@ public:
     vector<Type>(const vector<Type>& t) :
 	m_type(0), m_capacity(0), m_size(0)
     {
-	vector<Type> tmp;
-	tmp.operator=(t);
-	swap(tmp);
+	copy(t.m_type, t.m_size, t.m_size);
     }
     vector<Type>& operator=(const vector<Type>& t)
     {
 	//printf("operator=    %p   %d	%d\n", t.m_type, t.m_size, t.m_capacity);
-	if (this != &t)
-	    copy(t.m_type, t.m_size, t.m_size);
+	if (this != &t) {
+	    vector<Type> tmp(t);
+	    swap(tmp);
+	}
 	return *this;
     }
     ~vector();
@@ -200,6 +200,7 @@ public:
     void clear();
     iterator erase(iterator pos);
     iterator insert(iterator pos, const Type& t);
+    void insert(iterator pos, const_iterator from, const_iterator to);
     size_type find(reference t) const
     {
 	for (size_type i = 0; i < m_size; ++i)
@@ -317,7 +318,7 @@ typename vector<Type>::iterator vector<Type>::insert(iterator pos, const Type& t
     if (m_size + 1 >= m_capacity)
     {
 	const size_type nc = (m_capacity < min_capacity) ? min_capacity : m_capacity * 2;
-	tmp = new Type[m_capacity];
+	tmp = new Type[nc];
 	m_capacity = nc;
     }
 
@@ -337,6 +338,13 @@ typename vector<Type>::iterator vector<Type>::insert(iterator pos, const Type& t
     ++m_size;
 
     return m_type + n;
+}
+
+template <class Type>
+void vector<Type>::insert(iterator pos, const_iterator from, const_iterator to)
+{
+    for (; from != to; ++pos, ++from)
+	pos = insert(pos, *from);
 }
 
 template <class Type>

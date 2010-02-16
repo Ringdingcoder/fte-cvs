@@ -64,7 +64,7 @@ static int TagFilesLoaded = 0;   // tag files are loaded at first lookup
 static char *CurrentTag;
 static int TagPosition = -1;
 
-static int AllocMem(const char *Mem, size_t Len) { /*FOLD00*/
+static int AllocMem(const char *Mem, size_t Len) {
     int N = 1024;
     char *NM;
     int TagPos = TagLen;
@@ -82,7 +82,7 @@ static int AllocMem(const char *Mem, size_t Len) { /*FOLD00*/
     return TagPos;
 }
 
-static int AddTag(int Tag, int FileName, int TagBase, int Line, int StrFind) { /*FOLD00*/
+static int AddTag(int Tag, int FileName, int TagBase, int Line, int StrFind) {
     int N;
 
     N = 1024;
@@ -128,7 +128,7 @@ int cmptags(const void *p1, const void *p2) {
     return r;
 }
 
-int SortTags() { /*FOLD00*/
+int SortTags() {
     int *NI;
     int i;
 
@@ -147,7 +147,7 @@ int SortTags() { /*FOLD00*/
     return 0;
 }
 
-int TagsLoad(int id) { /*FOLD00*/
+int TagsLoad(int id) {
     //char line[2048];
     char *tags;
     int fd;
@@ -215,6 +215,8 @@ int TagsLoad(int id) { /*FOLD00*/
 
         MFile = MTag + TagL;
 
+	printf("TSTR  %s\n", LTag);
+	printf("FSTR  %s\n", LTag + TagL);
         if (LLine[0] == '/') {
             char *AStr = LLine;
             char *p = AStr + 1;
@@ -235,7 +237,7 @@ int TagsLoad(int id) { /*FOLD00*/
             *d = 0;
             if (stricmp(d - 10, "/*FOLD00*/") == 0)
                 d[-11] = 0; /* remove our internal folds */
-
+	    printf("MSTR  %s\n", AStr);
             MStr = AllocMem(AStr, strlen(AStr) + 1);
             if (MStr == -1)
                 break;
@@ -251,7 +253,7 @@ int TagsLoad(int id) { /*FOLD00*/
     return 0;
 }
 
-int TagsAdd(const char *FileName) { /*FOLD00*/
+int TagsAdd(const char *FileName) {
     int *NewT;
     int NewF;
 
@@ -267,7 +269,7 @@ int TagsAdd(const char *FileName) { /*FOLD00*/
     return 1;
 }
 
-int TagsSave(FILE *fp) { /*FOLD00*/
+int TagsSave(FILE *fp) {
     for (int i = 0; i < TagFileCount; i++)
         if (fprintf(fp, "T|%s\n", TagMem + TagFiles[i]) < 0)
             return ErFAIL;
@@ -275,7 +277,7 @@ int TagsSave(FILE *fp) { /*FOLD00*/
     return ErOK;
 }
 
-static void ClearTagStack() { /*FOLD00*/
+static void ClearTagStack() {
     free(CurrentTag);
     CurrentTag = 0;
     TagPosition = -1;
@@ -283,7 +285,7 @@ static void ClearTagStack() { /*FOLD00*/
         delete TagStack::TStack;
 }
 
-int TagLoad(const char *FileName) { /*FOLD00*/
+int TagLoad(const char *FileName) {
     if (TagsAdd(FileName) == 0)
         return 0;
     ClearTagStack();
@@ -299,7 +301,7 @@ int TagLoad(const char *FileName) { /*FOLD00*/
     return 1;
 }
 
-static int LoadTagFiles() { /*FOLD00*/
+static int LoadTagFiles() {
     int i;
 
     assert(TagFilesLoaded == 0);
@@ -316,7 +318,7 @@ static int LoadTagFiles() { /*FOLD00*/
     return 1;
 }
 
-void TagClear() { /*FOLD00*/
+void TagClear() {
     free(TagD);
     free(TagI);
     TagD = 0;
@@ -337,7 +339,7 @@ void TagClear() { /*FOLD00*/
     ClearTagStack();
 }
 
-static int GotoFilePos(EView *View, const char *FileName, int Line, int Col) { /*FOLD00*/
+static int GotoFilePos(EView *View, const char *FileName, int Line, int Col) {
     if (FileLoad(0, FileName, 0, View) == 0)
         return 0;
     if (((EBuffer *)ActiveModel)->Loaded == 0)
@@ -346,7 +348,7 @@ static int GotoFilePos(EView *View, const char *FileName, int Line, int Col) { /
     return 1;
 }
 
-static int GotoTag(int M, EView *View) { /*FOLD00*/
+static int GotoTag(int M, EView *View) {
     char path[MAXPATH];
     char Dir[MAXPATH];
     TagData *TT = &TagD[TagI[M]];
@@ -373,7 +375,7 @@ static int GotoTag(int M, EView *View) { /*FOLD00*/
     return 1;
 }
 
-static int PushPos(EBuffer *B) /*FOLD00*/
+static int PushPos(EBuffer *B)
 {
     (void) new TagStack(CurrentTag, B->FileName,
 			B->VToR(B->CP.Row), B->CP.Col,
@@ -416,7 +418,7 @@ int TagGoto(EView *View, const char *Tag) {
     return 0; // tag not found
 }
 
-int TagFind(EBuffer *B, EView *View, const char *Tag) { /*FOLD00*/
+int TagFind(EBuffer *B, EView *View, const char *Tag) {
     assert(View != 0 && Tag != 0 && B != 0);
 
     if (TagFilesLoaded == 0)
@@ -542,7 +544,7 @@ int TagComplete(char **Words, int *WordsPos, int WordsMax, const char *Tag) {
     return 0; // tag not found
 }
 
-int TagNext(EView *View) { /*FOLD00*/
+int TagNext(EView *View) {
     assert(View != 0);
 
     if (CurrentTag == 0 || TagPosition == -1)
@@ -558,7 +560,7 @@ int TagNext(EView *View) { /*FOLD00*/
     return 0;
 }
 
-int TagPrev(EView *View) { /*FOLD00*/
+int TagPrev(EView *View) {
     assert(View != 0);
 
     if (CurrentTag == 0 || TagPosition == -1) {
@@ -576,7 +578,7 @@ int TagPrev(EView *View) { /*FOLD00*/
     return 0;
 }
 
-int TagPop(EView *View) { /*FOLD00*/
+int TagPop(EView *View) {
 
     assert(View != 0);
 

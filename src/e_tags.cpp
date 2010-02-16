@@ -215,8 +215,8 @@ int TagsLoad(int id) {
 
         MFile = MTag + TagL;
 
-	printf("TSTR  %s\n", LTag);
-	printf("FSTR  %s\n", LTag + TagL);
+	//printf("TSTR  %s\n", LTag);
+	//printf("FSTR  %s\n", LTag + TagL);
         if (LLine[0] == '/') {
             char *AStr = LLine;
             char *p = AStr + 1;
@@ -237,9 +237,9 @@ int TagsLoad(int id) {
             *d = 0;
             if (stricmp(d - 10, "/*FOLD00*/") == 0)
                 d[-11] = 0; /* remove our internal folds */
-	    printf("MSTR  %s\n", AStr);
+	    //printf("MSTR  %s\n", AStr);
             MStr = AllocMem(AStr, strlen(AStr) + 1);
-            if (MStr == -1)
+	    if (MStr == -1)
                 break;
 
             if (AddTag(MTag, MFile, TagFiles[id], -1, MStr) == -1)

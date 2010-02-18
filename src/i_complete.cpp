@@ -170,24 +170,20 @@ void ExComplete::HandleEvent(TEvent &Event)
 	    DoQuit = 1;
 	    break;
 	default:
-            if (CheckASCII(Event.Key.Code&~kfShift)) {
-                char *s = new char[WordFixed + 2];
-		if (s != NULL) {
-		    if (WordFixed > 0)
-			strncpy(s, Words[WordPos], WordFixed);
-		    s[WordFixed] = (unsigned char)(Event.Key.Code & 0xFF);
-		    s[WordFixed + 1] = 0;
-		    for (int i = 0; i < WordsLast; i++)
-			if (strncmp(s, Words[i], WordFixed + 1) == 0) {
-			    WordPos = i;
-			    if (WordFixedCount == 1)
-				DoQuit = 1;
-			    else
-				FixedUpdate(1);
-			    break;
-			}
-		    delete[] s;
-		}
+            if (CheckASCII((char)Event.Key.Code)) {
+		char s[WordFixed + 2];
+		strncpy(s, Words[WordPos], WordFixed);
+		s[WordFixed] = (char)(Event.Key.Code);
+		s[WordFixed + 1] = 0;
+		for (int i = 0; i < WordsLast; i++)
+		    if (strncmp(s, Words[i], WordFixed + 1) == 0) {
+			WordPos = i;
+			if (WordFixedCount == 1)
+			    DoQuit = 1;
+			else
+			    FixedUpdate(1);
+			break;
+		    }
 		Event.What = evNone;
 	    }
 	    break;

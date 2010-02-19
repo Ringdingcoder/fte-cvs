@@ -158,8 +158,8 @@ public:
 
     static const size_type invalid = ~0U;
 
-    vector<Type>()
-	:m_type(0), m_capacity(0), m_size(0)
+    vector<Type>() :
+	m_type(0), m_capacity(0), m_size(0)
     {
     }
 
@@ -199,6 +199,7 @@ public:
     size_type capacity() const { return m_capacity; }
     void clear();
     iterator erase(iterator pos);
+    iterator erase(iterator first, iterator last);
     iterator insert(iterator pos, const Type& t);
     void insert(iterator pos, const_iterator from, const_iterator to);
     size_type find(reference t) const
@@ -301,31 +302,50 @@ void vector<Type>::internal_copy(iterator in, size_type sz, size_type alloc)
 template <class Type>
 typename vector<Type>::iterator vector<Type>::erase(iterator pos)
 {
-    assert(pos < end());
-    for (iterator p = pos; p + 1 < end(); ++p)
-	internal_swap(p, p[1]);
-    --m_size;
-    return pos;
+    return erase(pos, pos + 1);
+}
+
+template <class Type>
+typename vector<Type>::iterator vector<Type>::erase(iterator first, iterator last)
+{
+    assert(last <= end());
+    m_size -= last - first;
+    for (iterator p = first; p < end(); ++last, ++p)
+	internal_swap(p, *last);
+    return first;
 }
 
 template <class Type>
 typename vector<Type>::iterator vector<Type>::insert(iterator pos, const Type& t)
 {
     const size_type n = pos - begin();
-    Type* tmp = m_type;
+    insert(pos, &t, &t + 1);
+    return begin() + n;
+}
 
-    assert(n <= m_size);
-    if (m_size + 1 >= m_capacity)
+template <class Type>
+void vector<Type>::insert(iterator pos, const_iterator from, const_iterator to)
+{
+    const size_type isz = to - from;
+    if (!isz)
+	return;
+
+    const size_type n = pos - begin();
+    Type* tmp;
+
+    if (m_size + isz < m_capacity)
+	tmp = begin();
+    else
     {
-	const size_type nc = (m_capacity < min_capacity) ? min_capacity : m_capacity * 2;
+	const size_type nc = ((m_size + isz > min_capacity)
+			      ? m_size + isz : min_capacity) * 2;
 	tmp = new Type[nc];
 	m_capacity = nc;
     }
 
-    for (size_type i = m_size; i > n; --i)
-	internal_swap(tmp + i, m_type[i - 1]);
-
-    tmp[n] = t;
+    // works also for m_size == 0
+    for (size_type i = m_size - 1; i + 1 >= n + isz; --i)
+	internal_swap(tmp + (i + isz), m_type[i]);
 
     if (tmp != m_type)
     {
@@ -335,16 +355,10 @@ typename vector<Type>::iterator vector<Type>::insert(iterator pos, const Type& t
 	m_type = tmp;
     }
 
-    ++m_size;
+    for (size_type i = n; from != to; ++i, ++from)
+	m_type[i] = *from;
 
-    return m_type + n;
-}
-
-template <class Type>
-void vector<Type>::insert(iterator pos, const_iterator from, const_iterator to)
-{
-    for (; from != to; ++pos, ++from)
-	pos = insert(pos, *from);
+    m_size += isz;
 }
 
 template <class Type>

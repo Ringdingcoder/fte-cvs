@@ -148,9 +148,9 @@ SRCS = $(OBJS:.o=.cpp)\
  $(XOBJS:.o=.cpp)
 
 XLIBS    = $(XLIBDIR) -lX11 $(SOCKETLIB) $(XPMLIB) $(XTLIB)
-VLIBS    = -lgpm
-NLIBS    = -lncurses
-SLIBS    = -lslang
+VLIBS    = $(VLIBDIR) -lgpm
+NLIBS    = $(NLIBDIR) -lncurses
+SLIBS    = $(SLIBDIR) -lslang
 #QLIBS    = $(QLIBDIR) -lqt
 QLIBS    = $(QLIBDIR) -lqt-mt
 MLIBS    = $(MLIBDIR) -lXm -lXp -lXt -lXpm -lXext

@@ -105,10 +105,7 @@ SyntaxProc GetHilitProc(int id) {
 int EBuffer::HilitAddWord(const char *Word) {
     if (HilitFindWord(Word) == 1)
 	return 1;
-    char *w = strdup(Word);
-    if (!w)
-        return 0;
-    WordList.push_back(w);
+    WordList.push_back(Word);
     FullRedraw();
     return 1;
 }

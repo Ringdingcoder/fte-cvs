@@ -15,6 +15,7 @@
 #include "e_regex.h"
 #include "gui.h"
 #include "o_model.h"
+#include "stl_fte.h"
 
 #include <sys/stat.h>
 
@@ -375,7 +376,7 @@ public:
     int Save();
     int Reload();
     int FilePrint();
-    int SetFileName(const char *AFileName, const char *AMode);
+    int SetFileName(const char *AFileName, fte::string AMode);
 
     int SetPos(int Col, int Row, int tabMode = tmNone);
     int SetPosR(int Col, int Row, int tabMode = tmNone);

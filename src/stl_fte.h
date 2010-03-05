@@ -83,6 +83,7 @@ public:
     string(const char* s, size_type len);
     string(const string& s);
     string(const string& s, size_type len);
+    string(int p) : str(empty_string) { assert(p == 0); }
     ~string();
     char operator[](size_type i) const { return str[i]; }
     char& operator[](size_type i) { return str[i]; }

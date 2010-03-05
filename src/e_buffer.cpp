@@ -442,14 +442,22 @@ int EBuffer::AssertLine(int Row) {
     return 1;
 }
 
-int EBuffer::SetFileName(const char *AFileName, const char *AMode) {
+int EBuffer::SetFileName(const char *AFileName, fte::string AMode) {
     FileOk = 0;
 
     free(FileName);
     FileName = strdup(AFileName);
     Mode = 0;
-    if (AMode)
-        Mode = FindMode(AMode);
+    if (!AMode.empty())
+    {
+	Mode = FindMode(AMode.c_str());
+	if (Mode == 0)
+	{
+	    fte::string AMODE(AMode);
+	    AMODE.toupper();
+	    Mode = FindMode(AMODE.c_str());
+	}
+    }
     if (Mode == 0)
         Mode = GetModeForName(AFileName);
     assert(Mode != 0);

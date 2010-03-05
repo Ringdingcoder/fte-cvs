@@ -4,6 +4,7 @@ Revision history
 
 0.50.2b5 -- March 2010
   + Allowed -m flag to take lower-cased version of mode names
+  ! .t files are perl test files, added.
 
 0.50.2b4 -- February 2010
   ! Fixed memory leaks on exits - properly destroy all buffers

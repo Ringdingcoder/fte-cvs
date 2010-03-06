@@ -1,4 +1,77 @@
+fte (0.50.0-3) unstable; urgency=low
+
+  * QA upload
+  * Enable compilation on non-linux architectures, based on a patch by
+    Petr Salinger (thanks!) (Closes: #379778):
+    - no build-depends on libgpmg1-dev on kfreebsd, hurd
+    - adapt invocation of make in build target to non-linux architectures
+    - restrict architecture of fte-console to linux
+    - use -a flag for dh_* calls in binary_arch target
+  * fte-docs depends on ${misc:Depends}.
+  * Add stuff for target binary-indep
+  * Register documents in he fte-docs package with doc-base, instead of menu
+
+ -- Ralf Treinen <treinen@debian.org>  Tue, 23 Feb 2010 21:28:44 +0100
+
+fte (0.50.0-2) unstable; urgency=low
+
+  * QA upload.
+    + Set maintainer to Debian QA Group <packages@qa.debian.org>
+  * Version debhelper build-dep and set to >= 5.0.0.
+  * Move DH_COMPAT from rules to debian/compat and set to 5.
+  * Update x-dev build-dep to x11proto-core-dev. (Closes: #515373).
+  * Hammer build system to actually use debhelper.
+  * Add ${misc:Depends} for debhelper package.
+  * Replace ${Source-Version} with ${binary:Version}.
+  * Add appropriate Copyright holders to debian/copyright.
+  * Add set -e to maintainer scripts.
+  * Remove circular depends. fte Recommends fte-*. (Closes: #387204).
+  * Install menu icon. (Closes: #210614).
+  * THIS PACKAGE SHOULD NOT BE NATIVE.
+  * Bump Standards Version to 3.8.1.
+    + Menu policy transition.
+
+ -- Barry deFreese <bdefreese@debian.org>  Thu, 23 Apr 2009 12:42:54 -0400
+
+fte (0.50.0-1.4) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Move xfte out of /usr/X11R6.  Closes: #362912.
+  * src/con_slang.cpp: Really port to S-Lang2 (fixing a buffer overflow).
+    Closes: #346284.
+  * debian/fte: Add closing bracket in regular expression.  Thanks to
+    Nate Bargmann for the patch.  Closes: #217266.
+  * Make the package descriptions more consistent and explanatory.
+    Closes: #209496, #363527.
+
+ -- Matej Vela <vela@debian.org>  Mon,  5 Jun 2006 06:52:10 +0200
+
+fte (0.50.0-1.3) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * Split xlibs-dev build-dep (Closes: #346262)
+  * Quote values in menu files.
+
+ -- Luk Claes <luk@debian.org>  Sat,  7 Jan 2006 00:09:50 +0100
+
+fte (0.50.0-1.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Update slang build-dep (Closes: #315648).
+  * Removed -Wmissing-prototypes as not supported (anymore)
+  * src/con_slang.cpp: Explicit conversions to make sure it builds. 
+
+ -- Luk Claes <luk@debian.org>  Wed, 28 Dec 2005 17:02:20 +0100
+
+fte (0.50.0-1.1) unstable; urgency=high
+
+  * Remove setuid privileges from vfte due to a number of confirmed
+    vulnerabilities (CAN-2003-0648, Closes: #203871)
+
+ -- Matt Zimmerman <mdz@debian.org>  Thu, 29 Jan 2004 10:07:18 -0800
+
 fte (0.50.0-1) unstable; urgency=low
+
   * CVS 2003/07/10
   * fixed spelling (Closes: 12468, 12469)
   * applied patch (Closes: 118734)
@@ -280,6 +353,4 @@ fte (0.44-1) unstable; urgency=low
 
  -- Riku Voipio <riku.voipio@sci.fi>  Wed, 25 Dec 1996 20:41:34 +0200
 
-Local variables:
-mode: debian-changelog
-End:
+

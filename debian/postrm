@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # remove FTECFG entry
 FTECFG=/etc/fte
 if [ -d $FTECFG ] ; then 

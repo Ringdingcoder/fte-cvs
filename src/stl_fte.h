@@ -83,7 +83,6 @@ public:
     string(const char* s, size_type len);
     string(const string& s);
     string(const string& s, size_type len);
-    string(int p) : str(empty_string) { assert(p == 0); }
     ~string();
     char operator[](size_type i) const { return str[i]; }
     char& operator[](size_type i) { return str[i]; }
@@ -250,7 +249,7 @@ public:
     }
 
     /* vector extensions */
-    size_type find(reference t) const
+    size_type find(const_reference t) const
     {
 	for (iterator it = m_begin; it != m_end; ++it)
 	    if (t == *it)

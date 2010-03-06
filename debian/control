@@ -2,12 +2,15 @@ Source: fte
 Section: editors
 Priority: optional
 Maintainer: Zdenek Kabelac <kabi@debian.org>
-Standards-Version: 3.1.1.1
-Build-Depends: debhelper, perl5, x11proto-core-dev, libx11-dev, libxt-dev, libgpmg1-dev [!kfreebsd-i386 !kfreebsd-amd64 !hurd-i386], libncurses5-dev, libslang2-dev, patch
+Build-Depends: debhelper (>= 5.0.0), perl5, libx11-dev, libxt-dev,
+ libgpmg1-dev [!kfreebsd-i386 !kfreebsd-amd64 !hurd-i386],
+ x11proto-core-dev, libncurses5-dev, libslang2-dev, patch
+Standards-Version: 3.8.1
 
 Package: fte
 Architecture: any
-Depends: ${shlibs:Depends}, fte-xwindow | fte-terminal | fte-console
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: fte-xwindow | fte-terminal | fte-console
 Conflicts: fte-console (<< 0.49.13-3), fte-cfgdocs (<< 0.49.13-3)
 Suggests: fte-docs, exuberant-ctags
 Description: Text editor for programmers - base package
@@ -22,8 +25,10 @@ Description: Text editor for programmers - base package
  of the packages in the dependencies.
 
 Package: fte-docs
-Architecture: any
-Depends: fte (= ${Source-Version})
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: fte (= ${binary:Version})
 Replaces: fte-cfgdocs (<< 0.49.13-3)
 Description: Documentation and examples for the FTE editor
  FTE is a text editor for programmers.  Some of its features are smart
@@ -36,7 +41,7 @@ Description: Documentation and examples for the FTE editor
 
 Package: fte-xwindow
 Architecture: any
-Depends: ${shlibs:Depends}, fte (= ${Source-Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, fte (= ${binary:Version})
 Replaces: fte (<< 0.49.2-1)
 Description: Text editor for programmers - X Window System edition with I18N support
  FTE is a text editor for programmers.  Some of its features are smart
@@ -48,8 +53,9 @@ Description: Text editor for programmers - X Window System edition with I18N sup
  This is the X Window System edition, with internationalization support.
 
 Package: fte-console
-Architecture: any
-Depends: ${shlibs:Depends}, fte (= ${Source-Version})
+Architecture: i386 ia64 alpha amd64 armeb armel hppa m32r m68k mips mipsel
+ powerpc ppc64 s390 s390x sh3 sh3eb sh4 sh4eb sparc
+Depends: ${shlibs:Depends}, ${misc:Depends}, fte (= ${binary:Version})
 Conflicts: suidmanager (<< 0.50)
 Description: Text editor for programmers - console edition, no I18N support
  FTE is a text editor for programmers.  Some of its features are smart
@@ -62,7 +68,7 @@ Description: Text editor for programmers - console edition, no I18N support
 
 Package: fte-terminal
 Architecture: any
-Depends: ${shlibs:Depends}, fte (= ${Source-Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, fte (= ${binary:Version})
 Description: Text editor for programmers - version for terminals
  FTE is a text editor for programmers.  Some of its features are smart
  indentation for C, C++, Java, Perl; color syntax highlighting for many more

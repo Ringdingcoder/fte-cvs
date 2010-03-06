@@ -1,0 +1,9 @@
+Document: fte-manual
+Section: Editors
+Title: Fte Manual
+Abstract: Fte Users Manual
+
+Format: HTML
+Index: /usr/share/doc/fte/contents.html
+Files: /usr/share/doc/fte/*.html
+

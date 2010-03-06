@@ -2,8 +2,7 @@
 
 set -e
 
-if [ "$1" != "upgrade" ]
-then
+if test "$1" != upgrade; then
   update-alternatives --remove editor /usr/bin/fte
 fi
 

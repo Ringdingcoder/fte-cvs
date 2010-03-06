@@ -1,5 +1,31 @@
 #!/bin/sh
 
-dpkg-buildpackage -sgpg -pgpg -rfakeroot
+#dpkg-buildpackage -d -sa -pgpg -rfakeroot
+
+
+dpkg-buildpackage -b -sa -pgpg -ICVS -I.cvsignore -Ipatches -rfakeroot 
 
 # debchanges
+
+#
+# for adding new entry in the changelog database
+# debchanges
+#
+
+# For build just debian packages (unsigned, useful for testing)
+# fakeroot debian/rules binary-arch
+#
+
+
+# dch -r   - update changelog entry
+
+# Uploading new files to Debian ftp server
+# dupload --to anonymous-ftp-master fte*.changes
+
+# 
+# try to remove
+#
+# rel.text
+#
+# objdump --headers --private-headers -T 
+#

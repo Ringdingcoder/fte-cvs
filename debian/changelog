@@ -2,8 +2,9 @@ fte (0.50.2-1) unstable; urgency=low
   * CVS 2010/03/07
   * fixed build-dependency x-dev -> x11proto-core-dev (Closes: #515373)
   * applied patch GNU/kFreeBSD by Peter Salinger (Closes: #379778)
-  * fixed circular dependency (Closes: #387204)
   * fixed segfault with ctags (Closes: #222485)
+  * fixed lots of endianes issues upstream  (Closes: #471376)
+  * added Provides: editor (Closes: #398746)
   * pushing NMU to upstream files
 
  -- Zdenek Kabelac <kabi@debian.org>  Tue, 06 Mar 2010 19:55:23 +0100

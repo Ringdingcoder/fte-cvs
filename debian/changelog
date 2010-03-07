@@ -1,5 +1,5 @@
 fte (0.50.2-1) unstable; urgency=low
-  * CVS 2010/03/06
+  * CVS 2010/03/07
   * fixed build-dependency x-dev -> x11proto-core-dev (Closes: #515373)
   * applied patch GNU/kFreeBSD by Peter Salinger (Closes: #379778)
   * fixed circular dependency (Closes: #387204)
@@ -19,7 +19,7 @@ fte (0.50.0-3) unstable; urgency=low
     - use -a flag for dh_* calls in binary_arch target
   * fte-docs depends on ${misc:Depends}.
   * Add stuff for target binary-indep
-  * Register documents in he fte-docs package with doc-base, instead of menu
+  * Register documents in the fte-docs package with doc-base, instead of menu
 
  -- Ralf Treinen <treinen@debian.org>  Tue, 23 Feb 2010 21:28:44 +0100
 

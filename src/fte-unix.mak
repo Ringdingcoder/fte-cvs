@@ -218,7 +218,7 @@ tags: $(SRCS) $(wildcard *.h)
 
 clean:
 	rm -f core *.o *.moc .depend $(TARGETS) defcfg.h defcfg.cnf \
-	cfte fte sfte vfte nfte qfte xfte compkeys tags
+	cfte fte sfte vfte nfte mfte qfte xfte compkeys tags
 
 #
 # include dependency files if they exist

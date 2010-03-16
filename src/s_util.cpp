@@ -13,6 +13,9 @@
 #include "o_buflist.h"
 #include "s_direct.h"
 #include "s_files.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/fcntl.h>
 
 #define BUF_SZ (sizeof(FileBuffer))
 
@@ -20,7 +23,7 @@ extern RxNode *CompletionFilter;
 
 #ifdef CONFIG_BACKUP
 // should use DosCopy under OS/2...
-static int copyfile(char *f1, char *f2) { // from F1 to F2
+static int copyfile(char const* f1, char const* f2) { // from F1 to F2
     void *buffer;
     int fd1, fd2;
     int rd;

@@ -116,4 +116,6 @@
 /* Dissable  internal logging mechanism */
 #define FTE_NO_LOGGING
 
+#define CONFIG_BACKUP
+
 #endif // FEATURE_H

@@ -236,7 +236,7 @@ int HState::GetHilitWord(ChColor &clr, const char *str, size_t len) {
     if (options & STATE_NOCASE) {
         while (p && *p) {
 	    if (strnicmp(p, str, len) == 0) {
-                clr = COUNT_CLR + ((unsigned char*)p)[len];
+                clr = ChColor(COUNT_CLR + ((unsigned char*)p)[len]);
                 return 1;
             }
             p += len + 1;
@@ -244,7 +244,7 @@ int HState::GetHilitWord(ChColor &clr, const char *str, size_t len) {
     } else {
         while (p && *p) {
             if (memcmp(p, str, len) == 0) {
-                clr = COUNT_CLR + ((unsigned char*)p)[len];
+                clr = ChColor(COUNT_CLR + ((unsigned char*)p)[len]);
                 return 1;
             }
             p += len + 1;

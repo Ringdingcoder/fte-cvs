@@ -82,7 +82,7 @@ object GLOBAL {
 
 # GCC - must be first before grep -n
 #   filename:#ln:2: error:....
-    CompileRx = { 1, 2, 3, /^([\w:._\-\+\/\\]+):(\d+):\d:\s({warning}|{error}:.*)$/ };
+    CompileRx = { 1, 2, 3, /^([\w:._\-\+\/\\]+):(\d+):(\d+):\s({warning}|{error}:.*)$/ };
 #   filename:#ln: error:....
     CompileRx = { 1, 2, 3, /^([\w:._\-\+\/\\]+):(\d+):\s({warning}|{error}:.*)$/ };
 # grep -n

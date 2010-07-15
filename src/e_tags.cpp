@@ -557,7 +557,7 @@ int TagNext(EView *View) {
         return 1;
     }
     View->Msg(S_INFO, "No next match for tag.");
-    return 0;
+    return 1;
 }
 
 int TagPrev(EView *View) {
@@ -575,7 +575,7 @@ int TagPrev(EView *View) {
         return 1;
     }
     View->Msg(S_INFO, "No previous match for tag.");
-    return 0;
+    return 1;
 }
 
 int TagPop(EView *View) {

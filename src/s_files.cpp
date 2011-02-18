@@ -461,7 +461,7 @@ const char *ShortFName(const char *Path, size_t len) {
 
 
 int ChangeDir(const char *Dir) {
-    char dir[strlen(Dir) + 10];
+    char *dir = (char*)alloca(strlen(Dir) + 10);
 
     strcpy(dir, Dir);
     Slash(dir, 0); // remove last \ except in case of ?:

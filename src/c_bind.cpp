@@ -220,7 +220,7 @@ EKey *SetKey(EEventMap *aMap, const char *aKey) {
         xm = xm->Parent;
     }
 
-    d = p = Key;
+    d = Key;
     while (d) {
         // parse key combination
         p = d;

@@ -1180,22 +1180,20 @@ int EBuffer::FindTagWord(ExState &State) {
         return 0;
     }
 
-    int j = 2;
-    while (j--) {
-        int i;
-
-        i = TagFind(this, View, word);
-        if (i > 0)
+    for (int j = 2; j; j--) {
+        if (TagFind(this, View, word))
             return 1;
-        else if (j && (i < 0)) {
+
+	if (j == 2) {
             /* Try autoload tags */
-            if (View->ExecCommand(ExTagLoad, State) == 0)
+            if (!View->ExecCommand(ExTagLoad, State))
                 break;
         } else {
             Msg(S_INFO, "Tag '%s' not found.", word);
             break;
         }
     }
+
     return 0;
 }
 // *INDENT-ON*

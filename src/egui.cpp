@@ -204,7 +204,7 @@ int EGUI::ExecMacro(GxView *view, int Macro) {
 
 void EGUI::SetMsg(const char *Msg) {
     size_t len = Msg ? strlen(Msg) + 3 : 1;
-    char CharMap[len];
+    char* CharMap = (char*) alloca(len);
 
     if (Msg) {
 	CharMap[0] = '[';

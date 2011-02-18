@@ -21,7 +21,6 @@ class EBuffer;
 
 int TagsAdd(const char *FileName);
 int TagsSave(FILE *fp);
-int TagsLoad(int id);
 
 int TagLoad(const char *FileName);
 void TagClear();

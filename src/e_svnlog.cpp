@@ -18,12 +18,13 @@
 #include "s_string.h"
 #include "sysdep.h"
 
+#include <ctype.h>
 #include <stdio.h>
 
 ESvnLog *SvnLogView;
 
-ESvnLog::ESvnLog (int createFlags,EModel **ARoot,char *Directory,char *OnFiles) :
-    EBuffer (createFlags,ARoot,NULL)
+ESvnLog::ESvnLog(int createFlags,EModel **ARoot,char *Directory,char *OnFiles) :
+    EBuffer(createFlags,ARoot,NULL)
 {
     int i,j,p;
     char msgFile[MAXPATH];
@@ -32,19 +33,19 @@ ESvnLog::ESvnLog (int createFlags,EModel **ARoot,char *Directory,char *OnFiles) 
     // Create filename for message
 #ifdef UNIX
     // Use this in Unix - it says more to user
-    sprintf (msgFile,"/tmp/fte%d-svn-msg",getpid ());
+    sprintf(msgFile,"/tmp/fte%d-svn-msg",getpid());
 #else
-    tmpnam (msgFile);
+    tmpnam(msgFile);
 #endif
-    SetFileName (msgFile,SvnLogMode);
+    SetFileName(msgFile,SvnLogMode);
 
     // Preload buffer with info
-    InsertLine (0,0, "");
-    InsertLine (1,60, "SVN: -------------------------------------------------------");
-    InsertLine (2,59, "SVN: Enter log. Lines beginning with 'SVN:' will be removed");
-    InsertLine (3,4, "SVN:");
-    InsertLine (4,18, "SVN: Commiting in ");
-    InsText (4,18,strlen (Directory),Directory);
+    InsertLine(0,0, "");
+    InsertLine(1,60, "SVN: -------------------------------------------------------");
+    InsertLine(2,59, "SVN: Enter log. Lines beginning with 'SVN:' will be removed");
+    InsertLine(3,4, "SVN:");
+    InsertLine(4,18, "SVN: Commiting in ");
+    InsText(4,18,strlen(Directory),Directory);
     if (OnFiles[0]) {
         p=5;
         // Go through files - use GetFileStatus to show what to do with files
@@ -68,7 +69,7 @@ ESvnLog::ESvnLog (int createFlags,EModel **ARoot,char *Directory,char *OnFiles) 
                 len[j]=i-position[j];
                 char c=OnFiles[i];
                 OnFiles[i]=0;
-                status[j]=SvnView->GetFileStatus (OnFiles+position[j]);
+                status[j]=SvnView->GetFileStatus(OnFiles+position[j]);
                 if (status[j]==0) status[j]='x';
                 OnFiles[i]=c;
                 while (OnFiles[i]==' ') i++;
@@ -78,51 +79,53 @@ ESvnLog::ESvnLog (int createFlags,EModel **ARoot,char *Directory,char *OnFiles) 
         }
         // Go through status
         int fAdded=0,fRemoved=0,fModified=0,fOther=0;
-        for (i=0;i<cnt;i++) switch (status[i]) {
-            case 'A':case 'a':fAdded++;break;
-            case 'R':case 'r':fRemoved++;break;
-            case 'M':case 'm':fModified++;break;
-            default:fOther++;
-        }
+	for (i=0;i<cnt;i++)
+	    switch (toupper(status[i])) {
+	    case 'A': fAdded++; break;
+	    case 'R': fRemoved++; break;
+	    case 'M': fModified++; break;
+	    default:fOther++;
+	    }
+
         // Now list files with given status
-        ListFiles (p,fAdded,"Added",cnt,position,len,status,OnFiles,"Aa");
-        ListFiles (p,fRemoved,"Removed",cnt,position,len,status,OnFiles,"Rr");
-        ListFiles (p,fModified,"Modified",cnt,position,len,status,OnFiles,"Mm");
-        ListFiles (p,fOther,"Other",cnt,position,len,status,OnFiles,"AaRrMm",1);
+        ListFiles(p, fAdded, "Added", cnt, position, len, status, OnFiles, "Aa");
+        ListFiles(p, fRemoved, "Removed", cnt, position, len, status, OnFiles, "Rr");
+        ListFiles(p, fModified, "Modified", cnt, position, len, status, OnFiles, "Mm");
+        ListFiles(p, fOther, "Other", cnt, position, len, status, OnFiles, "AaRrMm", 1);
         delete position;delete len;delete status;
     } else {
-        InsertLine (5,4, "SVN:");
-        InsertLine (6,30, "SVN: Commiting whole directory");
+        InsertLine(5,4, "SVN:");
+        InsertLine(6,30, "SVN: Commiting whole directory");
         p=7;
     }
-    InsertLine (p,4, "SVN:");
-    InsertLine (p+1,60, "SVN: -------------------------------------------------------");
-    SetPos (0,0);
-    FreeUndo ();
+    InsertLine(p,4, "SVN:");
+    InsertLine(p+1,60, "SVN: -------------------------------------------------------");
+    SetPos(0,0);
+    FreeUndo();
     Modified=0;
 }
 
-ESvnLog::~ESvnLog () {
+ESvnLog::~ESvnLog() {
     SvnLogView=0;
 }
 
-void ESvnLog::ListFiles (int &p,const int fCount,const char *title,const int cnt,const int *position,
-                         const int *len,const char *status,const char *list,const char *excinc,const int exc) {
+void ESvnLog::ListFiles(int &p,const int fCount,const char *title,const int cnt,const int *position,
+                        const int *len,const char *status,const char *list,const char *excinc,const int exc) {
     if (fCount) {
-        InsertLine (p++,4, "SVN:");
-        int i=strlen (title);
-        InsertLine (p,5, "SVN: ");
+        size_t i = strlen(title);
+        InsertLine(p++, 4, "SVN:");
+        InsertLine(p, 5, "SVN: ");
         InsText (p,5,i, title);
         InsText (p,i+=5,5, " file");
         i+=5;
         if (fCount!=1) InsText (p,i++,1, "s");
         InsText (p++,i,1, ":");
         for (i=0;i<cnt;i++)
-            if (!!strchr (excinc,status[i])^!!exc) {
+            if (!!strchr(excinc,status[i])^!!exc) {
                 // Should be displayed
-                InsertLine (p,9, "SVN:     ");
-                InsText (p,9,1, status+i);InsText (p,10,1, " ");
-                InsText (p++,11,len[i], list+position[i]);
+                InsertLine(p,9, "SVN:     ");
+                InsText(p,9,1, status+i);InsText (p,10,1, " ");
+                InsText(p++,11,len[i], list+position[i]);
             }
     }
 }
@@ -134,14 +137,14 @@ EViewPort *ESvnLog::CreateViewPort(EView *V) {
     return V->Port;
 }
 
-int ESvnLog::CanQuit () {
+int ESvnLog::CanQuit() {
     return 0;
 }
 
-int ESvnLog::ConfQuit (GxView *V,int /*multiFile*/) {
+int ESvnLog::ConfQuit(GxView *V,int /*multiFile*/) {
     int i;
 
-    switch (V->Choice (GPC_ERROR,"SVN commit pending",3,"C&ommit","&Discard","&Cancel","")) {
+    switch (V->Choice(GPC_ERROR,"SVN commit pending",3,"C&ommit","&Discard","&Cancel","")) {
         case 0: // Commit
             // First save - this is just try
             if (Save ()==0) return 0;

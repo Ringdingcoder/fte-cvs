@@ -25,7 +25,7 @@ int EBuffer::Load() {
 int EBuffer::Reload() {
     int R = VToR(CP.Row), C = CP.Col;
 
-    if (LoadFrom(FileName) == 0)
+    if (!LoadFrom(FileName))
         return 0;
     SetNearPosR(C, R);
     return 1;
@@ -45,7 +45,7 @@ char FileBuffer[RWBUFSIZE];
 
 int EBuffer::LoadFrom(const char *AFileName) {
     int fd;
-    int len = 0, partLen;
+    ssize_t len = 0, partLen;
     unsigned long numChars = 0, Lines = 0;
     char *p, *e, *m = NULL;
     int lm = 0;
@@ -60,7 +60,7 @@ int EBuffer::LoadFrom(const char *AFileName) {
     fd = open(AFileName, O_RDONLY | O_BINARY, 0);
     if (fd == -1) {
         if (errno != ENOENT) {
-            Msg(S_INFO, "Could not open file %s (errno=%d, %s) .",
+            Msg(S_INFO, "Could not open file %s (errno=%d, %s).",
                 AFileName, errno, strerror(errno));
         } else {
             Msg(S_INFO, "New file %s.", AFileName);
@@ -82,10 +82,10 @@ int EBuffer::LoadFrom(const char *AFileName) {
             if (BFI(this, BFI_DetectLineSep)) {
                 int was_lf = 0, was_cr = 0;
                 for (int c = 0; c < len; c++) {
-                    if (FileBuffer[c] == 10) {
+                    if (FileBuffer[c] == '\n') {
                         was_lf++;
                         break;
-                    } else if (FileBuffer[c] == 13) {
+                    } else if (FileBuffer[c] == '\r') {
                         was_cr++;
                         if (was_cr == 2)
                             break;
@@ -99,14 +99,14 @@ int EBuffer::LoadFrom(const char *AFileName) {
                     BFI(this, BFI_AddLF) = 0;
                     BFI(this, BFI_AddCR) = 0;
                     if (was_lf) {
-                        BFI(this, BFI_LineChar) = 10;
+                        BFI(this, BFI_LineChar) = '\n';
                         BFI(this, BFI_AddLF) = 1;
                         if (was_cr) {
-                            BFI(this, BFI_StripChar) = 13;
+                            BFI(this, BFI_StripChar) = '\r';
                             BFI(this, BFI_AddCR) = 1;
                         }
                     } else if (was_cr) {
-                        BFI(this, BFI_LineChar) = 13;
+                        BFI(this, BFI_LineChar) = '\r';
                         BFI(this, BFI_AddCR) = 1;
                     } else {
                         BFI(this, BFI_LineChar) = -1;
@@ -150,7 +150,7 @@ int EBuffer::LoadFrom(const char *AFileName) {
             if (lf) {
                 // there is a new line, add it to buffer
 
-                if (lm == 0 && m == NULL && (m = (char *)malloc(CHAR_TRESHOLD)) == 0)
+                if (lm == 0 && !m && !(m = (char *)malloc(CHAR_TRESHOLD)))
                     goto fail;
 #if 0
                 { // support for VIM tabsize commands
@@ -162,12 +162,11 @@ int EBuffer::LoadFrom(const char *AFileName) {
                         BFI(this, BFI_TabSize) = ts;
                 }
 #endif
-
                 // Grow the line table if required,
                 if (RCount == RAllocated)
-                    if (Allocate(RCount ? (RCount * 2) : 1) == 0)
-			goto fail;
-                if ((LL[RCount++] = new ELine((char *)m, lm)) == 0)
+                    if (!Allocate(RCount ? (RCount * 2) : 1))
+                        goto fail;
+                if (!(LL[RCount++] = new ELine(m, lm)))
                     goto fail;
                 RGap = RCount;
 
@@ -191,7 +190,7 @@ int EBuffer::LoadFrom(const char *AFileName) {
             if (Allocate(RCount ? (RCount * 2) : 1) == 0)
                 goto fail;
         if ((LL[RCount++] = new ELine(m, lm)) == 0)
-	    goto fail;
+            goto fail;
         m = NULL;
         RGap = RCount;
     }
@@ -252,8 +251,8 @@ int EBuffer::LoadFrom(const char *AFileName) {
         // Open first level fold, bookmark "mark1" at column 10 and bookmark "mark2" at column 16.
         // At the end is length of string from BOOK up to end of mark2 - 26 (0x1a).
 
-	for (l = RCount - 1; l >= 0; l--) {
-	    if (LL[l]->Count >= len_start + len_end + 6) {
+        for (l = RCount - 1; l >= 0; l--) {
+            if (LL[l]->Count >= len_start + len_end + 6) {
                 for (int where = 1; where < 3; where++) {
                     // where == 1 - start-of-line
                     // where == 2 - end-of-line
@@ -372,12 +371,14 @@ int EBuffer::LoadFrom(const char *AFileName) {
                     if (open != -1) {
                         int f;
 
-                        if (FoldCreate(l) == 0) goto fail;
+                        if (!FoldCreate(l))
+                            goto fail;
                         f = FindFold(l);
                         assert(f != -1);
                         FF[f].level = (char)(level & 0xFF);
                         if (open == 0)
-                            if (FoldClose(l) == 0) goto fail;
+                            if (!FoldClose(l))
+                                goto fail;
                     }
                     // Now remove parsed comment from line
                     memmove(LL[l]->Chars + startpos,
@@ -444,12 +445,10 @@ int EBuffer::SaveTo(const char *AFileName) {
         if (FileStatus.st_size != StatBuf.st_size ||
             FileStatus.st_mtime != StatBuf.st_mtime)
         {
-            switch (View->MView->Win->Choice(GPC_ERROR, "File Changed on Disk",
-                                             2,
-                                             "&Save",
-                                             "&Cancel",
-                                             "%s", FileName))
-            {
+            switch (View->MView->Win->Choice(GPC_ERROR,
+                                             "File Changed on Disk",
+                                             2, "&Save", "&Cancel",
+                                             "%s", FileName)) {
             case 0:
                 break;
             case 1:
@@ -562,11 +561,11 @@ int EBuffer::SaveTo(const char *AFileName) {
         // write eol
         if ((l < RCount - 1) || BFI(this, BFI_ForceNewLine)) {
             if (BFI(this, BFI_AddCR) == 1) {
-                if (fputc(13, fp) < 0) goto fail;
+                if (fputc('\r', fp) < 0) goto fail;
                 ByteCount++;
             }
             if (BFI(this, BFI_AddLF) == 1) {
-                if (fputc(10, fp) < 0) goto fail;
+                if (fputc('\n', fp) < 0) goto fail;
                 ByteCount++;
             }
         }
@@ -600,7 +599,7 @@ int EBuffer::SaveTo(const char *AFileName) {
             unlink(ABackupName);
         }
     }
-    return ErOK;
+    return 1;
 fail:
     fclose(fp);
 failclose:
@@ -610,7 +609,7 @@ failclose:
     } else {
         View->MView->Win->Choice(GPC_ERROR, "Error", 1, "O&K", "Error writing file, backup restored.");
     }
-    return ErFAIL;
+    return 0;
 erroropen:
     View->MView->Win->Choice(GPC_ERROR, "Error", 1, "O&K", "Error writing %s (errno=%d).", AFileName, errno);
     return ErFAIL;

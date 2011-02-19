@@ -263,8 +263,8 @@ int EBuffer::FindStr(const char *Data, int Len, SearchReplaceOptions &opt) {
                 C = Start;
         }
 
-	while (((!(Options & SEARCH_BACK)) && (C <= End - Len))
-	       || ((Options & SEARCH_BACK) && (C >= Start))) {
+        while (((!(Options & SEARCH_BACK)) && (C <= End - Len))
+               || ((Options & SEARCH_BACK) && (C >= Start))) {
             if ((!(Options & SEARCH_WORDBEG)
                  || (C == 0)
                  || (WGETBIT(Flags.WordChars, P[C - 1]) == 0))
@@ -1184,7 +1184,7 @@ int EBuffer::FindTagWord(ExState &State) {
         if (TagFind(this, View, word))
             return 1;
 
-	if (j == 2) {
+        if (j == 2) {
             /* Try autoload tags */
             if (!View->ExecCommand(ExTagLoad, State))
                 break;

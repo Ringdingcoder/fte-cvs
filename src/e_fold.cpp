@@ -388,11 +388,11 @@ int EBuffer::FoldOpen(int Line) { /*FOLD00*/
 }
 
 int EBuffer::FoldOpenAll() { /*FOLD00*/
-    int l;
+    for (int l = 0; l < RCount; ++l)
+        if ((FindFold(l) != -1)
+            && !FoldOpen(l))
+            return 0;
 
-    for (l = 0; l < RCount; l++)
-        if (FindFold(l) != -1)
-            if (FoldOpen(l) == 0) return 0;
     return 1;
 }
 
@@ -465,68 +465,70 @@ int EBuffer::FoldClose(int Line) { /*FOLD00*/
 }
 
 int EBuffer::FoldCloseAll() { /*FOLD00*/
-    int l;
-
-    for (l = RCount - 1; l >= 0; l--)
-        if (FindFold(l) != -1)
-            if (FoldClose(l) == 0) return 0;
+    for (int l = RCount - 1; l >= 0; --l)
+        if ((FindFold(l) != -1)
+            && !FoldClose(l))
+            return 0;
     return 1;
 }
 
 int EBuffer::FoldToggleOpenClose() { /*FOLD00*/
     int Line = VToR(CP.Row);
-    int f;
+    int f = FindNearFold(Line);
 
-    f = FindNearFold(Line);
     if (f == -1)
         return 0;
+
     if (FF[f].open) {
-        if (FoldClose(Line) == 0) return 0;
+        if (!FoldClose(Line))
+            return 0;
     } else {
-        if (FoldOpen(Line) == 0) return 0;
+        if (!FoldOpen(Line))
+            return 0;
     }
+
     return 1;
 }
 
 int EBuffer::MoveFoldTop() { /*FOLD00*/
     int f = FindNearFold(VToR(CP.Row));
 
-    if (f == 0 || f == -1) return 0;
+    if (f <= 0)
+        return 0;
 
     if (FF[f].line == VToR(CP.Row))
         return 1;
-    if (SetPosR(CP.Col, FF[f].line, tmLeft) == 0) return 0;
-    return 1;
+
+    return SetPosR(CP.Col, FF[f].line, tmLeft);
 }
 
 int EBuffer::MoveFoldPrev() { /*FOLD00*/
     int f = FindNearFold(VToR(CP.Row));
 
-    if (f == 0 || f == -1) return 0;
+    if (f <= 0)
+        return 0;
 
     if (FF[f].line == VToR(CP.Row)) {
-        do {
-            f--;
-            if (f < 0) return 0;
+        for (;;) {
+            if (--f < 0)
+                return 0;
             if (RToV(FF[f].line) != -1)
                 break;
-        } while (1);
+        }
     }
-    if (SetPosR(CP.Col, FF[f].line, tmLeft) == 0) return 0;
-    return 1;
+
+    return SetPosR(CP.Col, FF[f].line, tmLeft);
 }
 
 int EBuffer::MoveFoldNext() { /*FOLD00*/
     int f = FindNearFold(VToR(CP.Row));
 
-    if (f == FCount - 1 || f == -1) return 0;
+    if ((f == (FCount - 1)) || (f == -1))
+        return 0;
 
-    do {
-        f++;
-        if (f == FCount) return 0;
+    while (++f < FCount)
         if (RToV(FF[f].line) != -1)
-            break;
-    } while (1);
-    if (SetPosR(CP.Col, FF[f].line, tmLeft) == 0) return 0;
-    return 1;
+            return SetPosR(CP.Col, FF[f].line, tmLeft);
+
+    return 0;
 }

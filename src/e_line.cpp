@@ -17,7 +17,7 @@ ELine::ELine(size_t ACount, const char *AChars) :
     , StateE(0)
 #endif
 {
-    Allocate(Count); 
+    Allocate(Count);
     if (AChars)
         memcpy(Chars, AChars, Count);
     else
@@ -38,134 +38,135 @@ ELine::~ELine() {
 }
 
 int ELine::Allocate(size_t Bytes) {
-    return ((Chars = (char*)realloc(Chars, Bytes | CHAR_TRESHOLD)) != NULL) ? 1 : 0;
+    Chars = (char*)realloc(Chars, Bytes | CHAR_TRESHOLD);
+    return (Chars != NULL);
 }
 
 int EBuffer::ScreenPos(ELine *L, int Offset) {
     int ExpandTabs = BFI(this, BFI_ExpandTabs);
     int TabSize = BFI(this, BFI_TabSize);
 
-    if (!ExpandTabs) {
+    if (!ExpandTabs)
         return Offset;
-    } else {
-        char *p = L->Chars;
-        int Len = L->Count;
-        int Pos = 0;
-        int Ofs = Offset;
 
-        if (Ofs > Len) {
-            while (Len > 0) {
-                if (*p++ != '\t')
-                    Pos++;
-                else
-                    Pos = NextTab(Pos, TabSize);
-                Len--;
-            }
-            Pos += Ofs - L->Count;
-        } else {
-            while (Ofs > 0) {
-                if (*p++ != '\t')
-                    Pos++;
-                else
-                    Pos = NextTab(Pos, TabSize);
-                Ofs--;
-            }
+    char *p = L->Chars;
+    int Len = L->Count;
+    int Pos = 0;
+    int Ofs = Offset;
+
+    if (Ofs > Len) {
+        while (Len > 0) {
+            if (*p++ != '\t')
+                Pos++;
+            else
+                Pos = NextTab(Pos, TabSize);
+            Len--;
         }
-        return Pos;
-    }
+        Pos += Ofs - L->Count;
+    } else
+        while (Ofs > 0) {
+            if (*p++ != '\t')
+                Pos++;
+            else
+                Pos = NextTab(Pos, TabSize);
+            Ofs--;
+        }
+
+    return Pos;
 }
 
 int EBuffer::CharOffset(ELine *L, int ScreenPos) {
     int ExpandTabs = BFI(this, BFI_ExpandTabs);
     int TabSize = BFI(this, BFI_TabSize);
 
-    if (!ExpandTabs) {
+    if (!ExpandTabs)
         return ScreenPos;
-    } else {
-        int Pos = 0;
-        int Ofs = 0;
-        char *p = L->Chars;
-        int Len = L->Count;
 
-        while (Len > 0) {
-            if (*p++ != '\t')
-                Pos++;
-            else
-                Pos = NextTab(Pos, TabSize);
-            if (Pos > ScreenPos)
-                return Ofs;
-            Ofs++;
-            Len--;
-        }
-        return Ofs + ScreenPos - Pos;
+    int Pos = 0;
+    int Ofs = 0;
+    char *p = L->Chars;
+    int Len = L->Count;
+
+    while (Len > 0) {
+        if (*p++ != '\t')
+            Pos++;
+        else
+            Pos = NextTab(Pos, TabSize);
+        if (Pos > ScreenPos)
+            return Ofs;
+        Ofs++;
+        Len--;
     }
+
+    return Ofs + ScreenPos - Pos;
 }
 
 int EBuffer::Allocate(int ACount) {
     PELine *L;
 
-    if (ACount > 1024 * 1024) // FIXME: - let's crash, before OOOM kills us
-	return 0;
+    if (ACount > 10 * 1024 * 1024) // FIXME: - let's crash, before OOOM kills us
+        return 0;
 
     L = (PELine *) realloc(LL, sizeof(PELine) * (ACount + 1));
-    if (L == 0 && ACount != 0)
+    if (!L && ACount != 0)
         return 0;
     RAllocated = ACount;
     LL = L;
+
     return 1;
 }
 
 int EBuffer::MoveRGap(int RPos) {
     int GapSize = RAllocated - RCount;
-    
-    if (RGap == RPos) return 1;
-    if (RPos < 0 || RPos > RCount) return 0;
-    
+
+    if (RGap == RPos)
+        return 1;
+    if (RPos < 0 || RPos > RCount)
+        return 0;
+
     if (RGap < RPos) {
-        if (RPos - RGap == 1) {
+        if (RPos - RGap == 1)
             LL[RGap] = LL[RGap + GapSize];
-        } else {
+        else
             memmove(LL + RGap,
                 LL + RGap + GapSize,
                 sizeof(PELine) * (RPos - RGap));
-        }
     } else {
-        if (RGap - RPos == 1) {
+        if (RGap - RPos == 1)
             LL[RPos + GapSize] = LL[RPos];
-        } else {
+        else
             memmove(LL + RPos + GapSize,
                     LL + RPos,
                     sizeof(PELine) * (RGap - RPos));
-        }
     }
     RGap = RPos;
+
     return 1;
 }
 
 int EBuffer::AllocVis(int ACount) {
-    int *V;
-    
-    V = (int *) realloc(VV, sizeof(int) * (ACount + 1));
-    if (V == 0 && ACount != 0) return 0;
+    int *V = (int *) realloc(VV, sizeof(int) * (ACount + 1));
+    if (!V && ACount != 0)
+        return 0;
     VAllocated = ACount;
     VV = V;
+
     return 1;
 }
 
 int EBuffer::MoveVGap(int VPos) {
     int GapSize = VAllocated - VCount;
-    
+
     if (VGap == VPos) return 1;
     if (VPos < 0 || VPos > VCount) return 0;
-    
+
     if (VGap < VPos) {
-        if (VPos - VGap == 1) {
+        if (VPos - VGap == 1)
             VV[VGap] = VV[VGap + GapSize];
-        } else {
+        else
             memmove(VV + VGap,
                     VV + VGap + GapSize,
                     sizeof(VV[0]) * (VPos - VGap));
-        }
     } else {
         if (VGap - VPos == 1) {
             VV[VPos + GapSize] = VV[VPos];
@@ -181,7 +182,7 @@ int EBuffer::MoveVGap(int VPos) {
 
 int EBuffer::RToV(int No) {
     int L = 0, R = VCount, M, V;
-    
+
     if (No > Vis(VCount - 1) + VCount - 1)   // beyond end
         return -1;
     if (No < VCount) // no folds before (direct match)
@@ -192,7 +193,7 @@ int EBuffer::RToV(int No) {
         V = Vis(M) + M;
         if (V == No)
             return M;
-        else if (V > No)
+        if (V > No)
             R = M;
         else
             L = M + 1;
@@ -202,14 +203,14 @@ int EBuffer::RToV(int No) {
 
 int EBuffer::RToVN(int No) {
     int L = 0, R = VCount, M, V;
-    
+
     if (No == RCount)
         return VCount;
-    if (No > Vis(VCount - 1) + VCount - 1) 
+    if (No > Vis(VCount - 1) + VCount - 1)
         return VCount - 1;
     if (No < VCount)
         if (Vis(No) == 0) return No;
-    
+
     while (L < R) {
         M = (L + R) / 2;
         V = Vis(M) + M;

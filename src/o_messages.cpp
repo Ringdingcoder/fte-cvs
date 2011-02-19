@@ -61,7 +61,7 @@ int AddCRegexp(int file, int line, int msg, const char *regexp) {
 
 void FreeCRegexp()
 {
-    while(NCRegexp--)
+    while (NCRegexp--)
         RxFree(CRegexp[NCRegexp].rx);
 }
 

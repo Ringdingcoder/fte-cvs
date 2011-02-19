@@ -17,6 +17,7 @@
 #include "s_string.h"
 #include "sysdep.h"
 
+#include <ctype.h>
 #include <stdio.h>
 
 ECvsLog *CvsLogView;
@@ -75,10 +76,11 @@ ECvsLog::ECvsLog (int createFlags,EModel **ARoot,char *Directory,char *OnFiles):
         }
         // Go through status
         int fAdded=0,fRemoved=0,fModified=0,fOther=0;
-        for (i=0;i<cnt;i++) switch (status[i]) {
-            case 'A':case 'a':fAdded++;break;
-            case 'R':case 'r':fRemoved++;break;
-            case 'M':case 'm':fModified++;break;
+        for (i=0;i<cnt;i++)
+            switch (toupper(status[i])) {
+            case 'A': fAdded++; break;
+            case 'R': fRemoved++; break;
+            case 'M': fModified++; break;
             default:fOther++;
         }
         // Now list files with given status

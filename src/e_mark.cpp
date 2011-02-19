@@ -13,7 +13,7 @@ EMark::EMark(const char *aName, const char *aFileName,
     Point(aPoint),
     Buffer(0)
 {
-    if (aBuffer == 0)
+    if (!aBuffer)
         aBuffer = FindFile(aFileName);
     if (aBuffer && aBuffer->Loaded)
         SetBuffer(aBuffer);
@@ -46,9 +46,9 @@ int EMark::RemoveBuffer(EBuffer *aBuffer) {
         return 0;
     assert(filecmp(aBuffer->FileName, FileName.c_str()) == 0);
 
-    if (Buffer->GetBookmark(Name.c_str(), Point) == 0)
+    if (!Buffer->GetBookmark(Name.c_str(), Point))
         return 0;
-    if (Buffer->RemoveBookmark(Name.c_str()) == 0)
+    if (!Buffer->RemoveBookmark(Name.c_str()))
         return 0;
 
     Buffer = 0;
@@ -71,18 +71,18 @@ EMarkIndex::~EMarkIndex() {
 }
 
 EMark *EMarkIndex::insert(const char *aName, const char *aFileName, EPoint aPoint, EBuffer *aBuffer) {
-    size_t L = 0, R = Marks.size(), M;
-    int cmp;
 
     assert(aName != 0 && aName[0] != 0);
     assert(aFileName != 0 && aFileName[0] != 0);
 
+    size_t L = 0, R = Marks.size();
+
     while (L < R) {
-        M = (L + R) / 2;
-        cmp = strcmp(aName, Marks[M]->GetName());
+        size_t M = (L + R) / 2;
+        int cmp = strcmp(aName, Marks[M]->GetName());
         if (cmp == 0)
             return 0;
-        else if (cmp > 0)
+        if (cmp > 0)
             L = M + 1;
         else
             R = M;
@@ -102,14 +102,13 @@ EMark *EMarkIndex::insert(const char *aName, EBuffer *aBuffer, EPoint aPoint) {
 }
 
 EMark *EMarkIndex::locate(const char *aName) {
-    size_t L = 0, R = Marks.size(), M;
-    int cmp;
-
     assert(aName != 0 && aName[0] != 0);
 
+    size_t L = 0, R = Marks.size();
+
     while (L < R) {
-        M = (L + R) / 2;
-        cmp = strcmp(aName, Marks[M]->GetName());
+        size_t M = (L + R) / 2;
+        int cmp = strcmp(aName, Marks[M]->GetName());
         if (cmp == 0)
             return Marks[M];
         else if (cmp > 0)
@@ -121,14 +120,13 @@ EMark *EMarkIndex::locate(const char *aName) {
 }
 
 int EMarkIndex::remove(const char *aName) {
-    size_t L = 0, R = Marks.size(), M;
-    int cmp;
-
     assert(aName != 0 && aName[0] != 0);
 
+    size_t L = 0, R = Marks.size();
+
     while (L < R) {
-        M = (L + R) / 2;
-        cmp = strcmp(aName, Marks[M]->GetName());
+        size_t M = (L + R) / 2;
+        int cmp = strcmp(aName, Marks[M]->GetName());
         if (cmp == 0) {
             delete Marks[M];
             Marks.erase(Marks.begin() + M);
@@ -146,9 +144,9 @@ int EMarkIndex::view(EView *aView, const char *aName) {
     if (m) {
         EBuffer *b = m->GetBuffer();
         if (b == 0) {
-            if (FileLoad(0, m->GetFileName(), 0, aView) == 0)
+            if (!FileLoad(0, m->GetFileName(), 0, aView))
                 return 0;
-            if (retrieveForBuffer((EBuffer *)ActiveModel) == 0)
+            if (!retrieveForBuffer((EBuffer *)ActiveModel))
                 return 0;
             b = (EBuffer *)ActiveModel;
         }
@@ -160,17 +158,17 @@ int EMarkIndex::view(EView *aView, const char *aName) {
 
 int EMarkIndex::retrieveForBuffer(EBuffer *aBuffer) {
     vector_iterate(EMark*, Marks, it)
-	if ((*it)->GetBuffer() == 0
-	    && filecmp(aBuffer->FileName, (*it)->GetFileName()) == 0)
-            if ((*it)->SetBuffer(aBuffer) == 0)
+        if (((*it)->GetBuffer() == 0)
+            && (filecmp(aBuffer->FileName, (*it)->GetFileName()) == 0))
+            if (!(*it)->SetBuffer(aBuffer))
                 return 0;
     return 1;
 }
 
 int EMarkIndex::storeForBuffer(EBuffer *aBuffer) {
     vector_iterate(EMark*, Marks, it)
-	if ((*it)->GetBuffer() == aBuffer
-            && (*it)->RemoveBuffer(aBuffer) == 0)
+        if (((*it)->GetBuffer() == aBuffer)
+            && ((*it)->RemoveBuffer(aBuffer) == 0))
                 return 0;
     return 1;
 }
@@ -184,9 +182,9 @@ int EMarkIndex::saveToDesktop(FILE *fp) {
                     (*it)->GetPoint().Col,
                     (*it)->GetName(),
                     (*it)->GetFileName()) < 0)
-            return ErFAIL;
+            return 0;
 
-    return ErOK;
+    return 1;
 }
 
 // needs performance fixes (perhaps a redesign ?)
@@ -222,7 +220,7 @@ int EMarkIndex::popMark(EView *aView) {
         return 0;
     char name[20];
     sprintf(name, "#%d", stackTop);
-    if (view(aView, name) == 0)
+    if (!view(aView, name))
         return 0;
     assert(remove(name) == 1);
     return 1;

@@ -21,7 +21,7 @@ sub JAVA_Base {
 
 colorize JAVA {
     SyntaxParser        = 'C';
-    
+
     color {
         { 'Normal',        'Editor_Default' },
         { 'Number',        'Lang_DecimalNumber' },
@@ -33,24 +33,24 @@ colorize JAVA {
         { 'Function',      'Lang_Function' },
         { 'Label',         'Lang_Label' },
     };
-    
+
     keyword 'Editor_Keywords' {
         'abstract',  'default',  'goto',       'null',      'synchronized',
         'boolean',   'do',       'if',         'package',   'this',
-        'break',     'double',   'implements', 'private',   'threadsafe', 
-        'byte',      'else',     'import',     'protected', 'throw', 
+        'break',     'double',   'implements', 'private',   'threadsafe',
+        'byte',      'else',     'import',     'protected', 'throw',
         'byvalue',   'extends',  'instanceof', 'public',    'transient',
         'case',      'false',    'int',        'return',    'true',
         'catch',     'final',    'interface',  'short',     'try',
         'char',      'finally',  'long',       'static',    'void',
         'class',     'float',    'native',     'super',     'while',
-        'const',     'for',      'new',        'switch',    'continue', 
+        'const',     'for',      'new',        'switch',    'continue',
         'throws'
     };
 }
 
 mode JAVA: PLAIN {      # JAVA Mode
-    FileNameRx          = /\.\c{JAVA}$/;
+    FileNameRx          = /\.\c{{java}|{js}}$/;
     HilitOn             = 1;
     Colorizer           = 'JAVA';
     AutoIndent          = 1;

@@ -30,7 +30,7 @@ int SaveDesktop(const char *FileName) {
     EModel *M;
 
     if (!(fp = fopen(FileName, "w")))
-        return ErFAIL;
+        return 0;
 
     if (setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer) != 0))
         goto err;
@@ -70,10 +70,10 @@ int SaveDesktop(const char *FileName) {
     TagsSave(fp);
 #endif
     markIndex.saveToDesktop(fp);
-    return (fclose(fp) == 0) ? ErOK : ErFAIL;
+    return (fclose(fp) == 0) ? 1 : 0;
 err:
     fclose(fp);
-    return ErFAIL;
+    return 0;
 }
 
 int LoadDesktop(const char *FileName) {
@@ -87,7 +87,7 @@ int LoadDesktop(const char *FileName) {
 #endif
 
     if (!(fp = fopen(FileName, "r")))
-        return ErFAIL;
+        return 0;
 
     //setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer));
 
@@ -95,7 +95,7 @@ int LoadDesktop(const char *FileName) {
         || (strcmp(line, DESKTOP_VER) != 0 &&
             (strcmp(line, DESKTOP_VER1) != 0))) {
         fclose(fp);
-        return ErFAIL;
+        return 0;
     }
 
     while (fgets(line, sizeof(line), fp) != 0) {
@@ -172,7 +172,7 @@ int LoadDesktop(const char *FileName) {
                 markIndex.insert(name, file, P);
         }
     }
-    return (fclose(fp) == 0) ? ErOK : ErFAIL;
+    return (fclose(fp) == 0) ? 1 : 0;
 }
 
 #endif

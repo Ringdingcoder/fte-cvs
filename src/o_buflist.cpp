@@ -117,10 +117,10 @@ int BufferView::ExecCommand(ExCommands Command, ExState &State) {
             if (B && B != this) {
                 View->SwitchToModel(B);
                 delete this;
-                return ErOK;
+                return 1;
             }
         }
-        return ErFAIL;
+        return 0;
     case ExBufListFileClose:
         {
             EModel *B = GetBufferById(Row);
@@ -131,19 +131,19 @@ int BufferView::ExecCommand(ExCommands Command, ExState &State) {
                     View->DeleteModel(B);
                 }
                 UpdateList();
-                return ErOK;
+                return 1;
             }
         }
-        return ErFAIL;
+        return 0;
     case ExBufListFileSave:
         {
             EModel *B = GetBufferById(Row);
 
             if (B && B->GetContext() == CONTEXT_FILE)
                 if (((EBuffer *)B)->Save())
-                    return ErOK;
+                    return 1;
         }
-        return ErFAIL;
+        return 0;
         
     case ExActivateInOtherWindow:
         {
@@ -152,13 +152,13 @@ int BufferView::ExecCommand(ExCommands Command, ExState &State) {
             CancelSearch();
             if (B) {
                 View->Next->SwitchToModel(B);
-                return ErOK;
+                return 1;
             }
         }
-        return ErFAIL;
+        return 0;
     case ExBufListSearchCancel:
         CancelSearch();
-        return ErOK;
+        return 1;
     case ExBufListSearchNext:
         // Find next matching line
         if (SearchLen) {
@@ -167,7 +167,7 @@ int BufferView::ExecCommand(ExCommands Command, ExState &State) {
             // Never returns -1 since something already found before call
             Row = SearchPos[SearchLen] = i;
         }
-        return ErOK;
+        return 1;
     case ExBufListSearchPrev:
         // Find prev matching line
         if (SearchLen) {
@@ -176,7 +176,7 @@ int BufferView::ExecCommand(ExCommands Command, ExState &State) {
             // Never returns -1 since something already found before call
             Row = SearchPos[SearchLen] = i;
         }
-        return ErOK;
+        return 1;
     default:
         ;
     }

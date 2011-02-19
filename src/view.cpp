@@ -178,14 +178,14 @@ int EView::ExecCommand(ExCommands Command, ExState &State) {
 #ifdef CONFIG_OBJ_ROUTINE
         return ViewRoutines(State);
 #else
-        return ErFAIL;
+        return 0;
 #endif
 
     case ExDirOpen:
 #ifdef CONFIG_OBJ_DIRECTORY
         return DirOpen(State);
 #else
-        return ErFAIL;
+        return 0;
 #endif
 
 #ifdef CONFIG_OBJ_MESSAGES
@@ -195,10 +195,10 @@ int EView::ExecCommand(ExCommands Command, ExState &State) {
     case ExCompilePrevError:    return CompilePrevError(State);
     case ExCompileNextError:    return CompileNextError(State);
 #else
-    case ExViewMessages:        return ErFAIL;
-    case ExCompile:             return ErFAIL;
-    case ExCompilePrevError:    return ErFAIL;
-    case ExCompileNextError:    return ErFAIL;
+    case ExViewMessages:        return 0;
+    case ExCompile:             return 0;
+    case ExCompilePrevError:    return 0;
+    case ExCompileNextError:    return 0;
 #endif
 
 #ifdef CONFIG_OBJ_CVS
@@ -213,16 +213,16 @@ int EView::ExecCommand(ExCommands Command, ExState &State) {
     case ExRunCvsCommit:        return RunCvsCommit(State);
     case ExViewCvsLog:          return ViewCvsLog(State);
 #else
-    case ExCvs:                 return ErFAIL;
-    case ExRunCvs:              return ErFAIL;
-    case ExViewCvs:             return ErFAIL;
-    case ExClearCvsMessages:    return ErFAIL;
-    case ExCvsDiff:             return ErFAIL;
-    case ExRunCvsDiff:          return ErFAIL;
-    case ExViewCvsDiff:         return ErFAIL;
-    case ExCvsCommit:           return ErFAIL;
-    case ExRunCvsCommit:        return ErFAIL;
-    case ExViewCvsLog:          return ErFAIL;
+    case ExCvs:                 return 0;
+    case ExRunCvs:              return 0;
+    case ExViewCvs:             return 0;
+    case ExClearCvsMessages:    return 0;
+    case ExCvsDiff:             return 0;
+    case ExRunCvsDiff:          return 0;
+    case ExViewCvsDiff:         return 0;
+    case ExCvsCommit:           return 0;
+    case ExRunCvsCommit:        return 0;
+    case ExViewCvsLog:          return 0;
 #endif
 
 #ifdef CONFIG_OBJ_SVN
@@ -237,16 +237,16 @@ int EView::ExecCommand(ExCommands Command, ExState &State) {
     case ExRunSvnCommit:        return RunSvnCommit(State);
     case ExViewSvnLog:          return ViewSvnLog(State);
 #else
-    case ExSvn:                 return ErFAIL;
-    case ExRunSvn:              return ErFAIL;
-    case ExViewSvn:             return ErFAIL;
-    case ExClearSvnMessages:    return ErFAIL;
-    case ExSvnDiff:             return ErFAIL;
-    case ExRunSvnDiff:          return ErFAIL;
-    case ExViewSvnDiff:         return ErFAIL;
-    case ExSvnCommit:           return ErFAIL;
-    case ExRunSvnCommit:        return ErFAIL;
-    case ExViewSvnLog:          return ErFAIL;
+    case ExSvn:                 return 0;
+    case ExRunSvn:              return 0;
+    case ExViewSvn:             return 0;
+    case ExClearSvnMessages:    return 0;
+    case ExSvnDiff:             return 0;
+    case ExRunSvnDiff:          return 0;
+    case ExViewSvnDiff:         return 0;
+    case ExSvnCommit:           return 0;
+    case ExRunSvnCommit:        return 0;
+    case ExViewSvnLog:          return 0;
 #endif
 
     case ExViewBuffers:         return ViewBuffers(State);

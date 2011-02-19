@@ -377,10 +377,10 @@ int ESvnBase::ExecCommand(ExCommands Command, ExState &State) {
             sprintf(s, "[aborted, status=%d]", ReturnCode);
             AddLine(0, -1, s);
         }
-        return ErOK;
+        return 1;
     case ExActivateInOtherWindow:
         ShowLine(View->Next, Row);
-        return ErOK;
+        return 1;
     default:
 	;
     }

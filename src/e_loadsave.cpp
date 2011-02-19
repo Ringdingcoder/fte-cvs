@@ -612,5 +612,5 @@ failclose:
     return 0;
 erroropen:
     View->MView->Win->Choice(GPC_ERROR, "Error", 1, "O&K", "Error writing %s (errno=%d).", AFileName, errno);
-    return ErFAIL;
+    return 0;
 }

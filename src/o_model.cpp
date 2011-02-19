@@ -116,7 +116,7 @@ EViewPort *EModel::CreateViewPort(EView * /*V*/) {
 }
 
 int EModel::ExecCommand(ExCommands /*Command*/, ExState &/*State*/) {
-    return ErFAIL;
+    return 0;
 }
 
 void EModel::HandleEvent(TEvent &/*Event*/) {

@@ -379,7 +379,7 @@ int EList::ExecCommand(ExCommands Command, ExState &State) {
     case ExMoveFileEnd:          return MoveFileEnd();
     case ExMoveLineStart:        return MoveLineStart();
     case ExMoveLineEnd:          return MoveLineEnd();
-    case ExRescan:               RescanList(); return ErOK;
+    case ExRescan:               RescanList(); return 1;
     case ExActivate:             return Activate();
     case ExListMark:             return Mark();
     case ExListUnmark:           return Unmark();
@@ -461,37 +461,37 @@ int EList::SetPos(int ARow, int ACol) {
     Row = ARow;
     LeftCol = ACol;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MoveLeft() {
     if (LeftCol == 0)
-        return ErFAIL;
+        return 0;
     LeftCol--;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MoveRight() {
     LeftCol++;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MoveUp() {
     if (Row == 0)
-        return ErFAIL;
+        return 0;
     Row--;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MoveDown() {
     if (Row == Count - 1)
-        return ErFAIL;
+        return 0;
     Row++;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MoveLineStart() {
@@ -499,7 +499,7 @@ int EList::MoveLineStart() {
         NeedsUpdate = 1;
         LeftCol = 0;
     }
-    return ErOK;
+    return 1;
 }
 
 // Move current column position to end of line, if line is shorter, stay at
@@ -524,14 +524,14 @@ int EList::MoveLineEnd() {
         LeftCol = len - W/2;
         NeedsUpdate = 1;
     }
-    return ErOK;
+    return 1;
 }
 
 int EList::MovePageUp() {
     int W, H;
     
     if (Row == 0)
-        return ErFAIL;
+        return 0;
     
     View->MView->Win->ConQuerySize(&W, &H);
     H--;
@@ -543,14 +543,14 @@ int EList::MovePageUp() {
     if (TopRow < 0)
         TopRow = 0;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MovePageDown() {
     int W, H;
     
     if (Row == Count - 1)
-        return ErFAIL;
+        return 0;
     
     View->MView->Win->ConQuerySize(&W, &H);
     H--;
@@ -566,7 +566,7 @@ int EList::MovePageDown() {
     if (TopRow < 0)
         TopRow = 0;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::ScrollRight(int Cols) {
@@ -577,19 +577,19 @@ int EList::ScrollRight(int Cols) {
         LeftCol = 0;
         NeedsUpdate = 1;
     } else
-        return ErFAIL;
-    return ErOK;
+        return 0;
+    return 1;
 }
 
 int EList::ScrollLeft(int Cols) {
     LeftCol += Cols;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::ScrollUp(int Rows) {
     if (TopRow == Count - 1)
-        return ErFAIL;
+        return 0;
 
     TopRow += Rows;
     Row += Rows;
@@ -601,12 +601,12 @@ int EList::ScrollUp(int Rows) {
     if (TopRow > Row)
         TopRow = Row;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::ScrollDown(int Rows) {
     if (TopRow == 0)
-        return ErFAIL;
+        return 0;
     
     TopRow -= Rows;
     Row -= Rows;
@@ -616,27 +616,27 @@ int EList::ScrollDown(int Rows) {
     if (TopRow < 0)
         TopRow = 0;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MovePageStart() {
     if (Row <= TopRow)
-        return ErFAIL;
+        return 0;
     Row = TopRow;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MovePageEnd() {
     int W, H;
 
     if (Row == Count - 1)
-        return ErOK;
+        return 1;
     
     View->MView->Win->ConQuerySize(&W, &H);
     H--;
     if (Row == TopRow + H - 1)
-        return ErOK;
+        return 1;
     
     Row = TopRow + H - 1;
     if (Row >= Count)
@@ -644,16 +644,16 @@ int EList::MovePageEnd() {
     if (Row < 0)
         Row = 0;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MoveFileStart() {
     if (Row == 0 && LeftCol == 0)
-        return ErOK;
+        return 1;
     Row = 0;
     LeftCol = 0;
     NeedsUpdate = 1;
-    return ErOK;
+    return 1;
 }
 
 int EList::MoveFileEnd() {
@@ -664,29 +664,29 @@ int EList::MoveFileEnd() {
         Row = 0;
     NeedsUpdate = 1;
     LeftCol = 0;
-    return ErOK;
+    return 1;
 }
 
 int EList::Activate() {
     if (Count > 0)
         if (CanActivate(Row))
             if (Activate(Row) == 1)
-                return ErOK;
-    return ErFAIL;
+                return 1;
+    return 0;
 }
 
 int EList::Mark() {
     if (Count > 0 && ! IsMarked(Row) && Mark(Row) == 1) {
         NeedsRedraw = 1;
-        return ErOK;
-    } else return ErFAIL;
+        return 1;
+    } else return 0;
 }
 
 int EList::Unmark() {
     if (Count > 0 && IsMarked(Row) && Unmark(Row) == 1) {
         NeedsRedraw = 1;
-        return ErOK;
-    } else return ErFAIL;
+        return 1;
+    } else return 0;
 }
 
 int EList::ToggleMark() {
@@ -694,44 +694,44 @@ int EList::ToggleMark() {
         if (IsMarked(Row)) {
             if (Unmark(Row) == 1) {
                 NeedsRedraw = 1;
-                return ErOK;
+                return 1;
             }
         } else {
             if (Mark(Row) == 1) {
                 NeedsRedraw = 1;
-                return ErOK;
+                return 1;
             }
         }
     }
-    return ErFAIL;
+    return 0;
 }
 
 int EList::MarkAll() {
     NeedsRedraw = 1;
     for (int i = 0; i < Count; i++) {
         if (! IsMarked(i))
-            if (Mark(i) != 1) return ErFAIL;
+            if (Mark(i) != 1) return 0;
     }
-    return ErOK;
+    return 1;
 }
 
 int EList::UnmarkAll() {
     NeedsRedraw = 1;
     for (int i = 0; i < Count; i++) {
         if (IsMarked(i))
-            if (Unmark(i) != 1) return ErFAIL;
+            if (Unmark(i) != 1) return 0;
     }
-    return ErOK;
+    return 1;
 }
 
 int EList::ToggleMarkAll() {
     NeedsRedraw = 1;
     for (int i = 0; i < Count; i++) {
         if (IsMarked(i)) {
-            if (Unmark(i) != 1) return ErFAIL;
+            if (Unmark(i) != 1) return 0;
         } else {
-            if (Mark(i) != 1) return ErFAIL;
+            if (Mark(i) != 1) return 0;
         }
     }
-    return ErOK;
+    return 1;
 }

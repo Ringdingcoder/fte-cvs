@@ -10,11 +10,6 @@
 #ifndef C_COMMANDS_H
 #define C_COMMANDS_H
 
-enum ExResult {
-    ErFAIL = 0,
-    ErOK = 1
-};
-
 enum ExCommands {
     ExNop,
     ExFail,

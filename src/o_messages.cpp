@@ -191,13 +191,13 @@ int EMessages::ExecCommand(ExCommands Command, ExState &State) {
         char s[30];
         sprintf(s, "[aborted, status=%d]", ReturnCode);
         AddError(0, -1, 0, s);
-        return ErOK;
+        return 1;
     case ExActivateInOtherWindow:
         ShowError(View->Next, Row);
-        return ErOK;
+        return 1;
     case ExFind:
         fprintf(stderr, "FIND\n");
-        return ErOK;
+        return 1;
     default:
         ;
     }

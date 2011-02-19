@@ -491,7 +491,7 @@ int EBuffer::ExecCommand(ExCommands Command, ExState &State) {
 #ifdef CONFIG_WORDWRAP
         return WrapPara();
 #else
-        return ErFAIL;
+        return 0;
 #endif
     case ExInsPrevLineChar:       return InsPrevLineChar();
     case ExInsPrevLineToEol:      return InsPrevLineToEol();
@@ -545,8 +545,8 @@ int EBuffer::ExecCommand(ExCommands Command, ExState &State) {
     case ExUndo:                  return Undo();
     case ExRedo:                  return Redo();
 #else
-    case ExUndo:                  return ErFAIL;
-    case ExRedo:                  return ErFAIL;
+    case ExUndo:                  return 0;
+    case ExRedo:                  return 0;
 #endif
     case ExMatchBracket:          return MatchBracket();
     case ExMovePrevPos:           return MovePrevPos();
@@ -584,7 +584,7 @@ int EBuffer::ExecCommand(ExCommands Command, ExState &State) {
 #ifdef CONFIG_WORD_HILIT
         return HilitWord();
 #else
-        return ErFAIL;
+        return 0;
 #endif
     case ExSearchWordPrev:        return SearchWord(SEARCH_BACK | SEARCH_NEXT);
     case ExSearchWordNext:        return SearchWord(SEARCH_NEXT);
@@ -621,9 +621,9 @@ int EBuffer::ExecCommand(ExCommands Command, ExState &State) {
     case ExRemoveBookmark:      return RemoveBookmark(State);
     case ExGotoBookmark:        return GotoBookmark(State);
 #else
-    case ExPlaceBookmark:       return ErFAIL;
-    case ExRemoveBookmark:      return ErFAIL;
-    case ExGotoBookmark:        return ErFAIL;
+    case ExPlaceBookmark:       return 0;
+    case ExRemoveBookmark:      return 0;
+    case ExGotoBookmark:        return 0;
 #endif
     case ExPlaceGlobalBookmark: return PlaceGlobalBookmark(State);
     case ExPushGlobalBookmark:  return PushGlobalBookmark();
@@ -664,7 +664,7 @@ int EBuffer::ExecCommand(ExCommands Command, ExState &State) {
 #ifdef CONFIG_I_ASCII
         return ASCIITable(State);
 #else
-        return ErFAIL;
+        return 0;
 #endif
     case ExCharTrans:           return CharTrans(State);
     case ExLineTrans:           return LineTrans(State);

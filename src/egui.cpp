@@ -104,7 +104,7 @@ int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
         return ExecMacro(view, Command & ~CMD_EXT);
 
     if (Command == ExFail)
-        return ErFAIL;
+        return 0;
 
     if (view->IsModelView()) {
         ExModelView *V = (ExModelView *)view->Top;
@@ -118,14 +118,14 @@ int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
 #ifdef CONFIG_I_SEARCH
             return View->MView->Win->IncrementalSearch(View);
 #else
-            return ErFAIL;
+            return 0;
 #endif
         default:
             ;
         }
     }
     switch (Command) {
-    case ExWinRefresh:              view->Repaint(); return ErOK;
+    case ExWinRefresh:              view->Repaint(); return 1;
     case ExWinNext:                 return WinNext(view);
     case ExWinPrev:                 return WinPrev(view);
     case ExShowEntryScreen:         return ShowEntryScreen();
@@ -146,7 +146,7 @@ int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
     case ExDesktopSave:
         if (DesktopFileName[0] != 0)
             return SaveDesktop(DesktopFileName);
-        return ErOK;
+        return 1;
     case ExChangeKeys:
         {
             char kmaps[64] = "";
@@ -154,12 +154,12 @@ int EGUI::ExecCommand(GxView *view, ExCommands Command, ExState &State) {
 
             if (State.GetStrParam(0, kmaps, sizeof(kmaps)) == 0) {
                 SetOverrideMap(0, 0);
-                return ErFAIL;
+                return 0;
             }
             if ((m = FindEventMap(kmaps)) == 0)
-                return ErFAIL;
+                return 0;
             SetOverrideMap(m->KeyMap, m->Name);
-            return ErOK;
+            return 1;
         }
     default:
         ;
@@ -178,10 +178,10 @@ int EGUI::ExecMacro(GxView *view, int Macro) {
     ExState State;
 
     if (Macro == -1)
-        return ErFAIL;
+        return 0;
 
     if (BeginMacro(view) == -1)
-        return ErFAIL;
+        return 0;
 
     State.Macro = Macro;
     State.Pos = 0;
@@ -195,11 +195,11 @@ int EGUI::ExecMacro(GxView *view, int Macro) {
         for (j = 0; j < m->cmds[i].repeat; j++) {
             State.Pos = i + 1;
             if (ExecCommand(view, (ExCommands)m->cmds[i].u.num, State) == 0 && !m->cmds[i].ign)
-                return ErFAIL;
+                return 0;
         }
         State.Pos = i;
     }
-    return ErOK;
+    return 1;
 }
 
 void EGUI::SetMsg(const char *Msg) {

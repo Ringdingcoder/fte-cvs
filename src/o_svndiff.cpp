@@ -158,7 +158,7 @@ int
 ESvnDiff::BlockCopy(int Append)
 {
     if(SSBuffer == 0)
-        return ErFAIL;
+        return 0;
     if(Append)
     {
         if(SystemClipboard)
@@ -191,7 +191,7 @@ ESvnDiff::BlockCopy(int Append)
     }
     if(SystemClipboard)
         PutPMClip(0);
-    return ErOK;
+    return 1;
 }
 
 // Event map - this name is used in config files when defining eventmap

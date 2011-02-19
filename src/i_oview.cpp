@@ -46,7 +46,7 @@ EEventMap *ExView::GetEventMap()
     return 0;
 }
 
-int ExView::ExecCommand(ExCommands /*Command*/, ExState &/*State*/) { return ErFAIL; }
+int ExView::ExecCommand(ExCommands /*Command*/, ExState &/*State*/) { return 0; }
 
 int ExView::BeginMacro() {
     return 1;

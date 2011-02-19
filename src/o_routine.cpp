@@ -50,16 +50,16 @@ int RoutineView::ExecCommand(ExCommands Command, ExState &State) {
     case ExRescan:
         Buffer->ScanForRoutines();
         UpdateList();
-        return ErOK;
+        return 1;
     case ExActivateInOtherWindow:
         if (Row < Buffer->rlst.Count) {
             View->Next->SwitchToModel(Buffer);
             Buffer->CenterPosR(0, Buffer->rlst.Lines[Row]);
-            return ErOK;
+            return 1;
         }
-        return ErFAIL;
+        return 0;
     case ExCloseActivate:
-        return ErFAIL;
+        return 0;
     default:
         ;
     }

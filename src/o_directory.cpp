@@ -195,24 +195,19 @@ int EDirectory::ExecCommand(ExCommands Command, ExState &State) {
     case ExActivateInOtherWindow:
         SearchLen = 0;
         Msg(S_INFO, "");
-        if (Files && Row >= 0 && Row < FCount) {
-            if (isDir(Row)) {
-            } else {
+        if (Files && Row >= 0 && Row < FCount)
+	    if (!isDir(Row))
                 return FmLoad(Files[Row]->Name(), View->Next);
-            }
-        }
-        return ErFAIL;
+        return 0;
 
     case ExRescan:
-        if (RescanDir() == 0)
-            return ErFAIL;
-        return ErOK;
+        return RescanDir();
 
     case ExDirGoUp:
         SearchLen = 0;
         Msg(S_INFO, "");
         FmChDir(SDOT SDOT);
-        return ErOK;
+        return 1;
 
     case ExDirGoDown:
         SearchLen = 0;
@@ -220,10 +215,10 @@ int EDirectory::ExecCommand(ExCommands Command, ExState &State) {
         if (Files && Row >= 0 && Row < FCount) {
             if (isDir(Row)) {
                 FmChDir(Files[Row]->Name());
-                return ErOK;
+                return 1;
             }
         }
-        return ErFAIL;
+        return 0;
 
     case ExDirGoto:
         SearchLen = 0;
@@ -234,13 +229,13 @@ int EDirectory::ExecCommand(ExCommands Command, ExState &State) {
         SearchLen = 0;
         Msg(S_INFO, "");
         FmChDir(SSLASH);
-        return ErOK;
+        return 1;
 
     case ExDirSearchCancel:
         // Kill search when moving
         SearchLen = 0;
         Msg(S_INFO, "");
-        return ErOK;
+        return 1;
 
     case ExDirSearchNext:
         // Find next matching file, search is case in-sensitive while sorting is sensitive
@@ -252,7 +247,7 @@ int EDirectory::ExecCommand(ExCommands Command, ExState &State) {
                 }
             }
         }
-        return ErOK;
+        return 1;
 
     case ExDirSearchPrev:
         // Find prev matching file, search is case in-sensitive while sorting is sensitive
@@ -264,7 +259,7 @@ int EDirectory::ExecCommand(ExCommands Command, ExState &State) {
                 }
             }
         }
-        return ErOK;
+        return 1;
 
     case ExDeleteFile:
         SearchLen = 0;

@@ -102,7 +102,7 @@ int ECvsDiff::ExecCommand(ExCommands Command, ExState &State) {
 }
 
 int ECvsDiff::BlockCopy (int Append) {
-    if (SSBuffer==0) return ErFAIL;
+    if (SSBuffer==0) return 0;
     if (Append) {
         if (SystemClipboard) GetPMClip(0);
     } else SSBuffer->Clear ();
@@ -125,7 +125,7 @@ int ECvsDiff::BlockCopy (int Append) {
         }
     }
     if (SystemClipboard) PutPMClip (0);
-    return ErOK;
+    return 1;
 }
 
 // Event map - this name is used in config files when defining eventmap

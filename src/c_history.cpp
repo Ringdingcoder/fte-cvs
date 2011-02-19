@@ -100,10 +100,10 @@ int SaveHistory(const char *FileName) { /*FOLD00*/
 	if (fprintf(fp, "I|%d|%s\n", inputHistory.Id[i], inputHistory.Line[i]) < 0)
             goto err;
 
-    return fclose(fp) == 0 ? ErOK : ErFAIL;
+    return fclose(fp) == 0 ? 1 : 0;
 err:
     fclose(fp);
-    return ErFAIL;
+    return 0;
 }
 
 int LoadHistory(const char *FileName) { /*FOLD00*/
@@ -114,7 +114,7 @@ int LoadHistory(const char *FileName) { /*FOLD00*/
     HBookmark **nb;
     
     if (!(fp = fopen(FileName, "r")))
-        return ErFAIL;
+        return 0;
 
     if (setvbuf(fp, FileBuffer, _IOFBF, sizeof(FileBuffer)) != 0)
         goto err;
@@ -213,10 +213,10 @@ int LoadHistory(const char *FileName) { /*FOLD00*/
             AddInputHistory(i, p);
         }
     }
-    return fclose(fp) == 0 ? ErOK : ErFAIL;
+    return (fclose(fp) == 0) ? 1 : 0;
 err:
     fclose(fp);
-    return ErFAIL;
+    return 0;
 }
 
 int UpdateFPos(const char *FileName, int Row, int Col) { /*FOLD00*/

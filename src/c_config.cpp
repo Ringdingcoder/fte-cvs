@@ -20,6 +20,7 @@
 #include "s_string.h"
 
 #include <fcntl.h>
+#include <stdio.h>
 
 struct GUICharactersEntry {
     struct GUICharactersEntry *next;

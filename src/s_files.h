@@ -10,7 +10,7 @@
 #ifndef S_FILES_H
 #define S_FILES_H
 
-#include <sys/types.h>
+#include <stddef.h>
 
 #define SDOT   "."
 

@@ -171,7 +171,7 @@ void ExComplete::HandleEvent(TEvent &Event)
 	    break;
 	default:
             if (CheckASCII((char)Event.Key.Code)) {
-		char s[WordFixed + 2];
+		char *s = (char *)alloca(WordFixed + 2);
 		strncpy(s, Words[WordPos], WordFixed);
 		s[WordFixed] = (char)(Event.Key.Code);
 		s[WordFixed + 1] = 0;

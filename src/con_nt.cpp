@@ -39,6 +39,7 @@
 
 #include <wincon.h>
 
+#include <ctype.h>
 #include <stdio.h>
 #include "sysdep.h"
 #include "console.h"

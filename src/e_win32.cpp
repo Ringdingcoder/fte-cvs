@@ -10,6 +10,11 @@
 // Win32 (NT) specific routines
 
 #include "fte.h"
+#include "c_bind.h"
+#include "i_view.h"
+#include "c_history.h"
+#include "s_util.h"
+#include "i_modelview.h"
 
 // Silence warnings about redefinition, we don't need this here anyway.
 #undef SEARCH_ALL

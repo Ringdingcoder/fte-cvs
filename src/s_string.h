@@ -1,7 +1,7 @@
 #ifndef S_STRING_H
 #define S_STRING_H
 
-#include <sys/types.h>
+#include <stddef.h>
 
 size_t UnTabStr(char *dest, size_t maxlen, const char *source, size_t slen);
 size_t UnEscStr(char *dest, size_t maxlen, const char *source, size_t slen);

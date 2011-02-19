@@ -8,6 +8,7 @@
  */
 
 #include "fte.h"
+#include "e_buffer.h"
 #include "clip.h"
 
 int GetPMClip(int clipboard) {

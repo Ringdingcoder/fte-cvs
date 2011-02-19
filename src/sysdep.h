@@ -101,17 +101,20 @@
 
 #if defined(NT)
 #    include <malloc.h>
-#    include <dos.h>
 #    include <io.h>
 #    include <process.h>
+#    include <fcntl.h>
 #    if defined(MSVC)
 #        include <direct.h>
+#        define snprintf _snprintf
+#        define ssize_t SSIZE_T
 #    endif
 #    if defined(WATCOM)
 #        include <direct.h>
 #    endif
 #    if defined(BCPP)
 #        include <dir.h>
+#        define ssize_t SSIZE_T
 #    endif
 #    if defined(MINGW)
 #        include <dir.h>

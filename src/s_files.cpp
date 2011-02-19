@@ -14,8 +14,8 @@
 #include "s_string.h"
 
 #include <stdlib.h> // getenv
+#include <ctype.h>
 #include <sys/stat.h>
-#include <unistd.h> // stat
 
 #if defined(OS2)
 #define INCL_DOS

@@ -192,7 +192,7 @@ void ExInput::HandleEvent(TEvent &Event) {
             /* fall */
         case kbTab:
             if (Comp) {
-                char Str2[MaxLen + 1];
+                char *Str2 = (char*)alloca(MaxLen + 1);
                 int n;
 
                 TabCount++;

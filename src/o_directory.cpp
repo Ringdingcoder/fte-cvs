@@ -7,6 +7,9 @@
  *
  */
 
+#include <stdio.h>
+#include <time.h>
+
 #include "o_directory.h"
 
 #include "c_commands.h"

@@ -98,12 +98,14 @@ typedef unsigned char TChar;
 // we need to use class instead of casting to short
 // otherwice we would need to resolve CPU ordering issues
 #ifdef NTCONSOLE
-//typedef unsigned long TCell;
-#error Write TCell class to be compatible with PCHAR_INFO and update methods!
-// this is just WILD WILD GUESS....
-class TCell : public PCHAR_INFO {
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+class TCell : public CHAR_INFO {
 public:
-    TCell(char c = ' ', TAttr a = 0x07) : Char.AsciiChar(c), Attributes(a) {}
+    TCell(char c = ' ', TAttr a = 0x07) {
+        Char.AsciiChar = c;
+        Attributes = a;
+    }
     char GetChar() const { return Char.AsciiChar; }
     TAttr GetAttr() const { return Attributes; }
     void SetChar(char c) { Char.AsciiChar = c; }

@@ -16,6 +16,8 @@
 #include "s_files.h"
 #include "s_string.h"
 
+#include <stdio.h>
+
 #ifdef CONFIG_USE_LOCALE
 #include <locale.h>
 #endif

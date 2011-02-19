@@ -237,7 +237,9 @@ SyntaxProc GetHilitProc(int id);
 int IsState(hsState *Buf, hsState State, size_t Len);
 int LookAt(EBuffer *B, int Row, unsigned int Pos, const char *What, hsState State, int NoWord = 1, int CaseInsensitive = 0);
 static inline int LookAtNoCase(EBuffer *B, int Row, unsigned int Pos, const char *What, hsState State, int NoWord = 1)
-{ return LookAt(B, Row, Pos, What, State, NoWord, 1); }
+{
+    return LookAt(B, Row, Pos, What, State, NoWord, 1);
+}
 
 #endif // CONFIG_SYNTAX_HILIT
 

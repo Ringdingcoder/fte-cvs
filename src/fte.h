@@ -20,6 +20,7 @@
 #endif
 
 #include "feature.h"
+#include "sysdep.h"
 
 #include <inttypes.h>
 #include <sys/types.h>

@@ -10,7 +10,7 @@
 #ifndef E_REGEX_H
 #define E_REGEX_H
 
-#include <sys/types.h>
+#include <stddef.h>
 
 /*
  * Operator:

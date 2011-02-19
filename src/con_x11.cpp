@@ -1780,7 +1780,7 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
 
         // Now read data
         pos = 0;
-        while(1) {
+        while (1) {
             // Wait for new value notification
             do {
                 if (!WaitForXEvent(PropertyNotify, &event)) {

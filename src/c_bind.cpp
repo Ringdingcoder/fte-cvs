@@ -406,8 +406,7 @@ EKeyMap::~EKeyMap() {
     // free keys
     EKey *e;
 
-    while((e = fKeys) != NULL)
-    {
+    while ((e = fKeys) != NULL) {
 	fKeys = fKeys->fNext;
 	delete e;
     }
@@ -482,8 +481,7 @@ EEventMap::~EEventMap() {
     EAbbrev *ab;
 
     for (int i = 0; i < ABBREV_HASH; i++)
-	while((ab = abbrev[i]) != NULL)
-	{
+	while ((ab = abbrev[i]) != NULL) {
 	    abbrev[i] = abbrev[i]->next;
 	    delete ab;
 	}

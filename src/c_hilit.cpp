@@ -266,10 +266,8 @@ HMachine::HMachine() :
 HMachine::~HMachine() {
 
     // free states
-    if (state)
-    {
-        while(stateCount--)
-        {
+    if (state) {
+        while (stateCount--) {
             for (unsigned i = 0; i < CK_MAXLEN; ++i)
                 free(state[stateCount].keywords.key[i]);
 
@@ -280,10 +278,8 @@ HMachine::~HMachine() {
     }
 
     // free transes
-    if (trans)
-    {
-        while(transCount--)
-        {
+    if (trans) {
+        while (transCount--) {
             if (trans[transCount].match) free(trans[transCount].match);
             if (trans[transCount].regexp) RxFree(trans[transCount].regexp);
         }

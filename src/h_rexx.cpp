@@ -115,7 +115,8 @@ int Hilit_REXX(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                 } else if (isdigit(*p)) {
                     Color = CLR_Number;
                     ColorNext();
-                    while(len && isdigit(*p)) ColorNext();
+                    while (len && isdigit(*p))
+                            ColorNext();
                     continue;
                 } else if (*p == '\'') {
                     State = hsREXX_String1;

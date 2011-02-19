@@ -48,7 +48,7 @@ int EView::SysShowHelp(ExState &State, const char *word) {
     snprintf(command, sizeof(command)-1, "%s %s %s >'%s' 2>&1", HelpCommand, options, word, file);
 
     /// !!! why is this needed ???
-#define SYSCALL(call) while(((call) == -1) && (errno == EINTR))
+#define SYSCALL(call) while (((call) == -1) && (errno == EINTR))
     pid_t pid;
     int err, status;
 
@@ -71,7 +71,7 @@ int EView::SysShowHelp(ExState &State, const char *word) {
             perror("Can't exec command");
         } else
             perror("Can't open file");
-        exit(-1);
+        exit(1);
     } else if (pid < 0) {
         perror("Can't fork");
         return 0;

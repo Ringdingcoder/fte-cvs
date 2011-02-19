@@ -1023,18 +1023,15 @@ void EGUI::Stop() {
     }
 
     // free menus
-    if (Menus)
-    {
+    if (Menus) {
         int mc, c;
 
-        while(MenuCount--)
-        {
+        while (MenuCount--) {
             mc = MenuCount;
 
             free(Menus[mc].Name);
 
-            while(Menus[mc].Count--)
-            {
+            while (Menus[mc].Count--) {
                 c = Menus[mc].Count;
                 free(Menus[mc].Items[c].Name);
             }

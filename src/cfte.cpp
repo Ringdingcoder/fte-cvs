@@ -46,7 +46,6 @@ static char XTarget[MAXPATH] = "";
 static char StartDir[MAXPATH] = "";
 static bool preprocess_only = false;
 
-
 struct CurPos {
     off_t sz;
     char *a;
@@ -61,7 +60,7 @@ static void cleanup(int xerrno) {
         fclose(output);
     if (XTarget[0] != 0)
         unlink(XTarget);
-    exit (xerrno);
+    exit(xerrno);
 }
 
 static void Fail(CurPos &cp, const char *s, ...) {
@@ -84,23 +83,18 @@ static void PutObject(CurPos &cp, int xtag, size_t xlen, void *obj) {
     unsigned short len = (unsigned short)xlen;
     unsigned char l[2];
 
-    if (preprocess_only == false)
-    {
-
+    if (preprocess_only == false) {
 	l[0] = (char)len;
 	l[1] = (char)(len >> 8);
 
-	if (fwrite(&tag, 1, 1, output) != 1 ||
-	    fwrite(l, 2, 1, output) != 1 ||
-	    fwrite(obj, 1, len, output) != len)
-	{
+	if (fwrite(&tag, 1, 1, output) != 1
+	    || fwrite(l, 2, 1, output) != 1
+	    || fwrite(obj, 1, len, output) != len)
 	    Fail(cp, "Disk full!");
-	}
     }
     pos += 1 + 2 + len;
-    if (offset != -1 && pos >= offset) {
+    if (offset != -1 && pos >= offset)
         Fail(cp, "Error location found at %ld", pos);
-    }
 }
 
 static void PutNull(CurPos &cp, int xtag) {
@@ -158,30 +152,22 @@ int main(int argc, char **argv) {
     offset = -1;
 
     // parse arguments
-    for (int i = 1; i < argc; i++)
-    {
-	if (argv[i][0] == '-')
-	{
+    for (int i = 1; i < argc; i++) {
+	if (argv[i][0] == '-') {
 	    if ((strcmp(argv[i], "-p") == 0) || (strcmp(argv[i], "-preprocess") == 0))
-	    {
 		preprocess_only = true;
-	    } else
-	    if (strncmp(argv[i], "-o", 2) == 0)
-	    {
+	    else if (strncmp(argv[i], "-o", 2) == 0) {
 		char *p;
 
 		p = argv[i];
 		p += 2;
 		offset = atol(p);
-	    } else
-	    {
+	    } else {
 		fprintf(stderr, "Invalid option '%s'\n", argv[i]);
 		exit(1);
 	    }
-	} else
-	{
-	    switch(n)
-	    {
+	} else {
+	    switch(n) {
 	    case 0:
 		strlcpy(Source, argv[i], sizeof(Source));
 		break;
@@ -198,8 +184,7 @@ int main(int argc, char **argv) {
 	}
     }
 
-    if (n == 0)
-    {
+    if (n == 0) {
 	fprintf(stderr, "No configuration file specified\n");
 	exit(1);
     }
@@ -207,8 +192,7 @@ int main(int argc, char **argv) {
     JustDirectory(Target, XTarget, sizeof(XTarget));
     Slash(XTarget, 1);
 
-    if (preprocess_only == false)
-    {
+    if (preprocess_only == false) {
 	sprintf(XTarget + strlen(XTarget), "cfte%ld.tmp", (long)getpid());
 	output = fopen(XTarget, "wb");
 	if (output == 0) {
@@ -255,8 +239,7 @@ int main(int argc, char **argv) {
                , StartDir, sizeof(StartDir));
     Slash(StartDir, 1);
 
-    if (preprocess_only == false)
-    {
+    if (preprocess_only == false) {
         CurPos cp;
         char FSource[MAXPATH];
 
@@ -281,9 +264,7 @@ int main(int argc, char **argv) {
     }
 
     if (preprocess_only == true)
-    {
         return 0;
-    }
 
     l = CONFIG_ID;
     b[0] = (unsigned char)(l & 0xFF);
@@ -560,30 +541,30 @@ static int Lookup(const OrdLookup *where, char *what) {
 typedef char Word[64];
 
 static const OrdLookup CfgKW[] = {
-{ "mode", K_MODE },
-{ "eventmap", K_EVENTMAP },
-{ "key", K_KEY },
-{ "color", K_COLOR },
-{ "color_palette", K_COLPALETTE },
-{ "keyword", K_KEYWORD },
-{ "object", K_OBJECT },
-{ "menu", K_MENU },
-{ "item", K_ITEM },
-{ "submenu", K_SUBMENU },
-{ "CompileRx", K_COMPILERX },
-{ "extern", K_EXTERN },
-{ "include", K_INCLUDE },
-{ "sub", K_SUB },
-{ "colorize", K_COLORIZE },
-{ "abbrev", K_ABBREV },
-{ "h_state", K_HSTATE },
-{ "h_trans", K_HTRANS },
-{ "h_words", K_HWORDS },
-{ "h_wtype", K_HWTYPE },
-{ "submenucond", K_SUBMENUCOND },
-{ "CvsIgnoreRx", K_CVSIGNRX },
-{ "SvnIgnoreRx", K_SVNIGNRX },
-{ 0, 0 },
+    { "mode", K_MODE },
+    { "eventmap", K_EVENTMAP },
+    { "key", K_KEY },
+    { "color", K_COLOR },
+    { "color_palette", K_COLPALETTE },
+    { "keyword", K_KEYWORD },
+    { "object", K_OBJECT },
+    { "menu", K_MENU },
+    { "item", K_ITEM },
+    { "submenu", K_SUBMENU },
+    { "CompileRx", K_COMPILERX },
+    { "extern", K_EXTERN },
+    { "include", K_INCLUDE },
+    { "sub", K_SUB },
+    { "colorize", K_COLORIZE },
+    { "abbrev", K_ABBREV },
+    { "h_state", K_HSTATE },
+    { "h_trans", K_HTRANS },
+    { "h_words", K_HWORDS },
+    { "h_wtype", K_HWTYPE },
+    { "submenucond", K_SUBMENUCOND },
+    { "CvsIgnoreRx", K_CVSIGNRX },
+    { "SvnIgnoreRx", K_SVNIGNRX },
+    { 0, 0 },
 };
 
 static const OrdLookup CfgVar[] = {
@@ -677,13 +658,11 @@ static char *GetColor(CurPos &cp, char *name) {
             Fail(cp, "Unknown symbolic color %s", name);
         name = p;
     }
-    if (!isxdigit(name[0]) &&
-        name[1] != ' ' &&
-        !isxdigit(name[2]) &&
-        name[3] != 0)
-    {
-        Fail(cp, "malformed color specification: %s", name);
-    }
+
+    if (!isxdigit(name[0]) && name[1] != ' ' &&
+        !isxdigit(name[2]) && name[3] != 0)
+        Fail(cp, "Malformed color specification: %s", name);
+
     return name;
 }
 
@@ -695,13 +674,14 @@ static int GetWord(CurPos &cp, char *w) {
            ((*cp.c >= 'a' && *cp.c <= 'z') ||
             (*cp.c >= 'A' && *cp.c <= 'Z') ||
             (*cp.c >= '0' && *cp.c <= '9') ||
-            (*cp.c == '_')))
-    {
+            (*cp.c == '_'))) {
         *p++ = *cp.c++;
         len++;
     }
-    if (len == sizeof(Word)) return -1;
+    if (len == sizeof(Word))
+        return -1;
     *p = 0;
+
     return 0;
 }
 
@@ -1826,7 +1806,8 @@ static int PreprocessConfigFile(CurPos &cp) {
                             }
                         } else if (*cp.c == '#') {
                             // we really shouldn't process hashed % directives
-                            while( cp.c < cp.z && *cp.c != '\n' ) cp.c++;
+				while (cp.c < cp.z && *cp.c != '\n' )
+					cp.c++;
 
                             // workaround to make line numbering correct
                             cp.line++;
@@ -1857,8 +1838,7 @@ static int PreprocessConfigFile(CurPos &cp) {
             string_open = false;
 	    break;
 
-	default:
-            break;
+	default:;
 	}
 
         cp.c++;
@@ -1899,29 +1879,24 @@ static int LoadFile(const char *WhereName, const char *CfgName, int Level) {
         sprintf(tmp, "~/.fte/%s", CfgName);
         ExpandPath(tmp, Cfg, sizeof(Cfg));
         //fprintf(stderr, "Looking for %s\n", Cfg);
-        if (!FileExists(Cfg))
-        {
+        if (!FileExists(Cfg)) {
             // 2. try "local config".
             sprintf(tmp, "%slocalconfig/%s", StartDir, CfgName);
             ExpandPath(tmp, Cfg, sizeof(Cfg));
             //fprintf(stderr, "Looking for %s\n", Cfg);
-            if (!FileExists(Cfg))
-            {
+            if (!FileExists(Cfg)) {
                 // 3. /usr/share/fte
                 sprintf(tmp, "/usr/share/fte/%s", CfgName);
                 ExpandPath(tmp, Cfg, sizeof(Cfg));
-                if (!FileExists(Cfg))
-                {
+                if (!FileExists(Cfg)) {
                     sprintf(tmp, "%sconfig/%s", StartDir, CfgName);
                     ExpandPath(tmp, Cfg, sizeof(Cfg));
                     //fprintf(stderr, "Looking for %s\n", Cfg);
-                    if (!FileExists(Cfg))
-                    {
+                    if (!FileExists(Cfg)) {
                         sprintf(tmp, "./%s", CfgName);
                         ExpandPath(tmp, Cfg, sizeof(Cfg));
                         //fprintf(stderr, "Looking for %s\n", Cfg);
-                        if (!FileExists(Cfg))
-                        {
+                        if (!FileExists(Cfg)) {
                             fprintf(stderr, "Cannot find '%s' in:\n"
                                     "\t~/.fte,\n""\t%slocalconfig,\n\t/usr/share/fte,\n"
                                     "\t%sconfig, or\n"
@@ -1973,13 +1948,11 @@ static int LoadFile(const char *WhereName, const char *CfgName, int Level) {
 
     // preprocess configuration file
     rc = PreprocessConfigFile(cp);
-    if (rc == -1) {
+    if (rc == -1)
         Fail(cp, "Preprocess failed");
-    }
 
-    if (preprocess_only == true) {
-	printf("%s", cp.a);
-    }
+    if (preprocess_only == true)
+        printf("%s", cp.a);
 
     // reset pointers
     cp.a = cp.c = buffer;
@@ -1991,9 +1964,9 @@ static int LoadFile(const char *WhereName, const char *CfgName, int Level) {
     if (Level == 0)
         PutNull(cp, CF_EOF);
 
-    if (rc == -1) {
+    if (rc == -1)
         Fail(cp, "Parse failed");
-    }
+
     free(buffer);
     return rc;
 }

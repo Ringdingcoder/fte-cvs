@@ -75,7 +75,7 @@ struct GPipe {
 
 static GPipe Pipes[MAX_PIPES];
 
-#define die(s) do { printf("%s\n", s); exit(1); } while(0)
+#define die(s) do { printf("%s\n", s); exit(1); } while (0)
 
 unsigned int VideoCols = 80;
 unsigned int VideoRows = 25;

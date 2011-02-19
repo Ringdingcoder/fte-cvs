@@ -16,7 +16,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-
 int ShowVScroll = 1;
 int ShowHScroll = 1;
 int ShowMenuBar = 1;
@@ -1077,8 +1076,8 @@ void GUI::ProcessEvent() {
 	&& (ConGetEvent(evMouse | evCommand | evKeyboard, &E, 0, 1, 0) == -1
 	    || E.What == evNone)) {
         frames->Update();
-        while(ConGetEvent(evMouse | evCommand | evKeyboard, &E, -1, 1, 0) == -1 ||
-           (E.What == evMouseMove && E.Mouse.Buttons == 0));
+        while (ConGetEvent(evMouse | evCommand | evKeyboard, &E, -1, 1, 0) == -1
+               || (E.What == evMouseMove && E.Mouse.Buttons == 0));
     }
     if (E.What != evNone) {
         GView *view = frames->Active;

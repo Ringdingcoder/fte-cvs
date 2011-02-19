@@ -286,16 +286,18 @@ int main(int argc, char* argv[])
         fprintf(fout, "############################\n\n");
 
         err = 0;
-        while(!err && fgets(linebuf, sizeof(linebuf), fin)==linebuf) {
+        while (!err && fgets(linebuf, sizeof(linebuf), fin)==linebuf) {
                 linecnt++;
                 lptr  = linebuf;
-                while(!err) {
-                        while(*lptr!='\0' && strchr(" \t", *lptr)!=NULL) lptr++;
-                        if (*lptr=='#' || *lptr=='\0' || *lptr=='\n') break;
+                while (!err) {
+                        while (*lptr != '\0' && strchr(" \t", *lptr))
+                                lptr++;
+                        if (*lptr == '#' || *lptr == '\0' || *lptr == '\n')
+                                break;
                         
                         bufptr=keyspecbuf;
                         
-                        while(*lptr!='\0' && strchr(" \t\n", *lptr)==NULL)
+                        while (*lptr != '\0' && !strchr(" \t\n", *lptr))
                                 *(bufptr++)=*(lptr++);
                         *(bufptr++)='\0';
                         

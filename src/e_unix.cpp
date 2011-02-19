@@ -62,7 +62,8 @@ int EView::SysShowHelp(ExState &State, const char *word) {
             //dup(1); // ignore error output
             close(0);
             assert(open("/dev/null", O_RDONLY) == 0);
-            execlp("man", "man",
+            setenv("MAN_KEEP_FORMATTING", "1", 0);
+            execlp("man", "man", "-7",
 #ifndef AIX // current AIX's don't like the -a.
                    "-a",
 #endif

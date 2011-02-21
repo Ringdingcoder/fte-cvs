@@ -631,6 +631,7 @@ int ConGetEvent(TEventMask /*EventMask */, TEvent* Event, int WaitTime, int Dele
 	return 1;
     }
 
+    int rtn;
     if ((rtn = WaitFdPipeEvent(Event, STDIN_FILENO, -1)) <= 0)
 	return rtn;
 

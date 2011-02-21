@@ -3888,8 +3888,8 @@ void DieError(int rc, const char *msg, ...) {
 
 char ConGetDrawChar(unsigned int index) {
     static const char tab[] = "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\xFA\x04\xC4\x18\x19\xB1\xB0\x1B\x1A";
-    
+
     assert(index < strlen(tab));
-    
+
     return tab[index];
 }

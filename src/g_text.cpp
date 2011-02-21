@@ -45,7 +45,7 @@ public:
     int sbVstart, sbVamount, sbVtotal, sbVupdate;
     int sbHstart, sbHamount, sbHtotal, sbHupdate;
     int SbVBegin, SbVEnd, SbHBegin, SbHEnd;
-    
+
     GViewPeer(GView *view, int XSize, int YSize);
     ~GViewPeer();
 
@@ -57,19 +57,19 @@ public:
 
     int ConSetSize(int X, int Y);
     int ConQuerySize(int *X, int *Y);
-    
+
     int ConSetCursorPos(int X, int Y);
     int ConQueryCursorPos(int *X, int *Y);
     int ConShowCursor();
     int ConHideCursor();
     int ConCursorVisible();
     int ConSetCursorSize(int Start, int End);
-    
+
 #ifdef CONFIG_MOUSE
     int CaptureMouse(int grab);
 #endif
     int CaptureFocus(int grab);
-    
+
     int QuerySbVPos();
     int SetSbVPos(int Start, int Amount, int Total);
     int SetSbHPos(int Start, int Amount, int Total);
@@ -77,19 +77,19 @@ public:
 
     int DrawScrollBar();
     int UpdateCursor();
-};      
+};
 
 class GFramePeer {
 public:
     int fW, fH;
     GFrame *Frame;
-    
+
     GFramePeer(GFrame *aFrame, int Width, int Height);
     ~GFramePeer();
-    
+
     int ConSetTitle(const char *Title, const char *STitle);
     int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen);
-    
+
     int ConSetSize(int X, int Y);
     int ConQuerySize(int *X, int *Y);
 
@@ -148,16 +148,18 @@ int GViewPeer::ConSetBox(int X, int Y, int W, int H, TCell Cell) {
 int GViewPeer::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
     return ::ConScroll(Way, X + wX, Y + wY, W, H, Fill, Count);
 }
-    
+
 int GViewPeer::ConSetSize(int X, int Y) {
     wW = X;
     wH = Y;
+
     return 1;
 }
 
 int GViewPeer::ConQuerySize(int *X, int *Y) {
     if (X) *X = wW;
     if (Y) *Y = wH;
+
     return 1;
 }
 
@@ -177,6 +179,7 @@ int GViewPeer::ConSetCursorPos(int X, int Y) {
 int GViewPeer::ConQueryCursorPos(int *X, int *Y) {
     if (X) *X = cX;
     if (Y) *Y = cY;
+
     return 1;
 }
 
@@ -184,6 +187,7 @@ int GViewPeer::ConShowCursor() {
     cVisible = 1;
     if (wState & sfFocus)
         return ::ConShowCursor();
+
     return 1;
 }
 
@@ -302,7 +306,7 @@ int GViewPeer::DrawScrollBar() {
     int W, H;
     char fore = ConGetDrawChar(DCH_HFORE);
     char back = ConGetDrawChar(DCH_HBACK);
-    
+
     ConQuerySize(&W, &H);
 
     if (ShowVScroll && H > 1) {
@@ -312,7 +316,7 @@ int GViewPeer::DrawScrollBar() {
         ConPutBox(W, H - 1, 1, 1, B);
 
         NRows = H - 2;
-        
+
         if (sbVtotal <= NRows) {
             SbVBegin = 0;
             SbVEnd = NRows - 1;
@@ -320,7 +324,7 @@ int GViewPeer::DrawScrollBar() {
             SbVBegin = NRows * sbVstart / sbVtotal;
             SbVEnd   = SbVBegin + NRows * sbVamount / sbVtotal;
         }
-        
+
         for (I = 0; I < NRows; I++) {
             if (I >= SbVBegin && I <= SbVEnd)
                 MoveCh(B, fore, hcScrollBar_Fore, 1);
@@ -334,9 +338,9 @@ int GViewPeer::DrawScrollBar() {
         ConPutBox(0, H, 1, 1, B);
         MoveCh(B, ConGetDrawChar(DCH_ARIGHT), hcScrollBar_Arrows, 1);
         ConPutBox(W - 1, H, 1, 1, B);
-        
+
         NCols = W - 2;
-        
+
         if (sbHtotal <= NCols) {
             SbHBegin = 0;
             SbHEnd = NCols - 1;
@@ -386,10 +390,11 @@ GView::~GView() {
 int GView::ConClear() {
     int W, H;
     TDrawBuffer B;
-    
+
     ConQuerySize(&W, &H);
     MoveChar(B, 0, W, ' ', 0x07, 1);
     ConSetBox(0, 0, W, H, B[0]);
+
     return 1;
 }
 
@@ -415,9 +420,10 @@ int GView::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 
 int GView::ConSetSize(int X, int Y) {
     if (Peer->ConSetSize(X, Y)) {
-	Resize(X, Y);
-	return 1;
+        Resize(X, Y);
+        return 1;
     }
+
     return 0;
 }
 
@@ -442,7 +448,7 @@ int GView::ConHideCursor() {
 }
 
 int GView::ConCursorVisible() {
-    return Peer->ConCursorVisible(); 
+    return Peer->ConCursorVisible();
 }
 
 int GView::ConSetCursorSize(int Start, int End) {
@@ -548,7 +554,7 @@ int GFramePeer::ConQuerySize(int *X, int *Y) {
     if (X) *X = fW;
     if (Y) *Y = fH;
     return 1;
-}   
+}
 
 //int GFrame::ConQuerySize(int *X, int *Y) {
 //    ::ConQuerySize(X, Y);
@@ -715,6 +721,7 @@ void GFrame::InsertView(GView *prev, GView *view) {
         view->Prev = view->Next = view;
         Top = view;
     }
+
     if (Active == 0) {
         Active = view;
         Active->Activate(1);
@@ -723,7 +730,7 @@ void GFrame::InsertView(GView *prev, GView *view) {
 
 void GFrame::RemoveView(GView *view) {
     if (!view) return;
-    
+
     if (Active == view)
         Active->Activate(0);
 
@@ -733,7 +740,7 @@ void GFrame::RemoveView(GView *view) {
     } else {
         view->Next->Prev = view->Prev;
         view->Prev->Next = view->Next;
-        
+
         if (Top == view) {
             Top = view->Next;
             Top->Peer->wY -= view->Peer->wH;
@@ -743,7 +750,7 @@ void GFrame::RemoveView(GView *view) {
             view->Prev->ConSetSize(view->Prev->Peer->wW,
                                    view->Prev->Peer->wH + view->Peer->wH + (ShowHScroll ? 1 : 0));
         }
-        
+
         if (Active == view) {
             Active = view->Prev;
             Active->Activate(1);
@@ -753,13 +760,13 @@ void GFrame::RemoveView(GView *view) {
 
 void GFrame::SelectNext(int back) {
     GView *c = Active;
-    
+
     if (c == 0 && Top == 0)
         return;
-    
+
     if (FocusCapture != 0)
         return ;
-    
+
     else if (c == 0)
         c = Active = Top;
     else
@@ -810,13 +817,13 @@ void GFrame::Resize(int width, int height) {
         height--;
 
     //fprintf(stderr, "Resize: %d %d   c:%d\n", width, height, count);
-    
+
     for (GView *V = Top->Prev; V != Top; V = V->Prev) {
         int h, y;
-        
+
         h = V->Peer->wH;
         y = V->Peer->wY;
-        
+
         if (y >= height - 2) {
             y = height - 2;
         }
@@ -893,7 +900,7 @@ static void HandleVScroll(GView *view, TEvent &E) {
     int y;
     int wY, wH;
     TEvent E1;
-    
+
     y = E.Mouse.Y;
     wY = view->Peer->wY;
     wH = view->Peer->wH;
@@ -957,7 +964,7 @@ static void HandleVScroll(GView *view, TEvent &E) {
         } while (1);
     } else {
         int delta = y - 1 - view->Peer->SbVBegin - wY;
-        
+
         do {
             E1.What = evCommand;
             E1.Msg.View = view;
@@ -981,7 +988,7 @@ static void HandleHScroll(GView *view, TEvent &E) {
     int x;
     int wX, wW;
     TEvent E1;
-    
+
     x = E.Mouse.X;
     wX = view->Peer->wX;
     wW = view->Peer->wW;
@@ -1045,7 +1052,7 @@ static void HandleHScroll(GView *view, TEvent &E) {
         } while (1);
     } else {
         int delta = x - 1 - view->Peer->SbHBegin - wX;
-        
+
         do {
             E1.What = evCommand;
             E1.Msg.View = view;
@@ -1100,11 +1107,10 @@ void GUI::ProcessEvent() {
             }
             if (E.What == evMouseDown && MouseCapture == 0 && FocusCapture == 0) {
                 GView *V = frames->Active;
-                
+
                 while (V) {
                     if (E.Mouse.Y >= V->Peer->wY &&
-                        E.Mouse.Y <  V->Peer->wY + V->Peer->wH + (ShowHScroll ? 1 : 0))
-                    {
+                        E.Mouse.Y <  V->Peer->wY + V->Peer->wH + (ShowHScroll ? 1 : 0)) {
                         frames->SelectView(V);
                         view = V;
                         break;
@@ -1140,7 +1146,7 @@ void GUI::ProcessEvent() {
         }
         if (E.What == evCommand) {
             switch (E.Msg.Command) {
-            case cmResize: 
+            case cmResize:
                 {
                     int X, Y;
 
@@ -1168,14 +1174,14 @@ void GUI::ProcessEvent() {
                 {
                     long id = E.Msg.Param1;
                     int Cols, Rows;
-                    
+
                     if (id == -1) return;
                     frames->ConQuerySize(&Cols, &Rows);
                     int x = Cols / 2, y = Rows / 2;
 #ifdef CONFIG_MOUSE
                     ConQueryMousePos(&x, &y);
 #endif
-                    
+
                     frames->Update(); // sync before menu
                     if (::ExecVertMenu(x, y, id, E, 0) != 1) {
                         if (E.What == evCommand && E.Msg.Command == cmResize) {
@@ -1212,7 +1218,7 @@ int GUI::multiFrame() {
 
 void DieError(int rc, const char *msg, ...) {
     va_list ap;
-    
+
     va_start(ap, msg);
     vfprintf(stderr, msg, ap);
     va_end(ap);

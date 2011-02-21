@@ -19,34 +19,35 @@ int GetPMClip(int clipboard) {
     int i,j, l, dx;
     EPoint P;
 
-    if (GetXSelection(&len, &data, clipboard) == 0) {
-        SSBuffer->Clear();
-        j = 0;
-        l = 0;
+    if (!GetXSelection(&len, &data, clipboard))
+        return 0;
 
-        for (i = 0; i < len; i++) {
-            if (data[i] == '\n') {
-                SSBuffer->AssertLine(l);
-                P.Col = 0; P.Row = l++;
-                dx = 0;
-                if ((i > 0) && (data[i-1] == '\r')) dx++;
-                SSBuffer->InsertLine(P, i - j - dx, data + j);
-                j = i + 1;
-            }
-        }
-        if (j < len) { // remainder
-            i = len;
+    SSBuffer->Clear();
+    j = 0;
+    l = 0;
+
+    for (i = 0; i < len; i++) {
+        if (data[i] == '\n') {
             SSBuffer->AssertLine(l);
             P.Col = 0; P.Row = l++;
             dx = 0;
             if ((i > 0) && (data[i-1] == '\r')) dx++;
-            SSBuffer->InsText(P.Row, P.Col, i - j - dx, data + j);
+            SSBuffer->InsertLine(P, i - j - dx, data + j);
             j = i + 1;
         }
-        free(data);
-        return 1;
     }
-    return 0;
+    if (j < len) { // remainder
+        i = len;
+        SSBuffer->AssertLine(l);
+        P.Col = 0; P.Row = l++;
+        dx = 0;
+        if ((i > 0) && (data[i-1] == '\r')) dx++;
+        SSBuffer->InsText(P.Row, P.Col, i - j - dx, data + j);
+        j = i + 1;
+    }
+    free(data);
+
+    return 1;
 }
 
 int PutPMClip(int clipboard) {

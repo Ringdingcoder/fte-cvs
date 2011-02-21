@@ -102,7 +102,7 @@ char *getProgramName(char *name) {
 #define INCL_DOS
 #include <os2.h>
 
-char *getProgramName(char *name) {
+static char *getProgramName(char *name) {
     char ProgramName[MAXPATH];
     PTIB tib;
     PPIB pib;

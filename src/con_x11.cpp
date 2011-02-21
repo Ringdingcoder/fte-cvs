@@ -167,25 +167,24 @@ static void SendSelection(XEvent *notify, Atom property, Atom type, unsigned cha
 
 static int ErrorHandler(Display *, XErrorEvent *ee) {
     gotXError = True;
+
     return 1;
 }
 
 static Atom GetXClip(int clipboard) {
-    if (clipboard==1) {
-        return XA_PRIMARY;
+    switch (clipboard) {
+    case 1: return XA_PRIMARY;
+    case 2: return XA_SECONDARY;
+    default: return XA_CLIPBOARD;
     }
-    if (clipboard==2) {
-        return XA_SECONDARY;
-    }
-    return XA_CLIPBOARD;
 }
 
 static int GetFTEClip(Atom clip) {
-    if (clip==XA_CLIPBOARD)
+    if (clip == XA_CLIPBOARD)
         return 0;
-    if (clip==XA_PRIMARY)
+    if (clip == XA_PRIMARY)
         return 1;
-    if (clip==XA_SECONDARY)
+    if (clip == XA_SECONDARY)
         return 2;
     return -1;
 }
@@ -214,7 +213,7 @@ static const struct {
 static void SetColor(int i) {
     assert (0 <= i && i <= 15);
 
-    if (RGBColorValid [i]) {
+    if (RGBColorValid[i]) {
         Colors[i].blue  = (unsigned short)((RGBColor[i].b << 8) | RGBColor[i].b);
         Colors[i].green = (unsigned short)((RGBColor[i].g << 8) | RGBColor[i].g);
         Colors[i].red   = (unsigned short)((RGBColor[i].r << 8) | RGBColor[i].r);
@@ -223,6 +222,7 @@ static void SetColor(int i) {
         Colors[i].green = (unsigned short)((dcolors[i].g << 8) | dcolors[i].g);
         Colors[i].red   = (unsigned short)((dcolors[i].r << 8) | dcolors[i].r);
     }
+
     Colors[i].flags = DoRed | DoGreen | DoBlue;
 }
 
@@ -236,8 +236,8 @@ static int InitXColors(Colormap colormap) {
         SetColor(i);
         if (XAllocColor(display, colormap, &Colors[i]) == 0) {
             SetColor(i);
-	    unsigned long pix = 0xFFFFFFFF;
-	    int num = DisplayCells(display, DefaultScreen(display));
+            unsigned long pix = 0xFFFFFFFF;
+            int num = DisplayCells(display, DefaultScreen(display));
             for (int j = 0; j < num; ++j) {
                 clr.pixel = j;
                 XQueryColor(display, colormap, &clr);
@@ -567,22 +567,21 @@ static int SetupXWindow(int argc, char **argv)
             if (c == NULL) c = xpm.colorTable[j].g4_color;
             if (c == NULL) c = xpm.colorTable[j].m_color;
             if (c == NULL) c = xpm.colorTable[j].symbolic;
-            if (c == NULL) {
+            if (c == NULL)
                 // Unknown color
                 colors[j] = 0;
-            } else if (strcmp(c, "None") == 0) {
+            else if (strcmp(c, "None") == 0)
                 // No color - see thru
                 colors[j] = 0;
-            } else if (XParseColor(display, colormap, c, &xc)) {
+            else if (XParseColor(display, colormap, c, &xc)) {
                 // Color parsed successfully
                 ((char *)(colors + j))[0] = (char)(xc.blue >> 8);
                 ((char *)(colors + j))[1] = (char)(xc.green >> 8);
                 ((char *)(colors + j))[2] = (char)(xc.red >> 8);
                 ((char *)(colors + j))[3] = (char)0xff;
-            } else {
+            } else
                 // Color parsing failed
                 colors[j] = 0;
-            }
         }
     }
     if (i == ICON_COUNT) {
@@ -740,7 +739,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
         H = ScreenRows;
 
     for (int i = 0; i < H; ++i) {
-	char temp[ScreenCols + 1];
+        char temp[ScreenCols + 1];
         TCell* pCell = CursorXYPos(X, Y + i);
         int x = 0, l;
         while (x < W) {
@@ -822,13 +821,15 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
 
     TCell Cell(' ', Fill);
     DrawCursor(0);
+
     if (Way == csUp) {
         DebugShowArea(X, (Y + Count), W, (H - Count), 14);
         XCopyArea(display, win, win, colorXGC->GetGC(0),
                   X * FontCX, (Y + Count) * FontCY,
                   W * FontCX, (H - Count) * FontCY,
                   X * FontCX, Y * FontCY);
-        for (l = 0; l < H - Count; ++l)
+
+	for (l = 0; l < H - Count; ++l)
             memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), W * sizeof(TCell));
         //l = H - Count;
         //fprintf(stderr, "X:%d   Y:%d   W:%d   H:%d  c:%d\n", X, Y, W, H, Count);
@@ -1482,8 +1483,8 @@ static void ProcessXEvents(TEvent *Event) {
                                     event.xselectionrequest.property,
                                     XA_ATOM,
                                     32, PropModeReplace,
-				    (unsigned char *)&type_list,
-				    FTE_ARRAY_SIZE(type_list));
+                                    (unsigned char *)&type_list,
+                                    FTE_ARRAY_SIZE(type_list));
                     notify.xselection.property = event.xselectionrequest.property;
 #ifdef CONFIG_X11_XMB
                 } else if (event.xselectionrequest.target == XA_STRING) {
@@ -1554,11 +1555,13 @@ static void ProcessXEvents(TEvent *Event) {
 static void FlashCursor ()
 {
     struct timeval tv;
-    if (!CursorBlink || gettimeofday (&tv, NULL) != 0)
+    unsigned long OldTime = CursorLastTime;
+
+    if (!CursorBlink || gettimeofday(&tv, NULL) != 0)
         return;
 
-    unsigned long OldTime = CursorLastTime;
     CursorLastTime = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+
     if (OldTime / CursorFlashInterval != CursorLastTime / CursorFlashInterval)
         DrawCursor(CursorVisible);
 }
@@ -1670,9 +1673,14 @@ static int WaitForXEvent(int eventType, XEvent *event) {
     while (!XCheckTypedWindowEvent(display, win, eventType, event)) {
         usleep(1000);
         time_t tnow = time(NULL);
-        if (time_started > tnow) time_started = tnow;
-        if (tnow - time_started > 5) return 0;
+
+        if (time_started > tnow)
+            time_started = tnow;
+
+        if (tnow - time_started > 5)
+            return 0;
     }
+
     return 1;
 }
 

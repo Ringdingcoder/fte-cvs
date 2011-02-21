@@ -45,7 +45,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>
-#include <unistd.h>
 
 #define DEBUG(x)
 //printf x
@@ -495,9 +494,8 @@ static void CloseWindow(Widget w, void *framev, XEvent *event, Boolean *cont)
     GFramePeer *frame = (GFramePeer*)framev;
     if (event->type != ClientMessage ||
         ((XClientMessageEvent *)event)->data.l[0] != WM_DELETE_WINDOW)
-    {
-        return ;
-    }
+        return;
+
     NextEvent.What = evCommand;
     NextEvent.Msg.Command = cmClose;
     *cont = False;
@@ -777,7 +775,8 @@ int GViewPeer::AllocBuffer() {
 
 void GViewPeer::DrawCursor(int Show) {
     if (!(View && View->Parent))
-        return ;
+        return;
+
     if (!(wState & sfFocus))
         Show = 0;
 
@@ -1004,6 +1003,7 @@ int GViewPeer::ConSetSize(int X, int Y) {
     wRefresh = 0;
     //    if (Refresh == 0)
     //        XResizeWindow(display, win, ScreenCols * cxChar, ScreenRows * cyChar);
+
     return 1;
 }
 
@@ -1011,36 +1011,42 @@ int GViewPeer::ConQuerySize(int *X, int *Y) {
     //printf("3CONQUERYSIZE  %d  %d\n", wW, wH);
     if (X) *X = wW;
     if (Y) *Y = wH;
+
     return 1;
 }
 
 int GViewPeer::ConSetCursorPos(int X, int Y) {
     if (X < 0) X = 0;
     else if (X >= wW) X = wW - 1;
+
     if (Y < 0) Y = 0;
     else if (Y >= wH) Y = wH - 1;
     DrawCursor(0);
     cX = X;
     cY = Y;
     DrawCursor(1);
+
     return 1;
 }
 
 int GViewPeer::ConQueryCursorPos(int *X, int *Y) {
     if (X) *X = cX;
     if (Y) *Y = cY;
+
     return 1;
 }
 
 int GViewPeer::ConShowCursor() {
     cVisible = 1;
     //    DrawCursor(1);
+
     return 1;
 }
 
 int GViewPeer::ConHideCursor() {
     cVisible = 0;
     //  DrawCursor(0);
+
     return 1;
 }
 
@@ -1051,10 +1057,11 @@ int GViewPeer::ConCursorVisible() {
 int GViewPeer::ConSetCursorSize(int Start, int End) {
     cStart = Start;
     cEnd = End;
+
     if (wState & sfFocus)
         return 1; //PMSetCursorSize(Start, End);
-    else
-        return 1;
+
+    return 1;
 }
 
 int GViewPeer::ExpandHeight(int DeltaY) {
@@ -1066,16 +1073,14 @@ int GViewPeer::QuerySbVPos() {
 }
 
 int GViewPeer::SetSbVPos(int Start, int Amount, int Total) {
-    if (sbVstart != Start ||
-        sbVamount != Amount ||
-        sbVtotal != Total)
-    {
+    if (sbVstart != Start || sbVamount != Amount || sbVtotal != Total) {
         sbVstart = Start;
         sbVamount = Amount;
         sbVtotal = Total;
 
-        if (View->Parent == 0)
+        if (!View->Parent)
             return 0;
+
         if (Amount < 1 || Start + Amount > Total) {
             XtVaSetValues(SbVert,
                           XmNmaximum, 1,
@@ -1094,22 +1099,20 @@ int GViewPeer::SetSbVPos(int Start, int Amount, int Total) {
                           NULL);
         }
     }
+
     return 1;
 }
 
 int GViewPeer::SetSbHPos(int Start, int Amount, int Total) {
-    if (sbHstart != Start ||
-        sbHamount != Amount ||
-        sbHtotal != Total)
-    {
+    if (sbHstart != Start || sbHamount != Amount || sbHtotal != Total) {
         sbHstart = Start;
         sbHamount = Amount;
         sbHtotal = Total;
 
-        if (View->Parent == 0)
+        if (!View->Parent)
             return 0;
 
-        if (Amount < 1 || Start + Amount > Total) {
+        if (Amount < 1 || Start + Amount > Total)
             XtVaSetValues(SbHorz,
                           XmNmaximum, 1,
                           XmNminimum, 0,
@@ -1117,7 +1120,7 @@ int GViewPeer::SetSbHPos(int Start, int Amount, int Total) {
                           XmNsliderSize, 1,
                           XmNvalue, 0,
                           NULL);
-        } else {
+        else
             XtVaSetValues(SbHorz,
                           XmNmaximum, Total,
                           XmNminimum, 0,
@@ -1125,8 +1128,8 @@ int GViewPeer::SetSbHPos(int Start, int Amount, int Total) {
                           XmNsliderSize, Amount,
                           XmNvalue, Start,
                           NULL);
-        }
     }
+
     return 1;
 }
 
@@ -1137,6 +1140,7 @@ int GViewPeer::UpdateCursor() {
         ConShowCursor();
     else
         ConHideCursor();
+
     return 1;
 }
 
@@ -1189,6 +1193,7 @@ int GView::ConClear() {
     ConQuerySize(&W, &H);
     MoveChar(B, 0, W, ' ', 0x07, 1);
     ConSetBox(0, 0, W, H, B[0]);
+
     return 1;
 }
 
@@ -1302,24 +1307,23 @@ void GView::Activate(int gotfocus) {
     if (gotfocus) {
         Peer->wState |= sfFocus;
         Peer->UpdateCursor();
-    } else {
+    } else
         Peer->wState &= ~sfFocus;
-    }
+
     Repaint();
 }
 
 int GView::CaptureMouse(int grab) {
     if (MouseCapture == 0) {
-        if (grab)
-            MouseCapture = this;
-        else
+        if (!grab)
             return 0;
+        MouseCapture = this;
     } else {
         if (grab || MouseCapture != this)
             return 0;
-        else
-            MouseCapture = 0;
+        MouseCapture = 0;
     }
+
     return 1;
 }
 
@@ -1360,7 +1364,7 @@ GFramePeer::~GFramePeer() {
 }
 
 int GFramePeer::ConSetSize(int X, int Y) {
-    printf("SetSIZE %d  %d\n", X, Y);
+    printf("SetSIZE %d x %d\n", X, Y);
     //return ::ConSetSize(X, Y);
     return 0;
 }
@@ -1372,7 +1376,7 @@ int GFramePeer::ConQuerySize(int *X, int *Y) {
     if (X) *X = 80;
     if (Y) *Y = 25;
 
-    printf("1CONQUERYSIZE %d  %d\n", *X, *Y);
+    printf("ConQuerySize %d x %d\n", *X, *Y);
     return 1;
 }
 
@@ -1399,7 +1403,7 @@ void GFramePeer::MapFrame() {
 
 GFrame::GFrame(int XSize, int YSize) {
     Menu = 0;
-    if (frames == 0) {
+    if (!frames) {
         frames = Prev = Next = this;
     } else {
         Next = frames->Next;
@@ -1553,7 +1557,8 @@ void GFrame::SelectNext(int back) {
 
     if (c == 0 && Top == 0)
         return;
-    else if (c == 0)
+
+    if (c == 0)
         c = Active = Top;
     else
         if (back) {
@@ -1561,10 +1566,12 @@ void GFrame::SelectNext(int back) {
         } else {
             Active = Active->Next;
         }
+
     if (c != Active) {
         c->Activate(0);
         Active->Activate(1);
     }
+
     if (Active)
         XtSetKeyboardFocus(Peer->PanedWin, Active->Peer->TextWin);
 }
@@ -1578,11 +1585,15 @@ int GFrame::SelectView(GView *view) {
 
     if (Active)
         Active->Activate(0);
+
     Active = view;
+
     if (Active)
         Active->Activate(1);
+
     if (Active)
         XtSetKeyboardFocus(Peer->PanedWin, Active->Peer->TextWin);
+
     return 1;
 }
 
@@ -1601,9 +1612,9 @@ static Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc 
     Widget hmenu;
     Widget item;
 
-    if (main == 1) {
+    if (main == 1)
         hmenu = XmCreateMenuBar(parent, "menu", NULL, 0);
-    } else if (main == 2) {
+    else if (main == 2) {
         hmenu = XmCreatePopupMenu(parent, "submenu",
                                   NULL, 0);
         //        XtCreateManagedWidget ( "Title", xmLabelWidgetClass, hmenu,
@@ -1611,10 +1622,9 @@ static Widget CreateMotifMenu(Widget parent, int menu, int main, XtCallbackProc 
 
         //        XtCreateManagedWidget ( "separator", xmSeparatorWidgetClass,
         //                            hmenu, NULL, 0 );
-    } else {
+    } else
         hmenu = XmCreatePulldownMenu(parent, "submenu",
                                      NULL, 0);
-    }
 
     for (int i = 0; i < Menus[menu].Count; ++i) {
         if (Menus[menu].Items[i].Name) {
@@ -1892,9 +1902,7 @@ void PipeCallback(void *pipev, int *source, XtInputId *input)
 }
 
 int GUI::OpenPipe(const char *Command, EModel *notify) {
-    int i;
-
-    for (i = 0; i < MAX_PIPES; i++) {
+    for (int i = 0; i < MAX_PIPES; i++) {
         if (Pipes[i].used == 0) {
             int pfd[2];
 

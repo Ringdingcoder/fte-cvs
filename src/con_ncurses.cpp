@@ -16,14 +16,12 @@
 #include "sysdep.h"
 
 #include <ncurses.h>
-//#include <unistd.h>
 
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <termios.h>
-#include <unistd.h>
 
 /* Escape sequence delay in milliseconds */
 #define escDelay 10
@@ -50,8 +48,8 @@ static int MaxSavedW = 0, MaxSavedH = 0;
 static int ScreenSizeChanged;
 static void curses_winch_handler(int signum)
 {
-    ScreenSizeChanged = 1;
-    signal(SIGWINCH, curses_winch_handler);
+	ScreenSizeChanged = 1;
+	signal(SIGWINCH, curses_winch_handler);
 }
 
 
@@ -103,30 +101,26 @@ static int InitColors()
 	int c = 0;
 	int colors = has_colors();
 
-	if(colors) start_color();
-	for(int bgb = 0 ; bgb < 2; bgb++) /* bg bright bit */
-	{
-		for(int bg = 0 ; bg < 8; bg++)
-		{
-			for(int fgb = 0; fgb < 2; fgb++) /* fg bright bit */
-			{
-				for(int fg = 0 ; fg < 8; fg++, c++)
-				{
-					if(colors)
-					{
-						short pair = short(bg*8+fg);
-						if(c!=0) init_pair(pair, fte_curses_colors[fg], fte_curses_colors[bg]);
+	if (colors)
+		start_color();
+
+	for (int bgb = 0 ; bgb < 2; bgb++) { /* bg bright bit */
+		for (int bg = 0 ; bg < 8; bg++) {
+			for (int fgb = 0; fgb < 2; fgb++) { /* fg bright bit */
+				for (int fg = 0 ; fg < 8; fg++, c++) {
+					if (colors) {
+						short pair = short(bg * 8 + fg);
+						if (c)
+							init_pair(pair, fte_curses_colors[fg], fte_curses_colors[bg]);
 						fte_curses_attr[c] = unsigned(fgb ? A_BOLD : 0) | COLOR_PAIR(pair);
-					}
-					else
-					{
-						fte_curses_attr[c] = 0;
-						if(fgb || bgb)
-						{
-							if(bg > fg) fte_curses_attr[c] |= (A_UNDERLINE | A_REVERSE);
-							else fte_curses_attr[c] |= A_BOLD;
-						}
-						else if(bg > fg) fte_curses_attr[c] |= A_REVERSE;
+					} else {
+						if (fgb || bgb)
+							fte_curses_attr[c] = (bg > fg) ?
+								(A_UNDERLINE | A_REVERSE) : A_BOLD;
+						else if (bg > fg)
+							fte_curses_attr[c] = A_REVERSE;
+						else
+							fte_curses_attr[c] = 0;
 					}
 				}
 			}
@@ -491,13 +485,16 @@ static int ConGetEscEvent()
 
 	char seq[8] = { (char)key };
 	unsigned seqpos = 1;
+
 	while (seqpos < 7 && (key = getch()) != ERR)
 		seq[seqpos++] = (char)key;
+
 	seq[seqpos] = 0;
 
 	if (!(key = TTYParseEsc(seq)))
 	    ;//Msg(S_ERROR, "Sequence '%s' not found.", seq);
-        return key;
+
+	return key;
 }
 
 #else
@@ -617,7 +614,6 @@ static int ResizeWindow()
 // *INDENT-OFF*
 int ConGetEvent(TEventMask /*EventMask */, TEvent* Event, int WaitTime, int Delete)
 {
-    int rtn;
     TKeyEvent* KEvent = &(Event->Key);
 
     if (ScreenSizeChanged && (ResizeWindow() > 0)) {
@@ -874,7 +870,7 @@ int GUI::RunProgram(int /*mode */ , char *Command)
 #endif
 	ConSuspend();
 
-	if (*Command == 0)		// empty string = shell
+	if (!Command[0]) // empty string = shell
 		Command = getenv("SHELL");
 
 	rc = system(Command);
@@ -887,6 +883,8 @@ int GUI::RunProgram(int /*mode */ , char *Command)
 
 	if (W != W1 || H != H1)
 		frames->Resize(W1, H1);
+
 	frames->Repaint();
+
 	return rc;
 }

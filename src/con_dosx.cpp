@@ -947,6 +947,7 @@ int RestoreScreen() {
 		ConPutBox(0, 0, SavedX, SavedY, SavedScreen);
 		ConSetCursorPos(SaveCursorPosX, SaveCursorPosY);
 	}
+
 	return 1;
 }
 
@@ -1001,6 +1002,7 @@ int GUI::ShowEntryScreen() {
 	ConShowMouse();
 	if (frames)
 		frames->Repaint();
+
 	return 1;
 }
 

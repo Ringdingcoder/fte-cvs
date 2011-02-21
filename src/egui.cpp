@@ -199,6 +199,7 @@ int EGUI::ExecMacro(GxView *view, int Macro) {
         }
         State.Pos = i;
     }
+
     return 1;
 }
 
@@ -207,36 +208,32 @@ void EGUI::SetMsg(const char *Msg) {
     char* CharMap = (char*) alloca(len);
 
     if (Msg) {
-	CharMap[0] = '[';
-	memcpy(CharMap + 1, Msg, len);
-	CharMap[len + 1] = ']';
-	CharMap[len + 2] = 0;
+        CharMap[0] = '[';
+        memcpy(CharMap + 1, Msg, len);
+        CharMap[len + 1] = ']';
+        CharMap[len + 2] = 0;
     } else
-	CharMap[0] = 0;
+        CharMap[0] = 0;
 
     if (ActiveModel)
-	ActiveModel->Msg(S_INFO, CharMap);
+        ActiveModel->Msg(S_INFO, CharMap);
 }
 
 void EGUI::SetOverrideMap(EKeyMap *aMap, const char *ModeName) {
     OverrideMap = aMap;
-    if (aMap == 0)
-        SetMsg(0);
-    else
-        SetMsg(ModeName);
+
+    SetMsg((aMap == 0) ? 0 : ModeName);
 }
 
 void EGUI::SetMap(EKeyMap *aMap, KeySel *ks) {
     char key[32] = "";
 
     ActiveMap = aMap;
-    if (ActiveMap == 0) {
+    if (!ActiveMap)
         SetMsg(0);
-    } else {
-        if (ks != 0) {
-            GetKeyName(key, sizeof(key), *ks);
-            SetMsg(key);
-        }
+    else if (ks != 0) {
+        GetKeyName(key, sizeof(key), *ks);
+        SetMsg(key);
     }
 }
 
@@ -308,8 +305,7 @@ void EGUI::DispatchKey(GxView *view, TEvent &Event) {
 }
 
 void EGUI::DispatchCommand(GxView *view, TEvent &Event) {
-    if (Event.Msg.Command > 65536 + 16384)
-    { // hack for PM toolbar
+    if (Event.Msg.Command > 65536 + 16384) { // hack for PM toolbar
         Event.Msg.Command -= 65536 + 16384;
         BeginMacro(view);
         ExState State;
@@ -335,25 +331,25 @@ void EGUI::DispatchEvent(GFrame *frame, GView *view, TEvent &Event) {
         Event.Msg.Model->NotifyPipe((int)Event.Msg.Param1);
         return;
     }
+
     if (xview && xview->GetEventMap() != 0) {
         switch (Event.What) {
         case evKeyDown:
             DispatchKey(xview, Event);
             break;
         case evCommand:
-            if (Event.Msg.Command >= 65536) {
+            if (Event.Msg.Command >= 65536)
                 DispatchCommand(xview, Event);
-            } else
+            else
                 switch (Event.Msg.Command) {
                 case cmClose:
-                    {
-                        assert(ActiveView != 0);
-                        FrameClose(ActiveView->MView->Win);
-                        return;
-                    }
+                    assert(ActiveView != 0);
+                    FrameClose(ActiveView->MView->Win);
+                    return;
                 }
         }
     }
+
     GUI::DispatchEvent(frame, view, Event);
 #if defined(OS2) && !defined(DBMALLOC) && defined(CHECKHEAP)
     if (_heapchk() != _HEAPOK)
@@ -423,6 +419,7 @@ int EGUI::FileCloseX(EView *View, int CreateNew, int XClose) {
 
         return 1;
     }
+
     return 0;
 }
 
@@ -443,7 +440,9 @@ int EGUI::FileCloseAll(EView *View, ExState &State) {
         x = OpenAfterClose;
 
     while (ActiveModel)
-        if (FileCloseX(View, x, 1) == 0) return 0;
+        if (!FileCloseX(View, x, 1))
+            return 0;
+
     return 1;
 }
 
@@ -470,12 +469,13 @@ int EGUI::WinClose(GxView * /*V*/) {
 
     if (View->Next == View) {
         // when closing last window, close all files
-        if (ExitEditor(View) == 0)
+        if (!ExitEditor(View))
             return 0;
     } else {
         View->MView->Win->Parent->SelectNext(0);
         delete View->MView->Win;
     }
+
     return 1;
 }
 
@@ -551,6 +551,7 @@ int EGUI::ExitEditor(EView *View) {
     }
 
     StopLoop();
+
     return 1;
 }
 
@@ -641,6 +642,7 @@ int EGUI::FrameNew() {
     view->PushView(edit);
     frames->Show();
     //fprintf(stderr, "FrameNew  %p\n", frames);
+
     return 1;
 }
 
@@ -969,8 +971,8 @@ void EGUI::EditorCleanup() {
     // If EView what is about to be deleted is currently ActiveView, ActiveView moves to next one
     // or if there is no next, it will be set as NULL.
     while ((BW = ActiveView) != NULL) {
-	ActiveView = ActiveView->Next;
-	delete BW;
+        ActiveView = ActiveView->Next;
+        delete BW;
     }
 #endif
 
@@ -984,10 +986,8 @@ void EGUI::Stop() {
 #endif
 
     // free macros
-    if (Macros != 0)
-    {
-        while (CMacros--)
-        {
+    if (Macros != 0) {
+        while (CMacros--) {
             free(Macros[CMacros].Name);
 
             for (unsigned i = 0; i < Macros[CMacros].Count; ++i)
@@ -1005,21 +1005,21 @@ void EGUI::Stop() {
 #ifdef CONFIG_SYNTAX_HILIT
     // free colorizers
     while (EColorize *p = Colorizers) {
-	Colorizers = Colorizers->Next;
-	delete p;
+        Colorizers = Colorizers->Next;
+        delete p;
     }
 #endif
 
     // free event maps
     while (EEventMap *em = EventMaps) {
-	EventMaps = EventMaps->Next;
-	delete em;
+        EventMaps = EventMaps->Next;
+        delete em;
     }
 
     // free modes
     while (EMode *m = Modes) {
-	Modes = Modes->fNext;
-	delete m;
+        Modes = Modes->fNext;
+        delete m;
     }
 
     // free menus

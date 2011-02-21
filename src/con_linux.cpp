@@ -52,7 +52,6 @@ extern "C" {
 #include <sys/vt.h>
 #include <sys/wait.h>
 #include <termios.h>
-#include <unistd.h>
 
 #include <linux/tty.h>
 #include <linux/major.h>
@@ -181,7 +180,7 @@ static void Cleanup() {
 
 static void Die(int) {
     ConDone();
-    exit(66);
+    exit(1);
 }
 
 int ConInit(int /*XSize*/, int /*YSize*/) {
@@ -961,8 +960,7 @@ int GetMouseEvent(TEvent *Event) {
             ((e.modifiers & 4) ? kfCtrl : 0);
 
         if (LastMouseX != e.x ||
-            LastMouseY != e.y)
-        {
+            LastMouseY != e.y) {
             mouseHide();
             LastMouseX = e.x;
             LastMouseY = e.y;
@@ -1000,6 +998,7 @@ int RestoreScreen() {
         ConPutBox(0, 0, SavedX, SavedY, SavedScreen);
         ConSetCursorPos(SaveCursorPosX, SaveCursorPosY);
     }
+
     return 1;
 }
 
@@ -1165,9 +1164,9 @@ char ConGetDrawChar(unsigned int idx) {
     static size_t tablen = 0;
 
     if (!tab) {
-        if (getenv("ISOCONSOLE")) {
+        if (getenv("ISOCONSOLE"))
             tab = GetGUICharacters("Linux", "++++-|+++++>.*-^v :[>");
-        } else {
+        else {
             /* it's hard to pick usable chars between way to many fonts */
             tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A.\x0A\xC4\x18\x19\xB1\xB0\x1B\x1A");
             //tab = GetGUICharacters("Linux", "\xDA\xBF\xC0\xD9\xC4\xB3\xC2\xC3\xB4\xC1\xC5\x1A\xFA\x04\xC4\x18\x19\xB1\xB0\x1B\x1A");

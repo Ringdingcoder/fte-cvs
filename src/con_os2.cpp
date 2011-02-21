@@ -379,6 +379,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
     int MX, MY;
     int MouseHidden = 0;
     unsigned char *p = (unsigned char *) Cell;
+
     if (MouseVisible)
         ConQueryMousePos(&MX, &MY);
 
@@ -433,6 +434,7 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
     int MX, MY;
     int MouseHidden = 0;
     unsigned char *p = (unsigned char *) Cell;
+
     if (MouseVisible)
         ConQueryMousePos(&MX, &MY);
 
@@ -458,6 +460,7 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
     int MX, MY;
     int MouseHidden = 0;
     unsigned char *p = (unsigned char *) &Cell;
+
     if (MouseVisible)
         ConQueryMousePos(&MX, &MY);
 
@@ -780,6 +783,7 @@ int RestoreScreen() {
         ConPutBox(0, 0, SavedX, SavedY, SavedScreen);
         ConSetCursorPos(SaveCursorPosX, SaveCursorPosY);
     }
+
     return 1;
 }
 
@@ -1005,8 +1009,8 @@ int GUI::OpenPipe(const char *Command, EModel *notify) {
             Pipes[i].Command = strdup(Command);
             Pipes[i].notify = notify;
             Pipes[i].DoTerm = 0;
-            if ((Pipes[i].buffer = (char *)malloc(PIPE_BUFLEN)) == 0)
-            {
+
+            if ((Pipes[i].buffer = (char *)malloc(PIPE_BUFLEN)) == 0) {
                 free(Pipes[i].Command);
                 return -1;
             }

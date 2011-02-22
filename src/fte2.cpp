@@ -458,9 +458,10 @@ static int InterfaceInit(int &argc, char **argv) {
     assert(VV != 0);
 
     edit = new ExModelView(VV);
-    if (edit == 0) return 1;
+    if (!edit)
+	return 0;
     view->PushView(edit);
-    return 0;
+    return 1;
 }
 
 static void InterfaceCleanup() {
@@ -504,7 +505,7 @@ int main(int argc, char **argv) {
         return 1;
 #endif
     }
-    if (InterfaceInit(argc, argv) != 0)
+    if (!InterfaceInit(argc, argv))
         return 2;
 
     gui->Run(); // here starts the PM second thread, so the above blocks the SIQ ;-(

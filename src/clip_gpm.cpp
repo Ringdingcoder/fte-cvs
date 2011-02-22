@@ -10,9 +10,9 @@
 #include "fte.h"
 
 int GetPMClip(int clipboard) {
-    return 0;
+    return 1;
 }
 
 int PutPMClip(int clipboard) {
-    return 0;
+    return 1;
 }

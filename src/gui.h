@@ -219,6 +219,13 @@ struct SearchReplaceOptions {
 int DLGGetFind(GView *View, SearchReplaceOptions &sr);
 int DLGGetFindReplace(GView *View, SearchReplaceOptions &sr);
 
-int WaitFdPipeEvent(TEvent *Event, int fd, int WaitTime);
+enum WaitFdPipe {
+    FD_PIPE_ERROR,
+    FD_PIPE_1,
+    FD_PIPE_2,
+    FD_PIPE_EVENT,
+    FD_PIPE_TIMEOUT
+};
+WaitFdPipe WaitFdPipeEvent(TEvent *Event, int fd, int fd2, int WaitTime);
 
 #endif // GUI_H

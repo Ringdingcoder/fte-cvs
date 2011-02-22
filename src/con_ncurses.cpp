@@ -171,7 +171,7 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 		if (key_sup > 0 && key_sdown > 0)
 			break;
 	}
-	return 0;
+	return 1;
 }
 
 
@@ -180,35 +180,36 @@ int ConDone()
 	keypad(stdscr,0);
 	endwin();
 	ReleaseScreen();
-	return 0;
+	return 1;
 }
 
 int ConSuspend()
 {
-	return 0;
+	return 1;
 }
+
 int ConContinue()
 {
-	return 0;
+	return 1;
 }
 
 int ConSetTitle(const char * /*Title */, const char * /*STitle */)
 {
-	return 0;
+	return 1;
 }
 
 int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen)
 {
 	strlcpy(Title, "", MaxLen);
 	strlcpy(STitle, "", SMaxLen);
-	return 0;
+	return 1;
 }
 
 int ConClear() /* not used? */
 {
 	clear();
 	refresh();
-	return 0;
+	return 1;
 }
 
 static chtype GetDch(int idx)
@@ -284,7 +285,7 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell)
 	for (int j = 0 ; j < H; Cell += W, ++j)
 		memcpy(Cell, SavedScreen[Y+j]+X, W*sizeof(TCell));
 
-	return 0;
+	return 1;
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell)
@@ -292,7 +293,7 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell)
 	for (int j = 0 ; j < H; ++j)
 		ConPutBox(X, Y+j, W, 1, Cell);
 
-	return 0;
+	return 1;
 }
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell)
@@ -302,7 +303,7 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 	for (int i = 0; i < W; ++i)
 		line[i] = Cell;
 	ConPutLine(X, Y, W, H, line);
-	return 0;
+	return 1;
 }
 
 
@@ -322,7 +323,7 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 		//ConSetBox(X, Y, W, Count, fill);
 	}
 
-	return 0;
+	return 1;
 }
 
 int ConSetSize(int /*X */ , int /*Y */ )
@@ -334,20 +335,20 @@ int ConQuerySize(int *X, int *Y)
 {
 	*X = COLS;
 	*Y = LINES;
-	return 0;
+	return 1;
 }
 
 int ConSetCursorPos(int X, int Y)
 {
 	move(Y,X);
 	refresh();
-	return 0;
+	return 1;
 }
 
 int ConQueryCursorPos(int *X, int *Y)
 {
 	getyx(stdscr, *Y, *X);
-	return 0;
+	return 1;
 }
 
 static int CurVis = 1;
@@ -357,14 +358,14 @@ int ConShowCursor()
 	CurVis = 1;
 	curs_set(1);
 	refresh();
-	return 0;
+	return 1;
 }
 int ConHideCursor()
 {
 	CurVis = 0;
 	curs_set(0);
 	refresh();
-	return 0;
+	return 1;
 }
 int ConCursorVisible()
 {
@@ -379,34 +380,36 @@ int ConSetCursorSize(int /*Start */ , int /*End */ )
 #ifdef CONFIG_MOUSE
 int ConSetMousePos(int /*X */ , int /*Y */ )
 {
-	return -1;
+	return 0;
 }
 int ConQueryMousePos(int *X, int *Y)
 {
 	*X = 0;
 	*Y = 0;
-	return 0;
+
+	return 1;
 }
 
 int ConShowMouse()
 {
-	return -1;
+	return 0;
 }
 
 int ConHideMouse()
 {
-	return -1;
+	return 0;
 }
 
 int ConMouseVisible()
 {
-	return 0;
+	return 1;
 }
 
 int ConQueryMouseButtons(int *ButtonCount)
 {
 	*ButtonCount = 0;
-	return 0;
+
+	return 1;
 }
 
 static int ConGetMouseEvent(TEvent *Event)
@@ -416,7 +419,7 @@ static int ConGetMouseEvent(TEvent *Event)
 
 	if (getmouse(&mevent) == ERR) {
 		 Event->What = evNone;
-		 return -1;
+		 return 0;
 	}
 #if 0
 	fprintf(stderr, "EVENT %x  %x %x  %d  %d\n", (int)bstate,
@@ -468,7 +471,7 @@ static int ConGetMouseEvent(TEvent *Event)
 		? cmVScrollUp : cmVScrollDown;
 	}
 
-	return 0;
+	return 1;
 }
 #endif // CONFIG_MOUSE
 
@@ -601,7 +604,8 @@ static int ResizeWindow()
 
 	if (ioctl(1, TIOCGWINSZ, &ws) == -1
 	    || !ws.ws_row || !ws.ws_col)
-	    return -1;
+	    return 0;
+
 	if (is_term_resized(ws.ws_row, ws.ws_col)) {
 	    LINES = ws.ws_row;
 	    COLS = ws.ws_col;
@@ -625,7 +629,8 @@ int ConGetEvent(TEventMask /*EventMask */, TEvent* Event, int WaitTime, int Dele
 	return 1;
     }
 
-    if (WaitTime == 0) return -1;
+    if (WaitTime == 0)
+	return 0;
 
     if (Prev.What != evNone) {
 	*Event = Prev;
@@ -829,7 +834,8 @@ char ConGetDrawChar(unsigned int idx)
 int ConPutEvent(const TEvent& Event)
 {
 	Prev = Event;
-	return 0;
+
+	return 1;
 }
 
 GUI::GUI(int &argc, char **argv, int XSize, int YSize)

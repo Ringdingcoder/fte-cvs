@@ -289,7 +289,7 @@ static int InitXColors(Colormap colormap) {
                          ((Colors[0].blue & 0xff00) << 8)
                          | ((Colors[0].green & 0xff00))
                          | ((Colors[0].red & 0xff00) >> 8));
-    return 0;
+    return 1;
 }
 
 class ColorXGC {
@@ -414,7 +414,8 @@ static int InitXFonts()
         // printf("Font X:%d\tY:%d\tD:%d\n", FontCX, FontCY, FontCYD);
     }
 #endif // CONFIG_X11_XMB
-    return 0;
+
+    return 1;
 }
 
 static int SetupXWindow(int argc, char **argv)
@@ -466,7 +467,7 @@ static int SetupXWindow(int argc, char **argv)
     unsigned long mask = 0;
     i18n_ctx = (useI18n) ? i18n_open(display, win, &mask) : 0;
 
-    if (InitXFonts() != 0)
+    if (!InitXFonts())
         DieError(1, "XFTE Fatal: could not open any font!");
 
     /* >KeyReleaseMask shouldn't be set for correct key mapping */
@@ -513,7 +514,8 @@ static int SetupXWindow(int argc, char **argv)
 
     XSetWMProtocols(display, win, &wm_delete_window, 1);
 
-    if (InitXColors(colormap) != 0) return -1;
+    if (!InitXColors(colormap))
+        return 0;
     colorXGC = new ColorXGC();
 
     XWMHints wm_hints;
@@ -613,7 +615,7 @@ static int SetupXWindow(int argc, char **argv)
     XSetWMHints(display, win, &wm_hints);
     XResizeWindow(display, win, ScreenCols * FontCX, ScreenRows * FontCY);
     XMapRaised(display, win); // -> Expose
-    return 0;
+    return 1;
 }
 
 #define CursorXYPos(x, y) (ScreenBuffer + ((x) + ((y) * ScreenCols)))
@@ -668,26 +670,26 @@ int ConInit(int XSize, int YSize) {
     if (YSize != -1)
         ScreenRows = YSize;
     if (!(ScreenBuffer = new TCell[ScreenCols * ScreenRows]))
-        return -1;
+        return 0;
 #ifndef NO_SIGNALS
     signal(SIGALRM, SIG_IGN);
     signal(SIGPIPE, SIG_IGN);
 #endif
-    return 0;
+    return 1;
 }
 
 int ConDone() {
     delete[] ScreenBuffer;
     ScreenBuffer = 0;
-    return 0;
+    return 1;
 }
 
 int ConSuspend() {
-    return 0;
+    return 1;
 }
 
 int ConContinue() {
-    return 0;
+    return 1;
 }
 
 int ConClear() {
@@ -709,13 +711,15 @@ int ConSetTitle(const char *Title, const char *STitle) {
 
     strlcpy(winSTitle, STitle, sizeof(winSTitle));
     XSetStandardProperties(display, win, winTitle, winSTitle, 0, NULL, 0, NULL);
-    return 0;
+
+    return 1;
 }
 
 int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
     strlcpy(Title, winTitle, MaxLen);
     strlcpy(STitle, winSTitle, SMaxLen);
-    return 0;
+
+    return 1;
 }
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell)
@@ -724,7 +728,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 
     if (X >= ScreenCols || Y >= ScreenRows) {
         //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
-        return -1;
+        return 0;
     }
 
     //XClearArea(display, win, X, Y, W * FontCX, H * FontCY, False);
@@ -789,22 +793,22 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 	Cell += W;
     }
 
-    return 0;
+    return 1;
 }
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
     for (int i = 0; i < H; Cell += W, ++i)
         memcpy(Cell, CursorXYPos(X, Y + i), W * sizeof(TCell));
 
-    return 0;
+    return 1;
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
     for (int i = 0; i < H; ++i)
-	if (ConPutBox(X, Y + i, W, 1, Cell) != 0)
-	    return -1;
+        if (ConPutBox(X, Y + i, W, 1, Cell) != 0)
+            return 0;
 
-    return 0;
+    return 1;
 }
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
@@ -813,7 +817,8 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
     for (int i = 0; i < W; i++)
         B[i] = Cell;
     ConPutLine(X, Y, W, H, B);
-    return 0;
+
+    return 1;
 }
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
@@ -851,7 +856,8 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
     }
 
     DrawCursor(1);
-    return 0;
+
+    return 1;
 }
 
 int ConSetSize(int X, int Y) {
@@ -869,13 +875,14 @@ int ConSetSize(int X, int Y) {
     //ConPutBox(0, 0, ScreenCols, ScreenRows, (PCell) ScreenBuffer);
     //if (Refresh == 0)
     //    XResizeWindow(display, win, ScreenCols * FontCX, ScreenRows * FontCY);
-    return 0;
+    return 1;
 }
 
 int ConQuerySize(int *X, int *Y) {
     *X = ScreenCols;
     *Y = ScreenRows;
-    return 0;
+
+    return 1;
 }
 
 int ConSetCursorPos(int X, int Y) {
@@ -883,25 +890,29 @@ int ConSetCursorPos(int X, int Y) {
     CursorX = X;
     CursorY = Y;
     DrawCursor(1);
-    return 0;
+
+    return 1;
 }
 
 int ConQueryCursorPos(int *X, int *Y) {
     *X = CursorX;
     *Y = CursorY;
-    return 0;
+
+    return 1;
 }
 
 int ConShowCursor() {
     CursorVisible = 1;
     DrawCursor(1);
-    return 0;
+
+    return 1;
 }
 
 int ConHideCursor() {
     DrawCursor(0);
     CursorVisible = 0;
-    return 0;
+
+    return 1;
 }
 
 int ConCursorVisible() {
@@ -911,11 +922,12 @@ int ConSetCursorSize(int Start, int End) {
     CursorStart = Start;
     CursorEnd = End;
     DrawCursor(CursorVisible);
-    return 0;
+
+    return 1;
 }
 
 int ConSetMousePos(int /*X*/, int /*Y*/) {
-    return 0;
+    return 1;
 }
 
 static int LastMouseX = -1, LastMouseY = -1;
@@ -923,17 +935,18 @@ static int LastMouseX = -1, LastMouseY = -1;
 int ConQueryMousePos(int *X, int *Y) {
     if (X) *X = LastMouseX;
     if (Y) *Y = LastMouseY;
-    return 0;
+
+    return 1;
 }
 
 int ConShowMouse() {
     printf("Show\n");
-    return 0;
+    return 1;
 }
 
 int ConHideMouse() {
     printf("Hide\n");
-    return 0;
+    return 1;
 }
 
 int ConMouseVisible() {
@@ -942,7 +955,8 @@ int ConMouseVisible() {
 
 int ConQueryMouseButtons(int *ButtonCount) {
     *ButtonCount = 3;
-    return 0;
+
+    return 1;
 }
 
 #if 0
@@ -1581,18 +1595,27 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
     Event->What = evNone;
     if (Queued.What != evNone) {
         *Event = Queued;
-        if (Delete) Queued.What = evNone;
-        if (Event->What & EventMask) return 0;
-        else Queued.What = evNone;
+
+        if (Delete)
+            Queued.What = evNone;
+
+        if (Event->What & EventMask)
+            return 1;
+
+        Queued.What = evNone;
     }
 
     Event->What = evNone;
     if (Pending.What != evNone) {
         *Event = Pending;
-        if (Delete) Pending.What = evNone;
-        if (Event->What & EventMask) return 0;
-        else
+
+        if (Delete)
             Pending.What = evNone;
+
+        if (Event->What & EventMask)
+            return 1;
+
+        Pending.What = evNone;
     }
 
     // We can't sleep for too much since we have to flash the cursor
@@ -1610,66 +1633,68 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
                 while ((Event->What == evMouseMove) && (Queued.What == evNone)) {
                     while ((rc = XPending(display)) > 0) {
                         ProcessXEvents(&Queued);
-                        if (Queued.What == evMouseMove) {
-                            *Event = Queued;
-                            Queued.What = evNone;
-                        } else break;
+                        if (Queued.What != evMouseMove)
+                            break;
+                        *Event = Queued;
+                        Queued.What = evNone;
                     }
-                    if (rc <= 0) break;
+                    if (rc <= 0)
+                        break;
                 }
             }
-            if (Delete == 0)
+            if (!Delete)
                 Pending = *Event;
             if (Event->What & EventMask)
-                return 0;
+                return 1;
 
-	    Pending.What = evNone;
+            Pending.What = evNone;
             Event->What = evNone;
         }
 
         if ((WaitTime == -1 || WaitTime > (int)MouseAutoDelay)
             && (LastMouseEvent.What == evMouseAuto) && (EventMask & evMouse)) {
 
-            rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
-                                 MouseAutoDelay);
-            if (rc == 0) {
+            if ((rc = WaitFdPipeEvent(Event, ConnectionNumber(display), -1,
+                                      MouseAutoDelay)) == FD_PIPE_TIMEOUT) {
                 *Event = LastMouseEvent;
-                return 0;
+                return 1;
             }
         } else if ((WaitTime == -1 || WaitTime > (int)MouseAutoRepeat)
                    && (LastMouseEvent.What == evMouseDown || LastMouseEvent.What == evMouseMove)
                    && (LastMouseEvent.Mouse.Buttons) && (EventMask & evMouse)) {
 
-            rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
-                                 MouseAutoRepeat);
-            if (rc == 0) {
+            if ((rc = WaitFdPipeEvent(Event, ConnectionNumber(display), -1,
+                                      MouseAutoRepeat)) == FD_PIPE_TIMEOUT) {
                 LastMouseEvent.What = evMouseAuto;
                 *Event = LastMouseEvent;
-                return 0;
+                return 1;
             }
         } else
-            rc = WaitFdPipeEvent(Event, ConnectionNumber(display),
+            rc = WaitFdPipeEvent(Event, ConnectionNumber(display), -1,
                                  (WaitTime < 1000) ? WaitTime : 1001);
 
-        if (rc == 0 || rc == -1)
-            return -1;
+        if (rc == FD_PIPE_TIMEOUT || rc == FD_PIPE_ERROR)
+            return 0;
         // pipe event has evNotify
     }
-    return 0;
+
+    return 1;
 }
 
 int ConPutEvent(const TEvent& Event) {
     Pending = Event;
-    return 0;
+
+    return 1;
 }
 
 int ConFlush() {
     XFlush(display);
-    return 0;
+
+    return 1;
 }
 
 int ConGrabEvents(TEventMask /*EventMask*/) {
-    return 0;
+    return 1;
 }
 
 static int WaitForXEvent(int eventType, XEvent *event) {
@@ -1766,7 +1791,8 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
     XConvertSelection(display, selection, type, prop_selection, win, now);
 
     // Wait for SelectionNotify
-    if (!WaitForXEvent(SelectionNotify, &event) || event.xselection.property != prop_selection) return -1;
+    if (!WaitForXEvent(SelectionNotify, &event) || event.xselection.property != prop_selection)
+        return 0;
 
     // Consume event sent when property was set by selection owner
     WaitForXEvent(PropertyNotify, &event);
@@ -1775,7 +1801,8 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
     retval = XGetWindowProperty(display, win, prop_selection, 0, 0, False, AnyPropertyType,
                                 &actual_type, &actual_format, &nitems, &bytes_after, &d);
     XFree(d);
-    if (retval != Success) return -1;
+    if (retval != Success)
+        return 0;
 
     if (actual_type == proptype_incr) {
         // Incremental data
@@ -1796,8 +1823,8 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
             // Wait for new value notification
             do {
                 if (!WaitForXEvent(PropertyNotify, &event)) {
-                    if (buffer) free(buffer);
-                    return -1;
+                    free(buffer);
+                    return 0;
                 }
             } while (event.xproperty.state != PropertyNewValue);
 
@@ -1826,25 +1853,22 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
             XFree(d);
             if (nitems == 0) {
                 // No more data - done
-                if (!buffer) {
+                if (!buffer)
                     // No buffer - failed
-                    return -1;
-                } else {
-                    // Buffer OK - exit loop and continue to data conversion
-                    nitems = pos;
-                    d = buffer;
-                    break;
-                }
+                    return 0;
+
+                // Buffer OK - exit loop and continue to data conversion
+                nitems = pos;
+                d = buffer;
+                break;
             }
         }
-    } else {
+    } else
         // Obtain the data from property
-        retval = XGetWindowProperty(display, win, prop_selection, 0, nitems + bytes_after, True, type,
-                                    &actual_type, &actual_format, &nitems, &bytes_after, &d);
-        if (retval != Success) {
-            return -1;
-        }
-    }
+        if (XGetWindowProperty(display, win, prop_selection, 0, nitems + bytes_after,
+                               True, type, &actual_type, &actual_format, &nitems,
+                               &bytes_after, &d) != Success)
+            return 0;
 
     // Now convert data to char string (uses nitems and d)
     if (actual_type == XA_STRING) {
@@ -1892,38 +1916,41 @@ static int ConvertSelection(Atom selection, Atom type, int *len, char **data) {
             // Cleanup
             XFreeStringList(list);
         }
-        if (*data == NULL) return -1; // failed
+        if (!*data)
+            return 0; // failed
 #else
-        return -1;
+        return 0;
 #endif
     }
     // OK
-    return 0;
+    return 1;
 }
 
 int GetXSelection(int *len, char **data, int clipboard) {
     if (CurSelectionOwn[clipboard]) {
-        *data = (char *) malloc(CurSelectionLen[clipboard]);
-        if (*data == 0)
-            return -1;
+        if (!(*data = (char *) malloc(CurSelectionLen[clipboard])))
+            return 0;
         memcpy(*data, CurSelectionData[clipboard], CurSelectionLen[clipboard]);
         *len = CurSelectionLen[clipboard];
-        return 0;
-    } else {
-        Atom clip = GetXClip(clipboard);
-        if (XGetSelectionOwner(display, clip) != None) {
-            // Get data - try various formats
+        return 1;
+    }
+
+    Atom clip = GetXClip(clipboard);
+    if (XGetSelectionOwner(display, clip) != None) {
+        // Get data - try various formats
 #ifdef CONFIG_X11_XMB
 #ifdef X_HAVE_UTF8_STRING
-            if (ConvertSelection(clip, proptype_utf8_string, len, data) == 0) return 0;
+        if (ConvertSelection(clip, proptype_utf8_string, len, data))
+            return 1;
 #endif
-            if (ConvertSelection(clip, proptype_compound_text, len, data) == 0) return 0;
+        if (ConvertSelection(clip, proptype_compound_text, len, data))
+            return 1;
 #endif
-            return ConvertSelection(clip, XA_STRING, len, data);
-        }
+        return ConvertSelection(clip, XA_STRING, len, data);
     }
     *data = XFetchBytes(display, len);
-    return (*data == 0) ? -1 :  0;
+
+    return (*data != NULL);
 }
 
 int SetXSelection(int len, char *data, int clipboard) {
@@ -1937,7 +1964,7 @@ int SetXSelection(int len, char *data, int clipboard) {
 
     if (!CurSelectionData[clipboard]) {
         CurSelectionLen[clipboard] = 0;
-        return -1;
+        return 0;
     }
 
     CurSelectionLen[clipboard] = len;
@@ -1951,7 +1978,8 @@ int SetXSelection(int len, char *data, int clipboard) {
 
     if (XGetSelectionOwner(display, clip) == win)
         CurSelectionOwn[clipboard] = 1;
-    return 0;
+
+    return 1;
 }
 
 GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
@@ -1992,8 +2020,7 @@ GUI::GUI(int &argc, char **argv, int XSize, int YSize) {
     argc = o;
     argv[argc] = 0;
 
-    if (::ConInit(XSize, YSize) == 0
-        && SetupXWindow(argc, argv) == 0)
+    if (::ConInit(XSize, YSize) && SetupXWindow(argc, argv))
         gui = this;
     else
         gui = NULL;
@@ -2048,7 +2075,7 @@ int GUI::RunProgram(int mode, char *Command) {
         if (mode == RUN_ASYNC)
             strlcat(Cmd, " &", sizeof(Cmd));
     }
-    return system(Cmd);
+    return (system(Cmd) == 0);
 }
 
 char ConGetDrawChar(unsigned int idx) {

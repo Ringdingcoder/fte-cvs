@@ -497,11 +497,11 @@ int EGUI::WinZoom(GxView *View) {
 int EGUI::WinResize(ExState &State, GxView *View) {
     int Delta = 1;
 
-    if (State.GetIntParam(0, &Delta)) {
-        if (View->ExpandHeight(Delta) == 0)
-            return 1;
-    }
-    return 0;
+    if (State.GetIntParam(0, &Delta))
+        if (!View->ExpandHeight(Delta))
+            return 0;
+
+    return 1;
 }
 
 int EGUI::ExitEditor(EView *View) {
@@ -602,7 +602,8 @@ int EGUI::ShowMenu(ExState &State, GxView *View) {
         return 0;
 
     View->Parent->PopupMenu(MName);
-    return 0;
+
+    return 1;
 }
 
 int EGUI::LocalMenu(GxView *View) {
@@ -615,7 +616,8 @@ int EGUI::LocalMenu(GxView *View) {
         MName = "Local";
 
     View->Parent->PopupMenu(MName);
-    return 0;
+
+    return 1;
 }
 
 int EGUI::DesktopSaveAs(ExState &State, GxView *view) {
@@ -773,7 +775,8 @@ void EGUI::EditorInit() {
 int EGUI::InterfaceInit(int &/*argc*/, char ** /*argv*/) {
     if (!FrameNew())
         DieError(1, "Failed to create window\n");
-    return 0;
+
+    return 1;
 }
 
 #ifdef CONFIG_HISTORY
@@ -917,13 +920,11 @@ int EGUI::CmdLoadFiles(int &argc, char **argv) {
 }
 
 int EGUI::Start(int &argc, char **argv) {
-    int rc;
+    if (!GUI::Start(argc, argv))
+        return 0;
 
-    if ((rc = GUI::Start(argc, argv)))
-        return rc;
-
-    if (InterfaceInit(argc, argv) != 0)
-        return 2;
+    if (!InterfaceInit(argc, argv))
+        return 0;
 
     EditorInit();
 
@@ -935,8 +936,8 @@ int EGUI::Start(int &argc, char **argv) {
     DoLoadDesktopOnEntry(argc, argv);
 #endif
 
-    if (CmdLoadFiles(argc, argv) == 0)
-        return 3;
+    if (!CmdLoadFiles(argc, argv))
+        return 0;
 
     if (!ActiveModel) {
 #ifdef CONFIG_OBJ_DIRECTORY

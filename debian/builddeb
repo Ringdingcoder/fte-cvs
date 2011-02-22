@@ -3,7 +3,8 @@
 #dpkg-buildpackage -d -sa -pgpg -rfakeroot
 
 
-dpkg-buildpackage -b -sa -pgpg -ICVS -I.cvsignore -Ipatches -rfakeroot 
+#dpkg-buildpackage -b -sa -pgpg -ICVS -I.cvsignore -Ipatches -rfakeroot 
+dpkg-buildpackage -sa -pgpg -ICVS -I.cvsignore -Ipatches -rfakeroot 
 
 # debchanges
 

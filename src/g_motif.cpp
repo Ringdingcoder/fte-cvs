@@ -761,13 +761,14 @@ int GViewPeer::AllocBuffer() {
     int i;
     char *p;
     /* FIXME */
-    ScreenBuffer = (char *)malloc(wW * wH * sizeof(TCell));
-    if (ScreenBuffer == NULL) return -1;
+    if (!(ScreenBuffer = (char *)malloc(wW * wH * sizeof(TCell))))
+        return 0;
     for (i = 0, p = ScreenBuffer; i < wW * wH; i++) {
         *p++ = 32;
         *p++ = 0x07;
     }
-    return 0;
+
+    return 1;
 }
 
 #define InRange(x,a,y) (((x) <= (a)) && ((a) < (y)))
@@ -823,13 +824,13 @@ int GViewPeer::ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         return 1;
 
     if (Visibility == VisibilityFullyObscured)
-        return - 1;
+        return 0;
 
     if (X >= wW || Y >= wH ||
         X + W > wW || Y + H > wH)
     {
         //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
-        return -1;
+        return 0;
     }
 
     DEBUG(("PutBox %d | %d %d %d %d | %d %d\n", wRefresh, X, Y, W, H, wW, wH));
@@ -884,7 +885,8 @@ int GViewPeer::ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         Cell += W;
     }
     DEBUG(("done putbox\n"));
-    return 0;
+
+    return 1;
 }
 
 void GViewPeer::UpdateWindow(int xx, int yy, int ww, int hh) {
@@ -914,16 +916,16 @@ int GViewPeer::ConGetBox(int X, int Y, int W, int H, PCell Cell) {
         memcpy(Cell, CursorXYPos(X, Y + i), 2 * W);
         Cell += W;
     }
-    return 0;
+
+    return 1;
 }
 
 int GViewPeer::ConPutLine(int X, int Y, int W, int H, PCell Cell) {
-    int i;
+    for (int i = 0; i < H; i++)
+        if (!ConPutBox(X, Y + i, W, 1, Cell))
+            return 0;
 
-    for (i = 0; i < H; i++) {
-        if (ConPutBox(X, Y + i, W, 1, Cell) != 0) return -1;
-    }
-    return 0;
+    return 1;
 }
 
 int GViewPeer::ConSetBox(int X, int Y, int W, int H, TCell Cell) {
@@ -932,7 +934,8 @@ int GViewPeer::ConSetBox(int X, int Y, int W, int H, TCell Cell) {
     for (int i = 0; i < W; i++)
         B[i] = Cell;
     ConPutLine(X, Y, W, H, B);
-    return 0;
+
+    return 1;
 }
 
 int GViewPeer::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
@@ -952,8 +955,9 @@ int GViewPeer::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Co
                  );
         for (l = 0; l < H - Count; l++)
             memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), 2 * W);
-        }
-        if (ConSetBox(X, Y + H - Count, W, Count, Cell) == -1) return -1;
+
+        if (!ConSetBox(X, Y + H - Count, W, Count, Cell))
+            return 0;
     } else if (Way == csDown) {
         XCopyArea(display, XtWindow(TextWin), XtWindow(TextWin), gc[0],
                   X * cxChar,
@@ -963,10 +967,11 @@ int GViewPeer::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Co
                   X * cxChar,
                   (Y + Count)* cyChar
                  );
-        for (l = H - 1; l >= Count; l--) {
+        for (l = H - 1; l >= Count; l--)
             memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l - Count), 2 * W);
-        }
-        if (ConSetBox(X, Y, W, Count, Cell) == -1) return -1;
+
+        if (!ConSetBox(X, Y, W, Count, Cell))
+            return 0;
     }
     DrawCursor(1);
 
@@ -980,7 +985,8 @@ int GViewPeer::ConSetSize(int X, int Y) {
     int MX, MY;
 
     p = NewBuffer = (char *) malloc(X * Y * sizeof(TCell));
-    if (NewBuffer == NULL) return -1;
+    if (NewBuffer == NULL)
+        return 0;
     for (int i = 0; i < X * Y; i++) {
         *p++ = ' ';
         *p++ = 0x07;
@@ -1221,11 +1227,12 @@ int GView::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 
 int GView::ConSetSize(int X, int Y) {
     printf("ConSetSize %d  %d\n", X, Y);
-    if (Peer->ConSetSize(X, Y)) ;
-    //        Resize(X, Y);
-    else
-        return 0;
-    return 1;
+    if (Peer->ConSetSize(X, Y)) {
+        // Resize(X, Y);
+        return 1;
+    }
+
+    return 0;
 }
 
 int GView::ConQuerySize(int *X, int *Y) {
@@ -1460,7 +1467,7 @@ int GFrame::ConSplitView(GView *view, GView *newview) {
     InsertView(view, newview);
     view->ConSetSize(view->Peer->wW, view->Peer->wH);
     newview->ConSetSize(newview->Peer->wW, newview->Peer->wH);
-    return 0;
+    return 1;
 }
 
 int GFrame::ConCloseView(GView *view) {
@@ -1485,7 +1492,7 @@ int GFrame::AddView(GView *view) {
     //        ConQuerySize(&W, &H);
     //        view->ConSetSize(W, H);
     InsertView(Top, view);
-    return 0;
+    return 1;
 }
 
 void GFrame::Update() {
@@ -1707,7 +1714,7 @@ int GFrame::SetMenu(const char *Name) {
 }
 
 int GFrame::ExecMainMenu(char Sub) {
-    return 0;
+    return 1;
 }
 
 int GFrame::PopupMenu(const char *Name) {
@@ -1803,7 +1810,7 @@ GUI::~GUI() {
 }
 
 int GUI::ConGrabEvents(TEventMask EventMask) {
-    return 0;
+    return 1;
 }
 
 void GUI::DispatchEvent(GFrame *frame, GView *view, TEvent &Event) {
@@ -1820,16 +1827,16 @@ int GUI::ConContinue() { return 0; }
 int GUI::ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete, GView **view) {
     //return ::ConGetEvent(EventMask, Event, WaitTime, Delete, view);
     assert(1 == 0);
-    return 0;
+    return 1;
 }
 
 int GUI::ConPutEvent(const TEvent& Event) {
     EventBuf = Event;
-    return 0;
+    return 1;
 }
 
 int GUI::ConFlush() {
-    return 0;
+    return 1;
 }
 
 void GUI::ProcessEvent() {
@@ -1848,19 +1855,19 @@ void GUI::ProcessEvent() {
 }
 
 int GUI::Run() {
-    if (Start(fArgc, fArgv) == 0) {
+    if (Start(fArgc, fArgv)) {
         doLoop = 1;
         frames->Show();
 
-	//if (frames && frames->Peer)
-	//    frames->Peer->MapFrame();
+        //if (frames && frames->Peer)
+        //    frames->Peer->MapFrame();
 
-	//XtAppMainLoop(AppContext);
-	while (doLoop)
-	    ProcessEvent();
+        //XtAppMainLoop(AppContext);
+        while (doLoop)
+            ProcessEvent();
 
-	Stop();
-        return 0;
+        Stop();
+        return 1;
     }
 
     return 0;
@@ -1884,7 +1891,7 @@ int GUI::RunProgram(int mode, char *Command) {
             strlcat(Cmd, " &", sizeof(Cmd));
     }
 
-    return system(Cmd);
+    return (system(Cmd) == 0);
 }
 
 //void PipeCallback(GPipe *pipe, int *source, XtInputId *input)
@@ -1912,7 +1919,7 @@ int GUI::OpenPipe(const char *Command, EModel *notify) {
             Pipes[i].stopped = 1;
 
             if (pipe((int *)pfd) == -1)
-                return -1;
+                return 0;
 
             switch (Pipes[i].pid = fork()) {
             case -1: /* fail */
@@ -1935,14 +1942,16 @@ int GUI::OpenPipe(const char *Command, EModel *notify) {
             return i;
         }
     }
+
     return -1;
 }
 
 int GUI::SetPipeView(int id, EModel *notify) {
     if (id < 0 || id > MAX_PIPES)
-        return -1;
+        return 0;
     if (Pipes[id].used == 0)
-        return -1;
+        return 0;
+
     //fprintf(stderr, "Pipe View: %d %08X\n", id, notify);
     Pipes[id].notify = notify;
     if (notify != Pipes[id].notify) {
@@ -1956,16 +1965,16 @@ int GUI::SetPipeView(int id, EModel *notify) {
             }
 	}
     }
-    return 0;
+
+    return 1;
 }
 
 ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
     ssize_t rc;
 
-    if (id < 0 || id > MAX_PIPES)
+    if (id < 0 || id > MAX_PIPES || Pipes[id].used == 0)
         return -1;
-    if (Pipes[id].used == 0)
-        return -1;
+
     //fprintf(stderr, "Pipe Read: Get %d %d\n", id, len);
 
     rc = read(Pipes[id].fd, buffer, len);
@@ -1978,33 +1987,31 @@ ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
         close(Pipes[id].fd);
         return -1;
     }
-    if (rc == -1) {
+    if (rc == -1)
         Pipes[id].stopped = 1;
-        return 0;
-    }
+
     return rc;
 }
 
 int GUI::ClosePipe(int id) {
     int status;
 
-    if (id < 0 || id > MAX_PIPES)
-        return -1;
-    if (Pipes[id].used == 0)
-        return -1;
+    if (id < 0 || id > MAX_PIPES || Pipes[id].used == 0)
+        return 0;
+
     waitpid(Pipes[id].pid, &status, 0);
     //fprintf(stderr, "Pipe Close: %d\n", id);
     Pipes[id].used = 0;
-    return WEXITSTATUS(status);
+
+    return (WEXITSTATUS(status) == 0);
 }
 
 int GetXSelection(int *len, char **data, int clipboard) {
     // XXX use clipboard?
-    *data = XFetchBytes(display, len);
-    if (*data == 0)
-        return -1;
-    else
+    if (!(*data = XFetchBytes(display, len)))
         return 0;
+
+    return 1;
 }
 
 int SetXSelection(int len, char *data, int clipboard) {
@@ -2023,9 +2030,10 @@ int SetXSelection(int len, char *data, int clipboard) {
         break;
     default:
         // not supported
-        return -1;
+        return 0;
     }
     XSetSelectionOwner(display, clip, None, CurrentTime);
+
     return 1;
 }
 

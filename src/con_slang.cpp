@@ -130,11 +130,11 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 
     if ((SLkp_init() == -1)
 	|| (SLang_init_tty(0, 1, 1) == -1))
-	return -1;
+	return 0;
 
     if (SLsmg_init_smg() == -1) {
 	SLang_reset_tty();
-	return -1;
+	return 0;
     }
 
     SLsignal_intr(SIGWINCH, sigwinch_handler);
@@ -161,14 +161,14 @@ int ConInit(int /*XSize */ , int /*YSize */ )
     SLtt_flush_output();
     //use_esc_hack = (getenv("FTESL_ESC_HACK") != NULL);
 
-    return 0;
+    return 1;
 }
 int ConDone()
 {
     SLsmg_reset_smg();
     SLang_reset_tty();
 
-    return 0;
+    return 1;
 }
 
 int ConSuspend()
@@ -176,19 +176,19 @@ int ConSuspend()
     SLsmg_suspend_smg();
     SLang_reset_tty();
 
-    return 0;
+    return 1;
 }
 int ConContinue()
 {
     SLang_init_tty(-1, 0, 1);
     SLsmg_resume_smg();
 
-    return 0;
+    return 1;
 }
 
 int ConSetTitle(const char * /*Title */ , const char * /*STitle */ )
 {
-    return 0;
+    return 1;
 }
 
 int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen)
@@ -196,7 +196,7 @@ int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen)
     strlcpy(Title, "", MaxLen);
     strlcpy(STitle, "", SMaxLen);
 
-    return 0;
+    return 1;
 }
 
 int ConClear()
@@ -204,7 +204,7 @@ int ConClear()
     SLsmg_cls();
     SLsmg_refresh();
 
-    return 0;
+    return 1;
 }
 
 static void fte_write_color_chars(PCell Cell, int W)
@@ -260,7 +260,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
     }
     ConSetCursorPos(CurX, CurY);
 
-    return 0;
+    return 1;
 }
 
 static int ConPutBoxRaw(int X, int Y, int W, int H, SLsmg_Char_Type *box)
@@ -274,7 +274,7 @@ static int ConPutBoxRaw(int X, int Y, int W, int H, SLsmg_Char_Type *box)
     }
     ConSetCursorPos(CurX, CurY);
 
-    return 0;
+    return 1;
 }
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell)
@@ -307,8 +307,7 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell)
     }
     ConSetCursorPos(CurX, CurY);
 
-    return 0;
-
+    return 1;
 }
 
 static int ConGetBoxRaw(int X, int Y, int W, int H, SLsmg_Char_Type *box)
@@ -322,7 +321,7 @@ static int ConGetBoxRaw(int X, int Y, int W, int H, SLsmg_Char_Type *box)
     }
     ConSetCursorPos(CurX, CurY);
 
-    return 0;
+    return 1;
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell)
@@ -336,7 +335,7 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell)
     }
     ConSetCursorPos(CurX, CurY);
 
-    return 0;
+    return 1;
 }
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell)
@@ -348,7 +347,7 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell)
 
     ConPutLine(X, Y, W, H, line);
 
-    return 0;
+    return 1;
 }
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
@@ -366,12 +365,12 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 	//ConSetBox(X, Y, W, Count, fill);
     }
 
-    return 0;
+    return 1;
 }
 
 int ConSetSize(int /*X */ , int /*Y */ )
 {
-    return -1;
+    return 0;
 }
 
 int ConQuerySize(int *X, int *Y)
@@ -379,21 +378,21 @@ int ConQuerySize(int *X, int *Y)
     *X = SLtt_Screen_Cols;
     *Y = SLtt_Screen_Rows;
 
-    return 0;
+    return 1;
 }
 
 int ConSetCursorPos(int X, int Y)
 {
     SLsmg_gotorc(Y, X);
     SLsmg_refresh();
-    return 0;
+    return 1;
 }
 
 int ConQueryCursorPos(int *X, int *Y)
 {
     *X = SLsmg_get_column();
     *Y = SLsmg_get_row();
-    return 0;
+    return 1;
 }
 
 static int CurVis = 1;
@@ -403,14 +402,14 @@ int ConShowCursor()
     CurVis = 1;
     SLtt_set_cursor_visibility(1);
 
-    return 0;
+    return 1;
 }
 int ConHideCursor()
 {
     CurVis = 0;
     SLtt_set_cursor_visibility(0);
 
-    return 0;
+    return 1;
 }
 int ConCursorVisible()
 {
@@ -419,40 +418,41 @@ int ConCursorVisible()
 
 int ConSetCursorSize(int /*Start */ , int /*End */ )
 {
-    return 0;
+    return 1;
 }
 
 int ConSetMousePos(int /*X */ , int /*Y */ )
 {
-    return -1;
+    return 0;
 }
 int ConQueryMousePos(int *X, int *Y)
 {
     *X = 0;
     *Y = 0;
-    return 0;
+
+    return 1;
 }
 
 int ConShowMouse()
 {
-    return -1;
+    return 0;
 }
 
 int ConHideMouse()
 {
-    return -1;
+    return 0;
 }
 
 int ConMouseVisible()
 {
-    return 0;
+    return 1;
 }
 
 int ConQueryMouseButtons(int *ButtonCount)
 {
     *ButtonCount = 0;
 
-    return 0;
+    return 1;
 }
 
 static int getkey(int tsecs)
@@ -527,7 +527,7 @@ static int parseEsc(TEvent *Event)
 	    NextEvent.Mouse.What = evMouseUp;
 	}
 #endif // CONFIG_MOUSE
-	return 0;
+	return 1;
     }
 
     return TTYParseEsc(seq);
@@ -559,11 +559,10 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 
     WaitTime = (WaitTime >= 0) ? WaitTime / 100 : 36000;
 
-    if ((rc = WaitFdPipeEvent(Event, STDIN_FILENO, WaitTime)) <= 0)
-        return rc;
-
-    if (Event->What == evNotify)
-        return 0; // pipe reading
+    switch (WaitFdPipeEvent(Event, STDIN_FILENO, -1, WaitTime)) {
+    case FD_PIPE_1: break;
+    default: return 0;
+    }
 
     Event->What = evKeyDown;
 
@@ -611,7 +610,7 @@ int ConPutEvent(const TEvent& Event)
 {
     Prev = Event;
 
-    return 0;
+    return 1;
 }
 
 GUI::GUI(int &argc, char **argv, int XSize, int YSize)

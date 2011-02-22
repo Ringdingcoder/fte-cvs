@@ -447,7 +447,7 @@ int ReadConsoleEvent(TEvent *E) /*FOLD00*/
 
 
 int ConInit(int /*XSize*/, int /*YSize*/) { /*FOLD00*/
-    if (Initialized) return 0;
+    if (Initialized) return 1;
 
     EventBuf.What = evNone;
     MousePresent    = 0; //MOUSInit();
@@ -472,31 +472,33 @@ int ConInit(int /*XSize*/, int /*YSize*/) { /*FOLD00*/
     ConContinue();
 
     Initialized = 1;
-    return 0;
+
+    return 1;
 }
 
 int ConDone() { /*FOLD00*/
     ConSuspend();
     CloseHandle(OurConOut);
-    return 0;
+
+    return 1;
 }
 
 int ConSuspend() { /*FOLD00*/
     SetConsoleActiveScreenBuffer(ConOut);
     SetConsoleMode(ConIn, OldConsoleMode);
 
-    return 0;
+    return 1;
 }
 
 int ConContinue() { /*FOLD00*/
     SetConsoleActiveScreenBuffer(OurConOut);
     GetConsoleMode(ConIn, &OldConsoleMode);
     SetConsoleMode(ConIn, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT);
-    {
-        SetConsoleOutputCP(codepage);
-        SetConsoleCP(codepage);
-    }
-    return 0;
+
+    SetConsoleOutputCP(codepage);
+    SetConsoleCP(codepage);
+
+    return 1;
 }
 
 int ConClear() { /*FOLD00*/
@@ -504,9 +506,11 @@ int ConClear() { /*FOLD00*/
     TDrawBuffer B;
 
     MoveChar(B, 0, ConMaxCols, ' ', 0x07, 1);
-    if ((ConQuerySize(&W, &H) == 0) &&
-        ConSetBox(0, 0, W, H, B[0])) return 0;
-    return -1;
+    if (!ConQuerySize(&W, &H)
+        || !ConSetBox(0, 0, W, H, B[0]))
+        return 0;
+
+    return 1;
 }
 
 
@@ -569,7 +573,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
         }
         p += W;
     }
-    return 0;
+    return 1;
 }
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
@@ -593,7 +597,7 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
         ReadConsoleOutput(OurConOut, (PCHAR_INFO)p, csize, corg, &rcl);
         p += W;
     }
-    return 0;
+    return 1;
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
@@ -618,7 +622,8 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
             //printf("WriteConsoleOutput %d\n", rc);
         }
     }
-    return 0;
+
+    return 1;
 }
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell) /*FOLD00*/
@@ -643,7 +648,8 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell) /*FOLD00*/
 
         WriteConsoleOutput(OurConOut, (PCHAR_INFO)B, csize, corg, &rcl);
     }
-    return 0;
+
+    return 1;
 }
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) /*FOLD00*/
@@ -681,11 +687,12 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) /*FOLD
     }
 
     ScrollConsoleScreenBuffer(OurConOut, &rect, &clip, dest, (PCHAR_INFO)&FillCell);
-    return 0;
+
+    return 1;
 }
 
 int ConSetSize(int X, int Y) { /*FOLD00*/
-    return -1;
+    return 0;
 }
 
 int ConQuerySize(int *X, int *Y) { /*FOLD00*/
@@ -696,7 +703,8 @@ int ConQuerySize(int *X, int *Y) { /*FOLD00*/
     *Y = csbi.dwSize.Y;
 
     dbg("Console size (%u,%u)\n", *X, *Y);
-    return 0;
+
+    return 1;
 }
 
 int ConSetCursorPos(int X, int Y) { /*FOLD00*/
@@ -705,7 +713,8 @@ int ConSetCursorPos(int X, int Y) { /*FOLD00*/
     xy.X = X;
     xy.Y = Y;
     SetConsoleCursorPosition(OurConOut, xy);
-    return 0;
+
+    return 1;
 }
 
 int ConQueryCursorPos(int *X, int *Y) { /*FOLD00*/
@@ -714,19 +723,22 @@ int ConQueryCursorPos(int *X, int *Y) { /*FOLD00*/
     GetConsoleScreenBufferInfo(OurConOut, &csbi);
     *X = csbi.dwCursorPosition.X;
     *Y = csbi.dwCursorPosition.Y;
-    return 0;
+
+    return 1;
 }
 
 int ConShowCursor() { /*FOLD00*/
     CursorVisible = 1;
     DrawCursor(1);
-    return 0;
+
+    return 1;
 }
 
 int ConHideCursor() { /*FOLD00*/
     CursorVisible = 0;
     DrawCursor(0);
-    return 0;
+
+    return 1;
 }
 
 int ConCursorVisible() { /*FOLD00*/
@@ -734,11 +746,11 @@ int ConCursorVisible() { /*FOLD00*/
 }
 
 int ConSetCursorSize(int Start, int End) { /*FOLD00*/
-    return -1;
+    return 0;
 }
 
 int ConSetMousePos(int X, int Y) { /*FOLD00*/
-    return -1;
+    return 0;
 }
 
 int ConQueryMousePos(int *X, int *Y) { /*FOLD00*/
@@ -746,19 +758,19 @@ int ConQueryMousePos(int *X, int *Y) { /*FOLD00*/
     *Y = LastMouseY;
 
     // NT does not have this ? (not needed anyway, but check mouse hiding above).
-    return 0;
+    return 1;
 }
 
 int ConShowMouse() { /*FOLD00*/
     MouseVisible = 1;
-    if (!MousePresent) return -1;
-    return 0;
+
+    return (MousePresent != 0);
 }
 
 int ConHideMouse() { /*FOLD00*/
     MouseVisible = 0;
-    if (!MousePresent) return -1;
-    return 0;
+
+    return (MousePresent != 0);
 }
 
 int ConMouseVisible() { /*FOLD00*/
@@ -766,20 +778,21 @@ int ConMouseVisible() { /*FOLD00*/
 }
 
 int ConQueryMouseButtons(int *ButtonCount) { /*FOLD00*/
-    return 0;
+    return 1;
 }
 
 int ConPutEvent(const TEvent& Event) { /*FOLD00*/
     EventBuf = Event;
-    return 0;
+
+    return 1;
 }
 
 int ConFlush() { /*FOLD00*/
-    return 0;
+    return 1;
 }
 
 int ConGrabEvents(TEventMask EventMask) { /*FOLD00*/
-    return 0;
+    return 1;
 }
 
 
@@ -798,7 +811,8 @@ int SaveScreen() { /*FOLD00*/
         ConGetBox(0, 0, SavedX, SavedY, SavedScreen);
 
     ConQueryCursorPos(&SaveCursorPosX, &SaveCursorPosY);
-    return 0;
+
+    return 1;
 }
 
 int RestoreScreen() { /*FOLD00*/
@@ -914,13 +928,13 @@ int ConSetTitle(const char *Title, const char *STitle) { /*FOLD00*/
     strlcpy(winSTitle, STitle, sizeof(winSTitle));
     SetConsoleTitle (winTitle);
 
-    return 0;
+    return 1;
 }
 
 int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) { /*FOLD00*/
     strlcpy(Title, winTitle, MaxLen);
     strlcpy(STitle, winSTitle, SMaxLen);
-    return 0;
+    return 1;
 }
 
 
@@ -1695,7 +1709,7 @@ static DWORD __stdcall PipeThread(void *p) {
         pipe->reading = 0;
         SetEvent(pipe->NewData);
         ReleaseMutex(pipe->Access);
-        return 0xFFFFFFFF;
+        return 0;
     }
 
     //fprintf(stderr, "Pipe: Begin: %d %s\n", pipe->id, pipe->Command);
@@ -1736,7 +1750,7 @@ static DWORD __stdcall PipeThread(void *p) {
     SetEvent(pipe->NewData);
     ReleaseMutex(pipe->Access);
     //fprintf(stderr, "Read: Released mutex\n");
-    return 0;
+    return 1;
 }
 
 int GUI::OpenPipe(const char *Command, EModel *notify) {
@@ -1852,9 +1866,9 @@ ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
 
 int GUI::ClosePipe(int id) {
     if (id < 0 || id > MAX_PIPES)
-        return -1;
+        return 0;
     if (Pipes[id].used == 0)
-        return -1;
+        return 0;
     if (Pipes[id].reading == 1) {
         Pipes[id].DoTerm = 1;
         SetEvent(Pipes[id].ResumeRead);
@@ -1869,7 +1883,7 @@ int GUI::ClosePipe(int id) {
     //fprintf(stderr, "Pipe Close: %d\n", id);
     Pipes[id].used = 0;
     //ConContinue();
-    return Pipes[id].RetCode;
+    return (Pipes[id].RetCode == 0);
 }
 
 int GetPipeEvent(int i, TEvent *Event) {
@@ -1894,12 +1908,12 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) /
     if (EventBuf.What != evNone) {
         *Event = EventBuf;
         if (Delete) EventBuf.What = evNone;
-        return 0;
+        return 1;
     }
     if (MouseEv.What != evNone) {
         *Event = MouseEv;
         if (Delete) MouseEv.What = evNone;
-        return 0;
+        return 1;
     }
 
     //** Now block and wait for a new event on the console handle and all pipes,
@@ -1912,38 +1926,32 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) /
 
     //** Fill the handle array with all active handles for pipes && console,
     o_ar[0] = ConIn;
-    for(i = 0, nh = 1; i < MAX_PIPES; i++)          // For all possible pipes
-    {
+    for(i = 0, nh = 1; i < MAX_PIPES; i++) {    // For all possible pipes
         if (Pipes[i].used)
             o_ar[nh++] = Pipes[i].NewData;
     }
 
-    for(;;)
-    {
+    for(;;) {
         rc = WaitForMultipleObjects(nh, o_ar, FALSE, WaitTime);
-        if(rc != WAIT_FAILED && (rc >= WAIT_OBJECT_0 && rc < WAIT_OBJECT_0+nh))
-        {
-            i       = rc - WAIT_OBJECT_0;                                   // Get item that signalled new data
-            if(i == 0)                                      // Was console?
-            {
-                if(ReadConsoleEvent(Event))                     // Get console,
-                    return 0;                                                       // And exit if valid,
-            }
-            else
-            {
-                GetPipeEvent(i - 1, Event);                     // Read data from pipe.
-                return 0;
+        if (rc != WAIT_FAILED && (rc >= WAIT_OBJECT_0 && rc < WAIT_OBJECT_0+nh)) {
+            i = rc - WAIT_OBJECT_0;             // Get item that signalled new data
+	    if (i == 0) {                       // Was console?
+                if (ReadConsoleEvent(Event))    // Get console,
+                    return 1;                   // And exit if valid,
+            } else {
+                GetPipeEvent(i - 1, Event);     // Read data from pipe.
+                return 1;
             }
         }
         else
-            return -1;                                                              // Something's wrong!
+            return 0;                          // Something's wrong!
     }
 }
 
 #include "clip.h"
 
 int GetClipText(ClipData *cd) {
-    int rc = -1;
+    int rc = 0;
     cd->fLen = 0;
     cd->fChar = NULL;
     if (OpenClipboard(NULL)) {
@@ -1959,7 +1967,7 @@ int GetClipText(ClipData *cd) {
                 if (cd->fChar != NULL) {
                     cd->fLen = len;
                     memcpy(cd->fChar, data, len);
-                    rc = 0;
+                    rc = 1;
                 }
                 GlobalUnlock(hmem);
             }
@@ -1970,7 +1978,7 @@ int GetClipText(ClipData *cd) {
 }
 
 int PutClipText(ClipData *cd) {
-    int rc = -1;
+    int rc = 0;
     if (OpenClipboard(NULL)) {
         if (EmptyClipboard()) {
             HGLOBAL hmem;
@@ -1982,9 +1990,8 @@ int PutClipText(ClipData *cd) {
                     memcpy(data, cd->fChar, cd->fLen);
                     ((char *)data)[cd->fLen] = 0;
                     GlobalUnlock(hmem);
-                    if (SetClipboardData(CF_TEXT, hmem)) {
-                        rc = 0;
-                    }
+                    if (SetClipboardData(CF_TEXT, hmem))
+                        rc = 1;
                 }
             }
         }

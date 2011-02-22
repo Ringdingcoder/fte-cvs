@@ -369,9 +369,11 @@ int ConClear() {
     TDrawBuffer B;
 
     MoveChar(B, 0, ConMaxCols, ' ', 0x07, 1);
-    if ((ConQuerySize(&W, &H) == 0) &&
-        ConSetBox(0, 0, W, H, B[0])) return 0;
-    return -1;
+    if (!ConQuerySize(&W, &H)
+        || !ConSetBox(0, 0, W, H, B[0]))
+            return 0;
+
+    return 1;
 }
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
@@ -398,7 +400,8 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         }
         p += W << 1;
     }
-    return 0;
+
+    return 1;
 }
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
@@ -426,7 +429,8 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
         }
         p += W << 1;
     }
-    return 0;
+
+    return 1;
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
@@ -452,7 +456,8 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
             MouseHidden = 0;
         }
     }
-    return 0;
+
+    return 1;
 }
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
@@ -511,7 +516,8 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
 
     if (MouseHidden)
         DrawMouse(1);
-    return 0;
+
+    return 1;
 }
 
 int ConSetSize(int X, int Y) {
@@ -524,8 +530,8 @@ int ConSetSize(int X, int Y) {
     vmi.row = (USHORT)Y;
     vmi.cb = 2 + 1 + 1 + 2 + 2;
     rc = VioSetMode(&vmi, 0);
-    if (rc == 0) return 0;
-    return -1;
+
+    return (rc == 0);
 }
 
 int ConQuerySize(int *X, int *Y) {
@@ -535,12 +541,14 @@ int ConQuerySize(int *X, int *Y) {
     VioGetMode(&vmi, 0);
     if (X) *X = vmi.col;
     if (Y) *Y = vmi.row;
-    return 0;
+
+    return 1;
 }
 
 int ConSetCursorPos(int X, int Y) {
     VioSetCurPos((USHORT)Y, (USHORT)X, 0);
-    return 0;
+
+    return 1;
 }
 
 int ConQueryCursorPos(int *X, int *Y) {
@@ -549,19 +557,22 @@ int ConQueryCursorPos(int *X, int *Y) {
     VioGetCurPos(&AY, &AX, 0);
     if (X) *X = AX;
     if (Y) *Y = AY;
-    return 0;
+
+    return 1;
 }
 
 int ConShowCursor() {
     CursorVisible = 1;
     DrawCursor(1);
-    return 0;
+
+    return 1;
 }
 
 int ConHideCursor() {
     CursorVisible = 0;
     DrawCursor(0);
-    return 0;
+
+    return 1;
 }
 
 int ConSetCursorSize(int Start, int End) {
@@ -572,41 +583,56 @@ int ConSetCursorSize(int Start, int End) {
     ci.cEnd = -End;
     ci.cx = 0;
     VioSetCurType(&ci, 0);
-    return 0;
+
+    return 1;
 }
 
 int ConSetMousePos(int X, int Y) {
     PTRLOC mp;
 
-    if (!MousePresent) return -1;
+    if (!MousePresent)
+            return 0;
+
     mp.col = (USHORT)X;
     mp.row = (USHORT)Y;
     MouSetPtrPos(&mp, MouseHandle);
-    return 0;
+
+    return 1;
 }
 
 int ConQueryMousePos(int *X, int *Y) {
     PTRLOC mp;
 
-    if (!MousePresent) return -1;
+    if (!MousePresent)
+            return 0;
+
     MouGetPtrPos(&mp, MouseHandle);
     if (X) *X = mp.col;
     if (Y) *Y = mp.row;
-    return 0;
+
+    return 1;
 }
 
 int ConShowMouse() {
     MouseVisible = 1;
-    if (!MousePresent) return -1;
+
+    if (!MousePresent)
+            return 0;
+
     DrawMouse(1);
-    return 0;
+
+    return 1;
 }
 
 int ConHideMouse() {
     MouseVisible = 0;
-    if (!MousePresent) return -1;
+
+    if (!MousePresent)
+            return 0;
+
     DrawMouse(0);
-    return 0;
+
+    return 1;
 }
 
 int ConMouseVisible() {
@@ -615,9 +641,14 @@ int ConMouseVisible() {
 
 int ConQueryMouseButtons(int *ButtonCount) {
     USHORT Count;
-    if (MouGetNumButtons(&Count, MouseHandle) != 0) return -1;
-    if (ButtonCount) *ButtonCount = Count;
-    return 0;
+
+    if (MouGetNumButtons(&Count, MouseHandle) != 0)
+            return 0;
+
+    if (ButtonCount)
+            *ButtonCount = Count;
+
+    return 1;
 }
 
 
@@ -641,7 +672,7 @@ int ConInit(int XSize, int YSize) {
 
     Initialized = 1;
 
-    return 0;
+    return 1;
 }
 
 int ConDone() {
@@ -667,7 +698,7 @@ int ConSuspend() {
     signal(SIGBREAK, SIG_DFL);
     signal(SIGINT, SIG_DFL);
 
-    return 0;
+    return 1;
 }
 
 int ConContinue() {
@@ -687,7 +718,8 @@ int ConContinue() {
     vi.fs = 1;
     VioSetState(&vi, 0);
     ConShowMouse();
-    return 0;
+
+    return 1;
 }
 
 int GetPipeEvent(TEvent *Event) {
@@ -740,11 +772,11 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
         else if (MousePresent && (ReadMouseEvent(Event, EventMask) == 1) && (EventMask & evMouse)) break;
         else if (GetPipeEvent(Event) == 1) break;
 
-        if (WaitTime == 0) return -1;
+        if (WaitTime == 0) return 0;
         DosSleep(5);
         if (WaitTime > 0) {
             WaitTime -= 5;
-            if (WaitTime <= 0) return -1;
+            if (WaitTime <= 0) return 0;
         }
     }
     if (Event->What != evNone) {
@@ -757,10 +789,11 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) {
             }
         }
         EventBuf = *Event;
-        if (Delete) EventBuf.What = evNone;
-        return 0;
+        if (Delete)
+            EventBuf.What = evNone;
+        return 1;
     }
-    return -1;
+    return 0;
 }
 
 static PCell SavedScreen = 0;
@@ -778,7 +811,8 @@ int SaveScreen() {
         ConGetBox(0, 0, SavedX, SavedY, SavedScreen);
 
     ConQueryCursorPos(&SaveCursorPosX, &SaveCursorPosY);
-    return 0;
+
+    return 1;
 }
 
 int RestoreScreen() {
@@ -854,18 +888,18 @@ static int CreatePipeChild(PID &pid, HPIPE &hfPipe, char *Command) {
                          NP_NOWAIT | NP_TYPE_BYTE | NP_READMODE_BYTE | 1,
                          0, 4096, 0);
     if (rc != 0)
-        return -1;
+        return 0;
 
     rc = DosConnectNPipe (hfPipe);
     if (rc != 0 && rc != ERROR_PIPE_NOT_CONNECTED) {
         DosClose(hfPipe);
-        return -1;
+        return 0;
     }
 
     rc = DosSetNPHState (hfPipe, NP_WAIT | NP_READMODE_BYTE);
     if (rc != 0) {
         DosClose(hfPipe);
-        return -1;
+        return 0;
     }
 
     rc = DosOpen (szPipe, &hfChildPipe, &ulAction, 0,
@@ -875,7 +909,7 @@ static int CreatePipeChild(PID &pid, HPIPE &hfPipe, char *Command) {
                   NULL);
     if (rc != 0) {
         DosClose (hfPipe);
-        return -1;
+        return 0;
     }
 
     // Duplicate handles
@@ -896,7 +930,7 @@ static int CreatePipeChild(PID &pid, HPIPE &hfPipe, char *Command) {
                           + 1);
     if (Args == NULL) {
         DosClose(hfPipe);
-        return -1;
+        return 0;
     }
 
     strcpy(Args, Prog);
@@ -927,12 +961,12 @@ static int CreatePipeChild(PID &pid, HPIPE &hfPipe, char *Command) {
 
     if (rc != 0) {
         DosClose(hfPipe);
-        return -1;
+        return 0;
     }
 
     pid = rc_code.codeTerminate; // get pid when successful
 
-    return 0;
+    return 1;
 }
 
 static void _LNK_CONV PipeThread(void *p) {
@@ -989,7 +1023,7 @@ static void _LNK_CONV PipeThread(void *p) {
                       &rc_code,
                       &pid,
                       pid);
-    pipe->RetCode = rc_code.codeResult;
+    pipe->RetCode = (rc_code.codeResult == 0);
             // pclose(fp);
     pipe->reading = 0;
     DosPostEventSem(pipe->NewData);
@@ -998,9 +1032,7 @@ static void _LNK_CONV PipeThread(void *p) {
 }
 
 int GUI::OpenPipe(const char *Command, EModel *notify) {
-    int i;
-
-    for (i = 0; i < MAX_PIPES; i++) {
+    for (int i = 0; i < MAX_PIPES; i++) {
         if (Pipes[i].used == 0) {
             Pipes[i].reading = 1;
             Pipes[i].stopped = 1;
@@ -1059,23 +1091,23 @@ int GUI::OpenPipe(const char *Command, EModel *notify) {
 
 int GUI::SetPipeView(int id, EModel *notify) {
     if (id < 0 || id > MAX_PIPES)
-        return -1;
+        return 0;
     if (Pipes[id].used == 0)
-        return -1;
+        return 0;
+
     DosRequestMutexSem(Pipes[id].Access, SEM_INDEFINITE_WAIT);
     //fprintf(stderr, "Pipe View: %d %08X\n", id, notify);
     Pipes[id].notify = notify;
     DosReleaseMutexSem(Pipes[id].Access);
-    return 0;
+
+    return 1;
 }
 
 ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
     ssize_t l = -1;
     //ULONG ulPostCount;
 
-    if (id < 0 || id > MAX_PIPES)
-        return -1;
-    if (Pipes[id].used == 0)
+    if (id < 0 || id > MAX_PIPES || Pipes[id].used == 0)
         return -1;
 
     //fprintf(stderr, "Read: Waiting on mutex\n");
@@ -1099,9 +1131,7 @@ ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
             //fprintf(stderr, "Read: posting sem\n");
             DosPostEventSem(Pipes[id].ResumeRead);
         }
-    } else if (Pipes[id].reading == 0)
-        l = -1;
-    else {
+    } else if (Pipes[id].reading)
         l = 0;
 //        DosBeep(200, 200);
     }
@@ -1113,9 +1143,9 @@ ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
 
 int GUI::ClosePipe(int id) {
     if (id < 0 || id > MAX_PIPES)
-        return -1;
+        return 0;
     if (Pipes[id].used == 0)
-        return -1;
+        return 0;
     if (Pipes[id].reading == 1) {
         Pipes[id].DoTerm = 1;
         DosPostEventSem(Pipes[id].ResumeRead);
@@ -1142,7 +1172,7 @@ int GUI::RunProgram(int mode, char *Command) {
     if (Command == 0 || *Command == 0)  // empty string = shell
         Command = getenv("COMSPEC");
 
-    rc = system(Command);
+    rc = (system(Command) == 0);
 
     ConContinue();
     ConShowMouse();
@@ -1199,13 +1229,14 @@ int ConSetTitle(const char *Title, const char *STitle) {
 
     WinTerminate(hab);
   */
-    return 0;
+    return 1;
 }
 
 int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
     strlcpy(Title, "FTE",  MaxLen);
     strlcpy(STitle, "FTE", SMaxLen);
-    return 0;
+
+    return 1;
 }
 
 int ConCursorVisible() {
@@ -1214,7 +1245,7 @@ int ConCursorVisible() {
 
 int ConPutEvent(const TEvent& Event) {
     EventBuf = Event;
-    return 0;
+    return 1;
 }
 
 extern int SevenBit;

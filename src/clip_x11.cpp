@@ -78,8 +78,9 @@ int PutPMClip(int clipboard) {
     if (p != NULL) {
         // remove some 'UNWANTED' characters - sequence XX 0x08 YY -> YY
         // this makes usable cut&paste from manpages
-        rc = (SetXSelection(l, p, clipboard) == 0);
+        rc = SetXSelection(l, p, clipboard);
         free(p);
     }
-    return (rc)?1:0;
+
+    return rc;
 }

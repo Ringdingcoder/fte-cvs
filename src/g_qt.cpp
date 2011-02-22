@@ -2062,10 +2062,9 @@ ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
         close(Pipes[id].fd);
         return -1;
     }
-    if (rc == -1) {
+    if (rc == -1)
         Pipes[id].stopped = 1;
-        return 0;
-    }
+
     return rc;
 }
 

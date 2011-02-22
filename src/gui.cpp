@@ -6,7 +6,7 @@ int GFrame::isLastFrame() {
 }
 
 int GUI::Start(int &/*argc*/, char ** /*argv*/) {
-    return 0;
+    return 1;
 }
 
 void GUI::Stop() {

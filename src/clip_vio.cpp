@@ -34,13 +34,13 @@ int GetClipText(ClipData *cd) {
     char *mem;
     
     rc = DosOpenMutexSem(SEM_PREFIX "CLIPSYN", &hmtxSyn);
-    if (rc != 0) return -1;
+    if (rc != 0) return 0;
     rc = DosOpenEventSem(SEM_PREFIX "CLIPGET", &hevGet);
-    if (rc != 0) return -1;
+    if (rc != 0) return 0;
 /*    rc = DosOpenEventSem(SEM_PREFIX "CLIPPUT", &hevPut);*/
 /*    if (rc != 0) return -1;*/
     rc = DosOpenEventSem(SEM_PREFIX "CLIPEND", &hevEnd);
-    if (rc != 0) return -1;
+    if (rc != 0) return 0;
     
     DosRequestMutexSem(hmtxSyn, SEM_INDEFINITE_WAIT);
     DosResetEventSem(hevEnd, &PostCount);
@@ -60,7 +60,7 @@ int GetClipText(ClipData *cd) {
     DosCloseEventSem(hevGet);
     DosCloseEventSem(hevEnd);
     DosCloseMutexSem(hmtxSyn);
-    return 0;
+    return 1;
 }
 
 int PutClipText(ClipData *cd) {
@@ -69,13 +69,13 @@ int PutClipText(ClipData *cd) {
     char *mem;
     
     rc = DosOpenMutexSem(SEM_PREFIX "CLIPSYN", &hmtxSyn);
-    if (rc != 0) return -1;
+    if (rc != 0) return 0;
 /*    rc = DosOpenEventSem(SEM_PREFIX "CLIPGET", &hevGet);*/
 /*    if (rc != 0) return -1;*/
     rc = DosOpenEventSem(SEM_PREFIX "CLIPPUT", &hevPut);
-    if (rc != 0) return -1;
+    if (rc != 0) return 0;
     rc = DosOpenEventSem(SEM_PREFIX "CLIPEND", &hevEnd);
-    if (rc != 0) return -1;
+    if (rc != 0) return 0;
     
     DosRequestMutexSem(hmtxSyn, SEM_INDEFINITE_WAIT);
     DosResetEventSem(hevEnd, &PostCount);
@@ -98,6 +98,6 @@ int PutClipText(ClipData *cd) {
     DosCloseMutexSem(hmtxSyn);
     if (mem)
         DosFreeMem(mem);
-    return 0;
+    return 1;
     
 }

@@ -1,6 +1,12 @@
 Revision history
 -----------------------------------------------------------------------
-0.50.2b6 -- <fill month here> 201X
+0.50.2b6 -- <fill month here> 2011
+  ! Compilation fixes for Windows compilers
+  + Allow JAVA colorizer to be used for javascript files (.js)
+  - Ongoing conversion of return codes to return consistently
+    1 for success or 0 for failure
+  ! Colorizing man pages again (using MAN_KEEP_FORMATTING)
+  + adding 2nd FD for WaitFdPipeEvent() so used in con_linux.cpp
 
 0.50.2b5 -- March 2010
   + Allowed -m flag to take lower-cased version of mode names

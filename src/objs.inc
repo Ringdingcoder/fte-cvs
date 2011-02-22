@@ -135,6 +135,7 @@ VOBJS = $(UNIXOBJS)\
  con_linux.$(OEXT)\
  g_nodlg.$(OEXT)\
  g_text.$(OEXT)\
+ g_unix_pipe.$(OEXT)\
  menu_text.$(OEXT)
 
 MOBJS = $(UNIXOBJS)\

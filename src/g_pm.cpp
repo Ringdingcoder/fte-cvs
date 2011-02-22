@@ -3336,7 +3336,7 @@ int GFrame::ExecMainMenu(char Sub) {
     } else {
         WinPostMsg(hwnd, MM_STARTMENUMODE, MPFROM2SHORT((Sub ? TRUE : FALSE), FALSE), 0);
     }
-    return 0;
+    return 1;
 }
 
 int GFrame::PopupMenu(const char *Name) {
@@ -3350,7 +3350,7 @@ int GFrame::PopupMenu(const char *Name) {
                UWM_CREATEPOPUPMENU,
                MPFROMP(Peer),
                MPFROMLONG(id));
-    return 0;
+    return 1;
 }
 
 void GFrame::Show() {
@@ -3438,11 +3438,12 @@ int GUI::ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Dele
 
 int GUI::ConPutEvent(const TEvent& Event) {
     EventBuf = Event;
-    return 0;
+
+    return 1;
 }
 
 int GUI::ConFlush() {
-    return 0;
+    return 1;
 }
 
 void GUI::ProcessEvent() {
@@ -3478,7 +3479,8 @@ int GUI::Run() {
 
     while (doLoop != 0 && WinGetMsg(hab, &qmsg, NULLHANDLE, 0, 0))
         WinDispatchMsg(hab, &qmsg);
-    return 0;
+
+    return 1;
 }
 
 int GUI::ShowEntryScreen() {
@@ -3798,14 +3800,17 @@ int GUI::OpenPipe(const char *Command, EModel *notify) {
 
 int GUI::SetPipeView(int id, EModel *notify) {
     if (id < 0 || id > MAX_PIPES)
-        return -1;
+        return 0;
+
     if (Pipes[id].used == 0)
-        return -1;
+        return 0;
+
     DosRequestMutexSem(Pipes[id].Access, SEM_INDEFINITE_WAIT);
 //    fprintf(stderr, "Pipe View: %d %08X\n", id, notify);
     Pipes[id].notify = notify;
     DosReleaseMutexSem(Pipes[id].Access);
-    return 0;
+
+    return 1;
 }
 
 int GUI::ReadPipe(int id, void *buffer, size_t len) {

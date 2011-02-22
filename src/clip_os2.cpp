@@ -19,36 +19,39 @@ int GetPMClip(int clipboard) {
     if (clipboard != 0)
         // only one clipboard supported
         return 0;
-    }
-    if (GetClipText(&cd) == 0) {
-        SSBuffer->Clear();
-        j = 0;
-        l = 0;
 
-        for (i = 0; i < cd.fLen; i++) {
-            if (cd.fChar[i] == 0x0A) {
-                SSBuffer->AssertLine(l);
-                P.Col = 0; P.Row = l++;
-                dx = 0;
-                if ((i > 0) && (cd.fChar[i-1] == 0x0D)) dx++;
-                SSBuffer->InsertLine(P, i - j - dx, cd.fChar + j);
-                j = i + 1;
-            }
-        }
-        if (j < cd.fLen) { // remainder
-            i = cd.fLen;
+    if (!GetClipText(&cd))
+        return 0;
+
+    SSBuffer->Clear();
+    j = 0;
+    l = 0;
+
+    for (i = 0; i < cd.fLen; i++) {
+        if (cd.fChar[i] == 0x0A) {
             SSBuffer->AssertLine(l);
             P.Col = 0; P.Row = l++;
             dx = 0;
             if ((i > 0) && (cd.fChar[i-1] == 0x0D)) dx++;
-            SSBuffer->InsText(P.Row, P.Col, i - j - dx, cd.fChar + j);
+            SSBuffer->InsertLine(P, i - j - dx, cd.fChar + j);
             j = i + 1;
-	}
-
-	// now that we don't need cd.fChar anymore, free it
-	free(cd.fChar);
+        }
     }
-    return 0;
+
+    if (j < cd.fLen) { // remainder
+        i = cd.fLen;
+        SSBuffer->AssertLine(l);
+        P.Col = 0; P.Row = l++;
+        dx = 0;
+        if ((i > 0) && (cd.fChar[i-1] == 0x0D)) dx++;
+        SSBuffer->InsText(P.Row, P.Col, i - j - dx, cd.fChar + j);
+        j = i + 1;
+    }
+
+    // now that we don't need cd.fChar anymore, free it
+    free(cd.fChar);
+
+    return 1;
 }
 
 int PutPMClip(int clipboard) {
@@ -77,7 +80,8 @@ int PutPMClip(int clipboard) {
     p[l++] = 0;
     cd.fChar = p;
     cd.fLen = l;
-    rc = (PutClipText(&cd) == 0);
+    rc = PutClipText(&cd);
     free(p);
-    return rc?1:0;
+
+    return rc;
 }

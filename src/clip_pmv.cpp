@@ -391,7 +391,7 @@ static BOOL AccessPmClipboard() {
 }
 
 int GetClipText(ClipData *cd) {
-    int rc = -1;
+    int rc = 0;
     char *text;
 
     cd->fLen = 0;
@@ -403,7 +403,7 @@ int GetClipText(ClipData *cd) {
     if ((text = (char *) p_WinQueryClipbrdData(PmInfo.hab, CF_TEXT)) != 0) {
         cd->fLen = strlen(text);
         cd->fChar = strdup(text);
-        rc = 0;
+        rc = 1;
     }
 
     LeavePmClipboard();
@@ -413,7 +413,7 @@ int GetClipText(ClipData *cd) {
 int PutClipText(ClipData *cd) {
     ULONG len;
     void *text;
-    int rc = -1;
+    int rc = 0;
 
     if (!AccessPmClipboard())
         return rc;
@@ -430,7 +430,7 @@ int PutClipText(ClipData *cd) {
         if (!p_WinSetClipbrdData(PmInfo.hab, (ULONG) text, CF_TEXT, CFI_POINTER))
             DosBeep(100, 1500);
         else
-            rc = 0;
+            rc = 1;
     }
 
     LeavePmClipboard();

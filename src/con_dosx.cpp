@@ -586,7 +586,7 @@ int ReadMouseEvent(TEvent *Event, unsigned long EventMask)
 int ConClear()
 {
 	plScnSetCell(0, 0, plScnWidth(), plScnHeight(), 0x0720);
-	return 0;
+	return 1;
 }
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
@@ -612,7 +612,8 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
 		}
 		p += W << 1;
 	}
-	return 0;
+
+	return 1;
 }
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
@@ -640,8 +641,8 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
 		}
 		p += W << 1;
 	}
-	return 0;
 
+	return 1;
 }
 
 int ConPutLine(int X, int Y, int W, int H, PCell Cell)
@@ -667,7 +668,7 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell)
 			MouseHidden = 0;
 		}
 	}
-	return 0;
+	return 1;
 }
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
@@ -693,7 +694,8 @@ int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
 			MouseHidden = 0;
 		}
 	}
-	return 0;
+
+	return 1;
 }
 
 int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
@@ -725,43 +727,49 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count)
 	}
 	if (MouseHidden)
 		DrawMouse(1);
-	return 0;
+
+	return 1;
 }
 
 int ConSetSize(int X, int Y) {
-	return 0;
+	return 1;
 }
 
 int ConQuerySize(int *X, int *Y) {
 	*X	= plScnWidth();
 	*Y	= plScnHeight();
-	return 0;
+
+	return 1;
 }
 
 int ConSetCursorPos(int X, int Y) {
 	plScnCursorPos(X, Y);
-	return 0;
+
+	return 1;
 }
 
 int ConQueryCursorPos(int *X, int *Y) {
 	plScnCursorPosGet(X, Y);
-	return 0;
+
+	return 1;
 }
 
 int ConShowCursor() {
 	CursorVisible = 1;
 	plScnCursorOn(TRUE);
-	return 0;
+
+	return 1;
 }
 
 int ConHideCursor() {
 	CursorVisible = 0;
 	plScnCursorOn(FALSE);
-	return 0;
+
+	return 1;
 }
 
 int ConSetCursorSize(int Start, int End) {
-	return 0;
+	return 1;
 }
 
 //int ConSetMousePos(int X, int Y) {
@@ -780,28 +788,35 @@ int ConQueryMousePos(int *X, int *Y) {
 	UWORD	a, b;
 	boolean lb, rb;
 
-	if(! MOUSIsPresent()) return -1;
+	if (!MOUSIsPresent())
+	    return 0;
 
 	MOUSPos(&a, &b, &lb, &rb);
 	*X	= a / 8;
 	*Y	= b / 8;
-	return 0;
+	return 1;
 }
 
 int ConShowMouse()
 {
 	MouseVisible = TRUE;
-	if(! MOUSIsPresent()) return -1;
+	if (!MOUSIsPresent())
+	    return 0;
+
 	MOUSCursen(TRUE);
-	return 0;
+
+	return 1;
 }
 
 int ConHideMouse()
 {
 	MouseVisible = FALSE;
-	if(! MOUSIsPresent()) return -1;
+	if (!MOUSIsPresent())
+	    return 0;
+
 	MOUSCursen(FALSE);
-	return 0;
+
+	return 1;
 }
 
 int ConMouseVisible() {
@@ -809,21 +824,25 @@ int ConMouseVisible() {
 }
 
 int ConQueryMouseButtons(int *ButtonCount) {
-	if(ButtonCount != 0) *ButtonCount = 2;
-	return 0;
+	if (ButtonCount != 0)
+		*ButtonCount = 2;
+
+	return 1;
 }
 
 
 
 int ConInit(int XSize, int YSize)
 {
-	if(Initialized) return 0;
+	if (Initialized)
+		return 1;
 
 	EventBuf.What = evNone;
-	MousePresent	= MOUSInit();
+	MousePresent = MOUSInit();
 	ConContinue();
 	Initialized = 1;
-	return 0;
+
+	return 1;
 }
 
 int ConDone()
@@ -839,7 +858,8 @@ int ConSuspend()
   	signal(SIGBREAK, SIG_DFL);
 #endif
 	signal(SIGINT, SIG_DFL);
-	return 0;
+
+	return 1;
 }
 
 int ConContinue()
@@ -850,7 +870,8 @@ int ConContinue()
 	signal(SIGINT, SIG_IGN);
 	plScnSetFlash(FALSE);		// Set "bright" mode, not flashing
 	ConShowMouse();
-	return 0;
+
+	return 1;
 }
 
 int GetPipeEvent(TEvent *Event) {
@@ -881,26 +902,25 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete)
 	{
 		*Event = EventBuf;
 		if (Delete) EventBuf.What = evNone;
-		return 0;
+		return 1;
 	}
 	if (MouseEv.What != evNone)
 	{
 		*Event = MouseEv;
 		if (Delete) MouseEv.What = evNone;
-		return 0;
+		return 1;
 	}
 	EventBuf.What = evNone;
 	Event->What = evNone;
 
-	if(! (ReadKbdEvent(Event, WaitTime) == 1) && (EventMask & evKeyboard))
+	if (!(ReadKbdEvent(Event, WaitTime) == 1) && (EventMask & evKeyboard))
 	{
-		if(MousePresent && (ReadMouseEvent(Event, EventMask) == 1) && (EventMask & evMouse))
+		if (MousePresent
+		    && (ReadMouseEvent(Event, EventMask) == 1)
+		    && (EventMask & evMouse))
 			;
-		else
-		{
-			if(GetPipeEvent(Event) != 1)
-				return -1;
-		}
+		else if (GetPipeEvent(Event) != 1)
+			return 0;
 	}
 	if (Event->What != evNone)
 	{
@@ -918,10 +938,11 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete)
 			}
 		}
 		EventBuf = *Event;
-		if (Delete) EventBuf.What = evNone;
-		return 0;
+		if (Delete)
+			EventBuf.What = evNone;
+		return 1;
 	}
-	return -1;
+	return 0;
 }
 
 static PCell SavedScreen = 0;
@@ -939,7 +960,8 @@ int SaveScreen() {
 		ConGetBox(0, 0, SavedX, SavedY, SavedScreen);
 
 	ConQueryCursorPos(&SaveCursorPosX, &SaveCursorPosY);
-	return 0;
+
+	return 1;
 }
 
 int RestoreScreen() {
@@ -1025,28 +1047,26 @@ int GUI::OpenPipe(const char *Command, EModel *notify) {
 
             Pipes[i].fp = xpopen(Command,"r");
             if (Pipes[i].fp == NULL)
-                return -1;
+                return 0;
             Pipes[i].used = 1;
             //fprintf(stderr, "Pipe Open: %d\n", i);
             return i;
         }
     }
-    return -1;
-#else
-    return 0;
 #endif
+    return -1;
 }
 
 int GUI::SetPipeView(int id, EModel *notify) {
 #ifdef DJGPP
     if (id < 0 || id >= MAX_PIPES)
-        return -1;
+        return 0;
     if (Pipes[id].used == 0)
-        return -1;
+        return 0;
     //fprintf(stderr, "Pipe View: %d %08X\n", id, notify);
     Pipes[id].notify = notify;
 #endif
-    return 0;
+    return 1;
 }
 
 ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
@@ -1062,23 +1082,23 @@ ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
     //fprintf(stderr, "Pipe Read: Got %d %d\n", id, rc);
     if (ferror(Pipes[id].fp)) {
         Pipes[id].stopped = 1;
-        return 0;
+        rc = -1;
     }
-    return rc == 0 ? -1 : rc;
+    return rc;
 #else
-    return 0;
+    return -1;
 #endif
 }
 
 int GUI::ClosePipe(int id) {
 #ifdef DJGPP
     if (id < 0 || id >= MAX_PIPES)
-        return -1;
+        return 0;
     if (Pipes[id].used == 0)
-        return -1;
+        return 0;
     Pipes[id].used = 0;
     //fprintf(stderr, "Pipe Close: %d\n", id);
-    return xpclose(Pipes[id].fp);
+    return (xpclose(Pipes[id].fp) == 0);
 #else
     return 0;
 #endif

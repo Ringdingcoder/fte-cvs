@@ -397,7 +397,7 @@ int GetClipText(ClipData *cd) {
     cd->fLen = 0;
     cd->fChar = 0;
 
-    if (AccessPmClipboard() != TRUE)
+    if (!AccessPmClipboard())
         return rc;
 
     if ((text = (char *) p_WinQueryClipbrdData(PmInfo.hab, CF_TEXT)) != 0) {
@@ -415,7 +415,7 @@ int PutClipText(ClipData *cd) {
     void *text;
     int rc = -1;
 
-    if (AccessPmClipboard() != TRUE)
+    if (!AccessPmClipboard())
         return rc;
 
     p_WinEmptyClipbrd(PmInfo.hab);

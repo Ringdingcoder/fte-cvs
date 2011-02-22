@@ -13,10 +13,10 @@
 
 int GetPMClip(int clipboard) {
     ClipData cd;
-    unsigned int i,j, l, dx;
+    unsigned int i, j, l, dx;
     EPoint P;
 
-    if (clipboard!=0) {
+    if (clipboard != 0)
         // only one clipboard supported
         return 0;
     }
@@ -52,17 +52,17 @@ int GetPMClip(int clipboard) {
 }
 
 int PutPMClip(int clipboard) {
-    char *p = 0;
+    char *p = NULL;
     int l = 0;
     PELine L;
     int Len;
     ClipData cd;
     int rc;
 
-    if (clipboard!=0) {
+    if (clipboard != 0)
         // only one clipboard supported
         return 0;
-    }
+
     for (int i = 0; i < SSBuffer->RCount; i++) {
         L = SSBuffer->RLine(i);
         p = (char *)realloc(p, l + (Len = L->Count) + 2);

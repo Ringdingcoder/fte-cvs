@@ -890,6 +890,7 @@ int GViewPeer::ConPutBox(int X, int Y, int W, int H, PCell Cell) {
 void GViewPeer::UpdateWindow(int xx, int yy, int ww, int hh) {
     PCell p;
     int i;
+
     ww /= cxChar; ww += 2;
     hh /= cyChar; hh += 2;
     xx /= cxChar;
@@ -898,18 +899,18 @@ void GViewPeer::UpdateWindow(int xx, int yy, int ww, int hh) {
     if (yy + hh > wH) hh = wH - yy;
     wRefresh = 1;
     p = (PCell) CursorXYPos(xx, yy);
+
     for (i = 0; i < hh; i++) {
         ConPutBox(xx, yy + i, ww, 1, p);
         p += wW;
     }
+
     XFlush(display);
     wRefresh = 0;
 }
 
 int GViewPeer::ConGetBox(int X, int Y, int W, int H, PCell Cell) {
-    int i;
-
-    for (i = 0; i < H; i++) {
+    for (int i = 0; i < H; i++) {
         memcpy(Cell, CursorXYPos(X, Y + i), 2 * W);
         Cell += W;
     }
@@ -927,9 +928,9 @@ int GViewPeer::ConPutLine(int X, int Y, int W, int H, PCell Cell) {
 
 int GViewPeer::ConSetBox(int X, int Y, int W, int H, TCell Cell) {
     TDrawBuffer B;
-    int i;
 
-    for (i = 0; i < W; i++) B[i] = Cell;
+    for (int i = 0; i < W; i++)
+        B[i] = Cell;
     ConPutLine(X, Y, W, H, B);
     return 0;
 }
@@ -949,7 +950,7 @@ int GViewPeer::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Co
                   X * cxChar,
                   Y * cyChar
                  );
-        for (l = 0; l < H - Count; l++) {
+        for (l = 0; l < H - Count; l++)
             memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l + Count), 2 * W);
         }
         if (ConSetBox(X, Y + H - Count, W, Count, Cell) == -1) return -1;
@@ -968,6 +969,7 @@ int GViewPeer::ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Co
         if (ConSetBox(X, Y, W, Count, Cell) == -1) return -1;
     }
     DrawCursor(1);
+
     return 0;
 }
 
@@ -1487,7 +1489,6 @@ int GFrame::AddView(GView *view) {
 }
 
 void GFrame::Update() {
-
     UpdateMenu();
     for (GView *v = Active; v; v = v->Next) {
         v->Update();
@@ -1878,7 +1879,7 @@ int GUI::RunProgram(int mode, char *Command) {
         strlcat(Cmd, " -ls &", sizeof(Cmd));
     else {
         strlcat(Cmd, " -e ", sizeof(Cmd));
-	strlcat(Cmd, Command, sizeof(Cmd));
+        strlcat(Cmd, Command, sizeof(Cmd));
         if (mode == RUN_ASYNC)
             strlcat(Cmd, " &", sizeof(Cmd));
     }
@@ -2008,6 +2009,7 @@ int GetXSelection(int *len, char **data, int clipboard) {
 
 int SetXSelection(int len, char *data, int clipboard) {
     Atom clip;
+
     XStoreBytes(display, data, len);
     switch (clipboard) {
     case 0:

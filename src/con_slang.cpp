@@ -458,6 +458,7 @@ int ConQueryMouseButtons(int *ButtonCount)
 static int getkey(int tsecs)
 {
     int key;
+
     if (SLang_input_pending(tsecs) > 0) {
 	key = SLang_getkey();
 	//fprintf(stderr, "readkey  0x%2x  %d  %c\n", key, key, isprint(key) ? key : ' ');
@@ -739,10 +740,10 @@ char ConGetDrawChar(unsigned int idx)
     static const char *use_tab;
     static size_t use_tab_size;
 
-    if (use_tab == NULL) {
+    if (!use_tab) {
 	const char *c = getenv("TERM");
 	use_tab = (const char*)
-	    (((c == NULL) || strcmp(c, "linux") != 0) ? tab : tab_linux);
+	    ((!c || strcmp(c, "linux") != 0) ? tab : tab_linux);
 	use_tab = GetGUICharacters("Slang", use_tab);
 	use_tab_size = strlen(use_tab);
     }

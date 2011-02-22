@@ -3472,8 +3472,10 @@ void GUI::ProcessEvent() {
 
 int GUI::Run() {
     QMSG qmsg;
+
     doLoop = 1;
     DosPostEventSem(StartInterface);
+
     while (doLoop != 0 && WinGetMsg(hab, &qmsg, NULLHANDLE, 0, 0))
         WinDispatchMsg(hab, &qmsg);
     return 0;
@@ -3848,21 +3850,25 @@ int GUI::ReadPipe(int id, void *buffer, size_t len) {
 
 int GUI::ClosePipe(int id) {
     if (id < 0 || id > MAX_PIPES)
-        return -1;
+        return 0;
+
     if (Pipes[id].used == 0)
-        return -1;
+        return 0;
+
     if (Pipes[id].reading == 1) {
         Pipes[id].DoTerm = 1;
         DosPostEventSem(Pipes[id].ResumeRead);
         DosWaitThread(&Pipes[id].tid, DCWW_WAIT);
     }
+
     free(Pipes[id].buffer);
     free(Pipes[id].Command);
     DosCloseEventSem(Pipes[id].ResumeRead);
     DosCloseMutexSem(Pipes[id].Access);
 //    fprintf(stderr, "Pipe Close: %d\n", id);
     Pipes[id].used = 0;
-    return Pipes[id].RetCode;
+
+    return (Pipes[id].RetCode == 0);
 }
 
 int GUI::multiFrame() {

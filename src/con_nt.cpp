@@ -796,6 +796,7 @@ int SaveScreen() { /*FOLD00*/
 
     if (SavedScreen)
         ConGetBox(0, 0, SavedX, SavedY, SavedScreen);
+
     ConQueryCursorPos(&SaveCursorPosX, &SaveCursorPosY);
     return 0;
 }
@@ -921,7 +922,6 @@ int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) { /*FO
     strlcpy(STitle, winSTitle, SMaxLen);
     return 0;
 }
-
 
 
 #if 0
@@ -1800,24 +1800,23 @@ int GUI::OpenPipe(const char *Command, EModel *notify) {
 
 int GUI::SetPipeView(int id, EModel *notify) {
     if (id < 0 || id > MAX_PIPES)
-        return -1;
+        return 0;
     if (Pipes[id].used == 0)
-        return -1;
+        return 0;
     WaitForSingleObject(Pipes[id].Access, INFINITE);
     //fprintf(stderr, "Pipe View: %d %08X\n", id, notify);
     Pipes[id].notify = notify;
     ReleaseMutex(Pipes[id].Access);
-    return 0;
+    return 1;
 }
 
 ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
     ssize_t l;
     //ULONG ulPostCount;
 
-    if (id < 0 || id > MAX_PIPES)
+    if (id < 0 || id > MAX_PIPES || Pipes[id].used == 0)
         return -1;
-    if (Pipes[id].used == 0)
-        return -1;
+
     //fprintf(stderr, "Read: Waiting on mutex\n");
     //ConContinue();
     WaitForSingleObject(Pipes[id].Access, INFINITE);
@@ -1892,14 +1891,12 @@ int GetPipeEvent(int i, TEvent *Event) {
 int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete) /*FOLD00*/
 {
     //** Any saved events left?
-    if (EventBuf.What != evNone)
-    {
+    if (EventBuf.What != evNone) {
         *Event = EventBuf;
         if (Delete) EventBuf.What = evNone;
         return 0;
     }
-    if (MouseEv.What != evNone)
-    {
+    if (MouseEv.What != evNone) {
         *Event = MouseEv;
         if (Delete) MouseEv.What = evNone;
         return 0;

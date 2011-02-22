@@ -833,7 +833,7 @@ int ConDone()
 
 int ConSuspend()
 {
-	plScnSetFlash(TRUE);					// Set "flash" mode, not bright mode
+	plScnSetFlash(TRUE);		// Set "flash" mode, not bright mode
 	ConHideMouse();
 #if defined(SIGBREAK)
   	signal(SIGBREAK, SIG_DFL);
@@ -848,7 +848,7 @@ int ConContinue()
   	signal(SIGBREAK, SIG_IGN);
 #endif
 	signal(SIGINT, SIG_IGN);
-	plScnSetFlash(FALSE);					// Set "bright" mode, not flashing
+	plScnSetFlash(FALSE);		// Set "bright" mode, not flashing
 	ConShowMouse();
 	return 0;
 }
@@ -924,7 +924,6 @@ int ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete)
 	return -1;
 }
 
-
 static PCell SavedScreen = 0;
 static int SavedX, SavedY, SaveCursorPosX, SaveCursorPosY;
 
@@ -938,6 +937,7 @@ int SaveScreen() {
 
 	if (SavedScreen)
 		ConGetBox(0, 0, SavedX, SavedY, SavedScreen);
+
 	ConQueryCursorPos(&SaveCursorPosX, &SaveCursorPosY);
 	return 0;
 }

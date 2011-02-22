@@ -344,21 +344,19 @@ public:
 };
 
 #ifdef CONFIG_X11_XMB
-static void TryLoadFontset(const char *fs)
+static int TryLoadFontset(const char *fs)
 {
     char *def = NULL;
     char **miss = NULL;
     int nMiss = 0;
 
     if (font_set)
-        return;
+        return 0;
 
     if (!fs || !*fs)
-        return;
+        return 0;
 
-    font_set = XCreateFontSet(display, fs, &miss, &nMiss, &def);
-
-    if (font_set == NULL) {
+    if (!(font_set = XCreateFontSet(display, fs, &miss, &nMiss, &def))) {
         fprintf(stderr, "XFTE Warning: unable to open font \"%s\":\n"
                 " Missing count: %d\n", fs, nMiss);
         for(int i = 0; i < nMiss; i++)
@@ -369,44 +367,43 @@ static void TryLoadFontset(const char *fs)
     //else fprintf(stderr, "fonts  %p  %d   %p\n", miss, nMiss, def);
     if (nMiss)
         XFreeStringList(miss);
+
+    return (font_set != NULL);
 }
 #endif // CONFIG_X11_XMB
 
 static int InitXFonts()
 {
     char *fs = getenv("VIOFONT");
-    if (fs == NULL && WindowFont[0] != 0)
+    if (!fs && WindowFont[0] != 0)
         fs = WindowFont;
 
     if (!useXMB) {
         font_struct = NULL;
 
-        if (fs != NULL) {
-            char *s = 0;
+        if (fs) {
+            char *s = strchr(fs, ',');
 
-            s = strchr(fs, ',');
-            if (s != NULL)
+            if (s)
                 *s = 0;
             font_struct = XLoadQueryFont(display, fs);
         }
-        if (font_struct == NULL)
-            font_struct = XLoadQueryFont(display, "8x13");
-        if (font_struct == NULL)
-            font_struct = XLoadQueryFont(display, "fixed");
-        if (font_struct == NULL)
-            return -1;
+
+        if (!font_struct
+            && !(font_struct = XLoadQueryFont(display, "8x13"))
+            && !(font_struct = XLoadQueryFont(display, "fixed")))
+            return 0;
+
         FontCX = font_struct->max_bounds.width;
         FontCY = font_struct->max_bounds.ascent + font_struct->max_bounds.descent;
     }
 #ifdef CONFIG_X11_XMB
     else {
-        TryLoadFontset(getenv("VIOFONT"));
-        TryLoadFontset(WindowFont);
-        TryLoadFontset("-misc-*-r-normal-*");
-        TryLoadFontset("*fixed*");
-
-        if (font_set == NULL)
-            return -1;
+        if (!TryLoadFontset(getenv("VIOFONT"))
+            && !TryLoadFontset(WindowFont)
+            && !TryLoadFontset("-misc-*-r-normal-*")
+            && !TryLoadFontset("*fixed*"))
+            return 0;
 
         XFontSetExtents *xE = XExtentsOfFontSet(font_set);
 
@@ -462,9 +459,9 @@ static int SetupXWindow(int argc, char **argv)
                         // but we need to open a window - so pick up 1 x 1
                         1, 1, 0,
                         CopyFromParent, InputOutput, CopyFromParent,
-			CWBackingStore | CWBackPixel | CWSaveUnder |
-			CWBitGravity | CWWinGravity,
-			&wattr);
+                        CWBackingStore | CWBackPixel | CWSaveUnder |
+                        CWBitGravity | CWWinGravity,
+                        &wattr);
 
     unsigned long mask = 0;
     i18n_ctx = (useI18n) ? i18n_open(display, win, &mask) : 0;
@@ -553,8 +550,7 @@ static int SetupXWindow(int argc, char **argv)
                                       NULL) != XpmSuccess)
             break;
         iconBufferSize += 2 + xpm.width * xpm.height;
-        colors = (CARD32 *)malloc(xpm.ncolors * sizeof(CARD32));
-        if (colors == NULL) {
+        if (!(colors = (CARD32 *)malloc(xpm.ncolors * sizeof(CARD32)))) {
             // Need to clear here as cleanup at the end checks for colors[i] to see if XPM was loaded
             XpmFreeXpmImage(&xpm);
             break;
@@ -697,6 +693,7 @@ int ConContinue() {
 int ConClear() {
     TDrawBuffer B;
     MoveCh(B, ' ', 0x07, ScreenCols);
+
     return ConPutLine(0, 0, ScreenCols, ScreenRows, B);
 }
 
@@ -729,6 +726,7 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
         //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
         return -1;
     }
+
     //XClearArea(display, win, X, Y, W * FontCX, H * FontCY, False);
     //DebugShowArea(X, Y, W, H, 13);
     //fprintf(stderr, "%d %d  %d %d %d %d\n", ScreenCols, ScreenRows, X, Y, W, H);
@@ -756,14 +754,14 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
 
                 if (!Refresh && Cell[p] == pCell[p])
                     break;
-		// find larges not yet printed string with same attributes
+                // find larges not yet printed string with same attributes
                 pCell[p] = Cell[p];
                 char& ch = temp[l];
                 switch (Cell[p].GetChar()) {
-		// remap needs to be done in upper layer
-		case '\t': ch = (char)3; break;  // HT
+                // remap needs to be done in upper layer
+                case '\t': ch = (char)3; break;  // HT
                 //case '\n': ch = (char)9; break;  // NL
-		//case '\r': ch = (char)5; break;  // CR
+                //case '\r': ch = (char)5; break;  // CR
                 default: ch = Cell[p].GetChar();
                 }
             }
@@ -784,9 +782,11 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell)
             //temp[l] = 0; printf("%s\n", temp);
             x += l;
         }
-        if (i + Y == CursorY)
+
+	if (i + Y == CursorY)
             DrawCursor(1);
-        Cell += W;
+
+	Cell += W;
     }
 
     return 0;
@@ -842,12 +842,14 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
                   X * FontCX, Y * FontCY,
                   W * FontCX, (H - Count) * FontCY,
                   X * FontCX, (Y + Count) * FontCY);
-        for (l = H - 1; l >= Count; --l)
+
+	for (l = H - 1; l >= Count; --l)
             memcpy(CursorXYPos(X, Y + l), CursorXYPos(X, Y + l - Count), W * sizeof(TCell));
 
-	//if (Count > 1 && ConSetBox(X, Y, W, Count, Cell) == -1)
+        //if (Count > 1 && ConSetBox(X, Y, W, Count, Cell) == -1)
         //    return -1;
     }
+
     DrawCursor(1);
     return 0;
 }
@@ -856,8 +858,10 @@ int ConSetSize(int X, int Y) {
     TCell* NewBuffer = new TCell[X * Y];
     int MX = (X < ScreenCols) ? X : ScreenCols;
     int MY = (Y < ScreenRows) ? Y : ScreenRows;
+
     for (int i = 0; i < MY; i++)
         memcpy(NewBuffer + X * i, CursorXYPos(0, i), MX * sizeof(TCell));
+
     delete[] ScreenBuffer;
     ScreenBuffer = NewBuffer;
     ScreenCols = X;
@@ -1924,22 +1928,27 @@ int GetXSelection(int *len, char **data, int clipboard) {
 
 int SetXSelection(int len, char *data, int clipboard) {
     Atom clip = GetXClip(clipboard);
-    if (CurSelectionData[clipboard] != NULL)
+
+    if (CurSelectionData[clipboard])
         free(CurSelectionData[clipboard]);
 
     // We need CurSelectionData zero-terminated so XmbTextListToTextProperty can work
     CurSelectionData[clipboard] = (unsigned char *)malloc(len + 1);
-    if (CurSelectionData[clipboard] == NULL) {
+
+    if (!CurSelectionData[clipboard]) {
         CurSelectionLen[clipboard] = 0;
         return -1;
     }
+
     CurSelectionLen[clipboard] = len;
     memcpy(CurSelectionData[clipboard], data, CurSelectionLen[clipboard]);
     CurSelectionData[clipboard][len] = 0;
-    if (CurSelectionLen[clipboard] < 64 * 1024) {
+
+    if (CurSelectionLen[clipboard] < 64 * 1024)
         XStoreBytes(display, data, len);
-    }
+
     XSetSelectionOwner(display, clip, win, CurrentTime);
+
     if (XGetSelectionOwner(display, clip) == win)
         CurSelectionOwn[clipboard] = 1;
     return 0;

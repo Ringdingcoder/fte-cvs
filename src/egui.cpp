@@ -374,7 +374,7 @@ int EGUI::FileCloseX(EView *View, int CreateNew, int XClose) {
     char Path[MAXPATH];
 
     // this should never fail!
-    if (GetDefaultDirectory(View->Model, Path, sizeof(Path)) == 0)
+    if (!GetDefaultDirectory(View->Model, Path, sizeof(Path)))
         return 0;
 
     if (View->Model->ConfQuit(View->MView->Win)) {
@@ -490,6 +490,7 @@ int EGUI::WinZoom(GxView *View) {
         V = V->Next;
         delete V1;
     }
+
     return 1;
 }
 
@@ -586,17 +587,18 @@ int EGUI::RunProgramAsync(ExState &State, GxView *view) {
 int EGUI::MainMenu(ExState &State, GxView *View) {
     char s[3];
 
-    if (State.GetStrParam(0, s, sizeof(s)) == 0)
+    if (!State.GetStrParam(0, s, sizeof(s)))
         s[0] = 0;
 
     View->Parent->ExecMainMenu(s[0]);
+
     return 1;
 }
 
 int EGUI::ShowMenu(ExState &State, GxView *View) {
     char MName[32] = "";
 
-    if (State.GetStrParam(0, MName, sizeof(MName)) == 0)
+    if (!State.GetStrParam(0, MName, sizeof(MName)))
         return 0;
 
     View->Parent->PopupMenu(MName);
@@ -611,17 +613,19 @@ int EGUI::LocalMenu(GxView *View) {
         MName = Map->GetMenu(EM_LocalMenu);
     if (MName == 0)
         MName = "Local";
+
     View->Parent->PopupMenu(MName);
     return 0;
 }
 
 int EGUI::DesktopSaveAs(ExState &State, GxView *view) {
-    if (State.GetStrParam(0, DesktopFileName, sizeof(DesktopFileName)) == 0)
-        if (view->GetFile("Save Desktop", sizeof(DesktopFileName), DesktopFileName, HIST_PATH, GF_SAVEAS) == 0)
-            return 0;
+    if (!State.GetStrParam(0, DesktopFileName, sizeof(DesktopFileName))
+        && !view->GetFile("Save Desktop", sizeof(DesktopFileName),
+                          DesktopFileName, HIST_PATH, GF_SAVEAS))
+        return 0;
 
     if (!DesktopFileName[0])
-	return 0;
+        return 0;
 
     return SaveDesktop(DesktopFileName);
 }
@@ -651,28 +655,29 @@ int EGUI::FrameClose(GxView *View) {
     assert(View != 0);
 
     //fprintf(stderr, "FrameClose  %p  v:%p\n", frames, View);
-    if (!frames->isLastFrame()) {
+    if (!frames->isLastFrame())
         delete frames;
-    } else {
-        if (ExitEditor(ActiveView) == 0)
-            return 0;
-    }
+    else if (!ExitEditor(ActiveView))
+        return 0;
+
     return 1;
 }
 
 int EGUI::FrameNext(GxView * /*View*/) {
     if (frames->isLastFrame())
-	return 0;
+        return 0;
 
     frames->Next->Activate();
+
     return 1;
 }
 
 int EGUI::FramePrev(GxView * /*View*/) {
     if (frames->isLastFrame())
-	return 0;
+        return 0;
 
     frames->Prev->Activate();
+
     return 1;
 }
 
@@ -766,7 +771,7 @@ void EGUI::EditorInit() {
 }
 
 int EGUI::InterfaceInit(int &/*argc*/, char ** /*argv*/) {
-    if (FrameNew() == 0)
+    if (!FrameNew())
         DieError(1, "Failed to create window\n");
     return 0;
 }
@@ -858,7 +863,6 @@ int EGUI::CmdLoadFiles(int &argc, char **argv) {
 #endif
 	    default:
 		DieError(2, "Invalid command line option %s", argv[Arg]);
-                return 0;
 	    }
         } else {
             QuoteNext = 0;
@@ -934,7 +938,7 @@ int EGUI::Start(int &argc, char **argv) {
     if (CmdLoadFiles(argc, argv) == 0)
         return 3;
 
-    if (ActiveModel == 0) {
+    if (!ActiveModel) {
 #ifdef CONFIG_OBJ_DIRECTORY
         char Path[MAXPATH];
 
@@ -944,17 +948,18 @@ int EGUI::Start(int &argc, char **argv) {
         ActiveView->SwitchToModel(ActiveModel);
 #else
         // FIXME Usage();
-        return 1;
+        return 0;
 #endif
     }
-    return 0;
+
+    return 1;
 }
 
 void EGUI::EditorCleanup() {
     if (ActiveModel != NULL) {
         EModel *B, *N, *A;
 
-       	B = A = ActiveModel;
+        B = A = ActiveModel;
         do {
             N = B->Next;
             delete B;

@@ -327,8 +327,8 @@ int ConDone() {
         }
 #endif
         ioctl(VtFd, KDSKBMODE, K_XLATE);
-        tmp = tcsetattr(VtFd, 0, &Save_termios);
-        if (tmp) fprintf(stderr, "tcsetattr = %d\n", tmp);
+        if ((tmp = tcsetattr(VtFd, 0, &Save_termios)))
+            fprintf(stderr, "tcsetattr = %d\n", tmp);
     }
     return 0;
 }
@@ -423,6 +423,7 @@ int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
 
 int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
     TDrawBuffer B;
+
     MoveCh(B, Cell.GetChar(), Cell.GetAttr(), W);
     ConPutLine(X, Y, W, H, B);
     return 0;
@@ -1152,10 +1153,11 @@ int GUI::RunProgram(int /*mode*/, char *Command) {
     ConShowMouse();
     ConQuerySize(&W1, &H1);
 
-    if (W != W1 || H != H1) {
+    if (W != W1 || H != H1)
         frames->Resize(W1, H1);
-    }
+
     frames->Repaint();
+
     return rc;
 }
 

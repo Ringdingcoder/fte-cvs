@@ -133,8 +133,8 @@ int Indent_SIMPLE(EBuffer *B, int Line, int PosCursor);
     int BPos; \
     ChColor *Colors = ColorTable; \
     ChColor Color = CLR_Normal; \
-    int i; \
-    int len = Line->Count; \
+    size_t i; \
+    size_t len = Line->Count; \
     char *p = Line->Chars; \
     int NC = 0, C = 0; \
     int TabSize = BFI(BF, BFI_TabSize); \

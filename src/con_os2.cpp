@@ -508,6 +508,7 @@ int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
         VioScrollRt((USHORT)Y, (USHORT)X, (USHORT)(Y + H - 1), (USHORT)(X + W - 1), (USHORT)Count, (PBYTE)&FillCell, 0);
         break;
     }
+
     if (MouseHidden)
         DrawMouse(1);
     return 0;
@@ -709,6 +710,7 @@ int GetPipeEvent(TEvent *Event) {
             return 1;
         }
     }
+
     return 0;
 }
 
@@ -774,6 +776,7 @@ int SaveScreen() {
 
     if (SavedScreen)
         ConGetBox(0, 0, SavedX, SavedY, SavedScreen);
+
     ConQueryCursorPos(&SaveCursorPosX, &SaveCursorPosY);
     return 0;
 }
@@ -992,7 +995,6 @@ static void _LNK_CONV PipeThread(void *p) {
     DosPostEventSem(pipe->NewData);
     DosReleaseMutexSem(pipe->Access);
     //fprintf(stderr, "Read: Released mutex\n");
-    return;
 }
 
 int GUI::OpenPipe(const char *Command, EModel *notify) {
@@ -1068,13 +1070,14 @@ int GUI::SetPipeView(int id, EModel *notify) {
 }
 
 ssize_t GUI::ReadPipe(int id, void *buffer, size_t len) {
-    ssize_t l;
+    ssize_t l = -1;
     //ULONG ulPostCount;
 
     if (id < 0 || id > MAX_PIPES)
         return -1;
     if (Pipes[id].used == 0)
         return -1;
+
     //fprintf(stderr, "Read: Waiting on mutex\n");
     //ConContinue();
     DosRequestMutexSem(Pipes[id].Access, SEM_INDEFINITE_WAIT);
@@ -1137,9 +1140,7 @@ int GUI::RunProgram(int mode, char *Command) {
     ConSuspend();
 
     if (Command == 0 || *Command == 0)  // empty string = shell
-        Command = getenv(
-                         "COMSPEC"
-                        );
+        Command = getenv("COMSPEC");
 
     rc = system(Command);
 
@@ -1147,10 +1148,11 @@ int GUI::RunProgram(int mode, char *Command) {
     ConShowMouse();
     ConQuerySize(&W1, &H1);
 
-    if (W != W1 || H != H1) {
+    if (W != W1 || H != H1)
         frames->Resize(W1, H1);
-    }
+
     frames->Repaint();
+
     return rc;
 }
 

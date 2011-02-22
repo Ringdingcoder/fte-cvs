@@ -164,11 +164,12 @@ int ConInit(int /*XSize */ , int /*YSize */ )
 		if (!(s = keyname(ch)))
 		      break;
 
-		if(!strcmp(s, "kUP"))
+		if (!strcmp(s, "kUP"))
 			key_sup = ch;
-		else if(!strcmp(s, "kDN"))
+		else if (!strcmp(s, "kDN"))
 			key_sdown = ch;
-		if(key_sup > 0 && key_sdown > 0) break;
+		if (key_sup > 0 && key_sdown > 0)
+			break;
 	}
 	return 0;
 }
@@ -412,6 +413,7 @@ static int ConGetMouseEvent(TEvent *Event)
 {
 	MEVENT mevent;
 	mmask_t& bstate = mevent.bstate;
+
 	if (getmouse(&mevent) == ERR) {
 		 Event->What = evNone;
 		 return -1;
@@ -596,6 +598,7 @@ static int ResizeWindow()
 	} ws = { 0 };
 
 	ScreenSizeChanged = 0;
+
 	if (ioctl(1, TIOCGWINSZ, &ws) == -1
 	    || !ws.ws_row || !ws.ws_col)
 	    return -1;

@@ -225,6 +225,7 @@ int GViewPeer::CaptureMouse(int grab) {
         else
             MouseCapture = 0;
     }
+
     return 1;
 }
 #endif
@@ -249,8 +250,10 @@ int GViewPeer::ExpandHeight(int DeltaY) {
         return -1;
     if (DeltaY + wH < 3)
         DeltaY = - (wH - 3);
+
     if (View->Next->Peer->wH - DeltaY < 3)
         DeltaY = View->Next->Peer->wH - 3;
+
     View->Peer->ConSetSize(wW, wH + DeltaY);
     View->Next->Peer->wY += DeltaY;
     assert(View->Next->Peer->wY >= 0);
@@ -265,28 +268,24 @@ int GViewPeer::QuerySbVPos() {
 }
 
 int GViewPeer::SetSbVPos(int Start, int Amount, int Total) {
-    if (sbVstart != Start ||
-        sbVamount != Amount ||
-        sbVtotal != Total)
-    {
+    if (sbVstart != Start || sbVamount != Amount || sbVtotal != Total) {
         sbVstart = Start;
         sbVamount = Amount;
         sbVtotal = Total;
         sbVupdate = 1;
     }
+
     return 1;
 }
 
 int GViewPeer::SetSbHPos(int Start, int Amount, int Total) {
-    if (sbHstart != Start ||
-        sbHamount != Amount ||
-        sbHtotal != Total)
-    {
+    if (sbHstart != Start || sbHamount != Amount || sbHtotal != Total) {
         sbHstart = Start;
         sbHamount = Amount;
         sbHtotal = Total;
         sbHupdate = 1;
     }
+
     return 1;
 }
 
@@ -514,8 +513,10 @@ int GView::Execute() {
         gui->ProcessEvent();
     NewResult = Result;
     Result = SaveRc;
+
     if (didFocus)
         CaptureFocus(0);
+
     return NewResult;
 }
 
@@ -622,19 +623,23 @@ int GFrame::ConQuerySize(int *X, int *Y) {
 
 int GFrame::ConSplitView(GView *view, GView *newview) {
     int dmy;
-    
+
     newview->Parent = this;
     newview->Peer->wX = 0;
     ConQuerySize(&newview->Peer->wW, &dmy);
-    if (ShowVScroll) 
+
+    if (ShowVScroll)
         newview->Peer->wW--;
+
     newview->Peer->wY = view->Peer->wY + view->Peer->wH / 2;
     assert(newview->Peer->wY >= 0);
     newview->Peer->wH = view->Peer->wH - view->Peer->wH / 2;
+
     if (ShowHScroll) {
         newview->Peer->wY++;
         newview->Peer->wH--;
     }
+
     view->Peer->wH /= 2;
     view->ConSetSize(view->Peer->wW, view->Peer->wH);
     newview->ConSetSize(newview->Peer->wW, newview->Peer->wH);
@@ -675,7 +680,7 @@ int GFrame::AddView(GView *view) {
 }
 
 void GFrame::Update() {
-    
+
     UpdateMenu();
     for (GView *v = Active; v; v = v->Next) {
         v->Update();
@@ -695,7 +700,7 @@ void GFrame::UpdateMenu() {
 }
 
 void GFrame::Repaint() {
-    
+
     if (ShowMenuBar)
         DrawMenuBar();
     for (GView *v = Active; v; v = v->Next) {
@@ -711,7 +716,9 @@ void GFrame::Repaint() {
 }
 
 void GFrame::InsertView(GView *prev, GView *view) {
-    if (!view) return ;
+    if (!view)
+        return;
+
     if (prev) {
         view->Prev = prev;
         view->Next = prev->Next;
@@ -778,23 +785,24 @@ void GFrame::SelectNext(int back) {
     if (c != Active) {
         if (c)
             c->Activate(0);
-        if (Active) 
+        if (Active)
             Active->Activate(1);
     }
 }
 
 int GFrame::SelectView(GView *view) {
-    if (Top == 0)
+    if (!Top)
         return 0;
-    
+
     if (FocusCapture != 0)
         view = view;
-    
+
     if (Active)
         Active->Activate(0);
     Active = view;
     if (Active)
         Active->Activate(1);
+
     return 1;
 }
 
@@ -866,10 +874,9 @@ int GUI::ConGrabEvents(TEventMask /*EventMask*/) {
 }
 
 void GUI::DispatchEvent(GFrame * /*frame*/, GView *view, TEvent &Event) {
-    if (Event.What != evNone) {
+    if (Event.What != evNone)
         if (view)
             view->HandleEvent(Event);
-    }
 }
 
 int GUI::ConGetEvent(TEventMask EventMask, TEvent *Event, int WaitTime, int Delete, GView **view) {
@@ -1074,7 +1081,7 @@ static void HandleHScroll(GView *view, TEvent &E) {
 
 void GUI::ProcessEvent() {
     TEvent E;
-    
+
     E = NextEvent;
     if (E.What != evNone)
         NextEvent.What = evNone;

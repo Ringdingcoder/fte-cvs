@@ -1,27 +1,33 @@
 .TH FTE 1
 .SH NAME
 fte \- Text editor
+
 .SH SYNOPSIS
 .B fte
-.I " [[options] files ...]"
+.RI [ options ]
+.RI [ files ...]
 .BR
 
 .B xfte
-.I "[[options] files ...]"
+.RI [ options ]
+.RI [ files ...]
 .BR
 
 .B vfte
-.I "[[options] files ...]"
+.RI [ options ]
+.RI [ files ...]
 .BR
 
 .B nfte
-.I "[[options] files ...]"
+.RI [ options ]
+.RI [ files ...]
 .BR
 
 .B sfte
-.I "[[options] files ...]"
+.RI [ options ]
+.RI [ files ...]
 .BR
-.\" .I "[[options] files ...]"
+
 .SH "DESCRIPTION"
 This manual page documents briefly the
 .BR "fte" .
@@ -31,44 +37,45 @@ Some detailed documentation is available html format, see below.
 .B fte
 is a powerful text editor which closely resembles Borlands programming
 editors for M$\-DOS, but is far more flexible and configurable.
+
 .SH OPTIONS
 .BR fte
 uses a command line syntax, which is a little bit different from
 most of Debian GNU/Linux apps.
 .TP
-.B \-h \-? \--help
+.BR \-h , \-? , \--help
 Help on command line options.
 .TP
 .B \-!
 Ignore any external configuration file and use internal configuration.
 .TP
-.BI \-l <line>[,<column>]
+.BR \-l < \fIline >[< \fI,column >]
 Go to line (and column) in next file on command line.
 .TP
-.BI \-# <line>[<,column>]
+.BR \-# < \fIline >[< \fI,column >]
 Same as \fB-l\fP. Do not use this option.
 .TP
-.BI \-m [<mode>]
+.BR \-m [< \fImode >]
 Set mode for next files to <mode>. If just plain \fB\-m\fP,
 then use default mode.
 .TP
-.BI \-C [<.cnf>]
+.BR \-C [< \fI.cnf >]
 Use specified configuration file (compiled). Plain \fB\-C\fP does the same as
 \fB\-!\fP.
 .TP
-.BI \-D [<.dsk>]
-Load/save desktop from file <.dsk>. If no argument, disable
+.BR \-D [< \fI.dsk >]
+Load/save desktop from file '\fI.dsk\fP'. If no argument, disable
 desktop load/save.
 .TP
-.BI \-H [<.his>]
-Load/save history from file <.his>. If no argument, disable
+.BR \-H [< \fI.his >]
+Load/save history from file '\fI.his\fP'. If no argument, disable
 history load/save.
 .TP
-.BI \-T <tagfile>
-Load 'tagfile' at startup.
+.BR \-T < \fItagfile >
+Load '\fItagfile\fP' at startup.
 .TP
-.BI \-t <tag>
-Lookup tag 'tag' and display file containing it.
+.BR \-t < \fItag >
+Lookup tag '\fItag\fP' and display file containing it.
 .TP
 .B \-\-
 The rest of the arguments are not options, but filenames.

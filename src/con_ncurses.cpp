@@ -639,9 +639,8 @@ int ConGetEvent(TEventMask /*EventMask */, TEvent* Event, int WaitTime, int Dele
 	return 1;
     }
 
-    int rtn;
-    if ((rtn = WaitFdPipeEvent(Event, STDIN_FILENO, -1)) <= 0)
-	return rtn;
+    if (WaitFdPipeEvent(Event, STDIN_FILENO, -1, -1) ==	FD_PIPE_ERROR)
+	return 0;
 
     if (Event->What == evNotify)
 	return 0; // pipe reading

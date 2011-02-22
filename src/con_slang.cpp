@@ -539,7 +539,7 @@ int ConGetEvent(TEventMask /*EventMask */ ,
 		TEvent * Event, int WaitTime, int Delete)
 {
     TKeyEvent& KEvent = Event->Key;
-    int key, rc;
+    int key;
 
     if (ScreenSizeChanged) {
 	ScreenSizeChanged = 0;

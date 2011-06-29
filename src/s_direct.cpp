@@ -51,11 +51,12 @@ static int my_stat(const char *name, struct stat *s)
 #endif
 
 
-FileInfo::FileInfo(const char *Name, int Type, off_t Size, time_t MTime) :
+FileInfo::FileInfo(const char *Name, int Type, off_t Size, time_t MTime, int Mode) :
     name(Name),
     size(Size),
     mtime(MTime),
-    type(Type)
+    type(Type),
+    mode(Mode)
 {
 }
 
@@ -334,7 +335,9 @@ again:
         *fi = new FileInfo(name,
                            S_ISDIR(st.st_mode) ? fiDIRECTORY : fiFILE,
                            st.st_size,
-                           st.st_mtime);
+			   st.st_mtime,
+                           st.st_mode
+			  );
     }
     //printf("ok\n");
     return 0;

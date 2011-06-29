@@ -24,14 +24,16 @@ class FileInfo {
     off_t size;
     time_t mtime;
     int type;
+    int mode;
     
 public:
-    FileInfo(const char *Name, int type, off_t Size, time_t MTime);
+    FileInfo(const char *Name, int type, off_t Size, time_t MTime, int Mode=-1);
     ~FileInfo();
 
     const char *Name() const { return name.c_str(); }
     off_t Size() const { return size; }
     int Type() const { return type; }
+    int Mode() const { return mode; }
     time_t MTime() const { return mtime; }
 };
 

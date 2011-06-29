@@ -57,7 +57,8 @@ void EDirectory::DrawLine(PCell B, int Line, int Col, ChColor color, int Width) 
         struct tm *t;
         time_t tim;
         off_t Size = Files[Line]->Size();
-        char SizeStr[16];
+	char SizeStr[16];
+        char ModeStr[11];
 
         tim = Files[Line]->MTime();
         t = localtime(&tim);
@@ -82,8 +83,34 @@ void EDirectory::DrawLine(PCell B, int Line, int Col, ChColor color, int Width) 
         } else
             sprintf(SizeStr, "%8ld", (long) Size);
 
+#ifdef UNIX
+	if (Files[Line]->Mode() >= 0)
+	{
+	    const int mode = Files[Line]->Mode();
+	    ModeStr[0] = mode & S_IFDIR ? 'd' : '-';
+	    ModeStr[1] = mode & S_IRUSR ? 'r' : '-';
+	    ModeStr[2] = mode & S_IWUSR ? 'w' : '-';
+	    ModeStr[3] = mode & S_IXUSR ? 'x' : '-';
+	    ModeStr[4] = mode & S_IRGRP ? 'r' : '-';
+	    ModeStr[5] = mode & S_IWGRP ? 'w' : '-';
+	    ModeStr[6] = mode & S_IXGRP ? 'x' : '-';
+	    ModeStr[7] = mode & S_IROTH ? 'r' : '-';
+	    ModeStr[8] = mode & S_IWOTH ? 'w' : '-';
+	    ModeStr[9] = mode & S_IXOTH ? 'x' : '-';
+	    ModeStr[10] = '\0';
+	}
+	else
+            ModeStr[0] = '\0';
+#endif
+
 	int l = snprintf(s, sizeof(s),
+#ifdef UNIX
+                         "%10s "
+#endif
 			 "%04d/%02d/%02d %02d:%02d:%02d %s %s%c",
+#ifdef UNIX
+                         ModeStr,
+#endif
 			 Year, Mon, Day, Hour, Min, Sec, SizeStr,
 			 Files[Line]->Name(),
 			 (Files[Line]->Type() == fiDIRECTORY) ? SLASH : ' ');

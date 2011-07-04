@@ -112,6 +112,7 @@ char SvnLogMode[32] = "PLAIN";
 int ReassignModelIds = 0;
 int RecheckReadOnly = 0;
 char XShellCommand[256] = "xterm";
+int ShowTildeFilesInDirList = 1;
 
 // Which characters to get. defaultCharacters if not set, rest filled
 // with defaultCharacters if too short
@@ -307,6 +308,7 @@ static int SetGlobalNumber(int what, int number)
     case FLAG_IgnoreBufferList:  IgnoreBufferList = number; break;
     case FLAG_ReassignModelIds:  ReassignModelIds = number; break;
     case FLAG_RecheckReadOnly:   RecheckReadOnly = number; break;
+    case FLAG_ShowTildeFilesInDirList: ShowTildeFilesInDirList = number; break;
     default:
         //printf("Unknown global number: %d\n", what);
         ENDFUNCRC(-1);

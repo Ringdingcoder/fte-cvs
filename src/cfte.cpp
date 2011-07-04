@@ -423,6 +423,7 @@ MODE_FLG(IgnoreBufferList),
 MODE_FLG(ReassignModelIds),
 MODE_FLG(RecheckReadOnly),
 MODE_FLG(CursorBlink),
+MODE_FLG(ShowTildeFilesInDirList),
 { 0, 0 },
 };
 
@@ -1102,7 +1103,7 @@ static int ParseConfigFile(CurPos &cp) {
                                     s = GetString(cp);
                                     if (s == 0) Fail(cp, "String expected");
                                     var = Lookup(event_string, w);
-                                    if (var == -1) Fail(cp, "Lookup of '%s' failed", w);
+                                    if (var == -1) Fail(cp, "event_string Lookup of '%s' failed", w);
                                     PutNumber(cp, CF_SETVAR, var);
                                     PutString(cp, CF_STRING, s);
                                 }
@@ -1161,7 +1162,7 @@ static int ParseConfigFile(CurPos &cp) {
                                 if (Parse(cp) != P_STRING) Fail(cp, "String expected");
                                 sname = GetString(cp);
                                 if ((cidx = Lookup(hilit_colors, sname)) == -1)
-                                    Fail(cp, "Lookup of '%s' failed", sname);
+                                    Fail(cp, "hilit_colors Lookup of '%s' failed", sname);
                                 PutNumber(cp, CF_INT, cidx);
                                 if (Parse(cp) != P_COMMA)
                                     Fail(cp, "',' expected");
@@ -1236,7 +1237,7 @@ static int ParseConfigFile(CurPos &cp) {
                                 if (Parse(cp) != P_STRING) Fail(cp, "String expected");
                                 cname = GetString(cp);
                                 if ((cidx = Lookup(hilit_colors, cname)) == -1)
-                                    Fail(cp, "Lookup of '%s' failed", cname);
+                                    Fail(cp, "hilit_colors Lookup of '%s' failed", cname);
                                 PutNumber(cp, CF_INT, cidx);
                                 if (Parse(cp) != P_CLOSEBRACE) Fail(cp, "'}' expected");
                                 GetOp(cp, P_CLOSEBRACE);
@@ -1287,7 +1288,7 @@ static int ParseConfigFile(CurPos &cp) {
                                 if (Parse(cp) != P_STRING) Fail(cp, "String expected");
                                 cname = GetString(cp);
                                 if ((cidx = Lookup(hilit_colors, cname)) == -1)
-                                    Fail(cp, "Lookup of '%s' failed", cname);
+                                    Fail(cp, "hilit_colors Lookup of '%s' failed", cname);
 
                                 PutNumber(cp, CF_INT, match_opts);
                                 PutNumber(cp, CF_INT, cidx);
@@ -1409,7 +1410,7 @@ static int ParseConfigFile(CurPos &cp) {
                                     if (s == 0) Fail(cp, "Parse failed");
                                     var = Lookup(colorize_string, w);
                                     if (var == -1)
-                                        Fail(cp, "Lookup of '%s' failed", w);
+                                        Fail(cp, "colorize_string Lookup of '%s' failed", w);
                                     PutNumber(cp, CF_SETVAR, var);
                                     PutString(cp, CF_STRING, s);
                                 }
@@ -1463,7 +1464,7 @@ static int ParseConfigFile(CurPos &cp) {
                                 num = GetNumber(cp);
                                 var = Lookup(mode_num, w);
                                 if (var == -1)
-                                    Fail(cp, "Lookup of '%s' failed", w);
+                                    Fail(cp, "mode_num Lookup of '%s' failed", w);
                                 PutNumber(cp, CF_SETVAR, var);
                                 PutNumber(cp, CF_INT, num);
                             }
@@ -1476,7 +1477,7 @@ static int ParseConfigFile(CurPos &cp) {
                                 if (s == 0) Fail(cp, "Parse failed");
                                 var = Lookup(mode_string, w);
                                 if (var == -1)
-                                    Fail(cp, "Lookup of '%s' filed", w);
+                                    Fail(cp, "mode_string Lookup of '%s' filed", w);
                                 PutNumber(cp, CF_SETVAR, var);
                                 PutString(cp, CF_STRING, s);
                             }
@@ -1619,7 +1620,7 @@ static int ParseConfigFile(CurPos &cp) {
                                     num = GetNumber(cp);
                                     var = Lookup(global_num, w);
                                     if (var == -1)
-                                        Fail(cp, "Lookup of '%s' failed", w);
+                                        Fail(cp, "global_num Lookup of '%s' failed", w);
                                     PutNumber(cp, CF_SETVAR, var);
                                     PutNumber(cp, CF_INT, num);
                                 }
@@ -1631,7 +1632,7 @@ static int ParseConfigFile(CurPos &cp) {
                                     s = GetString(cp);
                                     if (s == 0) Fail(cp, "Parse failed");
                                     var = Lookup(global_string, w);
-                                    if (var == -1) Fail(cp, "Lookup of '%s' failed", w);
+                                    if (var == -1) Fail(cp, "global_string Lookup of '%s' failed", w);
                                     PutNumber(cp, CF_SETVAR, var);
                                     PutString(cp, CF_STRING, s);
                                 }

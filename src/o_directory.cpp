@@ -12,6 +12,7 @@
 
 #include "o_directory.h"
 
+#include "c_config.h"
 #include "c_commands.h"
 #include "c_history.h"
 #include "i_modelview.h"
@@ -161,8 +162,12 @@ void EDirectory::RescanList() {
 
     rc = ff->FindFirst(&fi);
     while (rc == 0) {
-        assert(fi != 0);
-        if (strcmp(fi->Name(), ".") != 0) {
+	assert(fi != 0);
+
+	if (
+	    strcmp(fi->Name(), ".") != 0 &&
+            ( ShowTildeFilesInDirList || fi->Name()[strlen(fi->Name())-1] != '~' )
+	   ) {
             Files = (FileInfo **)realloc((void *)Files, ((FCount | 255) + 1) * sizeof(FileInfo *));
             if (Files == 0)
             {

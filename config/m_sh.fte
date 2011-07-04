@@ -46,7 +46,7 @@ colorize SH {
 mode SH: PLAIN { # *sh
     FileNameRx          = /{\.\cSH$}|{configure.{in}|{ac}}/;
     FirstLineRx         = /^\#\![ ]*[^ ]*sh>/;
-    RoutineRegexp       = /^\s*{function\s\s*\S\S*\s*}|{\S\S*\s*\(\)}\s*$/;
+    RoutineRegexp       = /^\s*{function\s\s*\S\S*\s*}|{\S\S*\s*\(\)}\s*\{?\s*$/;
     HilitOn             = 1;
     Colorizer           = 'SH';
     MultiLineHilit      = 1;

@@ -51,11 +51,11 @@ WaitFdPipe WaitFdPipeEvent(TEvent *Event, int fd, int fd2, int WaitTime)
 	}
 #endif
     //printf("EVENT %d:  %d   %d  %d\n", (int)time(NULL), fd, fd2, WaitTime);
-    timeout.tv_sec = WaitTime / 1000;
-    timeout.tv_usec = (WaitTime % 1000) * 1000;
+    timeout.tv_sec = WaitTime > 0 ? WaitTime / 1000 : 0;
+    timeout.tv_usec = WaitTime > 0 ? (WaitTime % 1000) * 1000 : 0;
 
     if ((rc = select(maxfd + 1, &readfds, 0, 0,
-		     (WaitTime < 0) ? 0 : &timeout)) <= 0)
+		     &timeout)) <= 0)
 	return (!rc) ? FD_PIPE_TIMEOUT : FD_PIPE_ERROR;
 
     if ((fd >= 0) && FD_ISSET(fd, &readfds))
@@ -89,7 +89,7 @@ int GUI::OpenPipe(const char *Command, EModel * notify)
     //fprintf(stderr, "PIPE  %s   \n", Command);
 #ifndef NO_PIPES
     for (int i = 0; i < MAX_PIPES; ++i) {
-	if (Pipes[i].fd != -1) {
+	if (Pipes[i].fd == -1) {
 	    int pfd[2];
 
 	    Pipes[i].notify = notify;

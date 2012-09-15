@@ -473,11 +473,32 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                     goto hilit;
                 } else if (*p == '#') {
                     State = hsPerl_Comment | (State & X_BIT);
-                    continue;
-                } else if (X_NOT(State) && *p == '/') {
-                    State = QSET(hsPerl_Regexp1, '/');
-                    Color = CLR_RegexpDelim;
-                    goto hilit;
+		    continue;
+		} else if (X_NOT(State) && *p == '/') {
+		    /*if (len >= 2 && p[1] == '/')
+		    {
+			Color = CLR_Punctuation;
+                        ColorNext();
+			ColorNext();
+			if (len && *p == '=')
+			    ColorNext();
+                        continue;
+		    }
+		    else*/
+		    {
+			State = QSET(hsPerl_Regexp1, '/');
+			Color = CLR_RegexpDelim;
+			goto hilit;
+		    }
+		} else if (*p == '/' && len >= 2 && p[1] == '/') {
+		    State = hsPerl_Punct;
+		    Color = CLR_Punctuation;
+		    ColorNext();
+		    ColorNext();
+		    if (len && *p == '=')
+			ColorNext();
+
+		    continue;
                 } else if (X_NOT(State) &&
                            *p == '-' &&
                            len >= 2 &&

@@ -466,7 +466,16 @@ int Hilit_PERL(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line
                         ColorNext();
                         State = hsPerl_Normal;
                         continue;
-                    }
+		    }
+		    else
+		    {
+                        State = hsPerl_Punct;
+			Color = CLR_Punctuation;
+			ColorNext();
+			ColorNext();
+			State = hsPerl_Normal;
+			continue;
+		    }
                 } else if (*p == '`') {
                     State = QSET(hsPerl_StringBk, '`');
                     Color = CLR_String;

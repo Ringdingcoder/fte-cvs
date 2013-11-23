@@ -983,7 +983,7 @@ int SaveScreen() {
     free(SavedScreen);
     ConQuerySize(&SavedX, &SavedY);
 
-    SavedScreen = (PCell) malloc(SavedX * SavedY * sizeof(PCell));
+    SavedScreen = (PCell) malloc(SavedX * SavedY * sizeof(TCell));
 
     if (SavedScreen)
         ConGetBox(0, 0, SavedX, SavedY, SavedScreen);

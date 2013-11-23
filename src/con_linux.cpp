@@ -121,7 +121,9 @@ static ssize_t conwrite(int fd, TCell *p, size_t len, off_t off) {
     char buf[len * 2];
     char *c = buf;
 
-    lseek(fd, off, SEEK_SET);
+    if (lseek(fd, off, SEEK_SET) == -1)
+        return 0;
+
     for (unsigned n = 0; n < len; ++n) {
 #ifdef USE_SCRNMAP
 	if (!noCharTrans)

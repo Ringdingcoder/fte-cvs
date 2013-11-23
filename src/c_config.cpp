@@ -406,7 +406,7 @@ static unsigned char GetObj(CurPos &cp, unsigned short &len) {
         unsigned char l[2];
         c = *cp.c++;
         memcpy(l, cp.c, 2);
-        len = (l[1] << 8) + l[0];
+        len = (unsigned short)((l[1] << 8) | l[0]);
         cp.c += 2;
         return c;
     }
@@ -427,18 +427,12 @@ static const char *GetCharStr(CurPos &cp, unsigned short len) {
     ENDFUNCRC(p);
 }
 
-static int GetNum(CurPos &cp, long &num) {
+static int GetNum(CurPos &cp, int &num) {
     unsigned char n[4];
     if (cp.c + 4 > cp.z) return 0;
     memcpy(n, cp.c, 4);
-    num =
-        (n[3] << 24) +
-        (n[2] << 16) +
-        (n[1] << 8) +
-        n[0];
+    num = (n[3] << 24) | (n[2] << 16) | (n[1] << 8) | n[0];
 
-    if ((n[3] > 127) && sizeof(long) > 4)
-        num = num | (~0xFFFFFFFFUL);
     cp.c += 4;
     return 1;
 }
@@ -449,13 +443,13 @@ static int ReadCommands(CurPos &cp, const char *Name) {
 
     unsigned char obj;
     unsigned short len;
-    long Cmd = NewCommand(Name);
-    long cmdno;
+    int Cmd = NewCommand(Name);
+    int cmdno;
 
     if (GetObj(cp, len) != CF_INT) ENDFUNCRC(-1);
     if (GetNum(cp, cmdno) == 0) ENDFUNCRC(-1);
     if (cmdno != (Cmd | CMD_EXT)) {
-        fprintf(stderr, "Bad Command map %s -> %ld != %ld\n", Name, Cmd, cmdno);
+        fprintf(stderr, "Bad Command map %s -> %d != %d\n", Name, Cmd, cmdno);
         ENDFUNCRC(-1);
     }
 
@@ -464,9 +458,9 @@ static int ReadCommands(CurPos &cp, const char *Name) {
         case CF_COMMAND:
             {
                 //              char *s;
-                long cnt;
-                long ign;
-                long cmd;
+                int cnt;
+                int ign;
+                int cmd;
 
                 //                if ((s = GetCharStr(cp, len)) == 0) return -1;
                 if (GetNum(cp, cmd) == 0) ENDFUNCRC(-1);
@@ -482,7 +476,7 @@ static int ReadCommands(CurPos &cp, const char *Name) {
 
                 if (AddCommand(Cmd, cmd, cnt, ign) == 0) {
                     if (Name == 0 || strcmp(Name, "xx") != 0) {
-                        fprintf(stderr, "Bad Command Id: %ld\n", cmd);
+                        fprintf(stderr, "Bad Command Id: %d\n", cmd);
                         ENDFUNCRC(-1);
                     }
                 }
@@ -498,7 +492,7 @@ static int ReadCommands(CurPos &cp, const char *Name) {
             break;
         case CF_INT:
             {
-                long num;
+                int num;
 
                 if (GetNum(cp, num) == 0) ENDFUNCRC(-1);
                 if (AddNumber(Cmd, num) == 0) ENDFUNCRC(-1);
@@ -506,7 +500,7 @@ static int ReadCommands(CurPos &cp, const char *Name) {
             break;
         case CF_VARIABLE:
             {
-                long num;
+                int num;
 
                 if (GetNum(cp, num) == 0) ENDFUNCRC(-1);
                 if (AddVariable(Cmd, num) == 0) ENDFUNCRC(-1);
@@ -621,7 +615,7 @@ static int ReadHilitColors(CurPos &cp, EColorize *Colorize, const char * /*ObjNa
         switch (obj) {
         case CF_INT:
             {
-                long cidx;
+                int cidx;
                 const char *svalue;
 
                 if (GetNum(cp, cidx) == 0) return -1;
@@ -712,7 +706,7 @@ static int ReadEventMap(CurPos &cp, EEventMap *Map, const char * /*MapName*/) {
 
         case CF_SETVAR:
             {
-                long what;
+                int what;
 
                 if (GetNum(cp, what) == 0) return -1;
                 switch (GetObj(cp, len)) {
@@ -779,8 +773,8 @@ static int ReadColorize(CurPos &cp, EColorize *Colorize, const char *ModeName) {
 
         case CF_HSTATE:
             {
-                long stateno;
-                long color;
+                int stateno;
+                int color;
 
                 if (Colorize->hm == 0)
                     Colorize->hm = new HMachine();
@@ -812,10 +806,10 @@ static int ReadColorize(CurPos &cp, EColorize *Colorize, const char *ModeName) {
         case CF_HTRANS:
             {
                 HTrans newTrans;
-                long nextState;
-                long matchFlags;
+                int nextState;
+                int matchFlags;
+                int color;
                 const char *match;
-                long color;
 
                 if (GetNum(cp, nextState) == 0)
                     return -1;
@@ -859,10 +853,10 @@ static int ReadColorize(CurPos &cp, EColorize *Colorize, const char *ModeName) {
 
         case CF_HWTYPE:
             {
-                long nextKwdMatchedState;
-                long nextKwdNotMatchedState;
-                long nextKwdNoCharState;
-                long options;
+                int nextKwdMatchedState;
+                int nextKwdNotMatchedState;
+                int nextKwdNoCharState;
+                int options;
                 const char *wordChars;
 
                 obj = GetObj(cp, len);
@@ -940,7 +934,7 @@ static int ReadColorize(CurPos &cp, EColorize *Colorize, const char *ModeName) {
 
         case CF_SETVAR:
             {
-                long what;
+                int what;
 
                 if (GetNum(cp, what) == 0) return -1;
                 switch (GetObj(cp, len)) {
@@ -982,7 +976,7 @@ static int ReadMode(CurPos &cp, EMode *Mode, const char * /*ModeName*/) {
         switch (obj) {
         case CF_SETVAR:
             {
-                long what;
+                int what;
 
                 if (GetNum(cp, what) == 0) return -1;
                 switch (GetObj(cp, len)) {
@@ -995,7 +989,7 @@ static int ReadMode(CurPos &cp, EMode *Mode, const char * /*ModeName*/) {
                     break;
                 case CF_INT:
                     {
-                        long num;
+                        int num;
 
                         if (GetNum(cp, num) == 0) return -1;
                         if (SetModeNumber(Mode, what, num) != 0) return -1;
@@ -1027,7 +1021,7 @@ static int ReadObject(CurPos &cp, const char *ObjName) {
 #ifdef CONFIG_OBJ_MESSAGES
         case CF_COMPRX:
             {
-                long file, line, msg;
+                int file, line, msg;
                 const char *regexp;
 
                 if (GetObj(cp, len) != CF_INT) return -1;
@@ -1070,7 +1064,7 @@ static int ReadObject(CurPos &cp, const char *ObjName) {
 #endif
         case CF_SETVAR:
             {
-                long what;
+                int what;
                 if (GetNum(cp, what) == 0) return -1;
 
                 switch (GetObj(cp, len)) {
@@ -1083,7 +1077,7 @@ static int ReadObject(CurPos &cp, const char *ObjName) {
                     break;
                 case CF_INT:
                     {
-                        long num;
+                        int num;
 
                         if (GetNum(cp, num) == 0) return -1;
                         if (SetGlobalNumber(what, num) != 0) return -1;
@@ -1244,7 +1238,8 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
     LOG << "Config file: " << CfgFileName << ENDLINE;
 
     int fd, rc;
-    char *buffer = 0;
+    char *buffer;
+    int ln;
     struct stat statbuf;
     CurPos cp;
 
@@ -1263,7 +1258,7 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
     }
 
     buffer = (char *) malloc((size_t)statbuf.st_size);
-    if (buffer == 0) {
+    if (!buffer) {
         close(fd);
         ENDFUNCRC(-1);
     }
@@ -1274,11 +1269,7 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
     }
     close(fd);
 
-    unsigned char l[4];
-    unsigned long ln;
-
-    memcpy(l, buffer, 4);
-    ln = (l[3] << 24) + (l[2] << 16) + (l[1] << 8) + l[0];
+    ln = (buffer[3] << 24) | (buffer[2] << 16) | (buffer[1] << 8) | buffer[0];
 
     if (ln != CONFIG_ID) {
         free(buffer);
@@ -1286,8 +1277,7 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
         ENDFUNCRC(-1);
     }
 
-    memcpy(l, buffer + 4, 4);
-    ln = (l[3] << 24) + (l[2] << 16) + (l[1] << 8) + l[0];
+    ln = (buffer[7] << 24) + (buffer[6] << 16) + (buffer[5] << 8) + buffer[4];
 
     if (ln != VERNUM) {
         LOG << std::hex << ln << " != " << VERNUM << ENDLINE;

@@ -11,7 +11,6 @@
 
 #include "c_color.h"
 #include "i_view.h"
-#include "s_string.h"
 #include "sysdep.h"
 
 #include <ctype.h>

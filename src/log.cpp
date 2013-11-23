@@ -22,9 +22,6 @@ any of its derivitives.
 #include <stdlib.h>
 #else
 #include <iomanip>
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
 
 using namespace std;
 #endif

@@ -12,7 +12,6 @@
 #ifdef CONFIG_I_SEARCH
 
 #include "i_view.h"
-#include "o_buflist.h"
 
 #include <stdio.h>
 

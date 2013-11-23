@@ -40,7 +40,6 @@ extern "C" {
 #endif
 
 #include <ctype.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -48,12 +47,10 @@ extern "C" {
 #include <sys/ioctl.h>
 #include <sys/kd.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/vt.h>
 #include <sys/wait.h>
 #include <termios.h>
 
-#include <linux/tty.h>
 #include <linux/major.h>
 #include <linux/kdev_t.h>
 #include <linux/kd.h>

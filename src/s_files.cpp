@@ -14,7 +14,6 @@
 #include "s_string.h"
 
 #include <stdlib.h> // getenv
-#include <ctype.h>
 #include <sys/stat.h>
 
 #if defined(OS2)

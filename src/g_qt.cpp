@@ -16,7 +16,6 @@
 #include <qapp.h>
 #include <qclipbrd.h>
 #include <qframe.h>
-#include <qkeycode.h>
 #include <qmenubar.h>
 #include <qpainter.h>
 #include <qscrbar.h>

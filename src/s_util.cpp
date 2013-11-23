@@ -13,7 +13,6 @@
 #include "o_buflist.h"
 #include "s_direct.h"
 #include "s_files.h"
-#include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

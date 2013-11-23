@@ -29,7 +29,6 @@
 #include <Xm/CascadeB.h>
 #include <Xm/DrawingA.h>
 #include <Xm/Form.h>
-#include <Xm/Label.h>
 #include <Xm/MainW.h>
 #include <Xm/MainW.h>
 #include <Xm/PanedW.h>
@@ -38,7 +37,6 @@
 #include <Xm/ScrollBar.h>
 #include <Xm/ScrolledW.h>
 #include <Xm/Separator.h>
-#include <Xm/Text.h>
 
 #include <fcntl.h>
 #include <stdarg.h>

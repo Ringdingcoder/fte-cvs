@@ -12,15 +12,12 @@
 #include "gui.h"
 #include "o_model.h"  // Msg
 #include "s_string.h"
-#include "s_util.h"  // S_ERROR
 #include "sysdep.h"
 
 #include <ncurses.h>
 
 #include <signal.h>
 #include <sys/ioctl.h>
-#include <sys/time.h>
-#include <sys/wait.h>
 #include <termios.h>
 
 /* Escape sequence delay in milliseconds */

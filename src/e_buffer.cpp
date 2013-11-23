@@ -932,8 +932,8 @@ int EBuffer::InsLineText(int Row, int Col, size_t ACount, int LCol, PELine Line)
     
     L = ScreenPos(Line, Line->Count);
     if (LCol >= L) return 1;
-    if (ACount == -1) ACount = L - LCol;
-    if (ACount + LCol > L) ACount = L - LCol;
+    if ((int)ACount == -1) ACount = L - LCol;
+    if ((int)ACount + LCol > L) ACount = L - LCol;
     if (ACount == 0) return 1;
     assert(ACount > 0);
 

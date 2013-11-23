@@ -173,7 +173,7 @@ struct ColorKeywords {
 
 struct HTrans {
     char *match;
-    int matchLen;
+    size_t matchLen;
     long matchFlags;
     int nextState;
     int color;

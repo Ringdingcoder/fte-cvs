@@ -427,7 +427,7 @@ void EMessages::GetErrors() {
                     getWord(fn, pin);                   // Get dirname,
                     //dbg("leaving %s", fn);
 		    int found = 0;
-		    for (unsigned i = DirLevel.size(); i-- > 0;) {
+		    for (size_t i = DirLevel.size(); i-- > 0;) {
 			/*
 			 * remove leaved director from our list of Dirs
 			 * as many users runs make in parallel mode

@@ -212,6 +212,7 @@ void ExInput::HandleEvent(TEvent &Event) {
         case 'Q' | kfCtrl:
             Event.What = evKeyDown;
             Event.Key.Code = Win->GetChar(0);
+            /* Fall through */
         default:
             {
                 char Ch;

@@ -284,7 +284,9 @@ int ExecVertMenu(int x, int y, int id, TEvent &E, UpMenu *up) {
         case evKeyDown:
             switch (kbCode(E.Key.Code)) {
             case kbPgDn:
-            case kbEnd: cur = Menus[id].Count;
+            case kbEnd:
+                cur = Menus[id].Count;
+                /* Fall through */
             case kbUp: 
                 {
                     int xcur = cur;
@@ -296,7 +298,9 @@ int ExecVertMenu(int x, int y, int id, TEvent &E, UpMenu *up) {
                 }
                 break;
             case kbPgUp:
-            case kbHome: cur = -1;
+            case kbHome:
+                cur = -1;
+                /* Fall through */
             case kbDown: 
                 {
                     int xcur = cur;
@@ -537,7 +541,9 @@ int ExecMainMenu(TEvent &E, char sub) {
             break;
         case evKeyDown:
             switch (kbCode(E.Key.Code)) {
-            case kbEnd: cur = Menus[id].Count;
+            case kbEnd:
+                cur = Menus[id].Count;
+                /* Fall through */
             case kbLeft:
                 dovert = 1;
                 {
@@ -548,7 +554,9 @@ int ExecMainMenu(TEvent &E, char sub) {
                     } while (cur != x && Menus[id].Items[cur].Name == 0);
                 }
                 break;
-            case kbHome: cur = -1;
+            case kbHome:
+                cur = -1;
+                /* Fall through */
             case kbRight:
                 dovert = 1;
                 {

@@ -120,6 +120,7 @@ void ExISearch::HandleEvent(TEvent &Event) {
         case 'Q' | kfCtrl:
             Event.What = evKeyDown;
             Event.Key.Code = Win->GetChar(0);
+            /* Fall through */
         default:
             if (isAscii(Event.Key.Code) && (len < (int)MAXISEARCH)) {
                 char Ch = (char) Event.Key.Code;

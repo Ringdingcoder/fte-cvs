@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <stdio.h>
+#include <errno.h>
 
 //#include <time.h>
 
@@ -152,8 +153,12 @@ ssize_t GUI::ReadPipe(int id, void *buffer, size_t len)
 	close(Pipes[id].fd);
 	Pipes[id].fd = -1;
 	return -1;
-    } else if (rc == -1)
-	Pipes[id].stopped = 1;
+    } else if (rc == -1) {
+        if (errno == EAGAIN)
+            rc = 0;
+        else
+            Pipes[id].stopped = 1;
+    }
 
     return rc;
 #else

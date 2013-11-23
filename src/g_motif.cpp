@@ -818,7 +818,7 @@ int GViewPeer::ConPutBox(int X, int Y, int W, int H, PCell Cell) {
     char *p, *ps, *c, *ops;
     int len, x, l, ox, olen, skip;
 
-    if (!(View && View->Parent && gc))
+    if (!(View && View->Parent))
         return 1;
 
     if (Visibility == VisibilityFullyObscured)

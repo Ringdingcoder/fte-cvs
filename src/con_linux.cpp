@@ -152,6 +152,7 @@ static void mouseHide() {
 #ifdef USE_GPM
     if (GpmFd != -1 && VcsFd != -1 && drawPointer && mouseDrawn == 1) {
         int pos = (LastMouseX + LastMouseY * VideoCols) * 2 + 4;
+
         conwrite(VcsFd, &MousePosCell, 1, pos);
         mouseDrawn = 0;
     }
@@ -188,16 +189,18 @@ int ConInit(int /*XSize*/, int /*YSize*/) {
 #endif
 
     VtFd = 2; /* try stderr as output */
-    if (isatty(VtFd) == 0) {
+    if (isatty(VtFd) == 0)
         die("not a terminal.");
-    }
+
     if (fstat(VtFd, &stb) != 0) {
         perror("stat");
         die("stat failed");
     }
+
     VtNum = MINOR(stb.st_rdev);
     if (MAJOR(stb.st_rdev) != TTY_MAJOR)
         die("Not running in a virtual console.");
+
     if (ioctl(VtFd, KDGKBMODE, &mode) != 0)
         die("failed to get kbdmode");
 #if 0
@@ -216,30 +219,32 @@ int ConInit(int /*XSize*/, int /*YSize*/) {
 #endif
     sprintf(vcsname, "/dev/vcsa%d", VtNum);
 
-     /*
-      * This is the _only_ place that we use our extra privs if any,
-      * If there is an error, we drop them prior to calling recovery
-      * functions, if we succeed we go back as well.
-      *
-      * Ben Collins <bcollins@debian.org>
+    /*
+     * This is the _only_ place that we use our extra privs if any,
+     * If there is an error, we drop them prior to calling recovery
+     * functions, if we succeed we go back as well.
+     *
+     * Ben Collins <bcollins@debian.org>
       */
-     extern uid_t effuid;
-     extern gid_t effgid;
+    extern uid_t effuid;
+    extern gid_t effgid;
 
-     seteuid(effuid);
-     setegid(effgid);
-     VcsFd = open(vcsname, O_RDWR);
-     setuid(getuid());
-     setgid(getgid());
+    seteuid(effuid);
+    setegid(effgid);
+    VcsFd = open(vcsname, O_RDWR);
+    setuid(getuid());
+    setgid(getgid());
 
-     if (VcsFd == -1) {
+    if (VcsFd == -1) {
         perror("open");
         die("failed to open /dev/vcsa*");
     }
+
     if (read(VcsFd, &vc_data, 4) != 4) {
         perror("read");
         die("failed to read from /dev/vcsa*");
     }
+
     VideoRows = vc_data[0];
     VideoCols = vc_data[1];
     CursorX = vc_data[2];
@@ -371,6 +376,7 @@ int ConContinue() {
 int ConClear() {
     int X, Y;
     TCell Cell(' ', 0x07);
+
     ConQuerySize(&X, &Y);
     ConSetBox(0, 0, X, Y, Cell);
     ConSetCursorPos(0, 0);
@@ -390,9 +396,13 @@ int ConGetTitle(char *Title, size_t MaxLen, char *STitle, size_t SMaxLen) {
 
 int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
     for (int i = 0; i < H; Cell += W, ++i) {
-        if (LastMouseY == Y + i) mouseHide();
+        if (LastMouseY == Y + i)
+            mouseHide();
+
         conwrite(VcsFd, Cell, W, 4 + ((Y + i) * VideoCols + X) * 2);
-        if (LastMouseY == Y + i) mouseShow();
+
+        if (LastMouseY == Y + i)
+            mouseShow();
     }
 
     return 1;
@@ -400,9 +410,13 @@ int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
 
 int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
     for (int i = 0; i < H; Cell += W, ++i) {
-        if (LastMouseY == Y + i) mouseHide();
+        if (LastMouseY == Y + i)
+            mouseHide();
+
         conread(VcsFd, Cell, W, 4 + ((Y + i) * VideoCols + X) * 2);
-        if (LastMouseY == Y + i) mouseShow();
+
+        if (LastMouseY == Y + i)
+            mouseShow();
     }
 
     return 1;
@@ -411,7 +425,7 @@ int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
 int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
 
     for (int i = 0; i < H; ++i)
-	ConPutBox(X, Y + i, W, 1, Cell);
+        ConPutBox(X, Y + i, W, 1, Cell);
 
     return 1;
 }
@@ -456,8 +470,11 @@ int ConSetSize(int /*X*/, int /*Y*/) {
 }
 
 int ConQuerySize(int *X, int *Y) {
-    if (X) *X = VideoCols;
-    if (Y) *Y = VideoRows;
+    if (X)
+        *X = VideoCols;
+
+    if (Y)
+        *Y = VideoRows;
 
     return 1;
 }
@@ -465,8 +482,12 @@ int ConQuerySize(int *X, int *Y) {
 int ConSetCursorPos(int X, int Y) {
     char pos[2];
 
-    if (X >= 0 && X < int(VideoCols)) CursorX = X;
-    if (Y >= 0 && Y < int(VideoRows)) CursorY = Y;
+    if (X >= 0 && X < int(VideoCols))
+        CursorX = X;
+
+    if (Y >= 0 && Y < int(VideoRows))
+        CursorY = Y;
+
     pos[0] = (char)CursorX;
     pos[1] = (char)CursorY;
     lseek(VcsFd, 2, SEEK_SET);
@@ -476,8 +497,11 @@ int ConSetCursorPos(int X, int Y) {
 }
 
 int ConQueryCursorPos(int *X, int *Y) {
-    if (X) *X = CursorX;
-    if (Y) *Y = CursorY;
+    if (X)
+        *X = CursorX;
+
+    if (Y)
+        *Y = CursorY;
 
     return 1;
 }
@@ -501,6 +525,7 @@ int ConSetMousePos(int /*X*/, int /*Y*/) {
 int ConQueryMousePos(int *X, int *Y) {
     if (X) *X = LastMouseX;
     if (Y) *Y = LastMouseY;
+
     return 1;
 }
 
@@ -963,6 +988,7 @@ int SaveScreen() {
 
     if (SavedScreen)
         ConGetBox(0, 0, SavedX, SavedY, SavedScreen);
+
     ConQueryCursorPos(&SaveCursorPosX, &SaveCursorPosY);
 
     return 1;
@@ -998,11 +1024,13 @@ GUI::~GUI() {
 
 int GUI::ConSuspend() {
     RestoreScreen();
+
     return ::ConSuspend();
 }
 
 int GUI::ConContinue() {
     SaveScreen();
+
     return ::ConContinue();
 }
 
@@ -1011,12 +1039,16 @@ int GUI::ShowEntryScreen() {
 
     ConHideMouse();
     RestoreScreen();
+
     do {
 	gui->ConGetEvent(evKeyDown, &E, -1, 1, 0);
     } while (E.What != evKeyDown);
+
     ConShowMouse();
+
     if (frames)
         frames->Repaint();
+
     return 1;
 }
 
@@ -1059,6 +1091,7 @@ char ConGetDrawChar(unsigned int idx) {
         }
         tablen = strlen(tab);
     }
+
     assert(idx < tablen);
 
 #ifdef USE_SCRNMAP

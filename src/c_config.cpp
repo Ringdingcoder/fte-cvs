@@ -138,7 +138,9 @@ const char *GetGUICharacters(const char *which, const char *defChars) {
             }
             found = g;
         } else {
-            free(g->name); free(g->chars); free(g);
+            free(g->name);
+            delete[] g->chars;
+            free(g);
         }
     }
     GUICharacters = found;

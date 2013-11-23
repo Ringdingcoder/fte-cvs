@@ -800,8 +800,8 @@ int GFrame::SelectView(GView *view) {
     if (!Top)
         return 0;
 
-    if (FocusCapture != 0)
-        view = view;
+    //if (FocusCapture != 0)
+    //    view = view;
 
     if (Active)
         Active->Activate(0);

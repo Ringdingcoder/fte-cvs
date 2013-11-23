@@ -1238,8 +1238,8 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
     LOG << "Config file: " << CfgFileName << ENDLINE;
 
     int fd, rc;
-    char *buffer;
-    int ln;
+    unsigned char *buffer;
+    int ln, ver;
     struct stat statbuf;
     CurPos cp;
 
@@ -1257,7 +1257,7 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
         ENDFUNCRC(-1);
     }
 
-    buffer = (char *) malloc((size_t)statbuf.st_size);
+    buffer = (unsigned char *) malloc((size_t)statbuf.st_size);
     if (!buffer) {
         close(fd);
         ENDFUNCRC(-1);
@@ -1270,25 +1270,18 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
     close(fd);
 
     ln = (buffer[3] << 24) | (buffer[2] << 16) | (buffer[1] << 8) | buffer[0];
+    ver = (buffer[7] << 24) | (buffer[6] << 16) | (buffer[5] << 8) | buffer[4];
 
-    if (ln != CONFIG_ID) {
+    if (ln != CONFIG_ID || ver != VERNUM) {
         free(buffer);
+        LOG << std::hex << "Config " << ln << ":" << ver << " expecting " << CONFIG_ID << VERNUM << ENDLINE;
         DieError(0, "Bad .CNF signature");
-        ENDFUNCRC(-1);
-    }
-
-    ln = (buffer[7] << 24) + (buffer[6] << 16) + (buffer[5] << 8) + buffer[4];
-
-    if (ln != VERNUM) {
-        LOG << std::hex << ln << " != " << VERNUM << ENDLINE;
-        free(buffer);
-        DieError(0, "Bad .CNF version.");
         ENDFUNCRC(-1);
     }
 
     cp.name = CfgFileName;
     cp.sz = statbuf.st_size;
-    cp.a = buffer;
+    cp.a = (char *) buffer;
     cp.c = cp.a + 2 * 4;
     cp.z = cp.a + cp.sz;
     cp.line = 1;
@@ -1307,7 +1300,6 @@ int LoadConfig(int /*argc*/, char ** /*argv*/, char *CfgFileName) {
 
 int UseDefaultConfig() {
     CurPos cp;
-    int rc;
 
     cp.name = "Internal Configuration";
     cp.sz = sizeof(DefaultConfig);
@@ -1316,7 +1308,7 @@ int UseDefaultConfig() {
     cp.z = cp.a + cp.sz;
     cp.line = 1;
 
-    rc = ReadConfigFile(cp);
+    int rc = ReadConfigFile(cp);
 
     if (rc == -1)
         DieError(1, "Error %s offset %d\n", cp.name, cp.c - cp.a);

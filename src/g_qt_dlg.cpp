@@ -199,12 +199,11 @@ int DLGPickChoice(GView *v, char *ATitle, int NSel, va_list ap, int Flags) {
     
     cb->setText(msg);
     
-    int retcode = cb->exec();
-    
+    int retcode = (cb->exec() == QDialog::Accepted) ? cb->getChoice()  : -1;
+
     delete cb;
-    if (retcode == QDialog::Accepted)
-        return cb->getChoice();
-    return -1;
+
+    return retcode;
 }
 
 int DLGGetFind(GView *View, SearchReplaceOptions &sr) {

@@ -165,6 +165,10 @@ int Hilit_C(EBuffer *BF, int /*LN*/, PCell B, int Pos, int Width, ELine *Line, h
                     Color = CLR_Punctuation;
                     PRINTF(("----FOUND TRIPPLET\n"));
                     goto hilit;
+		} else if (State == hsC_Tripplet && *p == ';') {
+		    State = hsC_Normal;
+		    Color = CLR_Punctuation;
+                    goto hilit;
                 } else if (ispunct(*p) && *p != '_') {
                     Color = CLR_Punctuation;
                     PRINTF(("----FOUND PUNKT\n"));
